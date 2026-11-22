@@ -8,6 +8,15 @@
      reveal animations, the booking pages) keeps doing so and is unaffected.
 
      $role may be null (a ticket whose schedule is gone): the default accent then. --}}
+@php
+    $guestTheme = \App\Utils\GuestTheme::for(($role ?? null) ? \App\Utils\GuestTheme::lookRole($role, $otherRole ?? null, $selectedGroup ?? null) : null);
+    // A palette the owner picked (Style > Background > Page style) lays its own ground and inks
+    // over the accent-tinted ones; never in an embed, which keeps the look of the site it is on.
+    $guestPalette = ($role ?? null) && ! request()->embed ? \App\Utils\GuestTheme::pagePalette($role, $otherRole ?? null, $event ?? null) : null;
+@endphp
 <style {!! nonce_attr() !!}>
-{!! \App\Utils\GuestTheme::for(($role ?? null) ? \App\Utils\GuestTheme::lookRole($role, $otherRole ?? null, $selectedGroup ?? null) : null)->css() !!}
+{!! $guestTheme->css() !!}
+@if ($guestPalette)
+{!! $guestTheme->paletteCss($guestPalette) !!}
+@endif
 </style>

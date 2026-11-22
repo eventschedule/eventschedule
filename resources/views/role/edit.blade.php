@@ -2404,6 +2404,42 @@
                     <x-form-row group="style" tab="background" :title="__('messages.background')" pane="style-content-background" class="style-tab-button" id="style-tab-background" chip />
                     <div id="style-content-background" class="event-subrow-body" hidden>
 
+                            {{-- How the guest pages are drawn: Automatic follows the background's
+                                 brightness (GuestTheme::pageMode()); a palette is the portal's own
+                                 (GuestTheme::PALETTES), its swatch drawn from the same colours. --}}
+                            @php
+                                $pageMode = old('page_mode', $role->guestPageSetting->page_mode ?? 'auto');
+                                $pageModeGroups = [
+                                    null => ['auto'],
+                                    __('messages.page_style_light') => ['sand', 'mist', 'paper'],
+                                    __('messages.page_style_dark') => ['espresso', 'midnight', 'carbon'],
+                                ];
+                            @endphp
+                            <fieldset class="mb-6">
+                                <legend class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.page_style') }}</legend>
+                                @foreach ($pageModeGroups as $groupName => $modes)
+                                <div class="mt-2 flex flex-wrap items-center gap-2">
+                                    @if ($groupName)<span class="w-12 text-sm text-gray-500 dark:text-gray-400">{{ $groupName }}</span>@endif
+                                    <div class="event-pills flex-wrap">
+                                    @foreach ($modes as $modeKey)
+                                    <label class="event-pill" for="page_mode_{{ $modeKey }}">
+                                        <input type="radio" id="page_mode_{{ $modeKey }}" name="page_mode" value="{{ $modeKey }}" {{ $pageMode === $modeKey ? 'checked' : '' }} class="sr-only">
+                                        <span class="inline-flex items-center gap-2">
+                                            @if ($modeKey !== 'auto')
+                                            @php [, $swGround, $swCard, , $swInk] = \App\Utils\GuestTheme::PALETTES[$modeKey]; @endphp
+                                            <i aria-hidden="true" class="inline-block h-4 w-4 rounded-full" style="background: linear-gradient(135deg, {{ $swGround }} 50%, {{ $swCard }} 50%); box-shadow: inset 0 0 0 1px {{ $swInk }}33;"></i>
+                                            @endif
+                                            {{ $modeKey === 'auto' ? __('messages.automatic') : __('messages.variant_'.$modeKey) }}
+                                        </span>
+                                    </label>
+                                    @endforeach
+                                    </div>
+                                </div>
+                                @endforeach
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.page_style_help') }}</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('page_mode')" />
+                            </fieldset>
+
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.background_type')" />
                                 {{-- old(): a refused save used to come back on the stored type. --}}

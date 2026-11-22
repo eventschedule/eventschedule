@@ -125,7 +125,9 @@ class GuestStyleSanitizingTest extends TestCase
 
         $this->assertStringNotContainsString('alert(document.domain)', $html);
         $this->assertStringNotContainsString(self::BREAK_OUT, $html);
-        $this->assertStringContainsString('background-color: #123456', $html, 'fixture: the page does wear the act\'s look');
+        // A solid background is a light of its colour across the top of the stage (2026-11
+        // redesign), printed only as the hex ColorUtils::normalizeHex() returns.
+        $this->assertStringContainsString('at 50% -8rem, #12345640, transparent', $html, 'fixture: the page does wear the act\'s look');
         // The page falls back to the default accent, as it does for a schedule without one: in
         // the tokens its fills are drawn from, and in the one literal still handed to script.
         $this->assertMatchesRegularExpression('/body \{ --es-accent: #4e81fa;/i', $html);
@@ -150,7 +152,9 @@ class GuestStyleSanitizingTest extends TestCase
         $this->assertStringNotContainsString('url("'.$raw, $html);
         $this->assertStringNotContainsString("url('".e($raw), $html);
         $this->assertStringContainsString('url("'.css_url($raw).'")', $html);
-        $this->assertStringContainsString("url('".css_url($raw)."')", $html);
+        // The phone's banner, which printed it a second time in a style attribute, went with the
+        // 2026-11 redesign: the background is the stage's glow at every width.
+        $this->assertStringNotContainsString("url('", $html);
     }
 
     public function test_another_schedules_uploaded_background_url_is_encoded_on_an_event_page(): void
@@ -256,7 +260,7 @@ class GuestStyleSanitizingTest extends TestCase
         $this->schedulePage($bare)->assertSee('background-image: linear-gradient(150deg, 43ADD0, 998EE0, E17DC2, EF9393);', false);
 
         $solid = $this->createRole($this->createOwner(), 'venue', ['background' => 'solid', 'background_color' => '#123456']);
-        $this->schedulePage($solid)->assertSee('background-color: #123456 !important;', false);
+        $this->schedulePage($solid)->assertSee('at 50% -8rem, #12345640, transparent 74%', false);
 
         $preset = $this->createRole($this->createOwner(), 'venue', ['background' => 'image', 'background_image' => 'Abstract_Sunrise']);
         $this->schedulePage($preset)

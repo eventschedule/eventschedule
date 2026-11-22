@@ -8475,4 +8475,8 @@ return [
     'mail_flag_dismissed' => 'De markering van :name is weggehaald.',
     'mail_paused_reason_word' => 'Een bewaakt woord in een nieuwsbrief',
     'admin_alert_mail_flagged' => '{1} :count betalend account is gemarkeerd|[0,*] :count betalende accounts zijn gemarkeerd',
+    'page_style' => 'Paginastijl',
+    'page_style_light' => 'Licht',
+    'page_style_dark' => 'Donker',
+    'page_style_help' => 'Automatisch gebruikt een lichte stijl als de achtergrond een lichte kleur of verloop is, en anders een donkere. Of kies een van de drie lichte of drie donkere paletten.',
 ];

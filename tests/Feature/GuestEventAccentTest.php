@@ -79,8 +79,10 @@ class GuestEventAccentTest extends TestCase
         $html = $this->page($event, $venue, '?embed=true&tickets=true');
         $card = substr($html, strpos($html, 'class="ticket-embed-card '));
 
-        $this->assertStringContainsString('<div class="px-6 py-4" style="background-color: var(--es-accent); color: var(--es-accent-text);">', $card);
-        $this->assertStringContainsString('style="background-color: var(--es-accent); color: var(--es-accent-text);"', substr($card, strpos($card, 'id="ticket-selector"')));
+        // The header is the stage's date line (--es-accent-readable) and the button the kit's
+        // primary (--es-accent / --es-accent-text): both read the tokens the layout printed.
+        $this->assertStringContainsString('<p class="gk-dateline">', $card);
+        $this->assertStringContainsString('class="gk-btn gk-btn-primary gk-cta-main gk-tembed-go"', $card);
         $this->assertStringNotContainsString('#dc2626', $card, 'nothing in the card is in the raw colour of either schedule');
         $this->assertStringNotContainsString('#16a34a', $card);
     }

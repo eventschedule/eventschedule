@@ -8474,4 +8474,8 @@ return [
     'mail_flag_dismissed' => 'Kasutaja :name märge on eemaldatud.',
     'mail_paused_reason_word' => 'Jälgitav sõna infolehes',
     'admin_alert_mail_flagged' => '{1} :count maksev konto märgiti|[0,*] :count maksvat kontot märgiti',
+    'page_style' => 'Lehe stiil',
+    'page_style_light' => 'Hele',
+    'page_style_dark' => 'Tume',
+    'page_style_help' => 'Automaatne kasutab heledat stiili, kui taust on hele värv või üleminek, ja muidu tumedat. Või vali üks kolmest heledast või kolmest tumedast paletist.',
 ];

@@ -38,16 +38,17 @@ class CompactHeaderBackgroundTest extends TestCase
         return $this->get(route('role.view_guest', ['subdomain' => $role->subdomain]));
     }
 
-    public function test_compact_header_background_starts_below_the_bar(): void
+    public function test_compact_header_paints_no_phone_banner(): void
     {
         $role = $this->createRoleWithBackground('compact');
 
         $response = $this->getGuestPage($role);
 
         $response->assertOk();
-        // -top-3 cancels the container's mobile pt-3, so the image starts flush at the bar's
-        // bottom edge instead of 160px above it.
-        $response->assertSee('absolute -top-3 -bottom-3', false);
+        // Since the 2026-11 redesign a phone shows the background as the glow at the top of the
+        // page, like every other width: no picture painted behind the header (it made the name
+        // unreadable).
+        $response->assertDontSee('absolute -top-3 -bottom-3', false);
         $response->assertDontSee('absolute -top-40', false);
     }
 
@@ -64,14 +65,14 @@ class CompactHeaderBackgroundTest extends TestCase
         $response->assertSee('id="gp-header" class="relative z-20 bg-white/95', false);
     }
 
-    public function test_banner_header_keeps_the_upward_bleed(): void
+    public function test_banner_header_paints_no_phone_banner(): void
     {
         $role = $this->createRoleWithBackground('banner');
 
         $response = $this->getGuestPage($role);
 
         $response->assertOk();
-        $response->assertSee('absolute -top-40 -bottom-3', false);
+        $response->assertDontSee('absolute -top-40 -bottom-3', false);
         $response->assertDontSee('absolute -top-3', false);
     }
 }

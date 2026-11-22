@@ -32,7 +32,10 @@
     $headGallery = ($galleryImages ?? collect());
     // The second row: what else a visitor may do. A member's Manage joins it on a phone, so for
     // a member the row is always drawn and, where Manage is all it holds, shown on a phone only.
-    $headRest = $headActions['gift'] || $headActions['submit'] || ($headActions['follow'] && $headActions['main'] !== 'follow');
+    // Gift cards stay beside Submit event, in the row of things a visitor can do (the owner's call
+    // with a UX review, 2026-11-19): the row after the description holds the list's tools only.
+    $headGiftInTools = false;
+    $headRest = ($headActions['gift'] && ! $headGiftInTools) || $headActions['submit'] || ($headActions['follow'] && $headActions['main'] !== 'follow');
 @endphp
         <div id="gp-header"
           class="gk-head {{ $headPicture ? 'gk-head-pictured' : '' }} {{ $headWall ? 'gk-head-walled' : '' }} {{ $headWash ? 'gk-head-washed' : '' }} {{ $role->profile_image_url ? 'gk-head-logoed' : '' }} mb-0 transition-[max-width] duration-300 ease-in-out mx-auto"
@@ -82,7 +85,7 @@
                 class="gk-head-picture"
                 src="{{ asset('images/headers') }}/{{ $role->header_image }}.png"
                 width="{{ \App\Models\Role::BUILT_IN_HEADER_SIZE[0] }}" height="{{ \App\Models\Role::BUILT_IN_HEADER_SIZE[1] }}"
-                @if (! $role->backgroundImageUrl()) fetchpriority="high" @endif
+                fetchpriority="high"
                 alt="{{ $headName }}"
               />
             </picture>
@@ -100,7 +103,7 @@
               src="{{ $role->headerImageUrl(960, pageWidth: true) }}"
               @if ($headerSrcset) srcset="{{ $headerSrcset }}" sizes="(min-width: 1536px) 1496px, calc(100vw - 40px)" @endif
               @if ($headerSize) width="{{ $headerSize[0] }}" height="{{ $headerSize[1] }}" @endif
-              @if (! $role->backgroundImageUrl()) fetchpriority="high" @endif
+              fetchpriority="high"
               alt="{{ $headName }}"
             />
             @endif
@@ -122,8 +125,17 @@
               @endif
               <div class="gk-head-actions">
                 @include('role.partials.headers.action-buttons', ['actionPart' => 'main'])
+                {{-- From a tablet up the visitor's other actions (Gift cards, Submit event) join
+                     this row between the main one and Share (profile design 2a); a phone keeps
+                     them in their own row under the links (.gk-head-more-actions). --}}
+                @if ($headRest)
+                <span class="gk-head-acts-rest">@include('role.partials.headers.action-buttons', ['actionPart' => 'rest', 'skipGift' => $headGiftInTools, 'skipManage' => true])</span>
+                @endif
                 <button type="button" class="gk-btn gk-btn-secondary gk-btn-icon gk-head-share" data-head-share data-said="{{ __('messages.copied') }}" aria-label="{{ __('messages.share') }}" title="{{ __('messages.share') }}">
                   <svg class="gk-head-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3.5"/><path d="M7.5 7.5L12 3l4.5 4.5"/><path d="M5 12v6.5A1.5 1.5 0 006.5 20h11a1.5 1.5 0 001.5-1.5V12"/></svg>
+                  {{-- Said in words on a phone (profile design 1a), where the button stands beside a
+                       full-width Follow; an icon alone from a tablet up. --}}
+                  <span class="gk-head-share-word" aria-hidden="true">{{ __('messages.share') }}</span>
                   <span class="gk-head-said" role="status" aria-live="polite"></span>
                 </button>
               </div>
@@ -178,24 +190,24 @@
                 @if ($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
                 <div class="gk-head-social">
                     @if ($hasEmail)
-                    <a href="mailto:{{ $role->email }}" class="gk-head-social-link social-tooltip" data-tooltip="Email: {{ $role->email }}" aria-label="Email: {{ $role->email }}">
+                    <a href="mailto:{{ $role->email }}" class="gk-head-social-link social-tooltip" data-tooltip="Email: {{ $role->email }}" aria-label="Email: {{ $role->email }}"><span class="gk-head-social-word">{{ __('messages.email') }}</span>
                         <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"/></svg>
                     </a>
                     @endif
                     @if ($hasPhone)
-                    <a href="tel:{{ $role->phone }}" class="gk-head-social-link social-tooltip" data-tooltip="Phone: {{ $role->phone }}" aria-label="Phone: {{ $role->phone }}">
+                    <a href="tel:{{ $role->phone }}" class="gk-head-social-link social-tooltip" data-tooltip="Phone: {{ $role->phone }}" aria-label="Phone: {{ $role->phone }}"><span class="gk-head-social-word">{{ __('messages.phone') }}</span>
                         <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                     </a>
                     @endif
                     @if ($hasWebsite)
-                    <a href="{{ $websiteHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}" aria-label="Website: {{ App\Utils\UrlUtils::clean($role->website) }}">
+                    <a href="{{ $websiteHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}" aria-label="Website: {{ App\Utils\UrlUtils::clean($role->website) }}"><span class="gk-head-social-word">{{ __('messages.website') }}</span>
                         <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z"/></svg>
                     </a>
                     @endif
                     @if ($hasSocial)
                         @foreach ($role->decodeLinks('social_links') as $link)
                         @if ($gpLinkHref = $role->socialLinkHref($link, $loop->index))
-                        <a href="{{ $gpLinkHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}" aria-label="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
+                        <a href="{{ $gpLinkHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}" aria-label="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}"><span class="gk-head-social-word">{{ App\Utils\UrlUtils::getBrand($link->url) }}</span>
                             <x-url-icon class="w-5 h-5" color="currentColor">
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
@@ -206,7 +218,7 @@
                     @if ($hasPayment)
                         @foreach ($role->decodeLinks('payment_links') as $link)
                         @if ($gpPaymentHref = \App\Utils\UrlUtils::safeHref($link->url))
-                        <a href="{{ $gpPaymentHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}" aria-label="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
+                        <a href="{{ $gpPaymentHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}" aria-label="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}"><span class="gk-head-social-word">{{ App\Utils\UrlUtils::getBrand($link->url) }}</span>
                             <x-url-icon class="w-5 h-5" color="currentColor">
                                 {{ \App\Utils\UrlUtils::clean($link->url) }}
                             </x-url-icon>
@@ -216,7 +228,9 @@
                     @endif
                 </div>
                 @endif
-                @include('role.partials.headers.tools')
+                @unless ($toolsBelow ?? false)
+                @include('role.partials.headers.tools', ['toolsGift' => $headGiftInTools])
+                @endunless
               </div>
             </div>
 
@@ -238,7 +252,7 @@
 
             @if ($headRest || $headActions['manage'])
             <div class="gk-head-more-actions{{ $headRest ? '' : ' gk-head-more-actions-phone' }}">
-              @include('role.partials.headers.action-buttons', ['actionPart' => 'rest'])
+              @include('role.partials.headers.action-buttons', ['actionPart' => 'rest', 'skipGift' => $headGiftInTools])
             </div>
             @endif
             </div></div>

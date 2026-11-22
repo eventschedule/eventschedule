@@ -26,25 +26,30 @@
 
         <link href="/vendor/manrope/manrope.css" rel="stylesheet">
         @include('partials.guest-theme', ['role' => $themeRole, 'otherRole' => null, 'selectedGroup' => null])
+        @include('partials.guest-kit-styles')
+        @include('partials.guest-stage-styles')
         @include('partials.guest-ticket-styles')
     </x-slot>
 
     <main id="main-content" class="gk-tkpage" tabindex="-1">
-      <div class="gk-tk-wrap">
-        <section class="gk-tk-card">
-          <header class="gk-tk-top {{ ($themeRole && $themeRole->profile_image_url) ? 'gk-tk-top-logo' : '' }}">
+      {{-- One sheet (partials/guest-ticket-styles): the schedule's picture small, the page's name
+           large, then each event as a row between hairlines, a way to its own ticket. --}}
+      <div class="gk-tk-wrap gk-stage gk-tk-sheet">
+        <section class="gk-tk-body-sheet">
+          <header class="gk-tk-head">
             @if ($themeRole && $themeRole->profile_image_url)
-              <img src="{{ $themeRole->profile_image_url }}" alt="">
+              <img class="gk-tk-head-logo" src="{{ $themeRole->profile_image_url }}" alt="">
             @endif
-            <div>
-              <h1 class="gk-tk-title">{{ __('messages.your_tickets') }}</h1>
-              <span class="gk-tk-sub">{{ __('messages.order_includes_events', ['count' => $sales->count()]) }}</span>
-            </div>
+            @if ($themeRole)
+              <p class="gk-dateline">{{ $themeRole->translatedName() }}</p>
+            @endif
+            <h1 class="gk-title">{{ __('messages.your_tickets') }}</h1>
+            <p class="gk-subtitle">{{ __('messages.order_includes_events', ['count' => $sales->count()]) }}</p>
           </header>
 
-          <div class="gk-tk-body">
+          <div class="gk-tk-body-rows">
             @if ($waitingLeg)
-              <div class="gk-tk-msg" data-ticket-state="confirming" role="status"
+              <div class="gk-note" data-ticket-state="confirming" role="status"
                 data-confirming="{{ \App\Services\Payments\PaymentGatewayDriver::landedSecondsLeft($waitingLeg) }}"
                 data-status-url="{{ route('ticket.status', ['event_id' => \App\Utils\UrlUtils::encodeId($waitingLeg->event_id), 'secret' => $waitingLeg->secret], false) }}">
                 @include('ticket.partials.icon', ['icon' => 'clock'])
@@ -102,7 +107,7 @@
             </ul>
 
             {{-- Each event is scanned with its own code, so there is no single QR for the order. --}}
-            <p class="gk-tk-quiet">{{ __('messages.order_ticket_per_event_help') }}</p>
+            <p class="gk-tk-quiet-s">{{ __('messages.order_ticket_per_event_help') }}</p>
           </div>
         </section>
       </div>

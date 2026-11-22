@@ -122,6 +122,123 @@
   </style>
   <script src="{{ asset('vendor/intl-tel-input/js/intlTelInput.min.js') }}" {!! nonce_attr() !!}></script>
   @endif
+  {{-- The form on the stage (partials/guest-stage-styles): it sits in the event page's raised
+       card (.gk-card gk-band), so nothing inside it is a card of its own. The ticket types are
+       rows divided by hairlines, the fields are wells in the stage's own colour, the total sits
+       between two hairlines and the bar ends on one large Checkout. Every colour is a token, so
+       light, dark and every accent follow; logical properties, so a right-to-left page mirrors.
+       Here, in the head, and not in the form: Vue drops a style element from a template it mounts. --}}
+  <style {!! nonce_attr() !!}>
+    .gk-p-tix { color: var(--gk-ink); }
+    .gk-tx-head { margin: 0 0 .5rem; font-size: clamp(1.5rem, 1.2rem + 1vw, 1.875rem); font-weight: 800; line-height: 1.15; letter-spacing: -.01em; color: var(--gk-ink); }
+    .gk-tx-sec { margin-top: 2.25rem; }
+    .gk-tx-sec-tight { margin-top: 1.5rem; }
+    .gk-tx-ink { color: var(--gk-ink); }
+    .gk-tx-ink2 { color: var(--gk-ink-2); }
+    .gk-tx-ink3 { color: var(--gk-ink-3); }
+    .gk-tx-ok { color: var(--gk-ok); }
+    .gk-tx-bad { color: var(--gk-bad); }
+    .gk-tx-accent { color: var(--es-accent-readable); }
+    .gk-tx-accent-link { color: var(--es-accent-readable); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
+    .gk-tx-rule { border-top: 1px solid var(--gk-line); }
+
+    {{-- What can be bought: one row per type, a hairline under each. --}}
+    .gk-tx-row { padding-block: 1.25rem; border-bottom: 1px solid var(--gk-line); }
+    .gk-tx-list-sub .gk-tx-row { padding-top: .5rem; }
+    .gk-tx-list-sub .gk-tx-row + .gk-tx-row { padding-top: 1.25rem; }
+    .gk-tx-sec > .gk-label { margin-bottom: .5rem; }
+    .gk-tx-row-main { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .gk-tx-row-text { min-width: 0; flex: 1 1 auto; }
+    .gk-tx-row-end { flex: none; }
+    .gk-tx-row-end p { margin: 0; }
+    .gk-tx-name { margin: 0; font-size: 1.1875rem; font-weight: 650; line-height: 1.3; color: var(--gk-ink); overflow-wrap: anywhere; }
+    .gk-tx-name-sm { font-size: 1.0625rem; }
+    .gk-tx-desc { margin: .25rem 0 0; font-size: .9375rem; line-height: 1.5; color: var(--gk-ink-2); overflow-wrap: anywhere; }
+    .gk-tx-price { margin: .375rem 0 0; font-size: 1.0625rem; font-weight: 650; color: var(--gk-ink); font-variant-numeric: tabular-nums; }
+    .gk-tx-hint { margin: .25rem 0 0; font-size: .84375rem; line-height: 1.45; color: var(--gk-ink-3); }
+    .gk-tx-pass { margin-top: .375rem; }
+    .gk-tx-state { font-size: 1rem; font-weight: 600; color: var(--gk-ink-3); text-align: end; }
+    .gk-tx-state-sm { font-size: .875rem; font-weight: 500; }
+    .gk-tx-off { opacity: .55; }
+    .gk-tx-qty { width: 6.5rem; }
+    .gk-tx-addon { display: flex; align-items: center; gap: .875rem; }
+    .gk-tx-addon-img { flex: none; width: 3.5rem; height: 3.5rem; border-radius: .75rem; object-fit: cover; }
+    .gk-tx-subfields { display: grid; gap: 1rem; margin-top: 1.25rem; }
+    .gk-tx-subfields > div { margin: 0; }
+
+    {{-- Fields: wells in the stage's colour on the raised card. layouts/app already sets their
+         type size and padding for every field, with !important, so only the look is said here. --}}
+    .gk-tx-field { box-sizing: border-box; min-height: 3.125rem; border: 1px solid color-mix(in srgb, var(--gk-ink) 20%, transparent); border-radius: .75rem; background-color: var(--gk-stage); color: var(--gk-ink); box-shadow: none; }
+    .gk-tx-field::placeholder { color: var(--gk-ink-3); opacity: 1; }
+    .gk-tx-field:focus { border-color: var(--es-accent-readable); box-shadow: 0 0 0 1px var(--es-accent-readable); outline: none; }
+    .gk-tx-field:disabled { opacity: .6; }
+    .gk-tx-upper { text-transform: uppercase; }
+    .gk-tx-upper::placeholder { text-transform: none; }
+    .gk-tx-lab { display: block; font-size: .9375rem; font-weight: 500; line-height: 1.4; color: var(--gk-ink-2); }
+    .gk-tx-fields { display: grid; gap: 1.25rem; }
+    .gk-tx-checklab { font-size: .9375rem; line-height: 1.5; color: var(--gk-ink-2); }
+    .gk-tx-check { flex: none; width: 1.125rem; height: 1.125rem; border: 1px solid color-mix(in srgb, var(--gk-ink) 38%, transparent); border-radius: .3125rem; color: var(--es-accent-readable); }
+    .gk-tx-check:not(:checked) { background-color: var(--gk-stage); }
+    .gk-tx-check:focus { box-shadow: none; outline: none; }
+    .gk-tx-check:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    .gk-tx-radio { border-radius: 999px; }
+    .gk-tx-eye { color: var(--gk-ink-3); }
+    .gk-tx-eye:hover { color: var(--gk-ink); }
+    .gk-tx-guest { display: grid; gap: 1rem; padding-block: 1.25rem; border-top: 1px solid var(--gk-line); }
+    .gk-tx-guest-name { margin: 0; font-size: 1.0625rem; font-weight: 650; color: var(--gk-ink); }
+    .gk-tx-guest > div { margin: 0; }
+
+    {{-- A code and its button, side by side. --}}
+    .gk-tx-codes-name { margin-bottom: -.5rem; }
+    .gk-tx-code { display: flex; gap: .5rem; }
+    .gk-tx-apply { flex: none; min-height: 3.125rem; min-width: 3.125rem; padding: 0 1.125rem; border: 1px solid color-mix(in srgb, var(--gk-ink) 22%, transparent); border-radius: .75rem; background: transparent; color: var(--gk-ink); font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color var(--gk-swap); }
+    .gk-tx-apply:hover { background: var(--gk-well); }
+    .gk-tx-apply:disabled { opacity: .45; cursor: default; background: transparent; }
+    .gk-tx-apply:focus-visible, .gk-tx-choice:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+
+    {{-- A choice among a few (the donation's amounts): bordered, the chosen one in the accent. --}}
+    .gk-tx-choice { min-height: 3rem; padding: 0 1.125rem; border: 1px solid color-mix(in srgb, var(--gk-ink) 22%, transparent); border-radius: .75rem; background: transparent; color: var(--gk-ink); font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color var(--gk-swap); }
+    .gk-tx-choice:hover { background: var(--gk-well); }
+    .gk-tx-choice[aria-pressed="true"] { border-color: var(--es-accent-readable); box-shadow: inset 0 0 0 1px var(--es-accent-readable); }
+
+    {{-- Pay in full or monthly. --}}
+    .gk-tx-options { display: grid; gap: .625rem; }
+    .gk-tx-option { display: flex; align-items: flex-start; gap: .75rem; padding: 1rem 1.125rem; border: 1px solid color-mix(in srgb, var(--gk-ink) 20%, transparent); border-radius: .875rem; cursor: pointer; }
+    .gk-tx-option-on { border-color: var(--es-accent-readable); box-shadow: inset 0 0 0 1px var(--es-accent-readable); }
+    .gk-tx-plan { padding: 1rem 1.125rem; border-radius: .875rem; background: var(--gk-stage); }
+
+    {{-- The total, between two hairlines, its figure large. --}}
+    .gk-tx-total { margin-top: 2.25rem; padding-block: 1.25rem; border-block: 1px solid var(--gk-line); }
+    .gk-tx-total > div:not(.gk-tx-sum) { margin-bottom: .25rem; }
+    .gk-tx-sum { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+    .gk-tx-sum-split { margin-top: .625rem; padding-top: .75rem; border-top: 1px solid var(--gk-line); }
+    .gk-tx-sum-label { font-size: 1.0625rem; font-weight: 600; color: var(--gk-ink); }
+    .gk-tx-sum-value { font-size: 1.75rem; font-weight: 800; line-height: 1.1; letter-spacing: -.01em; color: var(--gk-ink); font-variant-numeric: tabular-nums; }
+
+    {{-- Nothing on sale: the notice with its own way out. --}}
+    .gk-tx-closed { align-items: center; }
+    .gk-tx-closed-text { margin: 0; font-size: 1rem; font-weight: 650; }
+    .gk-tx-closed-btn { flex: none; min-height: 2.75rem; padding: 0 1rem; border: 0; border-radius: .625rem; background: transparent; color: inherit; font-size: 1rem; font-weight: 650; cursor: pointer; }
+    .gk-tx-closed-btn:hover { background: color-mix(in srgb, currentColor 10%, transparent); }
+
+    {{-- The actions: the quiet ones first, one large Checkout at the end. --}}
+    .gk-tx-actions, .gk-tx-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .75rem; }
+    .gk-tx-actions { margin-top: 1.5rem; }
+    .gk-tx-problem { flex: 1 0 100%; align-items: center; font-weight: 600; }
+    .gk-tx-bar .gk-cta-alt, .gk-tx-actions .gk-cta-alt { flex: 0 0 auto; white-space: nowrap; cursor: pointer; }
+    .gk-tx-bar .gk-cta-main, .gk-tx-actions .gk-cta-main { flex: 1 1 13.75rem; white-space: nowrap; cursor: pointer; }
+    .gk-tx-cart { border-color: var(--es-accent-readable); color: var(--es-accent-readable); }
+    .gk-tx-blocked { opacity: .5; cursor: not-allowed; }
+    .gk-tx-blocked:active { transform: none; }
+    .gk-tx-checkout:disabled { opacity: .55; cursor: default; }
+    {{-- The card the event page draws around the form clips (.gk-card), and a clipping box is
+         where a sticky bar sticks, inset by its padding: the bar never reached the foot of the
+         screen and sat 2rem up, over the line above it. Unclipped, it sticks to the screen as it
+         was made to, with the card's own corners at rest. --}}
+    .gk-band:has(.gk-p-tix) { overflow: visible; }
+    .gk-band .gk-tx-bar { border-radius: 0 0 1.5rem 1.5rem; }
+    [data-buybar-floating] .gk-tx-bar { border-radius: 0; }
+  </style>
   @if (\App\Utils\TurnstileUtils::isActiveForRequest())
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer {!! nonce_attr() !!}></script>
   @endif
@@ -1365,7 +1482,7 @@
 @if ($event->hasAllocatedSeating())
     @vite('resources/js/seating-picker.js')
 @endif
-<div id="ticket-selector" data-vue-root>
+<div id="ticket-selector" class="gk-p-tix" data-vue-root>
     {{-- novalidate: the browser's own check runs BEFORE the submit event and stops at the first
          empty required field in the page, which is now the name, below the tickets. So pressing
          Checkout with nothing chosen asked for a name. validateForm() asks for a ticket first and
@@ -1393,7 +1510,7 @@
         @if (session('error'))
         {{-- v-pre: a refusal can name an event (TicketController::refuseCartLeg()), and this is
              inside the form's Vue mount, where a name holding a mustache would be compiled. --}}
-        <div v-pre class="mb-6 p-3 rounded-lg text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+        <div v-pre class="gk-note gk-note-bad mb-6">
             {{ session('error') }}
         </div>
         @endif
@@ -1415,25 +1532,30 @@
             ][$ticketSaleState] ?? __('messages.sold_out');
         @endphp
         <div v-if="isAllSoldOut" v-cloak id="tickets-unavailable" data-sale-state="{{ $ticketSaleState }}" role="status"
-            class="mb-6 flex items-center gap-3 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3">
-            <svg class="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            class="gk-note gk-note-warn gk-tx-closed mb-6">
+            <svg class="gk-note-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.500-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
             </svg>
-            <p class="flex-1 text-base font-semibold text-amber-900 dark:text-amber-100">{{ $ticketSaleStateLabel }}</p>
+            <p class="gk-note-body gk-tx-closed-text">{{ $ticketSaleStateLabel }}</p>
             @if (! request()->embed)
             {{-- The waitlist block below carries its own Cancel; this is for when there is none. --}}
             <button type="button" @click="hideForm" v-if="!waitlistOpen"
-                class="whitespace-nowrap rounded-lg px-4 py-2.5 text-base font-semibold text-amber-900 dark:text-amber-100 hover:bg-amber-100 dark:hover:bg-amber-900/40 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                class="gk-tx-closed-btn">
                 {{ __('messages.close') }}
             </button>
             @endif
         </div>
 
         @if ($errors->any() && !$errors->has('name') && !$errors->has('email') && !$errors->has('phone') && !$errors->has('password') && !$errors->has('cf-turnstile-response'))
-        <div class="mb-6 p-3 rounded-lg text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+        <div class="gk-note gk-note-bad mb-6">
             {{ __('messages.error') }}
         </div>
         @endif
+
+        {{-- The card's name, as the mailing list's band has one. The word is the owner's
+             (customLabel), so it is printed under v-pre, on a span: v-pre on the heading itself
+             would skip its v-if too. --}}
+        <h2 v-if="!isPaymentLinkMode" class="gk-tx-head"><span v-pre>{{ $role->customLabel('tickets') }}</span></h2>
 
         {{-- ONE picker for the whole venue, full width, above the bands.
              It used to be one instance per band, mounted in the narrow right-hand cell of a ticket
@@ -1444,43 +1566,47 @@
         <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 w-full seating-picker-mount" :data-props="pickerProps()"></div>
         @endif
 
+        {{-- The ticket types as rows of the card, each set off by a hairline: what it is and
+             what it costs at the start, how many at the end. --}}
+        <div class="gk-tx-list">
         <template v-for="(ticket, index) in tickets" :key="ticket.id">
-        <div v-if="!isPaymentLinkMode && (!isAllSoldOut || ticket.sales_ended || ticket.sales_not_started)" class="mb-4 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-600" :class="{'opacity-50': ticket.sales_ended || ticket.sales_not_started}">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
-                    <span v-if="ticket.is_pass" class="inline-flex items-center gap-1 mt-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-semibold text-[var(--brand-blue)]">
+        <div v-if="!isPaymentLinkMode && (!isAllSoldOut || ticket.sales_ended || ticket.sales_not_started)" class="gk-tx-row" :class="{'gk-tx-off': ticket.sales_ended || ticket.sales_not_started}">
+            <div class="gk-tx-row-main">
+                <div class="gk-tx-row-text">
+                    <h3 class="gk-tx-name">@{{ ticket.type }}</h3>
+                    <span v-if="ticket.is_pass" class="gk-chip gk-chip-accent gk-tx-pass">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z"/></svg>
                         <template v-if="ticket.pass_usage_type === 'per_occurrence'">{{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}</template>
                         <template v-else-if="ticket.pass_usage_type === 'total' && ticket.pass_max_uses">{{ __('messages.subscription') }} &middot; @{{ ticket.pass_max_uses }} {{ __('messages.visits') }}</template>
                         <template v-else-if="ticket.pass_usage_type === 'unlimited'">{{ __('messages.subscription') }} &middot; {{ __('messages.pass_unlimited_visits') }}</template>
                         <template v-else>{{ __('messages.subscription') }}</template>
                     </span>
-                    <p v-if="ticket.is_pass && ticket.pass_allow_booking" class="text-xs text-[var(--brand-blue)] mt-1">{{ __('messages.pass_book_after_purchase') }}</p>
-                    <p v-if="ticket.is_pass && ticket.pass_allow_booking && passCancelPolicyHintText(ticket)" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ passCancelPolicyHintText(ticket) }}</p>
-                    <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
-                    <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price && donationOffered">{{ __('messages.free_donations_welcome') }}</template><template v-else-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
-                    <p v-if="ticket.price && ticket.volume_discount && ticket.volume_discount.min_quantity" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ volumeDiscountHintText(ticket) }}</p>
+                    <p v-if="ticket.is_pass && ticket.pass_allow_booking" class="gk-tx-hint gk-tx-accent">{{ __('messages.pass_book_after_purchase') }}</p>
+                    <p v-if="ticket.is_pass && ticket.pass_allow_booking && passCancelPolicyHintText(ticket)" class="gk-tx-hint">@{{ passCancelPolicyHintText(ticket) }}</p>
+                    <p v-if="ticket.description" class="gk-tx-desc" v-html="ticket.description"></p>
+                    <p class="gk-tx-price"><template v-if="!ticket.price && donationOffered">{{ __('messages.free_donations_welcome') }}</template><template v-else-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
+                    <p v-if="ticket.price && ticket.volume_discount && ticket.volume_discount.min_quantity" class="gk-tx-hint">@{{ volumeDiscountHintText(ticket) }}</p>
                     {{-- The affordability hook, on the price line where the sticker shock is. This
                          is what BNPL checkouts put next to a price and the reason the option
                          converts at all; the decision itself stays down by the total, where the
                          post-discount figure is finally known. --}}
-                    <p v-if="installmentsTeaserFor(ticket)" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ installmentsTeaserFor(ticket) }}</p>
+                    <p v-if="installmentsTeaserFor(ticket)" class="gk-tx-hint">@{{ installmentsTeaserFor(ticket) }}</p>
                 </div>
-                <div>
-                    <p v-if="ticket.sales_ended" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_ended') }}</p>
-                    <p v-else-if="ticket.sales_not_started" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_not_started') }}</p>
-                    <p v-else-if="getAvailableQuantity(ticket) === 0" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
+                <div class="gk-tx-row-end">
+                    <p v-if="ticket.sales_ended" class="gk-tx-state">{{ __('messages.sales_ended') }}</p>
+                    <p v-else-if="ticket.sales_not_started" class="gk-tx-state">{{ __('messages.sales_not_started') }}</p>
+                    <p v-else-if="getAvailableQuantity(ticket) === 0" class="gk-tx-state">{{ __('messages.sold_out') }}</p>
                     {{-- Allocated bands have no quantity control of their own: the venue map above
                          owns the whole selection and posts a tickets[] line per band. --}}
-                    <p v-else-if="ticket.is_allocated" class="text-sm text-gray-500 dark:text-gray-400">
+                    <p v-else-if="ticket.is_allocated" class="gk-tx-state gk-tx-state-sm">
                         @{{ allocatedQtyLabel(ticket) }}
                     </p>
                     <p v-else>
                     <select
                         v-model="ticket.selectedQty"
                         @change="onTicketChange"
-                        class="block w-28 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] font-medium"
+                        class="block gk-tx-field gk-tx-qty"
+                        :aria-label="ticket.type"
                         :name="`tickets[${ticket.id}]`" :id="`ticket-${index}`"
                     >
                         <option :value="0">0</option>
@@ -1493,9 +1619,9 @@
             </div>
 
             <!-- Ticket-level Custom Fields (shown when ticket is selected, hidden when per-guest fields are active) -->
-            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0 && !showGuestForms" class="mt-4 ps-4 border-s-2 border-gray-200 dark:border-gray-600">
+            <div v-if="ticket.selectedQty > 0 && ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0 && !showGuestForms" class="gk-tx-subfields">
                 <div v-for="(field, fieldKey) in ticket.custom_fields" :key="fieldKey" class="mb-3">
-                    <label :for="`ticket_custom_${ticket.id}_${fieldKey}`" class="text-sm text-gray-900 dark:text-gray-100">
+                    <label :for="`ticket_custom_${ticket.id}_${fieldKey}`" class="gk-tx-lab">
                         @{{ field.name }}@{{ field.required ? ' *' : '' }}
                     </label>
                     <!-- Text input -->
@@ -1504,7 +1630,7 @@
                         :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
-                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                        class="mt-1 block w-full gk-tx-field" />
                     <!-- Multiline text -->
                     <textarea v-else-if="field.type === 'multiline_string'"
                         :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
@@ -1513,14 +1639,14 @@
                         :required="field.required"
                         rows="2"
                         dir="auto"
-                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
+                        class="mt-1 block w-full gk-tx-field"></textarea>
                     <!-- Yes/No switch -->
                     <div v-else-if="field.type === 'switch'" class="mt-1">
                         <select :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
                             :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                             v-model="ticket.custom_values[fieldKey]"
                             :required="field.required"
-                            class="block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                            class="block w-full gk-tx-field">
                             <option value="">{{ __('messages.please_select') }}</option>
                             <option value="Yes">{{ __('messages.yes') }}</option>
                             <option value="No">{{ __('messages.no') }}</option>
@@ -1532,25 +1658,24 @@
                         :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
-                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                        class="mt-1 block w-full gk-tx-field" />
                     <!-- Dropdown -->
                     <select v-else-if="field.type === 'dropdown'"
                         :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`"
                         :id="`ticket_custom_${ticket.id}_${fieldKey}`"
                         v-model="ticket.custom_values[fieldKey]"
                         :required="field.required"
-                        class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        class="mt-1 block w-full gk-tx-field">
                         <option value="">{{ __('messages.please_select') }}</option>
                         <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                     </select>
                     <!-- Multi-select -->
                     <div v-else-if="field.type === 'multiselect'" class="mt-1 space-y-1">
                         <input type="hidden" :name="`ticket_custom_values[${ticket.id}][${fieldKey}]`" :value="(ticket.multiselect_values && ticket.multiselect_values[fieldKey] || []).join(', ')">
-                        <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
+                        <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-sm gk-tx-ink">
                             <input type="checkbox" :value="option.trim()"
                                 v-model="ticket.multiselect_values[fieldKey]"
-                                class="h-4 w-4 border-gray-300 rounded"
-                            style="accent-color: var(--es-accent-readable)" />
+                                class="gk-tx-check" />
                             @{{ option.trim() }}
                         </label>
                     </div>
@@ -1558,26 +1683,29 @@
             </div>
         </div>
         </template>
+        </div>
 
         <!-- Add-ons -->
-        <div v-if="addons.length > 0 && totalSelectedTickets > 0 && !isPaymentLinkMode && !isAllSoldOut" class="mb-6">
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.add_ons') }}</h3>
-            <div v-for="(addon, aIndex) in addons" :key="addon.id" class="mb-3 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-600">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
+        <div v-if="addons.length > 0 && totalSelectedTickets > 0 && !isPaymentLinkMode && !isAllSoldOut" class="gk-tx-sec">
+            <h3 class="gk-label">{{ __('messages.add_ons') }}</h3>
+            <div class="gk-tx-list gk-tx-list-sub">
+            <div v-for="(addon, aIndex) in addons" :key="addon.id" class="gk-tx-row">
+                <div class="gk-tx-row-main">
+                    <div class="gk-tx-row-text gk-tx-addon">
                         <img v-if="addon.image_url" :src="addon.image_url" :alt="addon.type"
-                            class="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-gray-200 dark:border-gray-600" />
+                            class="gk-tx-addon-img" />
                         <div>
-                            <h4 class="text-base font-medium text-gray-900 dark:text-gray-100">@{{ addon.type }}</h4>
-                            <p v-if="addon.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="addon.description"></p>
-                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100"><template v-if="!addon.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(addon.price) }}</template></p>
+                            <h4 class="gk-tx-name gk-tx-name-sm">@{{ addon.type }}</h4>
+                            <p v-if="addon.description" class="gk-tx-desc" v-html="addon.description"></p>
+                            <p class="gk-tx-price"><template v-if="!addon.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(addon.price) }}</template></p>
                         </div>
                     </div>
-                    <div>
-                        <p v-if="getAvailableQuantity(addon) === 0" class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sold_out') }}</p>
+                    <div class="gk-tx-row-end">
+                        <p v-if="getAvailableQuantity(addon) === 0" class="gk-tx-state">{{ __('messages.sold_out') }}</p>
                         <select v-else
                             v-model="addon.selectedQty"
-                            class="block w-28 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] font-medium"
+                            :aria-label="addon.type"
+                            class="block gk-tx-field gk-tx-qty"
                         >
                             <option :value="0">0</option>
                             <template v-for="n in getAvailableQuantity(addon)">
@@ -1588,6 +1716,7 @@
                 </div>
                 <input type="hidden" :name="`addons[${addon.id}]`" :value="addon.selectedQty">
             </div>
+            </div>
         </div>
 
         {{-- Who it is for, AFTER what is being bought. The form used to open on a name field, with
@@ -1595,43 +1724,43 @@
              had not yet said what anything cost. --}}
         {{-- Not over the per-guest cards, which have a heading of their own; and with no room
              above it where nothing is above it (a payment link has no rows to choose from). --}}
-        <h3 v-if="(!isAllSoldOut || waitlistOpen) && !showGuestForms" v-cloak :class="isPaymentLinkMode ? 'mt-0' : 'mt-8'" class="mb-4 text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.your_details') }}</h3>
+        <h3 v-if="(!isAllSoldOut || waitlistOpen) && !showGuestForms" v-cloak :class="isPaymentLinkMode ? 'mt-0' : 'gk-tx-sec'" class="gk-label">{{ __('messages.your_details') }}</h3>
         {{-- Nobody is asked for a name where there is nothing to give it for: nothing to buy,
              and no waitlist (which reads these same two fields). --}}
-        <div v-if="!showGuestForms && (!isAllSoldOut || waitlistOpen)">
-        <div class="mb-6">
-            <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
-            <input type="text" name="name" id="name" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+        <div v-if="!showGuestForms && (!isAllSoldOut || waitlistOpen)" class="gk-tx-fields">
+        <div>
+            <label for="name" class="gk-tx-lab">{{ __('messages.name') . ' *' }}</label>
+            <input type="text" name="name" id="name" class="mt-1 block w-full gk-tx-field"
                 v-model="name" required autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
-        <div class="mb-6">
-            <label for="email" class="text-gray-900 dark:text-gray-100">{{ __('messages.email') . ' *' }}</label>
-            <input type="email" name="email" id="email" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+        <div>
+            <label for="email" class="gk-tx-lab">{{ __('messages.email') . ' *' }}</label>
+            <input type="email" name="email" id="email" class="mt-1 block w-full gk-tx-field"
                 v-model="email" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if (! auth()->check() && config('app.hosted') && ! request()->embed)
-                <div class="mt-6">
+                <div class="mt-5">
                     <div class="flex items-center">
                         <input id="create_account" name="create_account" type="checkbox"
                             v-model="createAccount" value="1"
-                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                        <label for="create_account" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                            class="gk-tx-check">
+                        <label for="create_account" class="ms-3 block gk-tx-checklab">
                             {{ __('messages.create_account') }}
                         </label>
                     </div>
 
                     <div class="mt-6" v-if="createAccount">
-                        <label for="password" class="text-gray-900 dark:text-gray-100">{{ __('messages.password') . ' *' }}</label>
+                        <label for="password" class="gk-tx-lab">{{ __('messages.password') . ' *' }}</label>
                         <div class="relative mt-1">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password" class="block w-full pe-10 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password" class="block w-full pe-10 gk-tx-field"
                                 v-model="password" required autocomplete="new-password" />
                             <button
                                 type="button"
                                 @click="showPassword = !showPassword"
-                                class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                class="absolute inset-y-0 end-0 flex items-center pe-3 gk-tx-eye"
                             >
                                 <svg v-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1649,13 +1778,13 @@
                         <div class="relative flex items-start">
                             <div class="flex h-6 items-center">
                                 <input id="terms" name="terms" type="checkbox" required
-                                    class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                    class="gk-tx-check">
                             </div>
                             <div class="ms-3 text-sm leading-6">
-                                <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
+                                <label for="terms" class="gk-tx-checklab">
                                     {!! str_replace([':terms', ':privacy'], [
-                                        '<a href="' . policy_url('terms') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
-                                        '<a href="' . policy_url('privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                        '<a href="' . policy_url('terms') . '" target="_blank" class="gk-link"> ' . __('messages.terms_of_service') . '</a>',
+                                        '<a href="' . policy_url('privacy') . '" target="_blank" class="gk-link">' . __('messages.privacy_policy') . '</a>'
                                     ], __('messages.i_accept_the_terms_and_privacy')) !!}
                                 </label>
                             </div>
@@ -1677,28 +1806,28 @@
                  comment above for why a pre-ticked box on the shared platform mailer would also
                  damage deliverability for every other schedule. --}}
             @if (! request()->embed && $event->creatorRole)
-                <div class="mt-6 flex items-start">
+                <div class="mt-5 flex items-start">
                     <input id="audience_opt_in" name="audience_opt_in" type="checkbox" value="1"
-                        class="mt-1 h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded">
+                        class="mt-1 gk-tx-check">
                     {{-- v-pre: the schedule name is user-controlled and this label sits inside a
                          Vue mount (#rsvp-form / #ticket-selector), so without it a name like
                          "{{constructor.constructor('...')()}}" is compiled as a template and runs.
                          Same guard as the custom-content block further down this file. --}}
-                    <label for="audience_opt_in" v-pre class="ms-3 block text-sm text-gray-900 dark:text-gray-100">
+                    <label for="audience_opt_in" v-pre class="ms-3 block gk-tx-checklab">
                         {{ __('messages.audience_opt_in_label', ['schedule' => $event->creatorRole->name]) }}
                     </label>
                 </div>
             @endif
         </div>
 
-        <div class="mb-6" v-if="askPhone">
-            <label for="phone_input" class="block text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
+        <div v-if="askPhone">
+            <label for="phone_input" class="gk-tx-lab">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
             @if ($event->country_code_phone)
             <input type="hidden" name="phone" id="phone_hidden" v-model="phone">
-            <input type="tel" id="phone_input" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+            <input type="tel" id="phone_input" class="mt-1 block w-full gk-tx-field"
                 :required="requirePhone" autocomplete="tel" />
             @else
-            <input type="tel" name="phone" id="phone_input" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+            <input type="tel" name="phone" id="phone_input" class="mt-1 block w-full gk-tx-field"
                 v-model="phone" :required="requirePhone" autocomplete="tel" />
             @endif
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
@@ -1707,34 +1836,34 @@
 
         <!-- Per-Guest Forms (Individual Tickets) -->
         <div v-if="showGuestForms">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.guest_information') }}</h3>
-            <div v-for="(guest, gIndex) in guests" :key="gIndex" class="mb-4 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-600">
-                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            <h3 class="gk-label gk-tx-sec">{{ __('messages.guest_information') }}</h3>
+            <div v-for="(guest, gIndex) in guests" :key="gIndex" class="gk-tx-guest">
+                <h4 class="gk-tx-guest-name">
                     {{ __('messages.guest_n', ['n' => '']) }}@{{ gIndex + 1 }} (@{{ guest.ticketType }})
-                    <span v-if="gIndex === 0" class="text-xs text-gray-500 dark:text-gray-400"> - {{ __('messages.you') }}</span>
+                    <span v-if="gIndex === 0" class="gk-tx-ink3"> - {{ __('messages.you') }}</span>
                 </h4>
                 <div class="mb-3">
-                    <label :for="'guest_name_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.name') }} *</label>
+                    <label :for="'guest_name_' + gIndex" class="gk-tx-lab">{{ __('messages.name') }} *</label>
                     <input type="text" :id="'guest_name_' + gIndex" v-model="guest.name" required
-                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
+                        class="mt-1 block w-full gk-tx-field" />
                     <input type="hidden" :name="'guests[' + gIndex + '][name]'" :value="guest.name">
                     <input type="hidden" :name="'guests[' + gIndex + '][ticket_id]'" :value="guest.ticketId">
                 </div>
                 <div class="mb-3">
-                    <label :for="'guest_email_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.email') }} *</label>
+                    <label :for="'guest_email_' + gIndex" class="gk-tx-lab">{{ __('messages.email') }} *</label>
                     <input type="email" :id="'guest_email_' + gIndex" v-model="guest.email" required
-                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
+                        class="mt-1 block w-full gk-tx-field" />
                     <input type="hidden" :name="'guests[' + gIndex + '][email]'" :value="guest.email">
                 </div>
                 <div class="mb-3" v-if="askPhone">
-                    <label :for="'guest_phone_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
+                    <label :for="'guest_phone_' + gIndex" class="gk-tx-lab">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
                     @if ($event->country_code_phone)
                     <input type="tel" :id="'guest_phone_' + gIndex" :required="requirePhone"
-                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm guest-phone-intl" />
+                        class="mt-1 block w-full gk-tx-field guest-phone-intl" />
                     <input type="hidden" :name="'guests[' + gIndex + '][phone]'" :value="guest.phone">
                     @else
                     <input type="tel" :id="'guest_phone_' + gIndex" v-model="guest.phone" :required="requirePhone"
-                        class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
+                        class="mt-1 block w-full gk-tx-field" />
                     <input type="hidden" :name="'guests[' + gIndex + '][phone]'" :value="guest.phone">
                     @endif
                 </div>
@@ -1742,7 +1871,7 @@
                 <!-- Per-guest ticket-level custom fields -->
                 <template v-if="individualTicketFields && getTicketById(guest.ticketId) && getTicketById(guest.ticketId).custom_fields && Object.keys(getTicketById(guest.ticketId).custom_fields).length > 0">
                     <div v-for="(field, fieldKey) in getTicketById(guest.ticketId).custom_fields" :key="fieldKey" class="mb-3">
-                        <label :for="`guest_ticket_custom_${gIndex}_${fieldKey}`" class="text-sm text-gray-900 dark:text-gray-100">
+                        <label :for="`guest_ticket_custom_${gIndex}_${fieldKey}`" class="gk-tx-lab">
                             @{{ field.name }}@{{ field.required ? ' *' : '' }}
                         </label>
                         <!-- Text input -->
@@ -1750,20 +1879,20 @@
                             :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
                             v-model="guest.ticketCustomValues[fieldKey]"
                             :required="field.required"
-                            class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                            class="mt-1 block w-full gk-tx-field" />
                         <!-- Multiline text -->
                         <textarea v-else-if="field.type === 'multiline_string'"
                             :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
                             v-model="guest.ticketCustomValues[fieldKey]"
                             :required="field.required"
                             rows="2" dir="auto"
-                            class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
+                            class="mt-1 block w-full gk-tx-field"></textarea>
                         <!-- Yes/No switch -->
                         <div v-else-if="field.type === 'switch'" class="mt-1">
                             <select :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
                                 v-model="guest.ticketCustomValues[fieldKey]"
                                 :required="field.required"
-                                class="block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                class="block w-full gk-tx-field">
                                 <option value="">{{ __('messages.please_select') }}</option>
                                 <option value="Yes">{{ __('messages.yes') }}</option>
                                 <option value="No">{{ __('messages.no') }}</option>
@@ -1774,23 +1903,22 @@
                             :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
                             v-model="guest.ticketCustomValues[fieldKey]"
                             :required="field.required"
-                            class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                            class="mt-1 block w-full gk-tx-field" />
                         <!-- Dropdown -->
                         <select v-else-if="field.type === 'dropdown'"
                             :id="`guest_ticket_custom_${gIndex}_${fieldKey}`"
                             v-model="guest.ticketCustomValues[fieldKey]"
                             :required="field.required"
-                            class="mt-1 block w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                            class="mt-1 block w-full gk-tx-field">
                             <option value="">{{ __('messages.please_select') }}</option>
                             <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                         </select>
                         <!-- Multi-select -->
                         <div v-else-if="field.type === 'multiselect'" class="mt-1 space-y-1">
-                            <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-sm text-gray-900 dark:text-gray-100">
+                            <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-sm gk-tx-ink">
                                 <input type="checkbox" :value="option.trim()"
                                     v-model="guest.ticketMultiselectValues[fieldKey]"
-                                    class="h-4 w-4 border-gray-300 rounded"
-                                    style="accent-color: var(--es-accent-readable)" />
+                                    class="gk-tx-check" />
                                 @{{ option.trim() }}
                             </label>
                         </div>
@@ -1805,17 +1933,17 @@
                     <div class="flex items-center">
                         <input :id="'create_account_guest'" name="create_account" type="checkbox"
                             v-model="createAccount" value="1"
-                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                        <label for="create_account_guest" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                            class="gk-tx-check">
+                        <label for="create_account_guest" class="ms-3 block gk-tx-checklab">
                             {{ __('messages.create_account') }}
                         </label>
                     </div>
                     <div class="mt-3" v-if="createAccount">
-                        <label for="password_guest" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.password') }} *</label>
+                        <label for="password_guest" class="gk-tx-lab">{{ __('messages.password') }} *</label>
                         <div class="relative mt-1">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password_guest" class="block w-full pe-10 text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password_guest" class="block w-full pe-10 gk-tx-field"
                                 v-model="password" required autocomplete="new-password" />
-                            <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 gk-tx-eye">
                                 <svg v-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 <svg v-show="showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
                             </button>
@@ -1825,13 +1953,13 @@
                             <div class="relative flex items-start">
                                 <div class="flex h-6 items-center">
                                     <input id="terms_guest" name="terms" type="checkbox" required
-                                        class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                                        class="gk-tx-check">
                                 </div>
                                 <div class="ms-3 text-sm leading-6">
-                                    <label for="terms_guest" class="font-medium text-gray-900 dark:text-gray-300">
+                                    <label for="terms_guest" class="gk-tx-checklab">
                                         {!! str_replace([':terms', ':privacy'], [
-                                            '<a href="' . policy_url('terms') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
-                                            '<a href="' . policy_url('privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                            '<a href="' . policy_url('terms') . '" target="_blank" class="gk-link"> ' . __('messages.terms_of_service') . '</a>',
+                                            '<a href="' . policy_url('privacy') . '" target="_blank" class="gk-link">' . __('messages.privacy_policy') . '</a>'
                                         ], __('messages.i_accept_the_terms_and_privacy')) !!}
                                     </label>
                                 </div>
@@ -1848,9 +1976,9 @@
         </div>
 
         <!-- Event-level Custom Fields -->
-        <div v-if="hasEventCustomFields" class="mb-6">
-            <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" class="mb-4">
-                <label :for="`event_custom_${fieldKey}`" class="text-gray-900 dark:text-gray-100">
+        <div v-if="hasEventCustomFields" class="gk-tx-fields gk-tx-sec-tight">
+            <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey">
+                <label :for="`event_custom_${fieldKey}`" class="gk-tx-lab">
                     @{{ field.name }}@{{ field.required ? ' *' : '' }}
                 </label>
                 <!-- Text input -->
@@ -1859,7 +1987,7 @@
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                    class="mt-1 block w-full gk-tx-field" />
                 <!-- Multiline text -->
                 <textarea v-else-if="field.type === 'multiline_string'"
                     :name="`event_custom_values[${fieldKey}]`"
@@ -1868,14 +1996,14 @@
                     :required="field.required"
                     rows="3"
                     dir="auto"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
+                    class="mt-1 block w-full gk-tx-field"></textarea>
                 <!-- Yes/No switch -->
                 <div v-else-if="field.type === 'switch'" class="mt-1">
                     <select :name="`event_custom_values[${fieldKey}]`"
                         :id="`event_custom_${fieldKey}`"
                         v-model="eventCustomValues[fieldKey]"
                         :required="field.required"
-                        class="block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        class="block w-full gk-tx-field">
                         <option value="">{{ __('messages.please_select') }}</option>
                         <option value="Yes">{{ __('messages.yes') }}</option>
                         <option value="No">{{ __('messages.no') }}</option>
@@ -1887,25 +2015,24 @@
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                    class="mt-1 block w-full gk-tx-field" />
                 <!-- Dropdown -->
                 <select v-else-if="field.type === 'dropdown'"
                     :name="`event_custom_values[${fieldKey}]`"
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    class="mt-1 block w-full gk-tx-field">
                     <option value="">{{ __('messages.please_select') }}</option>
                     <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                 </select>
                 <!-- Multi-select -->
                 <div v-else-if="field.type === 'multiselect'" class="mt-1 space-y-1">
                     <input type="hidden" :name="`event_custom_values[${fieldKey}]`" :value="(eventMultiselectValues[fieldKey] || []).join(', ')">
-                    <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                    <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 gk-tx-ink">
                         <input type="checkbox" :value="option.trim()"
                             v-model="eventMultiselectValues[fieldKey]"
-                            class="h-4 w-4 border-gray-300 rounded"
-                            style="accent-color: var(--es-accent-readable)" />
+                            class="gk-tx-check" />
                         @{{ option.trim() }}
                     </label>
                 </div>
@@ -1918,56 +2045,56 @@
             $showGiftCardField = $event->acceptsGiftCards();
         @endphp
         @if($showPromoField || $showGiftCardField)
-        <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6">
-            <div class="bg-white dark:bg-gray-700/50 rounded-lg p-4 space-y-4">
+        <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="gk-tx-sec">
+            <div class="gk-tx-fields">
                 @if($showPromoField && $showGiftCardField)
-                <div class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.have_a_code') }}</div>
+                <div class="gk-label gk-tx-codes-name">{{ __('messages.have_a_code') }}</div>
                 @endif
                 @if($showPromoField)
                 <div>
-                    <label class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.promo_code') }}</label>
-                    <div class="flex gap-2 mt-1">
-                        <input type="text" v-model="promoCode" :disabled="promoCodeValid"
-                            class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm"
+                    <label for="promo-code-input" class="gk-tx-lab">{{ __('messages.promo_code') }}</label>
+                    <div class="gk-tx-code mt-1">
+                        <input type="text" id="promo-code-input" v-model="promoCode" :disabled="promoCodeValid"
+                            class="flex-1 min-w-0 gk-tx-field"
                             :class="{'opacity-50': promoCodeValid}"
                             placeholder="{{ __('messages.enter_promo_code') }}" />
                         <button type="button" v-if="!promoCodeValid" @click="applyPromoCode" :disabled="isValidatingPromo || !promoCode.trim()"
-                            class="px-4 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-medium rounded-lg hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            class="gk-tx-apply">
                             <span v-if="isValidatingPromo">...</span>
                             <span v-else>{{ __('messages.apply') }}</span>
                         </button>
                         <button type="button" v-else @click="removePromoCode"
-                            class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                            class="gk-tx-apply" aria-label="{{ __('messages.remove') }}">
                             &times;
                         </button>
                     </div>
-                    <p v-if="promoCodeMessage" class="mt-2 text-sm" :class="promoCodeValid ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                    <p v-if="promoCodeMessage" class="mt-2 text-sm" :class="promoCodeValid ? 'gk-tx-ok' : 'gk-tx-bad'">
                         @{{ promoCodeMessage }}
                     </p>
                 </div>
                 @endif
                 @if($showGiftCardField)
                 <div>
-                    <label class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.gift_card') }}</label>
-                    <div class="flex gap-2 mt-1">
-                        <input type="text" v-model="giftCardCode" :disabled="giftCardValid" dir="ltr" autocapitalize="characters" spellcheck="false"
-                            class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm uppercase"
+                    <label for="gift-card-input" class="gk-tx-lab">{{ __('messages.gift_card') }}</label>
+                    <div class="gk-tx-code mt-1">
+                        <input type="text" id="gift-card-input" v-model="giftCardCode" :disabled="giftCardValid" dir="ltr" autocapitalize="characters" spellcheck="false"
+                            class="flex-1 min-w-0 gk-tx-field gk-tx-upper"
                             :class="{'opacity-50': giftCardValid}"
                             placeholder="{{ __('messages.enter_gift_card_code') }}" />
                         <button type="button" v-if="!giftCardValid" @click="applyGiftCard" :disabled="isValidatingGiftCard || !giftCardCode.trim()"
-                            class="px-4 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-medium rounded-lg hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            class="gk-tx-apply">
                             <span v-if="isValidatingGiftCard">...</span>
                             <span v-else>{{ __('messages.apply') }}</span>
                         </button>
                         <button type="button" v-else @click="removeGiftCard"
-                            class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                            class="gk-tx-apply" aria-label="{{ __('messages.remove') }}">
                             &times;
                         </button>
                     </div>
-                    <p v-if="giftCardMessage" class="mt-2 text-sm" :class="giftCardValid ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                    <p v-if="giftCardMessage" class="mt-2 text-sm" :class="giftCardValid ? 'gk-tx-ok' : 'gk-tx-bad'">
                         @{{ giftCardMessage }}
                     </p>
-                    <p v-if="giftCardValid && giftCardApplied > 0" class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    <p v-if="giftCardValid && giftCardApplied > 0" class="mt-1 text-sm gk-tx-ink2">
                         {{ __('messages.gift_card_applied_summary') }}: -@{{ formatPrice(giftCardApplied) }} &middot; @{{ formatPrice(giftCardRemainderAfter) }} {{ __('messages.gift_card_remains_after') }}
                     </p>
                 </div>
@@ -1983,45 +2110,41 @@
         @endif
 
         @if ($role->canSellGiftCards())
-        <p v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 text-sm text-gray-500 dark:text-gray-400">
-            🎁 <a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" target="_blank" rel="noopener" class="hover:underline" style="color: var(--es-accent-readable)">{{ __('messages.gift_cards_available_buy') }}</a>
+        <p v-if="!isPaymentLinkMode && !isAllSoldOut" class="gk-tx-sec-tight text-sm gk-tx-ink3">
+            🎁 <a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" target="_blank" rel="noopener" class="gk-tx-accent-link">{{ __('messages.gift_cards_available_buy') }}</a>
         </p>
         @endif
 
         {{-- Donation. Below the promo code and gift card, beside the total it changes, and above the
              payment plan, whose split includes it. A radiogroup of the owner's amounts, and "Other"
              when the owner allows it; nothing chosen to begin with. --}}
-        <div v-if="donationOffered && !isPaymentLinkMode && !isAllSoldOut && totalSelectedTickets > 0" class="mb-6">
+        <div v-if="donationOffered && !isPaymentLinkMode && !isAllSoldOut && totalSelectedTickets > 0" class="gk-tx-sec">
             {{-- The owner's line (text, so v-pre), and whom the money goes to: the event's own schedule,
                  whose account is paid, not the page it is bought from. Escaped: a schedule's name is
                  somebody's text. --}}
-            <p id="donation-heading" class="text-sm font-medium text-gray-900 dark:text-gray-100" v-pre><bdi>{{ $event->donation_line ?: __('messages.donation_heading') }}</bdi></p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2" v-pre>{{ __('messages.donation_optional', ['organizer' => ($event->creatorRole ?? $role)->translatedName()]) }}</p>
+            <p id="donation-heading" class="gk-tx-name gk-tx-name-sm" v-pre><bdi>{{ $event->donation_line ?: __('messages.donation_heading') }}</bdi></p>
+            <p class="gk-tx-hint mb-3" v-pre>{{ __('messages.donation_optional', ['organizer' => ($event->creatorRole ?? $role)->translatedName()]) }}</p>
             {{-- Toggle buttons rather than radios: pressing the chosen amount again clears it, which a
                  radio never does. --}}
             <div role="group" aria-labelledby="donation-heading" class="flex flex-wrap gap-2">
                 <button v-for="amount in donationAmounts" :key="'d' + amount" type="button"
                     :aria-pressed="donationChoice === amount ? 'true' : 'false'"
                     @click="donationChoice = donationChoice === amount ? null : amount"
-                    class="px-4 py-2 rounded-lg border-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                    :class="donationChoice === amount ? 'text-gray-900 dark:text-gray-100' : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'"
-                    :style="donationChoice === amount ? 'border-color: var(--es-accent-readable)' : ''"><bdi dir="ltr">@{{ formatPrice(amount) }}</bdi></button>
+                    class="gk-tx-choice"><bdi dir="ltr">@{{ formatPrice(amount) }}</bdi></button>
                 <button v-if="donationCustom" type="button"
                     :aria-pressed="donationChoice === 'other' ? 'true' : 'false'"
                     @click="donationChoice = donationChoice === 'other' ? null : 'other'"
-                    class="px-4 py-2 rounded-lg border-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                    :class="donationChoice === 'other' ? 'text-gray-900 dark:text-gray-100' : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'"
-                    :style="donationChoice === 'other' ? 'border-color: var(--es-accent-readable)' : ''">@lang('messages.donation_other')</button>
+                    class="gk-tx-choice">@lang('messages.donation_other')</button>
             </div>
             <div v-if="donationChoice === 'other' && donationCustom" class="mt-2 flex items-center gap-2 max-w-[12rem]">
-                <span class="text-sm text-gray-600 dark:text-gray-400" aria-hidden="true">{{ \App\Utils\MoneyUtils::symbol($event->ticket_currency_code) }}</span>
+                <span class="gk-tx-ink2" aria-hidden="true">{{ \App\Utils\MoneyUtils::symbol($event->ticket_currency_code) }}</span>
                 <input id="donation-other" type="text" inputmode="decimal" v-model="donationOther" aria-label="{{ __('messages.donation_other_amount') }}"
                     :aria-invalid="(donationOutOfRange || donationUnreadable) ? 'true' : 'false'" aria-describedby="donation-range"
-                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 text-sm">
+                    class="block w-full gk-tx-field">
             </div>
-            <p id="donation-range" v-if="donationUnreadable" role="alert" class="mt-2 text-sm text-red-600 dark:text-red-400">@lang('messages.donation_unreadable')</p>
-            <p v-else-if="donationOutOfRange" id="donation-range" role="alert" class="mt-2 text-sm text-red-600 dark:text-red-400">@{{ @json(__('messages.donation_out_of_range')).replace(':min', formatPrice(donationMinimum)).replace(':max', formatPrice(donationLimits[1])) }}</p>
-            <p v-if="donationAmount > 0 && cartEligible" class="mt-2 text-xs text-gray-500 dark:text-gray-400">@lang('messages.donation_no_cart')</p>
+            <p id="donation-range" v-if="donationUnreadable" role="alert" class="mt-2 text-sm gk-tx-bad">@lang('messages.donation_unreadable')</p>
+            <p v-else-if="donationOutOfRange" id="donation-range" role="alert" class="mt-2 text-sm gk-tx-bad">@{{ @json(__('messages.donation_out_of_range')).replace(':min', formatPrice(donationMinimum)).replace(':max', formatPrice(donationLimits[1])) }}</p>
+            <p v-if="donationAmount > 0 && cartEligible" class="gk-tx-hint">@lang('messages.donation_no_cart')</p>
             <input type="hidden" name="donation_amount" :value="donationAmount > 0 ? donationAmount.toFixed(currencyDecimals) : ''">
         </div>
 
@@ -2032,51 +2155,47 @@
              Two radio cards rather than a checkbox, and PAY IN FULL IS SELECTED BY DEFAULT.
              Pre-selecting a credit arrangement is a dark pattern, and for the European audience
              this is aimed at, a regulatory problem too. --}}
-        <div v-if="installmentsOffered && !isPaymentLinkMode && !isAllSoldOut && totalSelectedTickets > 0" class="mb-6">
-            <label class="flex items-start gap-3 p-4 rounded-lg border cursor-pointer mb-2"
-                :class="!payMonthly ? 'border-2' : 'border-gray-200 dark:border-gray-600'"
-                :style="!payMonthly ? 'border-color: var(--es-accent-readable)' : ''">
-                <input type="radio" name="installments_choice" :value="false" v-model="payMonthly" class="mt-1" style="color: var(--es-accent-readable);">
+        <div v-if="installmentsOffered && !isPaymentLinkMode && !isAllSoldOut && totalSelectedTickets > 0" class="gk-tx-sec gk-tx-options">
+            <label class="gk-tx-option" :class="{ 'gk-tx-option-on': !payMonthly }">
+                <input type="radio" name="installments_choice" :value="false" v-model="payMonthly" class="mt-1 gk-tx-check gk-tx-radio">
                 <span class="flex-1 flex justify-between items-center">
-                    <span class="text-gray-900 dark:text-gray-100 font-medium">@lang('messages.pay_in_full')</span>
-                    <span class="text-gray-900 dark:text-gray-100 font-medium">@{{ formatPrice(totalAmount) }}</span>
+                    <span class="gk-tx-ink font-medium">@lang('messages.pay_in_full')</span>
+                    <span class="gk-tx-ink font-medium">@{{ formatPrice(totalAmount) }}</span>
                 </span>
             </label>
 
-            <label class="flex items-start gap-3 p-4 rounded-lg border cursor-pointer"
-                :class="payMonthly ? 'border-2' : 'border-gray-200 dark:border-gray-600'"
-                :style="payMonthly ? 'border-color: var(--es-accent-readable)' : ''">
-                <input type="radio" name="installments_choice" :value="true" v-model="payMonthly" class="mt-1" style="color: var(--es-accent-readable);">
+            <label class="gk-tx-option" :class="{ 'gk-tx-option-on': payMonthly }">
+                <input type="radio" name="installments_choice" :value="true" v-model="payMonthly" class="mt-1 gk-tx-check gk-tx-radio">
                 <span class="flex-1">
                     <span class="flex justify-between items-center">
-                        <span class="text-gray-900 dark:text-gray-100 font-medium">@lang('messages.pay_monthly')</span>
-                        <span class="text-gray-900 dark:text-gray-100 font-medium">@{{ formatPrice(installmentSchedule[0]) }}</span>
+                        <span class="gk-tx-ink font-medium">@lang('messages.pay_monthly')</span>
+                        <span class="gk-tx-ink font-medium">@{{ formatPrice(installmentSchedule[0]) }}</span>
                     </span>
-                    <span class="block text-sm text-gray-500 dark:text-gray-400 mt-1">@{{ installmentSummary }}</span>
+                    <span class="block text-sm gk-tx-ink3 mt-1">@{{ installmentSummary }}</span>
                 </span>
             </label>
 
-            <div v-if="payMonthly" class="mt-3 p-4 rounded-lg bg-white dark:bg-gray-700/50">
-                <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">@lang('messages.your_payment_schedule')</p>
+            <div v-if="payMonthly" class="gk-tx-plan">
+                <p class="text-sm font-medium gk-tx-ink mb-2">@lang('messages.your_payment_schedule')</p>
                 <div v-for="(row, i) in installmentSchedule" :key="i" class="flex justify-between text-sm py-1">
-                    <span class="text-gray-600 dark:text-gray-400">@{{ i === 0 ? @json(__('messages.due_today')) : installmentDates[i] }}</span>
-                    <span class="text-gray-900 dark:text-gray-100">@{{ formatPrice(row) }}</span>
+                    <span class="gk-tx-ink2">@{{ i === 0 ? @json(__('messages.due_today')) : installmentDates[i] }}</span>
+                    <span class="gk-tx-ink">@{{ formatPrice(row) }}</span>
                 </div>
 
                 {{-- The highest-conversion sentence in the feature. Without it every buyer assumes
                      there is a catch, and it is verifiably true: the platform takes no fee on
                      ticket sales and no surcharge is added here. --}}
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                <p class="text-sm gk-tx-ink2 mt-3 pt-3 gk-tx-rule">
                     @{{ noExtraCostText }}
                 </p>
 
-                <label class="flex items-start gap-2 mt-3 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
-                    <input type="checkbox" id="installments-consent" name="installments_consent" value="1" v-model="installmentConsent" @change="settle('consent')" class="mt-1 rounded" style="color: var(--es-accent-readable);">
+                <label class="flex items-start gap-2 mt-3 text-sm gk-tx-ink2 cursor-pointer">
+                    <input type="checkbox" id="installments-consent" name="installments_consent" value="1" v-model="installmentConsent" @change="settle('consent')" class="mt-0.5 gk-tx-check">
                     <span>@{{ consentText }}</span>
                 </label>
 
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">@{{ cancelNoteText }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">@lang('messages.installments_door_note')</p>
+                <p class="text-xs gk-tx-ink3 mt-2">@{{ cancelNoteText }}</p>
+                <p class="text-xs gk-tx-ink3 mt-1">@lang('messages.installments_door_note')</p>
             </div>
 
             <input type="hidden" name="installments" :value="payMonthly ? '1' : ''">
@@ -2086,46 +2205,46 @@
              under Stripe's per-charge floor. Without this the buyer posts a form the server
              rejects and gets a bare "error" with no explanation. --}}
         <div v-if="installmentsWereOffered && !installmentsOffered && totalSelectedTickets > 0"
-            class="mb-6 rounded-lg p-3 text-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-200">
+            class="gk-note gk-note-warn gk-tx-sec-tight">
             @lang('messages.installments_unavailable')
         </div>
 
         <!-- Total -->
-        <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
+        <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="gk-tx-total">
             <template v-if="volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0 || donationAmount > 0">
                 <div class="flex justify-between items-center mb-1">
-                    <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.subtotal')</span>
-                    <span class="text-sm text-gray-900 dark:text-gray-100">@{{ formatPrice(subtotalAmount) }}</span>
+                    <span class="gk-tx-ink2 text-sm">@lang('messages.subtotal')</span>
+                    <span class="text-sm gk-tx-ink">@{{ formatPrice(subtotalAmount) }}</span>
                 </div>
                 <div v-if="volumeDiscountTotal > 0" class="flex justify-between items-center mb-1">
-                    <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.volume_discount')</span>
-                    <span class="text-sm text-green-600 dark:text-green-400">-@{{ formatPrice(volumeDiscountTotal) }}</span>
+                    <span class="gk-tx-ok text-sm">@lang('messages.volume_discount')</span>
+                    <span class="text-sm gk-tx-ok">-@{{ formatPrice(volumeDiscountTotal) }}</span>
                 </div>
                 <div v-if="discountAmount > 0" class="flex justify-between items-center mb-1">
-                    <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.promo_discount')</span>
-                    <span class="text-sm text-green-600 dark:text-green-400">-@{{ formatPrice(discountAmount) }}</span>
+                    <span class="gk-tx-ok text-sm">@lang('messages.promo_discount')</span>
+                    <span class="text-sm gk-tx-ok">-@{{ formatPrice(discountAmount) }}</span>
                 </div>
                 <div v-if="donationAmount > 0" class="flex justify-between items-center mb-1">
-                    <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.donation')</span>
-                    <span class="text-sm text-gray-900 dark:text-gray-100">@{{ formatPrice(donationAmount) }}</span>
+                    <span class="gk-tx-ink2 text-sm">@lang('messages.donation')</span>
+                    <span class="text-sm gk-tx-ink">@{{ formatPrice(donationAmount) }}</span>
                 </div>
                 <div v-if="giftCardApplied > 0" class="flex justify-between items-center mb-1">
-                    <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.gift_card')</span>
-                    <span class="text-sm text-green-600 dark:text-green-400">-@{{ formatPrice(giftCardApplied) }}</span>
+                    <span class="gk-tx-ok text-sm">@lang('messages.gift_card')</span>
+                    <span class="text-sm gk-tx-ok">-@{{ formatPrice(giftCardApplied) }}</span>
                 </div>
             </template>
             {{-- On a monthly plan the buyer is about to be charged one instalment, not the total.
                  Leading with the total and then landing them on a Stripe page showing a quarter
                  of it is where disputes start, so the total is demoted and "due today" leads. --}}
             <div v-if="payMonthly && installmentsOffered" class="flex justify-between items-center mb-1">
-                <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.total')</span>
-                <span class="text-sm text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
+                <span class="gk-tx-ink2 text-sm">@lang('messages.total')</span>
+                <span class="text-sm gk-tx-ink">@{{ formatPrice(totalAmount) }}</span>
             </div>
-            <div class="flex justify-between items-center" :class="{ 'pt-2 mt-1 border-t border-gray-200 dark:border-gray-600': volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0 || donationAmount > 0 || (payMonthly && installmentsOffered) }">
-                <span class="text-gray-600 dark:text-gray-400">
+            <div class="gk-tx-sum" :class="{ 'gk-tx-sum-split': volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0 || donationAmount > 0 || (payMonthly && installmentsOffered) }">
+                <span class="gk-tx-sum-label">
                     @{{ payMonthly && installmentsOffered ? @json(__('messages.due_today')) : @json(__('messages.total')) }}
                 </span>
-                <span class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                <span class="gk-tx-sum-value">
                     @{{ formatPrice(payMonthly && installmentsOffered ? installmentSchedule[0] : totalAmount) }}
                 </span>
             </div>
@@ -2147,26 +2266,25 @@
              is also true when no ticket is on sale yet: read here, it offered a waitlist the
              endpoint then answered with "tickets are still available". --}}
         <div v-if="waitlistOpen" data-waitlist-block class="mt-6">
-            <div v-if="waitlistMessage" class="mb-4 p-4 rounded-lg text-sm" :class="waitlistSuccess ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'">
+            <div v-if="waitlistMessage" class="gk-note mb-4" :class="waitlistSuccess ? 'gk-note-ok' : 'gk-note-bad'">
                 @{{ waitlistMessage }}
             </div>
-            <div v-if="!waitlistSuccess" class="flex flex-wrap justify-end items-center pt-2 gap-x-4 gap-y-2">
+            <div v-if="!waitlistSuccess" class="gk-tx-actions">
                 @if (! request()->embed)
-                <button type="button" @click="hideForm" class="mt-4 whitespace-nowrap px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                <button type="button" @click="hideForm" class="gk-cta-alt">
                     {{ __('messages.cancel') }}
                 </button>
                 @endif
                 <button type="button" @click="joinWaitlist"
                     :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
-                    class="mt-4 whitespace-nowrap text-lg px-6 inline-flex items-center rounded-lg border border-transparent py-3 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
-                    style="background-color: var(--es-accent); color: var(--es-accent-text);">
+                    class="gk-btn gk-btn-primary gk-cta-main">
                     <span v-if="waitlistSubmitting">{{ __('messages.processing') }}</span>
                     <span v-else>{{ __('messages.join_waitlist') }}</span>
                 </button>
             </div>
             @if (! request()->embed)
-            <div v-else class="flex justify-end pt-2">
-                <button type="button" @click="hideForm" class="mt-4 whitespace-nowrap px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+            <div v-else class="gk-tx-actions">
+                <button type="button" @click="hideForm" class="gk-cta-alt">
                     {{ __('messages.back') }}
                 </button>
             </div>
@@ -2178,7 +2296,7 @@
              is indistinguishable from a broken one. OUTSIDE the button row - dropped inside it,
              a full-width notice wrapped the three actions onto two lines. --}}
         <p v-if="!isAllSoldOut && seatsBlocked" id="seats-blocked-reason" role="status" aria-live="polite"
-            class="mt-4 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-800 dark:text-amber-200">
+            class="gk-note gk-note-warn mt-4">
             @{{ seatsBlockedReason }}
         </p>
 
@@ -2189,7 +2307,7 @@
                  payment instructions would be compiled as a Vue expression (CSTI) in the buyer's browser.
                  demoteH1(): this form sits on the event page and in the ticket embed, and each has
                  its own <h1>, so the owner's "# Heading" prints as an <h2>. --}}
-            <div class="mt-6 custom-content" v-pre>
+            <div class="mt-6 custom-content gk-tx-ink2" v-pre>
                 {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($event->payment_instructions_html)) !!}
             </div>
         @endif
@@ -2198,7 +2316,7 @@
             {{-- Suppressed on a monthly plan: the sale is marked paid on the first installment,
                  so "payment must be completed within N hours" is simply untrue there and would
                  read as a threat to a buyer who has just committed to three more payments. --}}
-            <div class="mt-6 text-sm text-gray-600 dark:text-gray-400" v-if="!(payMonthly && installmentsOffered)">
+            <div class="mt-6 text-sm gk-tx-ink2" v-if="!(payMonthly && installmentsOffered)">
                 @if ($event->expire_unpaid_tickets == 1)
                     {{ __('messages.payment_must_be_completed_within_hour') }}
                 @else
@@ -2210,17 +2328,17 @@
 
         {{-- The actions stay at the foot of the screen while the form is longer than it (.gk-buybar),
              so the total and Checkout are never a scroll away from the tickets. --}}
-        <div v-if="!isAllSoldOut" class="gk-buybar flex flex-wrap justify-end items-center gap-x-4 gap-y-2">
+        <div v-if="!isAllSoldOut" class="gk-buybar gk-tx-bar">
             {{-- Said here, IN the bar, where the alert boxes used to be: what is still missing, one
                  thing at a time. In the bar because the bar is what stays on screen: said in the
                  flow of the page it was below the fold of a phone the moment it appeared. --}}
             <p v-if="problem" v-cloak id="checkout-problem" role="alert"
-                class="w-full flex items-center gap-2 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 text-sm font-medium text-amber-900 dark:text-amber-100">
-                <svg class="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                class="gk-note gk-note-warn gk-tx-problem">
+                <svg class="gk-note-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
                 <span>@{{ problem }}</span>
             </p>
             @if (! request()->embed)
-            <button type="button" @click="hideForm" class="whitespace-nowrap px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+            <button type="button" @click="hideForm" class="gk-cta-alt">
                 {{ __('messages.cancel') }}
             </button>
             @endif
@@ -2233,9 +2351,8 @@
                 @click="addToCart"
                 v-bind:aria-disabled="seatsBlocked ? 'true' : null"
                 v-bind:aria-describedby="seatsBlocked ? 'seats-blocked-reason' : null"
-                v-bind:class="seatsBlocked ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''"
-                class="whitespace-nowrap inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-lg border-2 transition-all duration-200 hover:scale-105"
-                style="border-color: var(--es-accent-readable); color: var(--es-accent-readable);">
+                v-bind:class="seatsBlocked ? 'gk-tx-blocked' : ''"
+                class="gk-cta-alt gk-tx-cart">
                 <span v-if="addedToCart">{{ __('messages.added_to_cart') }}</span>
                 <span v-else>{{ __('messages.add_to_cart') }}</span>
             </button>
@@ -2258,9 +2375,8 @@
                      checkbox is brought into view. --}}
                 v-bind:aria-disabled="(seatsBlocked || needsConsent) ? 'true' : null"
                 v-bind:aria-describedby="seatsBlocked ? 'seats-blocked-reason' : null"
-                v-bind:class="(seatsBlocked || needsConsent) ? 'opacity-50 cursor-not-allowed hover:scale-100 hover:shadow-sm' : ''"
-                class="whitespace-nowrap inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg font-semibold text-lg shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-sm"
-                style="background-color: var(--es-accent); color: var(--es-accent-text);">
+                v-bind:class="(seatsBlocked || needsConsent) ? 'gk-tx-blocked' : ''"
+                class="gk-btn gk-btn-primary gk-cta-main gk-tx-checkout">
                 <span v-if="isSubmitting">{{ __('messages.processing') }}</span>
                 <span v-else-if="payMonthly && installmentsOffered">@{{ payNowLabel }}</span>
                 <span v-else>{{ __('messages.checkout') }}<template v-if="totalAmount > 0 && !isPaymentLinkMode"> &middot; <bdi>@{{ formatPrice(totalAmount) }}</bdi></template></span>

@@ -30,6 +30,14 @@ class AppLayout extends Component
         public $realtimeEvent = null,
         /** False on a page that must not carry the beacon at all (the PayFast auto-post). */
         public bool $realtime = true,
+        /**
+         * 'dark' or 'light': the guest pages are drawn in the mode their schedule's look asks for,
+         * whatever the visitor's own setting (the 2026-11 redesign, GuestTheme::pageMode()). An
+         * embed's own ?dark= still wins: its owner knows the colours of the site it sits on.
+         */
+        public ?string $forceMode = null,
+        /** Hosts of their own that this guest page links to (GuestTheme::carryHosts()). */
+        public array $carryHosts = [],
     ) {}
 
     /**

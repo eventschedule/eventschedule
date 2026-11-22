@@ -25,17 +25,20 @@
     $actionFollowHere = $headActions['follow']
         && (($actionMain === 'follow' && $actionShowsLead) || ($actionMain !== 'follow' && $actionShowsRest));
 @endphp
-@if ($headActions['manage'] && $actionPart !== 'bar')
+@if ($headActions['manage'] && $actionPart !== 'bar' && ! ($skipManage ?? false))
 <a href="{{ app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)) }}" class="gk-btn {{ $actionPart === 'rest' ? 'gk-btn-secondary gk-head-manage-phone' : 'gk-btn-quiet gk-head-manage'.($actionPart === 'main' ? ' gk-head-manage-desk' : '') }}">
     <svg class="gk-head-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
     <span>{{ __('messages.manage') }}</span>
 </a>
 @endif
-@if ($actionShowsRest && $headActions['gift'])
-<a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" class="gk-btn gk-btn-secondary">{{ __('messages.gift_cards') }}</a>
+@if ($actionShowsRest && $headActions['gift'] && ! ($skipGift ?? false))
+<a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" class="gk-btn gk-btn-secondary gk-head-act gk-head-giftbtn">
+    <svg class="gk-head-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v7.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V12M12 8v12.5M12 8S10.5 3.5 8 4.5 9 8 12 8Zm0 0s1.5-4.5 4-3.5S15 8 12 8Z"/></svg>
+    <span>{{ __('messages.gift_cards') }}</span>
+</a>
 @endif
 @if ($actionShowsRest && $headActions['submit'])
-<a href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}" class="gk-btn gk-btn-secondary">{{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}</a>
+<a href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}" class="gk-btn gk-btn-secondary gk-head-act gk-head-submitbtn">{{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}</a>
 @endif
 @if ($actionFollowHere)
 <button type="button"

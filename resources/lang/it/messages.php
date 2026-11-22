@@ -8472,4 +8472,8 @@ return [
     'mail_flag_dismissed' => 'La segnalazione di :name è stata rimossa.',
     'mail_paused_reason_word' => 'Una parola sorvegliata in una newsletter',
     'admin_alert_mail_flagged' => '{1} :count account pagante è stato segnalato|[0,*] :count account paganti sono stati segnalati',
+    'page_style' => 'Stile della pagina',
+    'page_style_light' => 'Chiaro',
+    'page_style_dark' => 'Scuro',
+    'page_style_help' => 'Automatico usa uno stile chiaro quando lo sfondo è un colore o una sfumatura chiara, altrimenti uno scuro. Oppure scegli una delle tre tavolozze chiare o delle tre scure.',
 ];

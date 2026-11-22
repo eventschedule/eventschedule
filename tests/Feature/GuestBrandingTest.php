@@ -120,20 +120,24 @@ class GuestBrandingTest extends TestCase
     }
 
     /**
-     * With no credit under it, the privacy pill is the last thing on the page, and it sat against
-     * the bottom edge of the window: the chip's own padding had been the only room beneath it.
+     * The privacy policy and the credit are one pill at the foot of the page (the 2026-11
+     * redesign). It is the last thing on the page, so it keeps room under it either way, and the
+     * credit sits inside it where it is owed.
      */
-    public function test_the_privacy_pill_has_room_under_it_where_no_credit_follows(): void
+    public function test_the_privacy_pill_carries_the_credit_and_has_room_under_it(): void
     {
         $this->deploy('nexus');
-        $pill = fn (string $html) => preg_match('/data-privacy-pill class="([^"]*)"/', $html, $m) === 1 ? $m[1] : null;
+        $pill = fn (string $html) => preg_match('/<nav [^>]*data-privacy-pill class="([^"]*)".*?<\/nav>/s', $html, $m) === 1 ? $m : null;
 
-        $this->assertStringContainsString('pb-8', (string) $pill($this->guestPage($this->paidRole())));
+        $paid = $pill($this->guestPage($this->paidRole()));
+        $this->assertNotNull($paid);
+        $this->assertStringContainsString('pb-8', $paid[1]);
+        $this->assertStringNotContainsString('title="Powered by Event Schedule"', $paid[0], 'no credit on a paid page of eventschedule.com');
 
-        // The free tier's chip follows it and brings its own room.
         $free = $pill($this->guestPage($this->freeRole()));
         $this->assertNotNull($free);
-        $this->assertStringNotContainsString('pb-8', $free);
+        $this->assertStringContainsString('pb-8', $free[1]);
+        $this->assertStringContainsString('title="Powered by Event Schedule"', $free[0], 'the free tier\'s credit, inside the pill');
     }
 
     // ------------------------------------------------------ selfhosted SaaS

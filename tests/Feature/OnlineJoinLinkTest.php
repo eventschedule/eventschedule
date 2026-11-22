@@ -221,7 +221,7 @@ class OnlineJoinLinkTest extends TestCase
 
         // The add-to-calendar links carry the text as the entry's location, which is theirs to keep.
         $html = $page($this->onlineEvent(self::FREE_TEXT, $booking));
-        $this->assertStringContainsString('<dd class="break-all">'.self::FREE_TEXT.'</dd>', $html);
+        $this->assertMatchesRegularExpression('/<dd class="[^"]*\bbreak-all\b[^"]*"[^>]*>'.preg_quote(self::FREE_TEXT, '/').'<\/dd>/', $html);
         $this->assertStringNotContainsString('href="'.self::FREE_TEXT, $html);
 
         $html = $page($this->onlineEvent('https://zoom.us/j/5550001234', ['name' => 'Linked'] + $booking));

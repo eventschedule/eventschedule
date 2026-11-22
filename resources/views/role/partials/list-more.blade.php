@@ -6,7 +6,7 @@
      that later events exist instead of ending as though the schedule did. --}}
 <div v-if="hasMoreListRows" data-list-more class="mt-6 text-center">
     <button type="button" @click.stop="showMoreListRows"
-            class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 shadow-sm transition-all duration-200 hover:shadow-lg"
+            class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 shadow-sm {{ ($guestRows ?? false) ? 'gk-fill-btn' : 'transition-all duration-200 hover:shadow-lg' }}"
             style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}">
         {{ $label('show_more') }}
     </button>

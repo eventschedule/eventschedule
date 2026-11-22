@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\QueryException;
 
 /**
  * What a schedule's guest page shows (Style > Events). One row per schedule whose owner has saved
@@ -12,7 +13,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class GuestPageSetting extends Model
 {
-    public const DEFAULTS = ['show_next_event' => true];
+    public const DEFAULTS = ['show_next_event' => true, 'page_mode' => 'auto'];
+
+    /**
+     * page_mode: how the guest pages are drawn (Style > Background > Page style): 'auto' (light or
+     * dark by the background, GuestTheme::pageMode()), or one of the portal's six palettes
+     * (GuestTheme::PALETTES), which sets the brightness and the page's own colours.
+     */
+    public const MODES = ['auto', 'sand', 'mist', 'paper', 'espresso', 'midnight', 'carbon'];
 
     protected $guarded = [];
 
@@ -36,7 +44,7 @@ class GuestPageSetting extends Model
 
         try {
             self::updateOrCreate(['role_id' => $role->id], $values);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             // Two first saves at once (two tabs): the other one made the row between this one's
             // look and its insert. This one's values still win.
             if (($e->errorInfo[1] ?? null) !== 1062) {

@@ -2,8 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Event;
+use App\Utils\DateUtils;
+use App\Utils\MoneyUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -54,7 +59,7 @@ class GuestEventSidebarLinkTest extends TestCase
         return substr($html, $start, strpos($html, '</section>', $start) - $start);
     }
 
-    public function test_the_other_events_carry_on_down_the_left_column_as_links(): void
+    public function test_the_other_events_follow_both_columns_as_links(): void
     {
         $role = $this->createRole($this->createOwner(), 'venue');
         $event = $this->createEvent($role, ['name' => 'Tonight', 'starts_at' => $this->at(1)]);
@@ -78,19 +83,20 @@ class GuestEventSidebarLinkTest extends TestCase
         // the schedule's own phone list (.gk-day, .gk-row), not a second kind of card.
         $this->assertSame(10, substr_count($more, 'data-up-day="'));
         $this->assertSame(10, substr_count($more, '<h3 class="gk-dayhead-title">'));
-        $this->assertStringContainsString(\App\Utils\DateUtils::dayLabel(Carbon::now()->addDays(2)), $more);
+        $this->assertStringContainsString(DateUtils::dayLabel(Carbon::now()->addDays(2)), $more);
         $this->assertStringNotContainsString('gk-up-card', $more);
         // A phone and a tablet get the first five and the way to the rest: three days (two
         // events each, the third day's second event is the sixth), then nothing.
         $this->assertSame(15, substr_count($more, '<li class="gk-row-item gk-up-late">'));
         $this->assertSame(7, preg_match_all('/class="gk-day [^"]*gk-up-late"/', $more), 'a day whose events are all past the fifth is put away whole');
 
-        // In the LEFT column, after the flyer, the performers and the venue, and not at the
-        // foot of the page.
+        // Under both columns, across the sheet (the 2026-11 redesign: the owner's mock puts
+        // them there, as cards side by side under each day), never inside either column.
         $side = strpos($html, 'class="gk-event-col gk-event-side"');
         $main = strpos($html, 'class="gk-event-col gk-event-main"');
+        $after = strpos($html, 'class="gk-event-after"');
         $here = strpos($html, 'id="gp-upcoming-events"');
-        $this->assertTrue($side < $here && $here < $main, 'inside the left column');
+        $this->assertTrue($side < $main && $main < $after && $after < $here, 'under both columns');
         // The foot holds only the free tier's "create your own", and is not drawn without it:
         // empty, it was a blank block at the end of every paid schedule's event page.
         $this->assertFalse($role->fresh()->showBranding(), 'fixture: a paid schedule');
@@ -168,7 +174,7 @@ class GuestEventSidebarLinkTest extends TestCase
         $this->createTicket($series('Evening Class', 18), ['price' => 9, 'quantity' => 0]);
 
         $ticketQueries = [];
-        \Illuminate\Support\Facades\DB::listen(function ($query) use (&$ticketQueries) {
+        DB::listen(function ($query) use (&$ticketQueries) {
             if (preg_match('/\bfrom [`"]?tickets[`"]?/i', $query->sql)) {
                 $ticketQueries[] = $query->sql;
             }
@@ -188,15 +194,15 @@ class GuestEventSidebarLinkTest extends TestCase
             }
             $this->fail($name.' is not in the list');
         };
-        $this->assertStringContainsString(\App\Utils\MoneyUtils::format(20, 'USD'), $row('Priced Night'));
+        $this->assertStringContainsString(MoneyUtils::format(20, 'USD'), $row('Priced Night'));
         $this->assertStringContainsString('gk-chip-out', $row('Gone Night'));
         $this->assertStringContainsString(__('messages.sold_out'), $row('Gone Night'));
         $this->assertStringContainsString('gk-chip-free', $row('Free Night'));
         $this->assertStringContainsString('gk-chip-few', $row('Nearly Gone Night'));
-        $this->assertStringContainsString(\App\Utils\MoneyUtils::format(12, 'USD'), $row('Nearly Gone Night'));
+        $this->assertStringContainsString(MoneyUtils::format(12, 'USD'), $row('Nearly Gone Night'));
         $this->assertStringNotContainsString('gk-chip', $row('Plain Night'), 'nothing to sell, nothing said');
         // A series is judged by the occurrence: this morning's has begun and is not selling.
-        $this->assertStringContainsString(\App\Utils\MoneyUtils::format(9, 'USD'), $row('Evening Class'));
+        $this->assertStringContainsString(MoneyUtils::format(9, 'USD'), $row('Evening Class'));
         $this->assertStringNotContainsString('gk-chip', $row('Morning Class'), 'begun at nine, and it is noon');
     }
 
@@ -221,13 +227,13 @@ class GuestEventSidebarLinkTest extends TestCase
 
             return $event;
         };
-        $count = function (\App\Models\Event $on) use ($curator) {
-            \Illuminate\Support\Facades\Cache::flush();
-            \Illuminate\Support\Facades\DB::flushQueryLog();
-            \Illuminate\Support\Facades\DB::enableQueryLog();
+        $count = function (Event $on) use ($curator) {
+            Cache::flush();
+            DB::flushQueryLog();
+            DB::enableQueryLog();
             $html = $this->get($on->fresh()->getGuestUrl($curator->subdomain))->assertOk()->getContent();
-            $queries = count(\Illuminate\Support\Facades\DB::getQueryLog());
-            \Illuminate\Support\Facades\DB::disableQueryLog();
+            $queries = count(DB::getQueryLog());
+            DB::disableQueryLog();
 
             return [$queries, $this->more($html)];
         };

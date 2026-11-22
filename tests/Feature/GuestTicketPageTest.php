@@ -407,7 +407,7 @@ class GuestTicketPageTest extends TestCase
 
         [$light, $dark] = GuestTheme::fromAccent('#000000')->tokens();
         $this->assertNotSame($light['--es-accent'], $dark['--es-accent'], 'fixture: the two modes differ for black');
-        $this->assertSame(1, preg_match('/\n\s*\.gk-tkpage \{ --es-accent: '.preg_quote($dark['--es-accent'], '/').';[^}]*--es-accent-text: '.preg_quote($dark['--es-accent-text'], '/').';/', $html));
+        $this->assertSame(1, preg_match('/\n\s*\.gk-ticket, \.gk-tk-card \{ --es-accent: '.preg_quote($dark['--es-accent'], '/').';[^}]*--es-accent-text: '.preg_quote($dark['--es-accent-text'], '/').';/', $html));
     }
 
     public function test_every_wording_the_ticket_pages_ask_for_exists(): void
@@ -434,7 +434,8 @@ class GuestTicketPageTest extends TestCase
     {
         $html = $this->page($this->sale());
 
-        preg_match('/@media print \{(.*?)\n    \}\n<\/style>/s', $html, $m);
+        // The ticket's own print sheet, not the guest kit's, which the page loads first now.
+        preg_match('/@media print \{\s*body \{ background: #ffffff; \}(.*?)\n    \}\n<\/style>/s', $html, $m);
         $this->assertNotEmpty($m, 'the ticket has a print sheet');
         $this->assertStringContainsString('--tk-ink: #000000;', $m[1]);
         $this->assertStringContainsString('--tk-card: #ffffff;', $m[1]);

@@ -1,4 +1,4 @@
-<x-app-layout :title="$guestTitle()" realtime-surface="gp" :realtime-role="$role" :realtime-event="$event">
+<x-app-layout :title="$guestTitle()" realtime-surface="gp" :realtime-role="$role" :realtime-event="$event" :force-mode="request()->embed ? null : \App\Utils\GuestTheme::pageMode($role, $otherRole ?? null, $event ?? null)" :carry-hosts="request()->embed ? [] : \App\Utils\GuestTheme::carryHosts($role, $otherRole ?? null, $event ?? null)">
 
     <noscript>
       <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-4 text-center text-base">
@@ -98,6 +98,36 @@
         $bgLegacy = ! $paintBackground || (in_array($bg->background, ['gradient', 'image'], true) && $role->customCssStylesPageBackground());
         $bgAurora = ($paintBackground && $bg->background === 'aurora') ? \App\Utils\Aurora::for($bg) : null;
         $bgLayer = $bgAurora !== null || (! $bgLegacy && in_array($bg->background, ['gradient', 'image'], true));
+        // The 2026-11 redesign: a guest page is drawn on the stage's own dark ground, edge to
+        // edge, with the schedule's colour as a glow (partials/guest-stage-styles), never on the
+        // owner's background. An embed sits on the owner's own site and keeps its transparent
+        // ground.
+        $stageGround = ! request()->embed;
+        // A schedule that chose Aurora keeps it as the light across the top of its page, fading
+        // into the dark below (the owner's pick of two, 2026-11-19); every other background is
+        // the plain ground with the static glow in the schedule's colour. An owner who wants a
+        // calm page picks a solid background.
+        $auroraGlow = $stageGround && $bg->background === 'aurora' && $bgAurora !== null;
+        // Any other background the owner chose is drawn the same way (the owner's call, 2026-11-19):
+        // a photo or a gradient on the background layer, held to the top of the page and faded
+        // into the dark; a solid colour as a light of that colour across the top. The accent's
+        // own glow is the fallback for a schedule that chose no background.
+        // An owner whose custom CSS styles the page's background ($bgLegacy) keeps the page they
+        // wrote it for: their background on body, the sheet clear over it, and no glow.
+        $bgGlow = $stageGround && ! $bgLegacy && ! $auroraGlow && $bg->hasConfiguredBackground() && in_array($bg->background, ['image', 'gradient', 'solid'], true);
+        $bgGlowColor = $bgGlow && $bg->background === 'solid' ? \App\Utils\ColorUtils::normalizeHex($bg->background_color) : null;
+        if ($bgGlow && $bg->background === 'solid' && ! $bgGlowColor) {
+            $bgGlow = false;
+        }
+        // The glow is the background at every width, the schedule page's phone included (it used
+        // to paint its own banner behind the header instead, and so asked for no picture here).
+        if ($bgGlow) {
+            $showMobileBackground = true;
+        }
+        if ($stageGround && ! $auroraGlow && ! ($bgGlow && ! $bgGlowColor)) {
+            $bgLayer = false;
+            $bgAurora = null;
+        }
 
         $guestMetaDescription = match (true) {
             ($passwordGate ?? false) || $galleryMode => '',
@@ -293,6 +323,10 @@
         {{-- array_filter: the Role accessor reads an invalid font as null, as it does a missing one.
              Served from this install (font_stylesheet_url()), never from Google Fonts, which would
              hand every visitor's IP address to Google without asking. --}}
+        {{-- The guest pages' own type (the 2026-11 redesign): Rubik, served from this install. --}}
+        @if ($stageGround && ($rubikStylesheet = font_stylesheet_url('Rubik')))
+        <link href="{{ $rubikStylesheet }}" rel="stylesheet">
+        @endif
         @foreach(array_filter($fonts) as $font)
             @if ($fontStylesheet = font_stylesheet_url($font))
             <link href="{{ $fontStylesheet }}" rel="stylesheet">
@@ -303,6 +337,7 @@
              owner's custom CSS, which must be able to overrule both. --}}
         @include('partials.guest-theme')
         @include('partials.guest-kit-styles')
+        @include('partials.guest-stage-styles')
         @if ($bgAurora)
         @include('partials.aurora-styles')
         @endif
@@ -334,11 +369,13 @@
             @media (prefers-color-scheme: light) {
                 color: #33383C !important;
             }
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif !important;
+            font-family: {!! $stageGround ? "'Rubik', " : '' !!}-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif !important;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            @if ($bg->background == 'solid')
+            @if ($stageGround && ! $bgLegacy)
+                background: var(--gk-stage) !important;
+            @elseif ($bg->background == 'solid')
                 background-color: {{ $bg->background_color }} !important;
             @elseif ($bgLegacy)
                 @include('partials.guest-background-legacy')
@@ -347,6 +384,39 @@
 
         @if ($bgLayer)
         @include('partials.guest-background-css')
+        @endif
+        @if ($stageGround && $bgLegacy)
+        .gk-stage { background: transparent; }
+        .gk-stage::before { display: none; }
+        @endif
+        @if ($bgGlow && ! $bgGlowColor)
+        {{-- A photo or a gradient as the glow: the layer held to the top and faded into the dark,
+             and dimmed a little, so a bright photo still reads under the name. --}}
+        .gk-stage { background: transparent; }
+        .gk-stage::before { display: none; }
+        .gp-bg { position: absolute; inset: 0 0 auto 0; height: 52rem; -webkit-mask-image: linear-gradient(to bottom, rgb(0 0 0 / .9) 0%, rgb(0 0 0 / .6) 40%, rgb(0 0 0 / .2) 75%, transparent 100%); mask-image: linear-gradient(to bottom, rgb(0 0 0 / .9) 0%, rgb(0 0 0 / .6) 40%, rgb(0 0 0 / .2) 75%, transparent 100%); }
+        .gp-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgb(255 255 255 / .66), rgb(255 255 255 / .86) 16rem); }
+        {{-- Dark: a deep scrim of the page's own ground, so a light photo never turns into a grey
+             wash under white words. --}}
+        :where(.dark) .gp-bg::after { background: linear-gradient(to bottom, color-mix(in srgb, var(--gk-stage) 55%, transparent), color-mix(in srgb, var(--gk-stage) 86%, transparent) 18rem); }
+        @media (max-width: 767.98px) { .gp-bg { display: block; } }
+        {{-- The page under the glow is the ink, never the background's own base colour (a
+             gradient sets one on body), which flooded the page below the glow. --}}
+        body { background: var(--gk-stage) !important; }
+        @elseif ($bgGlowColor)
+        {{-- A solid colour as a light of that colour across the top. --}}
+        .gk-stage::before, [dir="rtl"] .gk-stage::before { background: radial-gradient(100rem 46rem at 50% -8rem, {{ $bgGlowColor }}40, transparent 74%); }
+        :where(.dark) .gk-stage::before, :where(.dark) [dir="rtl"] .gk-stage::before { background: radial-gradient(100rem 46rem at 50% -8rem, {{ $bgGlowColor }}a6, transparent 74%); }
+        @endif
+        @if ($auroraGlow)
+        {{-- Aurora as the glow: its layer held to the top of the page and faded out, the sheet
+             clear over it, the static glow not drawn. --}}
+        .gk-stage { background: transparent; }
+        {{-- Under the glow the page is its own ground, not Aurora's warm one (the cards are the
+             page's colour and looked foreign on it). --}}
+        body { background: var(--gk-stage) !important; }
+        .gk-stage::before { display: none; }
+        .gp-bg { position: absolute; inset: 0 0 auto 0; height: 52rem; -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / .65) 40%, rgb(0 0 0 / .25) 75%, transparent 100%); mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / .65) 40%, rgb(0 0 0 / .25) 75%, transparent 100%); }
         @endif
 
         @if ($role->custom_css && $role->isPro())
@@ -648,22 +718,39 @@
          eventschedule.com), and it used to sit against the bottom edge of the window there: the
          chip's own padding was the only room under it. --}}
     @if (! request()->embed && ! request()->graphic)
-    <nav aria-label="{{ __('messages.privacy_policy') }}" data-privacy-pill class="flex justify-center px-4 pt-6 {{ $creditReason ? '' : 'pb-8' }}">
-        <p class="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-gray-900/80 dark:text-gray-300 dark:ring-white/10">
-            <a href="{{ policy_url('privacy') }}" class="hover:text-gray-900 hover:underline dark:hover:text-white">{{ __('messages.privacy_policy') }}</a>
+    {{-- The foot of the page, ONE pill (the 2026-11 redesign): the privacy policy that covers
+         this page, the way back into the cookie banner (GDPR Art. 7(3): withdrawing consent must
+         be as easy as giving it), and, where it is owed, the credit. The privacy link carries a
+         small mark of its own, in colour like the credit's, so the two halves balance, and the
+         links share one hover (partials/guest-stage-styles, .es-foot-link). It is the last thing on the page, so it
+         keeps room under it (and es-credit-chip's lift clear of the phone's bar). --}}
+    <nav aria-label="{{ __('messages.privacy_policy') }}" data-privacy-pill class="es-credit-chip flex justify-center px-4 pt-8 pb-8 {{ $creditReason && $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
+        <p class="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-white/80 px-3.5 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-gray-900/80 dark:text-gray-300 dark:ring-white/10">
+            <a href="{{ policy_url('privacy') }}" class="es-foot-link">
+                <span aria-hidden="true" class="es-foot-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5 4.5 5.6v5.3c0 4.7 3.2 8.9 7.5 10.6 4.3-1.7 7.5-5.9 7.5-10.6V5.6L12 2.5zm-1.2 13.2-3.3-3.3 1.4-1.4 1.9 1.9 4.4-4.4 1.4 1.4-5.8 5.8z"/></svg></span>
+                <span class="es-foot-word">{{ __('messages.privacy_policy') }}</span>
+            </a>
             @if (cookie_banner_visible())
                 <span aria-hidden="true">&middot;</span>
-                <button type="button" data-cookie-consent-reopen class="hover:text-gray-900 hover:underline dark:hover:text-white">{{ __('messages.cookie_consent_manage') }}</button>
+                <button type="button" data-cookie-consent-reopen class="es-foot-link"><span class="es-foot-word">{{ __('messages.cookie_consent_manage') }}</span></button>
+            @endif
+            @if ($creditReason)
+                <span aria-hidden="true" class="h-3.5 w-px bg-gray-300 dark:bg-gray-600"></span>
+                {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
+                <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ \App\Models\Role::creditChipTitle() }}" class="es-foot-link">
+                    <span aria-hidden="true" class="flex h-4 w-4 items-center justify-center rounded-[5px] bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-[8px] font-black leading-none text-white">ES</span>
+                    <span class="es-foot-word">Event Schedule</span>
+                </a>
             @endif
         </p>
     </nav>
     @endif
 
-    {{-- es-credit-chip: lifted clear of the mobile CTA bar by accessibility-widget.css. An event
-         shown inside an embedded calendar carries it as the event's own page does: the copied
-         code's credit line is under the calendar, not under an overlay. --}}
-    @if ((! request()->embed || $embedEvent) && $creditReason)
-    <div class="es-credit-chip flex justify-{{ $isRtl ? 'start' : 'end' }} p-4 {{ $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
+    {{-- es-credit-chip on its own: an event shown inside an embedded calendar carries the credit as
+         the event's own page does (the copied code's credit line is under the calendar, not under
+         an overlay), and has no privacy pill of its own. --}}
+    @if (request()->embed && $embedEvent && $creditReason)
+    <div class="es-credit-chip flex justify-{{ $isRtl ? 'start' : 'end' }} p-4">
         {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
         <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ \App\Models\Role::creditChipTitle() }}"
            class="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-white hover:text-gray-900 dark:bg-gray-900/80 dark:text-gray-300 dark:ring-white/10 dark:hover:bg-gray-900 dark:hover:text-white">

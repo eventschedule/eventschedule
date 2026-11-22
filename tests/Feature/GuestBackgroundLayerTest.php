@@ -64,17 +64,20 @@ class GuestBackgroundLayerTest extends TestCase
 
         $this->assertStringContainsString(self::LAYER, $html);
         $this->assertMatchesRegularExpression('#\.gp-bg \{\s*background-image: url\("[^"]+/images/backgrounds/Calm\.webp"\);#', $html);
-        // On a phone the schedule page shows its picture behind the header only.
-        $this->assertStringContainsString('@media (max-width: 767.98px) { .gp-bg { display: none; } }', $html);
+        // Since the 2026-11 redesign a phone shows the picture as the glow at the top of the page
+        // too, as every page and width does (it used to paint a banner behind the header instead).
+        $this->assertStringNotContainsString('@media (max-width: 767.98px) { .gp-bg { display: none; } }', $html);
     }
 
-    public function test_a_solid_colour_is_a_colour_on_body_with_no_layer(): void
+    /** Since the 2026-11 redesign a solid colour is a light of that colour across the top of the dark page. */
+    public function test_a_solid_colour_is_a_glow_at_the_top_with_no_layer(): void
     {
         $solid = $this->schedule(['background' => 'solid', 'background_color' => '#223344']);
         $html = $this->page('/'.$solid->subdomain);
 
         $this->assertStringNotContainsString(self::LAYER, $html);
-        $this->assertStringContainsString('background-color: #223344 !important;', $html);
+        $this->assertStringContainsString('radial-gradient(100rem 46rem at 50% -8rem, #223344a6, transparent 74%)', $html);
+        $this->assertStringNotContainsString('background-color: #223344 !important;', $html, 'never the whole page');
     }
 
     public function test_the_subscribe_embed_draws_no_layer_under_its_transparent_page(): void

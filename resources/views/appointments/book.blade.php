@@ -1,17 +1,5 @@
 <x-app-guest-layout :role="$role" :page-title="__('messages.appointments')">
     @php
-        $accent = $role->accent_color ?? '#4E81FA';
-        $accentOnLight = \App\Utils\ColorUtils::readableAccentColor($accent, '#ffffff', '#111827');
-        $accentOnDark = \App\Utils\ColorUtils::readableAccentColor($accent, '#252526', '#ffffff');
-
-        // Faint accent tint for the duration chip, mixed here rather than with CSS color-mix() -
-        // nothing else in the app relies on that function.
-        $hex = ltrim($accent, '#');
-        $hex = strlen($hex) === 3 ? $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2] : $hex;
-        $accentTint = strlen($hex) === 6
-            ? 'rgba('.hexdec(substr($hex, 0, 2)).', '.hexdec(substr($hex, 2, 2)).', '.hexdec(substr($hex, 4, 2)).', 0.12)'
-            : 'transparent';
-
         $locationLabel = fn ($type) => match ($type->location_type) {
             'online' => __('messages.online'),
             'phone' => __('messages.appointments_phone_call'),
@@ -19,41 +7,67 @@
         };
     @endphp
 
+    {{-- The page's own pieces on the stage (partials/guest-stage-styles): the schedule beside its
+         name at the top, and each appointment type as a card raised on the sheet. The colours are
+         the stage's own tokens, which GuestTheme checks against the schedule's accent in both
+         modes, so nothing here mixes a colour of its own. --}}
     <style {!! nonce_attr() !!}>
-        #appt-chooser { --es-accent: {{ $accent }}; --es-accent-readable: {{ $accentOnLight }}; --es-accent-tint: {{ $accentTint }}; }
-        .dark #appt-chooser { --es-accent-readable: {{ $accentOnDark }}; }
-        {{-- A plain card: no stripe of colour down one side. The schedule's colour is the
-             card's outline once it is pointed at. --}}
-        #appt-chooser .es-type-card:hover { border-color: var(--es-accent-readable); }
-        #appt-chooser a:focus-visible { outline: 2px solid var(--es-accent-readable); outline-offset: 2px; }
+        .gk-p-appt { max-width: 64rem; }
+        .gk-p-appt-head { display: flex; flex-direction: column; gap: .875rem; margin-bottom: 2.5rem; }
+        .gk-p-appt .gk-title { font-size: clamp(2.25rem, 1.5rem + 2.8vw, 3.75rem); }
+        .gk-p-who { display: inline-flex; align-items: center; gap: .625rem; align-self: flex-start; max-width: 100%; color: var(--gk-ink-2); font-size: .9375rem; font-weight: 600; text-decoration: none; }
+        .gk-p-who:hover { color: var(--gk-ink); }
+        .gk-p-who:hover .gk-p-who-name { text-decoration: underline; text-underline-offset: 3px; }
+        .gk-p-who-img { flex: none; width: 2.25rem; height: 2.25rem; border-radius: .625rem; object-fit: cover; background: var(--gk-stage-raised); }
+        .gk-p-who-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .gk-p-who-arrow { flex: none; }
+        [dir="rtl"] .gk-p-who-arrow { transform: scaleX(-1); }
+        .gk-p-group + .gk-p-group { margin-top: 2.5rem; }
+        .gk-p-group-name { margin: 0 0 1rem; font-size: 1.25rem; font-weight: 700; color: var(--gk-ink); }
+        .gk-p-types { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
+        .gk-p-type { display: flex; flex-direction: column; gap: .5rem; padding: 1.5rem; text-decoration: none; transition: background-color var(--gk-swap), border-color var(--gk-swap); }
+        .gk-p-type:hover { background: var(--gk-stage-well); }
+        .gk-p-type:focus-visible { outline: 2px solid var(--es-accent-readable); outline-offset: 2px; }
+        .gk-p-type-name { margin: 0; font-size: 1.375rem; font-weight: 750; line-height: 1.2; letter-spacing: -.01em; color: var(--gk-ink); overflow-wrap: anywhere; }
+        .gk-p-type-host { margin: 0; font-size: .9375rem; color: var(--gk-ink-2); }
+        .gk-p-type-desc { margin: 0; font-size: 1rem; line-height: 1.55; color: var(--gk-ink-2); }
+        .gk-p-type-foot { display: flex; flex-wrap: wrap; align-items: center; gap: .375rem .875rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--gk-line); font-size: .9375rem; color: var(--gk-ink-2); }
+        .gk-p-type-go { display: inline-flex; align-items: center; gap: .375rem; margin-inline-start: auto; font-weight: 650; color: var(--es-accent-readable); }
+        [dir="rtl"] .gk-p-type-go svg { transform: scaleX(-1); }
+        .gk-p-type-head { display: flex; flex-direction: column; gap: .25rem; }
     </style>
 
     {{-- Wider, with the types two-up: showBook() redirects when there is only one type, so this page
          always has at least two cards and a single column left half the width empty. --}}
-    <div id="appt-chooser" class="max-w-4xl mx-auto px-4 py-10">
-        {{-- Everything sits on an opaque panel. The schedule background defaults to a photo or a
-             random gradient and the guest layout pins body text to a dark gray, so content rendered
-             straight onto that background is unreadable half the time. Same approach as the schedule
-             page's own content panel. --}}
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">{{ $role->customLabel('book_a_time') }}</h1>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.appointments_with', ['schedule' => $role->name]) }}</p>
-
-            @php
-                // With two or more team members hosting types here, the cards are grouped under each
-                // one's name ("with Sam"), and the schedule's own types under the schedule's name.
-                // With one, or none, it is one list and a hosted card says who it is with.
-                $byHost = $types->groupBy(fn ($type) => (int) $type->host_user_id);
-                $grouped = $byHost->keys()->filter()->count() >= 2;
-                $groups = $grouped ? $byHost->sortKeys() : collect([0 => $types]);
-                $cardHeading = $grouped ? 'h3' : 'h2';
-            @endphp
-
-            @foreach ($groups as $groupHostId => $groupTypes)
-                @if ($grouped)
-                    <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 {{ $loop->first ? '' : 'mt-8' }}" dir="auto">{{ $groupHostId ? __('messages.appointments_with_host', ['name' => $groupTypes->first()->hostName() ?? '']) : $role->name }}</h2>
+    <div id="appt-chooser" class="gk-stage gk-p-appt">
+        <header class="gk-p-appt-head">
+            <a href="{{ $role->getGuestUrl() }}" class="gk-p-who">
+                @if ($role->profile_image_url)
+                    <img src="{{ $role->profile_image_url }}" alt="" class="gk-p-who-img" width="36" height="36">
                 @endif
-            <div class="grid gap-4 sm:grid-cols-2">
+                <span class="gk-p-who-name" dir="auto">{{ $role->name }}</span>
+                <svg class="gk-p-who-arrow w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+            </a>
+            <h1 class="gk-title">{{ $role->customLabel('book_a_time') }}</h1>
+            <p class="gk-subtitle" dir="auto">{{ __('messages.appointments_with', ['schedule' => $role->name]) }}</p>
+        </header>
+
+        @php
+            // With two or more team members hosting types here, the cards are grouped under each
+            // one's name ("with Sam"), and the schedule's own types under the schedule's name.
+            // With one, or none, it is one list and a hosted card says who it is with.
+            $byHost = $types->groupBy(fn ($type) => (int) $type->host_user_id);
+            $grouped = $byHost->keys()->filter()->count() >= 2;
+            $groups = $grouped ? $byHost->sortKeys() : collect([0 => $types]);
+            $cardHeading = $grouped ? 'h3' : 'h2';
+        @endphp
+
+        @foreach ($groups as $groupHostId => $groupTypes)
+        <section class="gk-p-group">
+            @if ($grouped)
+                <h2 class="gk-p-group-name" dir="auto">{{ $groupHostId ? __('messages.appointments_with_host', ['name' => $groupTypes->first()->hostName() ?? '']) : $role->name }}</h2>
+            @endif
+            <div class="gk-p-types">
                 @foreach ($groupTypes as $type)
                     @php
                         $priceLabel = $type->isFree()
@@ -66,18 +80,18 @@
                     @endphp
                     <a href="{{ route('appointments.book_type', ['subdomain' => $role->subdomain, 'typeSlug' => $type->slug]) }}"
                        aria-label="{{ $ariaLabel }}"
-                       class="es-type-card flex flex-col p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:shadow-md transition-all duration-200">
-                        <{{ $cardHeading }} class="font-semibold text-lg text-gray-900 dark:text-gray-100">{{ $type->name }}</{{ $cardHeading }}>
-                        @if ($typeHost && ! $grouped)
-                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.appointments_with_host', ['name' => $typeHost]) }}</p>
-                        @endif
+                       class="es-type-card gk-card gk-p-type">
+                        <div class="gk-p-type-head">
+                            <{{ $cardHeading }} class="gk-p-type-name" dir="auto">{{ $type->name }}</{{ $cardHeading }}>
+                            @if ($typeHost && ! $grouped)
+                                <p class="gk-p-type-host" dir="auto">{{ __('messages.appointments_with_host', ['name' => $typeHost]) }}</p>
+                            @endif
+                        </div>
                         @if ($type->description)
-                            <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $type->description }}</p>
+                            <p class="gk-p-type-desc" dir="auto">{{ $type->description }}</p>
                         @endif
-                        <div class="mt-auto pt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium" style="color: var(--es-accent-readable); background-color: var(--es-accent-tint)">
-                                {{ $type->duration_minutes }} {{ __('messages.minutes') }}
-                            </span>
+                        <div class="gk-p-type-foot">
+                            <span class="gk-chip gk-chip-accent">{{ $type->duration_minutes }} {{ __('messages.minutes') }}</span>
                             <span>{{ $priceLabel }}</span>
                             <span aria-hidden="true">&middot;</span>
                             <span>{{ $locationLabel($type) }}</span>
@@ -85,11 +99,14 @@
                                 <span aria-hidden="true">&middot;</span>
                                 <span>{{ __('messages.appointments_requires_confirmation') }}</span>
                             @endif
+                            <span class="gk-p-type-go" aria-hidden="true">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+                            </span>
                         </div>
                     </a>
                 @endforeach
             </div>
-            @endforeach
-        </div>
+        </section>
+        @endforeach
     </div>
 </x-app-guest-layout>

@@ -1,15 +1,12 @@
-{{-- The schedule's other upcoming events, down the left column of an event page under the
-     flyer, the performers and the venue. They look as the schedule's own list does on a phone:
-     each day under its date, a card for each event with its time, its name, what it costs and
-     whether any are left, and its picture down the card's end where it has one. Where the page
-     is one column (a phone, a tablet) the list comes after everything but the free tier's "create
-     your own", and stops after five.
+{{-- The schedule's other upcoming events, under both columns of an event page and across the
+     sheet: each day under its date, a card for each event with its picture at the card's start,
+     its time, its name, what it costs and whether any are left (partials/guest-stage-styles).
+     Where the page is one column (a phone, a tablet) the list stops after five.
 
-     The column is where this list always was. For a few days in October 2026 it was three rows
-     across the foot of the page, and then small cards under a date set between two lines; the
-     schedule page's phone rows are what it was asked to match, so it is drawn with their own
-     classes (partials/guest-kit-styles: .gk-day, .gk-row) and says what they say
-     (partials/guest-ticket-chips).
+     It was down the left column, under the flyer, the performers and the venue, until the
+     2026-11 redesign, whose mock puts the events at the foot of the page as cards side by side.
+     It is drawn with the schedule's own row classes (partials/guest-kit-styles: .gk-day,
+     .gk-row) and says what they say (partials/guest-ticket-chips).
 
      It is drawn by the server from EventRepo::upcomingForGuest() (RoleController::viewGuest()
      hands over up to twenty, with their tickets loaded in ONE query for the chips). It used to

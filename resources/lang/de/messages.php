@@ -8473,4 +8473,8 @@ return [
     'mail_flag_dismissed' => 'Die Markierung von :name ist entfernt.',
     'mail_paused_reason_word' => 'Ein beobachtetes Wort in einem Newsletter',
     'admin_alert_mail_flagged' => '{1} :count zahlendes Konto wurde markiert|[0,*] :count zahlende Konten wurden markiert',
+    'page_style' => 'Seitenstil',
+    'page_style_light' => 'Hell',
+    'page_style_dark' => 'Dunkel',
+    'page_style_help' => 'Automatisch verwendet einen hellen Stil, wenn der Hintergrund eine helle Farbe oder ein heller Verlauf ist, sonst einen dunklen. Oder wähle eine der drei hellen oder drei dunklen Paletten.',
 ];

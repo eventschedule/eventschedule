@@ -38,24 +38,38 @@
     $lang = $role->displayLanguageCode();
 @endphp
 
-<div class="container mx-auto max-w-3xl px-0 sm:px-5 pt-4 pb-20 sm:pb-8">
+@include('partials.guest-form-pages-styles')
+<style {!! nonce_attr() !!}>
+    {{-- The platform speaking about a page it made, so not the schedule's colour (see $accent). --}}
+    .gk-pg-unclaimed .gk-pg-claim { padding: 1.25rem; }
+    @media (min-width: 40rem) { .gk-pg-unclaimed .gk-pg-claim { padding: 1.5rem 1.75rem; } }
+    .gk-pg-unclaimed .gk-pg-claim-body { color: var(--gk-ink-2); }
+    .gk-pg-unclaimed .gk-pg-claim-icon { flex: none; width: 1.5rem; height: 1.5rem; margin-top: .125rem; color: var(--gk-ink-2); }
+    .gk-pg-unclaimed .gk-pg-claim-go { background: {{ $accent }}; color: #ffffff; border-color: {{ $accent }}; }
+    .gk-pg-unclaimed .gk-pg-events { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--gk-line); }
+    .gk-pg-unclaimed .gk-pg-events li { display: flex; flex-direction: column; gap: .25rem; padding-block: 1rem; border-bottom: 1px solid var(--gk-line); }
+    .gk-pg-unclaimed .gk-pg-event-name { font-size: 1.1875rem; font-weight: 650; line-height: 1.3; color: var(--gk-ink); text-decoration: none; }
+    .gk-pg-unclaimed .gk-pg-event-name:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .gk-pg-unclaimed .gk-pg-event-when { font-size: .9375rem; color: var(--gk-ink-2); }
+</style>
+
+<div class="gk-stage gk-pg gk-pg-md gk-pg-unclaimed">
 
     {{-- The disclosure strip, above the schedule name, shown to everyone. --}}
-    <section role="region" aria-labelledby="claim-strip-heading"
-        class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 mb-4">
+    <section role="region" aria-labelledby="claim-strip-heading" class="gk-card gk-pg-claim">
         <div class="flex items-start gap-3">
-            <svg class="h-6 w-6 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <svg class="gk-pg-claim-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
             </svg>
             <div class="min-w-0">
-                <h2 id="claim-strip-heading" class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                <h2 id="claim-strip-heading" class="gk-h">
                     @if ($createdBy)
                         <x-user-text dir="{{ content_dir_for_language($createdBy->translatedName(), $lang) }}">{{ __('messages.claim_strip_title', ['schedule' => $createdBy->translatedName()]) }}</x-user-text>
                     @else
                         {{ __('messages.claim_strip_title_generic') }}
                     @endif
                 </h2>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                <p class="gk-pg-fine gk-pg-claim-body">
                     {{-- Two strings, because the one that mentions the dates below is false on a
                          page that has none - and a page whose dates have all passed is a common
                          shape, an act listed once months ago. --}}
@@ -64,16 +78,13 @@
                         : __('messages.claim_strip_body_dates', ['name' => $role->translatedName()]) }}</x-user-text>
                 </p>
 
-                <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
+                <div class="gk-pg-actions gk-pg-actions-start mt-5">
                     {{-- Forward action last, per the repo's button-pair rule. --}}
-                    <a href="{{ route('role.claim.not_me', ['subdomain' => $role->subdomain]) }}"
-                        class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:underline">
+                    <a href="{{ route('role.claim.not_me', ['subdomain' => $role->subdomain]) }}" class="gk-pg-quiet">
                         {{ __('messages.claim_strip_not_me') }}
                     </a>
                     @if ($canClaim)
-                    <a href="{{ route('role.claim.start', ['subdomain' => $role->subdomain]) }}"
-                        style="background-color: {{ $accent }};"
-                        class="inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 dark:focus:ring-offset-gray-900">
+                    <a href="{{ route('role.claim.start', ['subdomain' => $role->subdomain]) }}" class="gk-btn gk-btn-lg gk-pg-claim-go">
                         {{ __('messages.claim_strip_cta') }}
                     </a>
                     @endif
@@ -83,7 +94,7 @@
                 {{-- No contact on the row means there is nothing we could verify control of, and
                      ownership here is granted by verification, never by pressing a button. Say so
                      rather than offering a button that can only refuse. --}}
-                <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
+                <p class="gk-pg-fine mt-3">
                     {{ __('messages.claim_strip_no_contact') }}
                 </p>
                 @endunless
@@ -91,41 +102,43 @@
         </div>
     </section>
 
-    <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100"
+    <div class="gk-pg-head mt-10">
+        <h1 class="gk-title"
             dir="{{ content_dir_for_language($role->translatedName(), $lang) }}"
             style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
             <x-user-text>{{ $role->translatedName() }}</x-user-text>
         </h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p class="gk-subtitle">
             {{ __('messages.' . $role->type) }}@if ($role->city), <x-user-text dir="{{ content_dir_for_language($role->city, $lang) }}">{{ $role->city }}</x-user-text>@endif
         </p>
+    </div>
 
-        <h2 class="mt-8 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+    <section class="gk-sec mt-10">
+        <h2 class="gk-label">
             {{ __('messages.claim_strip_upcoming') }}
         </h2>
 
         @if ($events->isEmpty())
-        <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+        <p class="gk-pg-lead">
             {{ __('messages.claim_strip_no_events') }}
         </p>
         @else
-        <ul class="mt-3 divide-y divide-gray-200 dark:divide-gray-700">
+        <ul class="gk-pg-events">
             @foreach ($events as $event)
-            <li class="py-3 flex flex-col gap-1">
+            <li>
                 {{-- The canonical, on a schedule that accepted the event: this placeholder cannot
                      serve it (viewGuestUnclaimed() answers only the root), and neither can a
                      performer who has not accepted it yet. A series links at its undated URL, not
                      at its first date, which need not be an occurrence. --}}
-                <a href="{{ $event->getCanonicalUrl() }}" class="text-sm font-medium text-gray-900 dark:text-gray-100 hover:underline"
+                <a href="{{ $event->getCanonicalUrl() }}" class="gk-pg-event-name"
                    dir="{{ content_dir_for_language($event->translatedName(), $lang) }}">
                     <x-user-text>{{ $event->translatedName() }}</x-user-text>
                 </a>
-                <span class="text-sm text-gray-600 dark:text-gray-400">
+                <span class="gk-pg-event-when">
                     {{ $event->localStartsAt(true) }}@if ($event->venue), <x-user-text dir="{{ content_dir_for_language($event->venue->translatedName(), $lang) }}">{{ $event->venue->translatedName() }}</x-user-text>@endif
                 </span>
                 @if ($event->creatorRole)
-                <span class="text-xs text-gray-500 dark:text-gray-400" dir="{{ content_dir_for_language($event->creatorRole->translatedName(), $lang) }}">
+                <span class="gk-pg-fine" dir="{{ content_dir_for_language($event->creatorRole->translatedName(), $lang) }}">
                     <x-user-text>{{ __('messages.claim_strip_listed_by', ['schedule' => $event->creatorRole->translatedName()]) }}</x-user-text>
                 </span>
                 @endif
@@ -133,7 +146,7 @@
             @endforeach
         </ul>
         @endif
-    </div>
+    </section>
 </div>
 
 </x-app-guest-layout>

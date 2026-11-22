@@ -15,28 +15,25 @@
 @if ($unavailable)
     {{-- Says nothing about plans or upgrades: the guest is the schedule owner's customer, not ours.
          A "not taking bookings" register, not an error one. --}}
-    <div class="max-w-xl mx-auto px-4 py-16">
-        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-8 text-center">
-            <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100" dir="auto">{{ $type->name }}</h1>
-            @if ($type->description)
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400" dir="auto">{{ $type->description }}</p>
-            @endif
-            <p class="mt-4 text-sm text-gray-700 dark:text-gray-300">{{ __('messages.appointments_not_available') }}</p>
-            <a href="{{ $role->getGuestUrl() }}"
-               class="mt-6 inline-flex items-center px-4 py-3 text-base font-semibold rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200">
-                {{ $role->name }}
-            </a>
-        </div>
+    <div class="gk-stage gk-p-closed">
+        <style {!! nonce_attr() !!}>
+            .gk-p-closed { max-width: 44rem; display: flex; flex-direction: column; gap: 1rem; }
+            .gk-p-closed .gk-title { font-size: clamp(2rem, 1.5rem + 2vw, 3rem); }
+            .gk-p-closed-say { margin: .5rem 0 0; font-size: 1.125rem; line-height: 1.6; color: var(--gk-ink); }
+            .gk-p-closed .gk-cta-alt { align-self: flex-start; margin-top: .75rem; text-decoration: none; }
+        </style>
+        <h1 class="gk-title" dir="auto">{{ $type->name }}</h1>
+        @if ($type->description)
+            <p class="gk-story" dir="auto">{{ $type->description }}</p>
+        @endif
+        <p class="gk-p-closed-say">{{ __('messages.appointments_not_available') }}</p>
+        <a href="{{ $role->getGuestUrl() }}" class="gk-cta-alt" dir="auto">{{ $role->name }}</a>
     </div>
 @else
     @php
-        // A pale accent is unreadable as text on the card, and a pale accent behind hardcoded white
-        // text is unreadable as a button label. Both directions get a contrast-checked value, driven
-        // through CSS custom properties so the light/dark split resolves in CSS rather than in Vue.
+        // The accent and its label come from the guest layout (partials/guest-theme), which checks
+        // them against the stage this page is laid on, light and dark. Still passed to the app.
         $accent = $role->accent_color ?? '#4E81FA';
-        $accentText = accent_contrast_color($accent);
-        $accentOnLight = \App\Utils\ColorUtils::readableAccentColor($accent, '#ffffff', '#111827');
-        $accentOnDark = \App\Utils\ColorUtils::readableAccentColor($accent, '#252526', '#ffffff');
 
         // What the guest is told about WHERE the appointment happens. Deliberately not the join link
         // or the phone number: /book/{typeSlug} is public and indexable, so putting a meeting URL or
@@ -173,6 +170,9 @@
                 'back' => __('messages.back'),
                 'requiresConfirmation' => __('messages.appointments_requires_confirmation'),
                 'minutes' => __('messages.minutes'),
+                'duration' => __('messages.appointments_duration'),
+                'price' => __('messages.price'),
+                'location' => __('messages.location'),
                 'next' => __('messages.appointments_next_step'),
                 // Real labels for the details form: the fields used to carry only placeholders,
                 // which vanish on input and are not a reliable accessible name.
@@ -215,38 +215,104 @@
         ];
     @endphp
 
-    {{-- Kept outside #booking-app: anything inside the mount is compiled as a Vue template. --}}
+    {{-- Kept outside #booking-app: anything inside the mount is compiled as a Vue template.
+         The page is laid on the stage (partials/guest-stage-styles): the type's name large at the
+         start, its facts in one row, and the picker as the one card on the sheet, a form to fill
+         in. Every colour is a stage token or the accent GuestTheme checked against the stage, the
+         raised card and the well, light and dark, so nothing here mixes one of its own. --}}
     <style {!! nonce_attr() !!}>
-        #booking-app { --es-accent: {{ $accent }}; --es-accent-text: {{ $accentText }}; --es-accent-readable: {{ $accentOnLight }}; }
-        .dark #booking-app { --es-accent-readable: {{ $accentOnDark }}; }
-
-        /* Accent as a fill: the label uses the contrast-checked colour, never a hardcoded white. */
-        #booking-app .es-accent-fill { background-color: var(--es-accent); color: var(--es-accent-text); }
-        /* Accent as text or a border on the card surface: contrast-checked per mode. */
-        #booking-app .es-accent-text { color: var(--es-accent-readable); }
-        #booking-app .es-dot { background-color: var(--es-accent-readable); }
-        #booking-app .es-day-selected { background-color: var(--es-accent); color: var(--es-accent-text); }
-        /* A ring rather than a fill, so "today" cannot be confused with "selected". */
-        #booking-app .es-today { box-shadow: inset 0 0 0 2px var(--es-accent-readable); }
-        #booking-app .es-slot { border-color: var(--es-accent-readable); color: var(--es-accent-readable); }
-        #booking-app .es-slot-armed { background-color: var(--es-accent); border-color: var(--es-accent); color: var(--es-accent-text); }
-
-        /* Compact fact chips for the rail. Custom dark palette, per the app's own scale: the guest
-           card is #252526 in dark mode, so the chip sits one shade above it. */
-        #booking-app .es-fact {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            border-radius: 9999px;
-            background-color: #f3f4f6;
-            padding: 0.125rem 0.5rem;
-            font-size: 0.75rem;
-            line-height: 1.25rem;
-            color: #2d2d30;
+        .gk-p-book { display: grid; gap: 2rem; align-items: start; }
+        @media (min-width: 64rem) {
+            .gk-p-book { grid-template-columns: minmax(0, 22rem) minmax(0, 1fr); column-gap: clamp(2rem, 4vw, 3.5rem); }
+            .gk-p-book-head { position: sticky; top: 1.5rem; }
         }
-        .dark #booking-app .es-fact { background-color: rgb(var(--ap-border)); color: rgb(var(--ap-ink-2)); }
+        .gk-p-book-head { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+        .gk-p-book .gk-title { font-size: clamp(2.25rem, 1.6rem + 2vw, 3.25rem); }
+        .gk-p-back { display: inline-flex; align-items: center; gap: .375rem; align-self: flex-start; font-size: .9375rem; font-weight: 500; color: var(--gk-ink-3); text-decoration: none; }
+        .gk-p-back:hover { color: var(--gk-ink); text-decoration: underline; text-underline-offset: 3px; }
+        [dir="rtl"] .gk-p-back svg { transform: scaleX(-1); }
+        .gk-p-book .gk-factrow { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); }
+        .gk-p-book .gk-fact-main { font-size: 1.0625rem; }
+        .gk-p-small { margin: 0; font-size: .875rem; line-height: 1.5; color: var(--gk-ink-3); }
+        .gk-p-desc { margin: 0; font-size: 1.0625rem; line-height: 1.65; color: var(--gk-ink-2); white-space: pre-line; overflow-wrap: anywhere; }
+        .gk-p-now { padding: 1rem 1.125rem; border-radius: 1rem; background: var(--gk-stage-well); }
+        .gk-p-now-label { margin: 0 0 .25rem; font-size: .8125rem; font-weight: 500; color: var(--gk-ink-3); }
+        .gk-p-now-main { margin: 0; font-size: 1.0625rem; font-weight: 650; color: var(--gk-ink); }
+        .gk-p-now-sub { margin: 0; font-size: .9375rem; color: var(--gk-ink-2); }
+        .gk-p-now-who { margin-bottom: .625rem; padding-bottom: .625rem; border-bottom: 1px solid var(--gk-line); }
 
-        /* No global outline reset here, but the UA ring is unreliable against an accent fill. */
+        {{-- The picker: one card raised on the sheet. --}}
+        .gk-p-picker { min-width: 0; }
+        .gk-p-picker-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: 1.25rem; }
+        .gk-p-step { margin: 0; font-size: .875rem; font-weight: 500; color: var(--gk-ink-3); }
+        .gk-p-tz { position: relative; }
+        .gk-p-tz-btn { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.5rem; padding: 0 .875rem; border: 1px solid var(--gk-line); border-radius: .75rem; background: transparent; color: var(--gk-ink-2); font: inherit; font-size: .875rem; cursor: pointer; transition: background-color var(--gk-swap); }
+        .gk-p-tz-btn:hover { background: var(--gk-stage-well); }
+        .gk-p-tz-btn svg { flex: none; width: 1rem; height: 1rem; }
+        .gk-p-tz-panel { position: absolute; inset-inline-end: 0; z-index: 10; width: 18rem; max-width: 80vw; margin-top: .5rem; padding: .75rem; border: 1px solid var(--gk-line); border-radius: 1rem; background: var(--gk-stage-raised); box-shadow: 0 1.25rem 2.5rem -1rem rgb(0 0 0 / .35); }
+        .gk-p-cols { display: grid; gap: 2rem; }
+        @media (min-width: 40rem) { .gk-p-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; } }
+        .gk-p-month { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
+        .gk-p-month-name { font-size: 1.1875rem; font-weight: 700; color: var(--gk-ink); }
+        .gk-p-month-nav { display: flex; gap: .375rem; }
+        .gk-p-nav { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border: 1px solid var(--gk-line); border-radius: 999px; background: transparent; color: var(--gk-ink); font-size: 1.25rem; line-height: 1; cursor: pointer; transition: background-color var(--gk-swap); }
+        .gk-p-nav:hover:not(:disabled) { background: var(--gk-stage-well); }
+        .gk-p-nav:disabled { opacity: .35; cursor: not-allowed; }
+        [dir="rtl"] .gk-p-nav svg { transform: scaleX(-1); }
+        .gk-p-wk { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .25rem; margin-bottom: .25rem; font-size: .75rem; font-weight: 600; text-align: center; color: var(--gk-ink-3); }
+        .gk-p-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .25rem; }
+        .gk-p-day { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 1; border: 0; border-radius: .75rem; background: none; color: var(--gk-ink-3); font: inherit; font-size: .9375rem; }
+        .gk-p-day-on { color: var(--gk-ink); font-weight: 650; cursor: pointer; transition: background-color var(--gk-swap); }
+        .gk-p-day-on:hover { background: var(--gk-stage-well); }
+        .gk-p-day-off { opacity: .55; cursor: default; }
+        #booking-app .es-day-selected { background: var(--es-accent); color: var(--es-accent-text); }
+        {{-- A ring rather than a fill, so "today" cannot be confused with "selected". --}}
+        #booking-app .es-today { box-shadow: inset 0 0 0 2px var(--es-accent-readable); }
+        #booking-app .es-dot { position: absolute; bottom: .3125rem; width: .3125rem; height: .3125rem; border-radius: 999px; background: var(--es-accent-readable); }
+        .gk-p-dayname { margin: 0 0 .875rem; font-size: 1.1875rem; font-weight: 700; color: var(--gk-ink); }
+        .gk-p-part { margin: 0 0 .5rem; font-size: .8125rem; font-weight: 500; color: var(--gk-ink-3); }
+        .gk-p-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin-bottom: 1.25rem; }
+        .gk-p-slot-row { display: flex; gap: .5rem; min-width: 0; }
+        .gk-p-slot-row-armed { grid-column: 1 / -1; }
+        #booking-app .es-slot, #booking-app .es-slot-armed { flex: 1 1 auto; min-width: 0; min-height: 3rem; padding: 0 .5rem; border: 1px solid; border-radius: .75rem; font: inherit; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background-color var(--gk-swap), color var(--gk-swap); }
+        #booking-app .es-slot { border-color: color-mix(in srgb, var(--es-accent-readable) 45%, transparent); background: transparent; color: var(--es-accent-readable); }
+        #booking-app .es-slot:hover { background: var(--gk-stage-well); }
+        #booking-app .es-slot-armed { border-color: var(--es-accent-edge, transparent); background: var(--es-accent); color: var(--es-accent-text); }
+        .gk-p-slot-tag { margin-inline-start: .25rem; font-size: .75rem; font-weight: 500; opacity: .8; }
+        .gk-p-next { flex: none; min-width: 6.5rem; min-height: 3rem; }
+        .gk-p-skel { border-radius: .5rem; background: var(--gk-stage-well); }
+        .gk-p-link { padding: 0; border: 0; background: none; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+        #booking-app .es-accent-text { color: var(--es-accent-readable); }
+        #booking-app .es-accent-fill { background: var(--es-accent); color: var(--es-accent-text); border-color: var(--es-accent-edge, transparent); }
+
+        {{-- The details step and the review step. --}}
+        .gk-p-back-btn { display: inline-flex; align-items: center; gap: .375rem; margin-bottom: 1rem; padding: 0; border: 0; background: none; color: var(--gk-ink-3); font: inherit; font-size: .9375rem; cursor: pointer; }
+        .gk-p-back-btn:hover { color: var(--gk-ink); text-decoration: underline; text-underline-offset: 3px; }
+        [dir="rtl"] .gk-p-back-btn svg { transform: scaleX(-1); }
+        .gk-p-h2 { margin: 0 0 1rem; font-size: 1.5rem; font-weight: 750; letter-spacing: -.01em; color: var(--gk-ink); }
+        .gk-p-picked { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; max-width: 42rem; margin-bottom: 1.5rem; padding: 1rem 1.125rem; border-radius: 1rem; background: var(--gk-stage-well); }
+        .gk-p-picked-main { font-size: 1.0625rem; font-weight: 650; color: var(--gk-ink); }
+        .gk-p-picked-sub { font-size: .9375rem; color: var(--gk-ink-2); }
+        .gk-p-was { font-size: .9375rem; color: var(--gk-ink-3); }
+        .gk-p-form { display: grid; gap: 1rem; max-width: 42rem; }
+        .gk-p-pair { display: grid; gap: 1rem; }
+        @media (min-width: 40rem) { .gk-p-pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+        .gk-p-label { display: block; margin-bottom: .375rem; font-size: .875rem; font-weight: 500; color: var(--gk-ink-2); }
+        .gk-p-opt { font-weight: 400; color: var(--gk-ink-3); }
+        #booking-app .gk-p-input { display: block; box-sizing: border-box; width: 100%; min-height: 3.125rem; padding: .75rem .875rem; border: 1px solid var(--gk-line); border-radius: .75rem; background: var(--gk-stage); color: var(--gk-ink); font: inherit; font-size: 1rem; box-shadow: none; }
+        #booking-app input.gk-p-input, #booking-app select.gk-p-input { height: 3.25rem; padding-block: 0; }
+        #booking-app .gk-p-tz-panel input.gk-p-input, #booking-app .gk-p-tz-panel select.gk-p-input { height: 2.75rem; }
+        #booking-app .gk-p-input::placeholder { color: var(--gk-ink-3); }
+        #booking-app .gk-p-input:focus { border-color: var(--es-accent-readable); outline: none; box-shadow: 0 0 0 1px var(--es-accent-readable); }
+        #booking-app .gk-p-input[aria-invalid="true"] { border-color: var(--gk-bad); }
+        #booking-app .gk-p-tz-panel .gk-p-input { min-height: 2.75rem; padding: .5rem .75rem; font-size: .9375rem; }
+        .gk-p-count { margin-top: .25rem; font-size: .8125rem; text-align: end; color: var(--gk-ink-3); }
+        .gk-p-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; max-width: 42rem; }
+        .gk-p-actions .gk-btn-lg { flex: 1 1 14rem; }
+        .gk-p-quiet { font-size: .9375rem; color: var(--gk-ink-2); }
+        .gk-p-quiet:hover { color: var(--gk-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+        {{-- No global outline reset here, but the UA ring is unreliable against an accent fill. --}}
         #booking-app button:focus-visible,
         #booking-app a:focus-visible,
         #booking-app select:focus-visible,
@@ -258,330 +324,312 @@
     </style>
 
     <noscript>
-        <div class="max-w-5xl mx-auto px-4 py-8">
-            <div class="rounded-2xl border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-6 text-amber-800 dark:text-amber-200">
-                {{ __('messages.appointments_enable_js') }}
-            </div>
+        <div class="gk-stage">
+            <div class="gk-note gk-note-warn">{{ __('messages.appointments_enable_js') }}</div>
         </div>
     </noscript>
 
-    {{-- max-w-5xl, and the rail is a fixed 20rem rather than a third: the extra width all goes to the
-         picker, which is what turns the slot list into two readable columns. --}}
-    <div id="booking-app" data-vue-root data-props="{{ json_encode($props) }}" class="max-w-5xl mx-auto px-4 py-8">
-        {{-- The guest page background comes from the schedule's own theme and does not follow dark
-             mode - and it defaults to a photo or a random gradient - so the widget needs an opaque
-             surface of its own in BOTH modes, and every child carries an explicit text color. --}}
-        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden md:flex">
-            {{-- Left panel --}}
-            {{-- A fixed 320px rail only from lg. Pinning it at md took 75px off the picker at a 768px
-                 viewport (rail 320 vs the 245 a third used to give it), which is where the two-column
-                 slot grid is tightest - the opposite of what widening the card was for. --}}
-            <div class="md:w-1/3 lg:w-80 lg:flex-shrink-0 p-6 border-b md:border-b-0 md:border-e border-gray-200 dark:border-gray-700">
-                <a :href="backUrl" class="text-xs text-gray-500 dark:text-gray-400 hover:underline"><span class="inline-block rtl:rotate-180">&larr;</span> @{{ mode === 'reschedule' ? t.rescheduleKeep : t.back }}</a>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100 mt-2">@{{ typeName }}</h1>
-                <p class="text-sm text-gray-600 dark:text-gray-400">@{{ scheduleName }}</p>
-                <p v-if="hostLine" class="text-sm text-gray-600 dark:text-gray-400">@{{ hostLine }}</p>
-                {{-- One wrapped row of facts rather than four stacked lines. Below md the rail sits
-                     above the calendar, so every line here is a line the picker starts further down.
-                     Where the appointment happens is part of it: the guest could not see that at all
-                     before, so "is this a call or do I travel?" was only answered by the email. --}}
-                <div class="mt-2 flex flex-wrap items-center gap-1.5">
-                    <span class="es-fact">@{{ duration }} @{{ t.minutes }}</span>
-                    <span class="es-fact">@{{ priceLabel }}</span>
-                    <span class="es-fact">
-                        <svg v-if="locationType === 'online'" class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                        <svg v-else-if="locationType === 'phone'" class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-                        <svg v-else class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                        @{{ locationLabel }}
-                    </span>
-                    <span v-if="requiresApproval" class="es-fact">@{{ t.requiresConfirmation }}</span>
-                </div>
-                <p v-if="locationDetail" class="text-xs text-gray-500 dark:text-gray-400 mt-2">@{{ locationDetail }}</p>
-                <p v-if="locationNote" class="text-xs text-gray-500 dark:text-gray-400 mt-1">@{{ locationNote }}</p>
-                <p v-if="t.minNoticeHint && mode !== 'reschedule'" class="text-xs text-gray-500 dark:text-gray-400 mt-1">@{{ t.minNoticeHint }}</p>
+    <div id="booking-app" data-vue-root data-props="{{ json_encode($props) }}" class="gk-stage gk-p-book">
+        {{-- The type, large, and its facts. Below a laptop it sits above the picker; from one up,
+             beside it, where it stays in view while the guest picks. --}}
+        <div class="gk-p-book-head">
+            <a :href="backUrl" class="gk-p-back">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+                @{{ mode === 'reschedule' ? t.rescheduleKeep : t.back }}
+            </a>
+            <p class="gk-dateline"><span dir="auto">@{{ scheduleName }}</span><template v-if="hostLine"><span class="gk-dateline-dot" aria-hidden="true">&middot;</span><span dir="auto">@{{ hostLine }}</span></template></p>
+            <h1 class="gk-title" dir="auto">@{{ typeName }}</h1>
+            <p v-if="typeDescription" class="gk-p-desc" dir="auto">@{{ typeDescription }}</p>
 
-                {{-- What they are moving, and from when. Without this the picker gives no clue which
-                     booking is in play or what time it currently holds. --}}
-                <div v-if="mode === 'reschedule' && currentSlotUtc" class="mt-4 rounded-lg bg-gray-50 dark:bg-gray-900 p-3">
-                    <div v-if="guestName" class="mb-2 pb-2 border-b border-gray-200 dark:border-gray-700">
-                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">@{{ guestName }}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">@{{ guestEmail }}</div>
-                    </div>
-                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">@{{ t.rescheduleCurrent }}</div>
-                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-1">@{{ currentShownDate }}</div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">@{{ currentShownTime }} (@{{ tz }})</div>
+            {{-- One row of facts. Where the appointment happens is part of it: the guest could not
+                 see that at all before, so "is this a call or do I travel?" was only answered by
+                 the email. --}}
+            <div class="gk-factrow">
+                <div class="gk-fact-cell" :data-label="t.duration">
+                    <span class="gk-fact-main">@{{ duration }} @{{ t.minutes }}</span>
                 </div>
-
-                {{-- The highest-risk moment in the flow: a confirmed booking is about to be released. --}}
-                <div v-if="approvalWarning" class="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-amber-800 dark:text-amber-200">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                    <p class="text-xs">@{{ t.approvalWarning }}</p>
+                <div class="gk-fact-cell" :data-label="t.price">
+                    <span class="gk-fact-main">@{{ priceLabel }}</span>
+                    <span v-if="requiresApproval" class="gk-fact-sub">@{{ t.requiresConfirmation }}</span>
                 </div>
+                <div class="gk-fact-cell" :data-label="t.location">
+                    <span class="gk-fact-main">@{{ locationLabel }}</span>
+                    <span v-if="locationDetail" class="gk-fact-sub" dir="auto">@{{ locationDetail }}</span>
+                    <span v-if="locationNote" class="gk-fact-sub">@{{ locationNote }}</span>
+                </div>
+            </div>
+            <p v-if="t.minNoticeHint && mode !== 'reschedule'" class="gk-p-small">@{{ t.minNoticeHint }}</p>
 
-                <p v-if="mode === 'reschedule' && ownerMode" class="mt-4 text-xs text-gray-500 dark:text-gray-400">@{{ t.ownerNote }}</p>
-                <p v-if="typeDescription" class="text-sm text-gray-600 dark:text-gray-300 mt-3">@{{ typeDescription }}</p>
+            {{-- What they are moving, and from when. Without this the picker gives no clue which
+                 booking is in play or what time it currently holds. --}}
+            <div v-if="mode === 'reschedule' && currentSlotUtc" class="gk-p-now">
+                <div v-if="guestName" class="gk-p-now-who">
+                    <p class="gk-p-now-main" dir="auto">@{{ guestName }}</p>
+                    <p class="gk-p-now-sub">@{{ guestEmail }}</p>
+                </div>
+                <p class="gk-p-now-label">@{{ t.rescheduleCurrent }}</p>
+                <p class="gk-p-now-main">@{{ currentShownDate }}</p>
+                <p class="gk-p-now-sub">@{{ currentShownTime }} (@{{ tz }})</p>
             </div>
 
-            {{-- Right panel --}}
-            <div class="md:flex-1 min-w-0 p-6">
-                {{-- Step: date + time --}}
-                <div v-if="step === 'pick'">
-                    <div class="mb-3 flex flex-wrap items-start justify-between gap-2">
-                        <p class="text-xs text-gray-500 dark:text-gray-400" aria-current="step">@{{ stepLabel(1) }}</p>
+            {{-- The highest-risk moment in the flow: a confirmed booking is about to be released. --}}
+            <div v-if="approvalWarning" class="gk-note gk-note-warn">
+                <svg class="gk-note-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                <p class="gk-note-body">@{{ t.approvalWarning }}</p>
+            </div>
 
-                        {{-- Timezone. Moved out of the foot of the rail and next to the times it
-                             relabels: on a phone the rail stacks above the picker, so a control down
-                             there pushed the calendar most of a screen further down. The full IANA
-                             list is ~430 unlabelled entries, so the common zones come first and the
-                             rest sit behind a filter. --}}
-                        <div class="relative">
-                            <button type="button" @click="toggleTz" aria-controls="tz-panel" :aria-expanded="tzOpen ? 'true' : 'false'"
-                                class="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                                <span aria-hidden="true">&#127760;</span> <span aria-live="polite">@{{ t.timesShownIn }} @{{ tz }}</span>
-                            </button>
-                            <p v-if="tz !== scheduleTz" class="text-xs text-gray-500 dark:text-gray-400 mt-1 text-end">@{{ t.scheduleIn }} @{{ scheduleTz }}</p>
-                            <div v-if="tzOpen" id="tz-panel" class="absolute end-0 z-10 mt-2 w-72 max-w-[80vw] rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 p-3 shadow-lg">
-                                <label class="sr-only" for="tz-select">@{{ t.timezone }}</label>
-                                <select id="tz-select" v-model="tz" class="w-full text-sm px-2 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-                                    <option v-for="z in tzChoices" :key="z" :value="z">@{{ tzLabel(z) }}</option>
-                                </select>
-                                <div v-if="!tzShowAll" class="mt-1">
-                                    <button type="button" @click="tzShowAll = true" class="text-xs es-accent-text hover:underline">@{{ t.showAllTimezones }}</button>
-                                </div>
-                                <div v-else class="mt-2">
-                                    <label class="sr-only" for="tz-filter">@{{ t.search }}</label>
-                                    <input id="tz-filter" v-model="tzFilter" type="search" :placeholder="t.search"
-                                        class="w-full text-sm px-2 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
-                                </div>
+            <p v-if="mode === 'reschedule' && ownerMode" class="gk-p-small">@{{ t.ownerNote }}</p>
+        </div>
+
+        {{-- The picker, a form to fill in: the one card on the sheet. --}}
+        <div class="gk-card gk-band gk-p-picker">
+            {{-- Step: date + time --}}
+            <div v-if="step === 'pick'">
+                <div class="gk-p-picker-top">
+                    <p class="gk-p-step" aria-current="step">@{{ stepLabel(1) }}</p>
+
+                    {{-- Timezone. Next to the times it relabels: on a phone the type's facts stack
+                         above the picker, so a control down there pushed the calendar most of a
+                         screen further down. The full IANA list is ~430 unlabelled entries, so the
+                         common zones come first and the rest sit behind a filter. --}}
+                    <div class="gk-p-tz">
+                        <button type="button" @click="toggleTz" aria-controls="tz-panel" :aria-expanded="tzOpen ? 'true' : 'false'" class="gk-p-tz-btn">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" /></svg>
+                            <span aria-live="polite">@{{ t.timesShownIn }} @{{ tz }}</span>
+                        </button>
+                        <p v-if="tz !== scheduleTz" class="gk-p-small" style="margin-top: .25rem; text-align: end">@{{ t.scheduleIn }} @{{ scheduleTz }}</p>
+                        <div v-if="tzOpen" id="tz-panel" class="gk-p-tz-panel">
+                            <label class="sr-only" for="tz-select">@{{ t.timezone }}</label>
+                            <select id="tz-select" v-model="tz" class="gk-p-input">
+                                <option v-for="z in tzChoices" :key="z" :value="z">@{{ tzLabel(z) }}</option>
+                            </select>
+                            <div v-if="!tzShowAll" style="margin-top: .5rem">
+                                <button type="button" @click="tzShowAll = true" class="gk-p-link es-accent-text">@{{ t.showAllTimezones }}</button>
+                            </div>
+                            <div v-else style="margin-top: .5rem">
+                                <label class="sr-only" for="tz-filter">@{{ t.search }}</label>
+                                <input id="tz-filter" v-model="tzFilter" type="search" :placeholder="t.search" class="gk-p-input">
                             </div>
                         </div>
                     </div>
-                    <div class="sm:flex sm:gap-6">
-                        {{-- Calendar --}}
-                        <div class="sm:w-1/2">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="font-semibold text-gray-900 dark:text-gray-100" aria-live="polite">@{{ monthLabel }}</div>
-                                <div class="flex gap-1">
-                                    {{-- Bounded: paging into the past, or past the booking window, only ever
-                                         produced an empty grid with no explanation. --}}
-                                    <button type="button" @click="changeMonth(-1)" :disabled="!canGoPrev"
-                                        class="px-2 py-1 rounded border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rtl:rotate-180 disabled:opacity-40 disabled:cursor-not-allowed">
-                                        <span aria-hidden="true">&lsaquo;</span><span class="sr-only">@{{ t.prevMonth }}</span>
-                                    </button>
-                                    <button type="button" @click="changeMonth(1)" :disabled="!canGoNext"
-                                        class="px-2 py-1 rounded border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rtl:rotate-180 disabled:opacity-40 disabled:cursor-not-allowed">
-                                        <span aria-hidden="true">&rsaquo;</span><span class="sr-only">@{{ t.nextMonth }}</span>
-                                    </button>
-                                </div>
+                </div>
+                <div class="gk-p-cols">
+                    {{-- Calendar --}}
+                    <div>
+                        <div class="gk-p-month">
+                            <div class="gk-p-month-name" aria-live="polite">@{{ monthLabel }}</div>
+                            <div class="gk-p-month-nav">
+                                {{-- Bounded: paging into the past, or past the booking window, only ever
+                                     produced an empty grid with no explanation. --}}
+                                <button type="button" @click="changeMonth(-1)" :disabled="!canGoPrev" class="gk-p-nav">
+                                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg><span class="sr-only">@{{ t.prevMonth }}</span>
+                                </button>
+                                <button type="button" @click="changeMonth(1)" :disabled="!canGoNext" class="gk-p-nav">
+                                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg><span class="sr-only">@{{ t.nextMonth }}</span>
+                                </button>
                             </div>
-                            {{-- Redundant once every cell carries its full date as an accessible name. --}}
-                            <div class="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 dark:text-gray-400 mb-1" aria-hidden="true">
-                                <div v-for="d in weekdayLabels" :key="d">@{{ d }}</div>
-                            </div>
-                            <div class="grid grid-cols-7 gap-1">
-                                <template v-for="(cell, i) in flatCells" :key="i">
-                                    <button v-if="cell" type="button"
-                                        :disabled="!hasSlots(cell.date)"
-                                        @click="selectDate(cell.date)"
-                                        :aria-label="dayLabel(cell.date)"
-                                        :aria-pressed="selectedDate === cell.date ? 'true' : 'false'"
-                                        :aria-current="cell.date === todayLocal ? 'date' : null"
-                                        :class="['aspect-square rounded-lg text-sm flex items-center justify-center relative',
-                                            selectedDate === cell.date ? 'es-day-selected font-medium' : '',
-                                            cell.date === todayLocal && selectedDate !== cell.date ? 'es-today' : '',
-                                            hasSlots(cell.date) ? 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium cursor-pointer' : 'text-gray-400 dark:text-gray-600 cursor-default']">
-                                        @{{ cell.day }}
-                                        <span v-if="hasSlots(cell.date) && selectedDate !== cell.date" class="absolute bottom-1 w-1 h-1 rounded-full es-dot" aria-hidden="true"></span>
-                                    </button>
-                                    <div v-else></div>
-                                </template>
-                            </div>
-
-                            {{-- Loading was a bare ellipsis in a <p>. --}}
-                            <div v-if="loading" class="mt-3 space-y-2" aria-busy="true">
-                                <span class="sr-only" aria-live="polite">@{{ t.loading }}</span>
-                                <div v-for="n in 3" :key="n" class="h-3 rounded bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-                            </div>
-                            <p v-if="!loading && !monthHasSlots && !nextAvailable" class="text-sm text-gray-500 dark:text-gray-400 mt-3">@{{ anySlots ? t.noTimesThisMonth : t.noTimes }}</p>
-                            {{-- In reschedule mode an empty calendar reads like the booking itself broke. --}}
-                            <div v-if="!loading && !anySlots && !nextAvailable && mode === 'reschedule'" class="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-amber-800 dark:text-amber-200">
-                                <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                                <div class="text-xs">
-                                    <p>@{{ t.rescheduleNoneLeft }}</p>
-                                    <a :href="backUrl" class="es-accent-text hover:underline">@{{ t.rescheduleKeep }}</a>
-                                </div>
-                            </div>
-                            <p v-if="!loading && !monthHasSlots && nextAvailable" class="text-xs mt-3">
-                                <button type="button" @click="jumpToNext" class="underline es-accent-text">@{{ t.nextAvailable }}: @{{ nextAvailable }}</button>
-                            </p>
+                        </div>
+                        {{-- Redundant once every cell carries its full date as an accessible name. --}}
+                        <div class="gk-p-wk" aria-hidden="true">
+                            <div v-for="d in weekdayLabels" :key="d">@{{ d }}</div>
+                        </div>
+                        <div class="gk-p-days">
+                            <template v-for="(cell, i) in flatCells" :key="i">
+                                <button v-if="cell" type="button"
+                                    :disabled="!hasSlots(cell.date)"
+                                    @click="selectDate(cell.date)"
+                                    :aria-label="dayLabel(cell.date)"
+                                    :aria-pressed="selectedDate === cell.date ? 'true' : 'false'"
+                                    :aria-current="cell.date === todayLocal ? 'date' : null"
+                                    :class="['gk-p-day',
+                                        selectedDate === cell.date ? 'es-day-selected' : '',
+                                        cell.date === todayLocal && selectedDate !== cell.date ? 'es-today' : '',
+                                        hasSlots(cell.date) ? 'gk-p-day-on' : 'gk-p-day-off']">
+                                    @{{ cell.day }}
+                                    <span v-if="hasSlots(cell.date) && selectedDate !== cell.date" class="es-dot" aria-hidden="true"></span>
+                                </button>
+                                <div v-else></div>
+                            </template>
                         </div>
 
-                        {{-- Times --}}
-                        <div class="sm:w-1/2 mt-6 sm:mt-0" ref="times">
-                            <div v-if="error" class="mb-3 p-2 rounded bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-sm" role="alert" aria-live="assertive">
-                                @{{ error }}
-                                <button v-if="canRetry" type="button" @click="retryMonth" class="ms-1 underline">@{{ t.retry }}</button>
+                        <div v-if="loading" style="margin-top: .875rem; display: grid; gap: .5rem" aria-busy="true">
+                            <span class="sr-only" aria-live="polite">@{{ t.loading }}</span>
+                            <div v-for="n in 3" :key="n" class="gk-p-skel animate-pulse" style="height: .75rem"></div>
+                        </div>
+                        <p v-if="!loading && !monthHasSlots && !nextAvailable" class="gk-p-small" style="margin-top: .875rem">@{{ anySlots ? t.noTimesThisMonth : t.noTimes }}</p>
+                        {{-- In reschedule mode an empty calendar reads like the booking itself broke. --}}
+                        <div v-if="!loading && !anySlots && !nextAvailable && mode === 'reschedule'" class="gk-note gk-note-warn" style="margin-top: .875rem">
+                            <svg class="gk-note-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                            <div class="gk-note-body">
+                                <p>@{{ t.rescheduleNoneLeft }}</p>
+                                <a :href="backUrl" class="gk-link">@{{ t.rescheduleKeep }}</a>
                             </div>
-                            <div v-if="selectedDate" role="group" :aria-label="selectedDateLabel">
-                                <h2 class="sr-only">@{{ t.pickTime }}</h2>
-                                <div class="font-semibold text-gray-900 dark:text-gray-100 mb-2">@{{ selectedDateLabel }}</div>
-                                <div v-if="loading" class="space-y-2" aria-busy="true">
-                                    <div v-for="n in 5" :key="n" class="h-9 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
-                                </div>
-                                <template v-else v-for="group in ['morning','afternoon','evening']" :key="group">
-                                    <div v-if="slotGroups[group].length" class="mb-3">
-                                        <h3 v-if="showGroups" class="text-xs text-gray-500 dark:text-gray-400 uppercase mb-1">@{{ t[group] }}</h3>
-                                        {{-- Two columns. Single-file, a 16-slot day ran about 700px
-                                             tall next to a ~330px calendar, so most of the panel was
-                                             empty on one side and a long scroll on the other. The
-                                             armed slot spans the row, keeping room for the inline
-                                             Next button. --}}
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div v-for="u in slotGroups[group]" :key="u" :class="['flex gap-2', armed === u ? 'col-span-2' : '']">
-                                                {{-- The booking's own slot is offered back (the grid excludes its event so it
-                                                     does not block itself), so it has to be LABELLED. Unmarked, it looked like
-                                                     any other option, and picking it produced a review step reading
-                                                     "Previously: 2:00 PM / Now: 2:00 PM" and then a no-op. --}}
-                                                <button type="button" @click="armSlot(u)"
-                                                    :aria-pressed="armed === u ? 'true' : 'false'"
-                                                    :aria-expanded="armed === u ? 'true' : 'false'"
-                                                    :aria-current="u === currentSlotUtc ? 'true' : null"
-                                                    :class="['min-w-0 flex-1 py-2 rounded-lg border text-sm transition', armed === u ? 'es-slot-armed' : 'es-slot']">
-                                                    @{{ localTime(u) }}
-                                                    <span v-if="u === currentSlotUtc" class="ms-1 text-xs opacity-70">@{{ t.currentSlotTag }}</span>
-                                                </button>
-                                                {{-- Fixed width so arming a slot does not reflow the whole column. --}}
-                                                <button v-if="armed === u" ref="nextButton" type="button" @click="confirmSlot(u)" class="w-24 flex-shrink-0 px-4 py-2 rounded-lg text-sm es-accent-fill">@{{ t.next }}</button>
-                                            </div>
+                        </div>
+                        <p v-if="!loading && !monthHasSlots && nextAvailable" style="margin-top: .875rem">
+                            <button type="button" @click="jumpToNext" class="gk-p-link es-accent-text">@{{ t.nextAvailable }}: @{{ nextAvailable }}</button>
+                        </p>
+                    </div>
+
+                    {{-- Times --}}
+                    <div ref="times">
+                        <div v-if="error" class="gk-note gk-note-warn" style="margin-bottom: .875rem" role="alert" aria-live="assertive">
+                            <div class="gk-note-body">
+                                @{{ error }}
+                                <button v-if="canRetry" type="button" @click="retryMonth" class="gk-p-link" style="margin-inline-start: .25rem">@{{ t.retry }}</button>
+                            </div>
+                        </div>
+                        <div v-if="selectedDate" role="group" :aria-label="selectedDateLabel">
+                            <h2 class="sr-only">@{{ t.pickTime }}</h2>
+                            <p class="gk-p-dayname">@{{ selectedDateLabel }}</p>
+                            <div v-if="loading" style="display: grid; gap: .5rem" aria-busy="true">
+                                <div v-for="n in 5" :key="n" class="gk-p-skel animate-pulse" style="height: 3rem"></div>
+                            </div>
+                            <template v-else v-for="group in ['morning','afternoon','evening']" :key="group">
+                                <div v-if="slotGroups[group].length">
+                                    <h3 v-if="showGroups" class="gk-p-part">@{{ t[group] }}</h3>
+                                    {{-- Two columns. Single-file, a 16-slot day ran about 700px tall next
+                                         to the calendar. The armed slot spans the row, keeping room for
+                                         the inline Next button. --}}
+                                    <div class="gk-p-slots">
+                                        <div v-for="u in slotGroups[group]" :key="u" :class="['gk-p-slot-row', armed === u ? 'gk-p-slot-row-armed' : '']">
+                                            {{-- The booking's own slot is offered back (the grid excludes its event so it
+                                                 does not block itself), so it has to be LABELLED. Unmarked, it looked like
+                                                 any other option, and picking it produced a review step reading
+                                                 "Previously: 2:00 PM / Now: 2:00 PM" and then a no-op. --}}
+                                            <button type="button" @click="armSlot(u)"
+                                                :aria-pressed="armed === u ? 'true' : 'false'"
+                                                :aria-expanded="armed === u ? 'true' : 'false'"
+                                                :aria-current="u === currentSlotUtc ? 'true' : null"
+                                                :class="armed === u ? 'es-slot-armed' : 'es-slot'">
+                                                <bdi dir="ltr">@{{ localTime(u) }}</bdi>
+                                                <span v-if="u === currentSlotUtc" class="gk-p-slot-tag">@{{ t.currentSlotTag }}</span>
+                                            </button>
+                                            {{-- Fixed width so arming a slot does not reflow the whole column. --}}
+                                            <button v-if="armed === u" ref="nextButton" type="button" @click="confirmSlot(u)" class="gk-btn gk-btn-primary gk-p-next">@{{ t.next }}</button>
                                         </div>
                                     </div>
-                                </template>
-                            </div>
-                            <p v-else class="text-sm text-gray-500 dark:text-gray-400">@{{ t.pickDate }}</p>
+                                </div>
+                            </template>
                         </div>
+                        <p v-else class="gk-p-small" style="font-size: 1rem">@{{ t.pickDate }}</p>
                     </div>
                 </div>
+            </div>
 
-                {{-- Step: review (reschedule only). A move must never be one tap on a button labelled
-                     "Next" - the guest gets to see both times and confirm. --}}
-                <div v-else-if="step === 'review'">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2" aria-current="step">@{{ stepLabel(2) }}</p>
-                    <button type="button" @click="backToPick" class="text-xs text-gray-500 dark:text-gray-400 hover:underline mb-3"><span class="inline-block rtl:rotate-180">&larr;</span> @{{ t.back }}</button>
-                    <h2 class="mb-3 text-base font-semibold text-gray-900 dark:text-gray-100">@{{ t.whatsChanged }}</h2>
+            {{-- Step: review (reschedule only). A move must never be one tap on a button labelled
+                 "Next" - the guest gets to see both times and confirm. --}}
+            <div v-else-if="step === 'review'">
+                <p class="gk-p-step" style="margin-bottom: .75rem" aria-current="step">@{{ stepLabel(2) }}</p>
+                <button type="button" @click="backToPick" class="gk-p-back-btn">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+                    @{{ t.back }}
+                </button>
+                <h2 class="gk-p-h2">@{{ t.whatsChanged }}</h2>
 
-                    <div class="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-700 text-sm">
+                <div class="gk-p-picked">
+                    <div>
                         {{-- Deliberately the short form, matching the "Now" line below it rather than
                              the rail's fuller one: the single tz label under them covers both. --}}
-                        <div v-if="currentSlotUtc" class="text-gray-500 dark:text-gray-400">
-                            @{{ t.previously }}: <s>@{{ currentShownShort }}</s>
-                        </div>
-                        <div class="flex items-start justify-between gap-3 mt-1">
+                        <div v-if="currentSlotUtc" class="gk-p-was">@{{ t.previously }}: <s>@{{ currentShownShort }}</s></div>
+                        <div class="gk-p-picked-main">@{{ t.nowLabel }}: @{{ selectedSlotLabel }}, <bdi dir="ltr">@{{ localTime(selectedSlot) }}</bdi></div>
+                        <div class="gk-p-picked-sub">@{{ tz }}</div>
+                    </div>
+                    <button type="button" @click="backToPick" class="gk-p-link es-accent-text" style="flex: none">@{{ t.change }}</button>
+                </div>
+
+                {{-- A paid guest must not be told they are about to pay again. --}}
+                <p v-if="alreadyPaid" class="gk-p-small" style="margin-bottom: 1rem">@{{ t.rescheduleNoCharge }}</p>
+
+                <div v-if="approvalWarning" class="gk-note gk-note-warn" style="max-width: 42rem; margin-bottom: 1rem">
+                    <svg class="gk-note-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                    <p class="gk-note-body">@{{ t.approvalWarning }}</p>
+                </div>
+
+                <div v-if="error" class="gk-note gk-note-warn" style="max-width: 42rem; margin-bottom: 1rem" role="alert" aria-live="assertive"><div class="gk-note-body">@{{ error }}</div></div>
+
+                {{-- Owner moves get the same choice the event editor already offers when a time
+                     changes: an optional note to the guest, or move without emailing at all. Inline
+                     on the review step rather than as a modal - this step IS the confirmation. --}}
+                <div v-if="ownerMode" style="max-width: 42rem; margin-bottom: 1.25rem">
+                    <label for="reschedule-note" class="gk-p-label">@{{ t.notifyMessageLabel }}</label>
+                    <textarea id="reschedule-note" v-model="note" maxlength="280" rows="3" :placeholder="t.notifyMessagePlaceholder" class="gk-p-input"></textarea>
+                    <div class="gk-p-count">@{{ note.length }}/280</div>
+                </div>
+
+                <div class="gk-p-actions">
+                    <a :href="backUrl" class="gk-p-quiet">@{{ t.rescheduleKeep }}</a>
+                    {{-- Forward action last. Its label never says "pay". --}}
+                    <button v-if="ownerMode" type="button" @click="submit(false)" :disabled="submitting" class="gk-btn gk-btn-secondary gk-btn-lg">@{{ t.dontNotify }}</button>
+                    <button type="button" @click="submit(true)" :disabled="submitting" :aria-busy="submitting ? 'true' : 'false'"
+                        class="gk-btn gk-btn-primary gk-btn-lg es-accent-fill disabled:opacity-60">@{{ ownerMode ? t.notifyAndMove : rescheduleCtaLabel }}</button>
+                </div>
+                <span v-if="submitting" class="sr-only" aria-live="polite">@{{ t.loading }}</span>
+            </div>
+
+            {{-- Step: details --}}
+            <div v-else-if="step === 'details'">
+                <p class="gk-p-step" style="margin-bottom: .75rem" aria-current="step">@{{ stepLabel(2) }}</p>
+                <button type="button" @click="backToPick" class="gk-p-back-btn">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+                    @{{ t.back }}
+                </button>
+                <h2 class="gk-p-h2">@{{ t.yourDetails }}</h2>
+                <div class="gk-p-picked">
+                    <div>
+                        <div class="gk-p-picked-main">@{{ selectedSlotLabel }}, <bdi dir="ltr">@{{ localTime(selectedSlot) }}</bdi></div>
+                        <div class="gk-p-picked-sub">@{{ tz }}</div>
+                    </div>
+                    {{-- The only way back to the times used to be the generic Back link. --}}
+                    <button type="button" @click="backToPick" class="gk-p-link es-accent-text" style="flex: none">@{{ t.change }}</button>
+                </div>
+                <div v-if="error" class="gk-note gk-note-warn" style="max-width: 42rem; margin-bottom: 1rem" role="alert" aria-live="assertive"><div class="gk-note-body">@{{ error }}</div></div>
+                <form @submit.prevent="submit" class="gk-p-form">
+                    <fieldset style="display: grid; gap: 1rem; min-width: 0; margin: 0; padding: 0; border: 0">
+                        <legend class="sr-only">@{{ t.yourDetails }}</legend>
+                        <x-honeypot vmodel="website" />
+
+                        <div class="gk-p-pair">
                             <div>
-                                <div class="font-semibold text-gray-900 dark:text-gray-100">@{{ t.nowLabel }}: @{{ selectedSlotLabel }}, @{{ localTime(selectedSlot) }}</div>
-                                <div class="text-gray-500 dark:text-gray-400">@{{ tz }}</div>
+                                <label for="booking-name" class="gk-p-label">@{{ t.name }}</label>
+                                <input id="booking-name" v-model="form.name" autocomplete="name" required
+                                    :aria-invalid="fieldErrors.name ? 'true' : 'false'"
+                                    :aria-describedby="fieldErrors.name ? 'booking-name-error' : null"
+                                    class="gk-p-input">
+                                <span v-if="fieldErrors.name" id="booking-name-error" role="alert" class="gk-err" style="display: block">@{{ fieldErrors.name }}</span>
                             </div>
-                            <button type="button" @click="backToPick" class="text-xs es-accent-text hover:underline flex-shrink-0">@{{ t.change }}</button>
+
+                            <div>
+                                <label for="booking-email" class="gk-p-label">@{{ t.email }}</label>
+                                <input id="booking-email" v-model="form.email" type="email" inputmode="email" autocomplete="email" required
+                                    :aria-invalid="fieldErrors.email ? 'true' : 'false'"
+                                    :aria-describedby="fieldErrors.email ? 'booking-email-error' : null"
+                                    class="gk-p-input">
+                                <span v-if="fieldErrors.email" id="booking-email-error" role="alert" class="gk-err" style="display: block">@{{ fieldErrors.email }}</span>
+                            </div>
                         </div>
-                    </div>
 
-                    {{-- A paid guest must not be told they are about to pay again. --}}
-                    <p v-if="alreadyPaid" class="mb-3 text-xs text-gray-500 dark:text-gray-400">@{{ t.rescheduleNoCharge }}</p>
+                        <div v-if="askPhone">
+                            <label for="booking-phone" class="gk-p-label">
+                                @{{ t.phone }}<span v-if="!requirePhone" class="gk-p-opt"> (@{{ t.optional }})</span>
+                            </label>
+                            <input id="booking-phone" v-model="form.phone" type="tel" autocomplete="tel" :required="requirePhone" :aria-required="requirePhone ? 'true' : 'false'"
+                                :aria-invalid="fieldErrors.phone ? 'true' : 'false'"
+                                :aria-describedby="fieldErrors.phone ? 'booking-phone-error' : null"
+                                class="gk-p-input">
+                            <span v-if="fieldErrors.phone" id="booking-phone-error" role="alert" class="gk-err" style="display: block">@{{ fieldErrors.phone }}</span>
+                        </div>
 
-                    <div v-if="approvalWarning" class="mb-3 flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-amber-800 dark:text-amber-200">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                        <p class="text-xs">@{{ t.approvalWarning }}</p>
-                    </div>
-
-                    <div v-if="error" class="mb-3 p-2 rounded bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-sm" role="alert" aria-live="assertive">@{{ error }}</div>
-
-                    {{-- Owner moves get the same choice the event editor already offers when a time
-                         changes: an optional note to the guest, or move without emailing at all. Inline
-                         on the review step rather than as a modal - this step IS the confirmation. --}}
-                    <div v-if="ownerMode" class="mb-4 max-w-xl">
-                        <label for="reschedule-note" class="block text-sm font-medium text-gray-700 dark:text-gray-300">@{{ t.notifyMessageLabel }}</label>
-                        <textarea id="reschedule-note" v-model="note" maxlength="280" rows="3" :placeholder="t.notifyMessagePlaceholder"
-                            class="mt-1 block w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 dark:placeholder-gray-500"></textarea>
-                        <div class="mt-1 text-xs text-gray-400 text-end">@{{ note.length }}/280</div>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-3 max-w-xl">
-                        <a :href="backUrl" class="text-sm text-gray-500 dark:text-gray-400 hover:underline">@{{ t.rescheduleKeep }}</a>
-                        {{-- Forward action last. Its label never says "pay". --}}
-                        <button v-if="ownerMode" type="button" @click="submit(false)" :disabled="submitting"
-                            class="px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-300 disabled:opacity-60">@{{ t.dontNotify }}</button>
-                        <button type="button" @click="submit(true)" :disabled="submitting" :aria-busy="submitting ? 'true' : 'false'"
-                            class="flex-1 py-3 rounded-lg font-semibold disabled:opacity-60 es-accent-fill">@{{ ownerMode ? t.notifyAndMove : rescheduleCtaLabel }}</button>
-                    </div>
-                    <span v-if="submitting" class="sr-only" aria-live="polite">@{{ t.loading }}</span>
-                </div>
-
-                {{-- Step: details --}}
-                <div v-else-if="step === 'details'">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2" aria-current="step">@{{ stepLabel(2) }}</p>
-                    <button type="button" @click="backToPick" class="text-xs text-gray-500 dark:text-gray-400 hover:underline mb-3"><span class="inline-block rtl:rotate-180">&larr;</span> @{{ t.back }}</button>
-                    <h2 class="mb-3 text-base font-semibold text-gray-900 dark:text-gray-100">@{{ t.yourDetails }}</h2>
-                    <div class="mb-4 max-w-2xl p-3 rounded-lg bg-gray-50 dark:bg-gray-700 text-sm flex items-start justify-between gap-3">
                         <div>
-                            <div class="font-semibold text-gray-900 dark:text-gray-100">@{{ selectedSlotLabel }}, @{{ localTime(selectedSlot) }}</div>
-                            <div class="text-gray-500 dark:text-gray-400">@{{ tz }}</div>
+                            <label for="booking-notes" class="gk-p-label">
+                                @{{ t.notesLabel }}<span class="gk-p-opt"> (@{{ t.optional }})</span>
+                            </label>
+                            <textarea id="booking-notes" v-model="form.notes" :placeholder="t.notes" rows="3" class="gk-p-input"></textarea>
                         </div>
-                        {{-- The only way back to the times used to be the generic Back link. --}}
-                        <button type="button" @click="backToPick" class="text-xs es-accent-text hover:underline flex-shrink-0">@{{ t.change }}</button>
-                    </div>
-                    <div v-if="error" class="mb-3 p-2 rounded bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-sm" role="alert" aria-live="assertive">@{{ error }}</div>
-                    {{-- max-w-md inside a two-thirds panel left most of this step empty; name and email
-                         also pair up once there is room for them. --}}
-                    <form @submit.prevent="submit" class="space-y-3 max-w-2xl">
-                        <fieldset>
-                            <legend class="sr-only">@{{ t.yourDetails }}</legend>
-                            <x-honeypot vmodel="website" />
-
-                            <div class="space-y-3">
-                                <div class="grid gap-3 sm:grid-cols-2">
-                                    <div>
-                                        <label for="booking-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@{{ t.name }}</label>
-                                        <input id="booking-name" v-model="form.name" autocomplete="name" required
-                                            :aria-invalid="fieldErrors.name ? 'true' : 'false'"
-                                            :aria-describedby="fieldErrors.name ? 'booking-name-error' : null"
-                                            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
-                                        <span v-if="fieldErrors.name" id="booking-name-error" role="alert" class="block text-xs text-red-600 dark:text-red-400 mt-1">@{{ fieldErrors.name }}</span>
-                                    </div>
-
-                                    <div>
-                                        <label for="booking-email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">@{{ t.email }}</label>
-                                        <input id="booking-email" v-model="form.email" type="email" inputmode="email" autocomplete="email" required
-                                            :aria-invalid="fieldErrors.email ? 'true' : 'false'"
-                                            :aria-describedby="fieldErrors.email ? 'booking-email-error' : null"
-                                            class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
-                                        <span v-if="fieldErrors.email" id="booking-email-error" role="alert" class="block text-xs text-red-600 dark:text-red-400 mt-1">@{{ fieldErrors.email }}</span>
-                                    </div>
-                                </div>
-
-                                <div v-if="askPhone">
-                                    <label for="booking-phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        @{{ t.phone }}<span v-if="!requirePhone" class="text-gray-500 dark:text-gray-400 font-normal"> (@{{ t.optional }})</span>
-                                    </label>
-                                    <input id="booking-phone" v-model="form.phone" type="tel" autocomplete="tel" :required="requirePhone" :aria-required="requirePhone ? 'true' : 'false'"
-                                        :aria-invalid="fieldErrors.phone ? 'true' : 'false'"
-                                        :aria-describedby="fieldErrors.phone ? 'booking-phone-error' : null"
-                                        class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
-                                    <span v-if="fieldErrors.phone" id="booking-phone-error" role="alert" class="block text-xs text-red-600 dark:text-red-400 mt-1">@{{ fieldErrors.phone }}</span>
-                                </div>
-
-                                <div>
-                                    <label for="booking-notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        @{{ t.notesLabel }}<span class="text-gray-500 dark:text-gray-400 font-normal"> (@{{ t.optional }})</span>
-                                    </label>
-                                    <textarea id="booking-notes" v-model="form.notes" :placeholder="t.notes" rows="3"
-                                        class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500"></textarea>
-                                </div>
-                            </div>
-                        </fieldset>
-                        <div v-if="turnstileEnabled" id="turnstile-booking-widget"></div>
-                        <button type="submit" :disabled="submitting" :aria-busy="submitting ? 'true' : 'false'" class="w-full py-3 rounded-lg font-semibold disabled:opacity-60 es-accent-fill">@{{ ctaLabel }}</button>
-                        <span v-if="submitting" class="sr-only" aria-live="polite">@{{ t.loading }}</span>
-                    </form>
-                </div>
+                    </fieldset>
+                    <div v-if="turnstileEnabled" id="turnstile-booking-widget"></div>
+                    <button type="submit" :disabled="submitting" :aria-busy="submitting ? 'true' : 'false'" class="gk-btn gk-btn-primary gk-btn-lg gk-btn-block es-accent-fill disabled:opacity-60">@{{ ctaLabel }}</button>
+                    <span v-if="submitting" class="sr-only" aria-live="polite">@{{ t.loading }}</span>
+                </form>
             </div>
         </div>
     </div>

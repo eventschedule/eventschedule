@@ -8545,4 +8545,8 @@ return [
     'mail_flag_dismissed' => 'The flag on :name is cleared.',
     'mail_paused_reason_word' => 'A watched word in a newsletter',
     'admin_alert_mail_flagged' => '{1} :count paying account was flagged|[0,*] :count paying accounts were flagged',
+    'page_style' => 'Page style',
+    'page_style_light' => 'Light',
+    'page_style_dark' => 'Dark',
+    'page_style_help' => 'Automatic uses a light style when your background is a light color or gradient, and a dark one otherwise. Or pick one of the three light or three dark palettes.',
 ];

@@ -19,22 +19,34 @@
     }
 @endphp
 @if ($embedTicketShown->isNotEmpty())
-<ul class="divide-y divide-gray-200 dark:divide-gray-700" data-embed-tickets v-pre>
+{{-- Rows between hairlines, in the stage's inks (partials/guest-stage-styles), on the event
+     page's sheet and on the widget's alike. Its own small sheet of style, since it is the only
+     place these rows are drawn. --}}
+<style {!! nonce_attr() !!}>
+    .gk-etl { margin: 0; padding: 0; list-style: none; border-block: 1px solid var(--gk-line); }
+    .gk-etl-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-block: .875rem; }
+    .gk-etl-row + .gk-etl-row { border-top: 1px solid var(--gk-line); }
+    .gk-etl-off { opacity: .6; }
+    .gk-etl-name { min-width: 0; font-size: 1.0625rem; font-weight: 600; color: var(--gk-ink); overflow-wrap: anywhere; }
+    .gk-etl-price { flex: none; font-size: 1.0625rem; font-weight: 600; color: var(--gk-ink); font-variant-numeric: tabular-nums; }
+    .gk-etl-out { font-size: .875rem; font-weight: 500; color: var(--gk-ink-3); }
+</style>
+<ul class="gk-etl" data-embed-tickets v-pre>
     @foreach ($embedTicketShown as $embedTicket)
         @php
             $embedTicketLeft = $embedTicket->availableQuantity($embedTicketDate);
             $embedTicketOff = $embedTicket->isSalesEnded() || $embedTicket->isSalesNotStarted() || ($embedTicketLeft !== null && $embedTicketLeft <= 0);
         @endphp
-        <li class="flex items-baseline justify-between gap-4 py-2.5 {{ $embedTicketOff ? 'opacity-60' : '' }}" data-embed-ticket>
-            <span class="min-w-0 text-base font-medium text-gray-900 dark:text-gray-100"><bdi>{{ $embedTicket->type ?: __('messages.ticket') }}</bdi></span>
-            <span class="flex-shrink-0 text-base text-gray-700 dark:text-gray-300">
+        <li class="gk-etl-row {{ $embedTicketOff ? 'gk-etl-off' : '' }}" data-embed-ticket>
+            <span class="gk-etl-name"><bdi>{{ $embedTicket->type ?: __('messages.ticket') }}</bdi></span>
+            <span class="gk-etl-price">
                 @if ((float) $embedTicket->price <= 0)
                     {{ __('messages.free') }}
                 @else
                     <bdi>{{ \App\Utils\MoneyUtils::format($embedTicket->price, $event->ticket_currency_code) }}</bdi>
                 @endif
                 @if ($embedTicketLeft !== null && $embedTicketLeft <= 0 && ! $embedTicket->isSalesEnded() && ! $embedTicket->isSalesNotStarted())
-                    <span class="text-sm text-gray-500 dark:text-gray-400">&middot; {{ __('messages.sold_out') }}</span>
+                    <span class="gk-etl-out">&middot; {{ __('messages.sold_out') }}</span>
                 @endif
             </span>
         </li>

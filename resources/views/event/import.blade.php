@@ -118,10 +118,10 @@
                     <div class="w-full max-w-2xl md:max-w-xl lg:max-w-2xl">
                         <!-- Status header for guest users (curators that do NOT require an account) -->
                         @if (isset($isGuest) && $isGuest && ! auth()->check())
-                        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-                            <p class="text-sm text-blue-800 dark:text-blue-200">
+                        <div class="gk-note mb-4">
+                            <p class="gk-note-body">
                                 {!! __('messages.create_account_link', ['link' => '<a href="' . app_url('/sign_up') . '" class="font-medium underline hover:no-underline">' . __('messages.create_an_account') . '</a>']) !!}
-                                <span class="text-sm text-gray-400 dark:text-gray-500 mx-1">|</span> <a href="{{ marketing_url('/why-create-account') }}{{ request()->has('lang') && is_valid_language_code(request()->get('lang')) ? '?lang=' . request()->get('lang') : '' }}" target="_blank" class="text-blue-600 dark:text-blue-300 underline hover:no-underline">{{ __('messages.why_create_account_learn_more') }} <svg class="inline-block w-3 h-3 ml-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg></a>
+                                <span class="text-sm text-gray-400 dark:text-gray-500 mx-1">|</span> <a href="{{ marketing_url('/why-create-account') }}{{ request()->has('lang') && is_valid_language_code(request()->get('lang')) ? '?lang=' . request()->get('lang') : '' }}" target="_blank" class="font-medium underline hover:no-underline">{{ __('messages.why_create_account_learn_more') }} <svg class="inline-block w-3 h-3 ml-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg></a>
                             </p>
                         </div>
                         @endif
@@ -306,7 +306,7 @@
                                     :class="['inline-flex items-center gap-1.5 p-2 rounded-lg transition-all duration-200 shadow-md {{ $isGuestPage ? '' : 'min-h-[44px]' }}', 
                                         (isLoading || detailsImage)
                                             ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500'
-                                            : '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white cursor-pointer border border-[var(--brand-blue-a30)] shadow-lg hover:shadow-xl' }}']"
+                                            : '{{ (isset($isGuest) && $isGuest) ? 'gk-imp-go cursor-pointer' : 'bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white cursor-pointer border border-[var(--brand-blue-a30)] shadow-lg hover:shadow-xl' }}']"
                                     title="{{ __('messages.add_image') }}">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -324,7 +324,7 @@
                                     :disabled="!canSubmit || isLoading"
                                     :class="['inline-flex items-center gap-1.5 p-2 rounded-lg transition-all duration-200 shadow-md {{ $isGuestPage ? '' : 'min-h-[44px]' }}', 
                                         canSubmit && !isLoading
-                                            ? '{{ (isset($isGuest) && $isGuest) ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white cursor-pointer border border-blue-400/30 hover:border-blue-300/50 shadow-lg hover:shadow-xl' : 'bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white cursor-pointer border border-[var(--brand-blue-a30)] shadow-lg hover:shadow-xl' }}'
+                                            ? '{{ (isset($isGuest) && $isGuest) ? 'gk-imp-go cursor-pointer' : 'bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white cursor-pointer border border-[var(--brand-blue-a30)] shadow-lg hover:shadow-xl' }}'
                                             : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed border border-gray-400 dark:border-gray-500']"
                                     title="{{ __('messages.submit') }}">
                                     @unless ($isGuestPage)

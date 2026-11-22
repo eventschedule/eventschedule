@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -150,7 +152,7 @@ class GuestTicketFormTest extends TestCase
 
         // A fan's photo over the size limit comes back as validation errors, which nothing on
         // the page printed: the form stays shut and the first of them is said in a toast.
-        $tooBig = (new \Illuminate\Support\ViewErrorBag)->put('default', new \Illuminate\Support\MessageBag(['photo' => ['The photo is too large.']]));
+        $tooBig = (new ViewErrorBag)->put('default', new MessageBag(['photo' => ['The photo is too large.']]));
         $page = $this->flushSession()->withSession(['errors' => $tooBig])->get($url)->assertOk()->getContent();
         $this->assertStringNotContainsString('data-show-initial="true"', $page);
         $this->assertStringContainsString('window.esSayOnPage("The photo is too large.");', $page);
@@ -175,7 +177,7 @@ class GuestTicketFormTest extends TestCase
 
         // What the server refused about a field is below the tickets now, so the first of it is
         // handed to the bar, with the field to bring into view.
-        $errors = (new \Illuminate\Support\ViewErrorBag)->put('default', new \Illuminate\Support\MessageBag(['password' => ['The password is too short.']]));
+        $errors = (new ViewErrorBag)->put('default', new MessageBag(['password' => ['The password is too short.']]));
         $html = $this->withSession(['errors' => $errors, '_old_input' => ['event_id' => 'abc']])->get($url)->assertOk()->getContent();
         $this->assertStringContainsString('this.say("The password is too short.", "password" || null, \'server\');', $html);
         // Only what answers a message takes it away: the security check finishing a second
@@ -200,10 +202,12 @@ class GuestTicketFormTest extends TestCase
         $event = $this->createEvent($role, ['tickets_enabled' => true, 'creator_role_id' => $role->id]);
         $this->createTicket($event, ['price' => 10, 'quantity' => 5]);
 
-        // The embed's card has its own padding, clips, and is as tall as what it holds.
+        // The embed's card lists the tickets and sends the buyer to the event's page for the form
+        // (App\Support\EmbedEventView), so it has no bar of its own to fit any more.
         $embed = $this->get($event->fresh()->getGuestUrl($role->subdomain).'?embed=true&tickets=true')->assertOk()->getContent();
         $this->assertStringContainsString('class="ticket-embed-card ', $embed, 'fixture: this is the embed');
-        $this->assertStringContainsString('.ticket-embed-card .gk-buybar { position: static; margin: 1.25rem -1.5rem -1.25rem;', $embed);
+        $this->assertStringNotContainsString('id="ticket-selector"', $embed);
+        $this->assertStringContainsString('data-embed-checkout="tickets"', $embed);
 
         // No other cloak rule reaches the sign-up form, and its message was on screen reading
         // its own template until Vue started.

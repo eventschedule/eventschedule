@@ -8,54 +8,55 @@
 --}}
 <x-app-guest-layout :role="$role" :fonts="$fonts" :no-index="true" :page-title="__('messages.claim_not_me_heading')">
 
-<div class="container mx-auto max-w-xl px-0 sm:px-5 pt-8 pb-20 sm:pb-8">
-    <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
-        <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+@include('partials.guest-form-pages-styles')
+<div class="gk-stage gk-pg gk-pg-sm">
+    <div class="gk-pg-head">
+        @include('role.partials.form-page-who', ['whoRole' => $role, 'whoLink' => $role->getClaimUrl()])
+        <h1 class="gk-title">
             {{ __('messages.claim_not_me_heading') }}
         </h1>
 
-        <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+        <p class="gk-pg-lead">
             <x-user-text dir="{{ content_dir_for_language($role->translatedName(), $role->displayLanguageCode()) }}">{{ __('messages.claim_not_me_body', ['name' => $role->translatedName()]) }}</x-user-text>
         </p>
-
-        @auth
-        {{-- No honeypot: authenticated forms never get one, because a password manager fills it. --}}
-        {{-- Bare route(), NOT app_url(route(..., false)). On hosted this route lives in the tenant
-             domain group, so route() already yields the absolute tenant URL, while app_url() would
-             point it at https://app.<domain>/not-me - a host the tenant group explicitly excludes
-             and where no such route exists. app_url() belongs on the app-domain /{subdomain}/...
-             routes, which this is not. Invisible to the suite: routes/web.php gates the hosted
-             block on `hosted && ! is_testing`, so only the path copies exist under PHPUnit and
-             app_url() degrades to url(). --}}
-        <form method="POST" action="{{ route('role.claim.not_me.submit', ['subdomain' => $role->subdomain]) }}"
-              class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
-            @csrf
-            <a href="{{ $role->getClaimUrl() }}" class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:underline">
-                {{ __('messages.back') }}
-            </a>
-            <button type="submit"
-                class="inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 dark:focus:ring-offset-gray-900"
-                style="background-color: #dc2626;">
-                {{ __('messages.claim_not_me_confirm') }}
-            </button>
-        </form>
-        @else
-        <p class="mt-6 text-sm text-gray-600 dark:text-gray-400">
-            {{ __('messages.claim_not_me_sign_in') }}
-        </p>
-        {{-- Posts to the same action rather than linking straight at sign-up: claimNotMeSubmit()
-             parks a pending_claim for a signed-out visitor, which is what brings them back to the
-             page afterwards. A bare sign-up link left them on the dashboard with no way back. --}}
-        <form method="POST" action="{{ route('role.claim.not_me.submit', ['subdomain' => $role->subdomain]) }}" class="mt-4">
-            @csrf
-            <button type="submit"
-                class="inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:opacity-90"
-                style="background-color: #2563eb;">
-                {{ __('messages.sign_up') }}
-            </button>
-        </form>
-        @endauth
     </div>
+
+    @auth
+    {{-- No honeypot: authenticated forms never get one, because a password manager fills it. --}}
+    {{-- Bare route(), NOT app_url(route(..., false)). On hosted this route lives in the tenant
+         domain group, so route() already yields the absolute tenant URL, while app_url() would
+         point it at https://app.<domain>/not-me - a host the tenant group explicitly excludes
+         and where no such route exists. app_url() belongs on the app-domain /{subdomain}/...
+         routes, which this is not. Invisible to the suite: routes/web.php gates the hosted
+         block on `hosted && ! is_testing`, so only the path copies exist under PHPUnit and
+         app_url() degrades to url(). --}}
+    <form method="POST" action="{{ route('role.claim.not_me.submit', ['subdomain' => $role->subdomain]) }}"
+          class="gk-pg-actions mt-8">
+        @csrf
+        <a href="{{ $role->getClaimUrl() }}" class="gk-pg-quiet">
+            {{ __('messages.back') }}
+        </a>
+        <button type="submit" class="gk-btn gk-cta-main gk-pg-danger">
+            {{ __('messages.claim_not_me_confirm') }}
+        </button>
+    </form>
+    @else
+    <p class="gk-pg-fine mt-8">
+        {{ __('messages.claim_not_me_sign_in') }}
+    </p>
+    {{-- Posts to the same action rather than linking straight at sign-up: claimNotMeSubmit()
+         parks a pending_claim for a signed-out visitor, which is what brings them back to the
+         page afterwards. A bare sign-up link left them on the dashboard with no way back. --}}
+    <form method="POST" action="{{ route('role.claim.not_me.submit', ['subdomain' => $role->subdomain]) }}" class="gk-pg-actions mt-4">
+        @csrf
+        <a href="{{ $role->getClaimUrl() }}" class="gk-pg-quiet">
+            {{ __('messages.back') }}
+        </a>
+        <button type="submit" class="gk-btn gk-btn-primary gk-cta-main">
+            {{ __('messages.sign_up') }}
+        </button>
+    </form>
+    @endauth
 </div>
 
 </x-app-guest-layout>

@@ -95,16 +95,22 @@
              private shell (no social tags, canonical, structured data, pixel, cart or owner CSS,
              and nothing reported to the owner's Realtime view) and takes only the colours. --}}
         @include('partials.guest-theme', ['role' => $themeRole, 'otherRole' => null, 'selectedGroup' => null])
+        @include('partials.guest-kit-styles')
+        @include('partials.guest-stage-styles')
         @include('partials.guest-ticket-styles')
     </x-slot>
 
     <main id="main-content" class="gk-tkpage" tabindex="-1" data-sale-status="{{ $sale->status }}" data-ticket="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}">
-      <div class="gk-tk-wrap">
-
+      {{-- The way back, on the ground above the sheet, as on every guest page. --}}
+      <div class="gk-topbar gk-tk-topbar gk-tk-topbar-ticket gk-tk-noprint">
         <a href="{{ $eventUrl }}" class="gk-tk-back"{!! $outOfFrame !!}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19l-7-7 7-7"/></svg>
           <span>{{ __('messages.view_event') }}</span>
         </a>
+      </div>
+
+      {{-- The sheet the ticket stands on (partials/guest-ticket-styles). --}}
+      <div class="gk-tk-wrap">
 
         <article class="gk-ticket {{ ($fresh && $valid) ? 'gk-ticket-fresh' : '' }}" id="ticket">
           <div class="gk-ticket-a">

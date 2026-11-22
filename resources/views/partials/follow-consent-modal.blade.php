@@ -280,66 +280,62 @@ document.addEventListener('DOMContentLoaded', function() {
         template: `
 <transition name="follow-consent-fade">
 <div v-if="open"
-    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+    class="gk-fcm-backdrop"
     @click.self="close"
     role="dialog"
     aria-modal="true"
     aria-labelledby="follow-consent-title"
     aria-describedby="follow-consent-desc">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-200 dark:border-gray-700"
-        @click.stop>
+    <div class="gk-fcm" @click.stop>
 
-        <div class="px-6 pt-6 pb-2 flex items-center gap-3">
-            <img v-if="scheduleImage" :src="scheduleImage" :alt="scheduleName"
-                class="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-gray-200 dark:border-gray-700">
-            <h3 id="follow-consent-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex-1">
-                {{ __('messages.follow_consent_title') }} <span v-text="scheduleName"></span>
+        <div class="gk-fcm-head">
+            <img v-if="scheduleImage" :src="scheduleImage" :alt="scheduleName" class="gk-fcm-avatar">
+            <h3 id="follow-consent-title" class="gk-fcm-title">
+                {{ __('messages.follow_consent_title') }} <span v-text="scheduleName" dir="auto"></span>
             </h3>
-            <button type="button" @click="close"
-                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1 rounded focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]"
-                aria-label="{{ __('messages.close') }}">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button type="button" @click="close" class="gk-fcm-close" aria-label="{{ __('messages.close') }}">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
         </div>
 
-        <div id="follow-consent-desc" class="px-6 pb-4 space-y-3">
+        <div id="follow-consent-desc" class="gk-fcm-body">
             {{-- Signed in: unchanged. Following still means a real account and a role_user row. --}}
             <template v-if="!isGuest">
-                <p class="text-sm text-gray-700 dark:text-gray-300">
-                    <span v-text="scheduleName"></span> {{ __('messages.follow_consent_body') }}
+                <p class="gk-fcm-lead">
+                    <span v-text="scheduleName" dir="auto"></span> {{ __('messages.follow_consent_body') }}
                 </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">
+                <p class="gk-fcm-fine">
                     {{ __('messages.follow_consent_body_privacy') }}
                 </p>
+                <label class="gk-fcm-check">
+                    <input type="checkbox" v-model="dontAskAgain">
+                    <span>{{ __('messages.follow_consent_dont_ask_again') }}</span>
+                </label>
             </template>
 
             {{-- Signed out: the modal IS the subscribe form. It used to be a consent gate in front
                  of a redirect to sign_up, which is why 139k guest page views produced 764
                  followers. --}}
             <template v-else>
-                <div v-if="done" class="text-sm text-gray-700 dark:text-gray-300">
+                <div v-if="done" class="gk-fcm-lead">
                     <p v-text="resultMessage"></p>
                 </div>
                 <template v-else>
                     {{-- v-text, not a Blade-rendered string: the schedule name lives in Vue
                          state, and v-text sets textContent so a name containing markup or a
                          mustache is inert. --}}
-                    <p class="text-sm text-gray-700 dark:text-gray-300" v-text="subscribeBody"></p>
+                    <p class="gk-fcm-lead" v-text="subscribeBody"></p>
                     <div>
-                        <label for="follow-consent-email" class="sr-only">{{ __('messages.subscribe_your_email') }}</label>
-                        <input id="follow-consent-email" type="email" v-model="email" required autocomplete="email"
-                            @keyup.enter="submitSubscribe"
-                            placeholder="{{ __('messages.subscribe_your_email') }}"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <label for="follow-consent-email" class="gk-fcm-label">{{ __('messages.subscribe_your_email') }}</label>
+                        <input id="follow-consent-email" type="email" dir="ltr" v-model="email" required autocomplete="email"
+                            @keyup.enter="submitSubscribe" class="gk-fcm-input">
                     </div>
                     <div>
-                        <label for="follow-consent-name" class="sr-only">{{ __('messages.subscribe_your_name') }}</label>
+                        <label for="follow-consent-name" class="gk-fcm-label">{{ __('messages.subscribe_your_name') }}</label>
                         <input id="follow-consent-name" type="text" v-model="subscriberName" required autocomplete="name"
-                            @keyup.enter="submitSubscribe"
-                            placeholder="{{ __('messages.subscribe_your_name') }}"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                            @keyup.enter="submitSubscribe" class="gk-fcm-input">
                     </div>
                     <div class="hidden" aria-hidden="true">
                         <input type="text" v-model="website" tabindex="-1" autocomplete="off">
@@ -349,44 +345,35 @@ document.addEventListener('DOMContentLoaded', function() {
                          COLLECTS an address from somebody with no account, and it disclosed
                          nothing - while the owner sees every subscriber's name and email on the
                          followers tab. Static translated text, so no CSTI surface. --}}
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                    <p class="gk-fcm-fine">
                         {{ __('messages.subscribe_privacy_note') }}
-                        <a href="{{ policy_url('privacy') }}" target="_blank" rel="noopener"
-                            class="text-[var(--brand-blue)] hover:underline">{{ __('messages.privacy_policy') }}</a>
+                        <a href="{{ policy_url('privacy') }}" target="_blank" rel="noopener" class="gk-fcm-link">{{ __('messages.privacy_policy') }}</a>
                     </p>
                     {{-- Same sentence the subscribe panel carries, on the same gate. Static
                          translated text, so no CSTI surface. --}}
-                    <p v-if="accountNote" class="text-xs text-gray-500 dark:text-gray-400">
+                    <p v-if="accountNote" class="gk-fcm-fine">
                         {{ __('messages.subscribe_account_note') }}
                     </p>
-                    <p v-if="resultMessage && !resultSuccess" class="text-xs text-red-600 dark:text-red-400" v-text="resultMessage"></p>
+                    <p v-if="resultMessage && !resultSuccess" class="gk-fcm-err" role="alert" v-text="resultMessage"></p>
                 </template>
             </template>
         </div>
 
-        <div v-if="!isGuest" class="px-6 pb-4">
-            <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                <input type="checkbox" v-model="dontAskAgain"
-                    class="rounded border-gray-300 dark:border-gray-600 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:bg-gray-700">
-                <span>{{ __('messages.follow_consent_dont_ask_again') }}</span>
-            </label>
-        </div>
-
-        <div class="px-6 pb-6 pt-2 flex justify-end gap-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-            <button v-if="!done" type="button" @click="close" :disabled="submitting"
-                class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors disabled:opacity-50">
+        <div class="gk-fcm-foot">
+            <button v-if="!done" type="button" @click="close" :disabled="submitting" class="gk-fcm-btn gk-fcm-btn-alt">
                 {{ __('messages.cancel') }}
             </button>
             {{-- The guest footer used to carry a muted "Sign up and follow" button here, next to
                  the primary. It went with the subscribe panel's matching link: subscribing IS the
                  account now, so offering the account separately was a choice between a thing and
                  the same thing. confirm() is still the signed-in path, and the no-Vue fallback at
-                 the top of this file still navigates to followUrl. --}}
+                 the top of this file still navigates to followUrl. The trigger's own colours: on an
+                 event page each performer's Follow is that schedule's. --}}
             <button v-if="!done" type="button" ref="confirmButtonRef"
                 @click="isGuest ? submitSubscribe() : confirm()" :disabled="submitting"
                 :style="{ backgroundColor: accentColor, color: contrastColor, borderColor: accentColor }"
-                class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90">
-                <svg v-if="submitting" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                class="gk-fcm-btn gk-fcm-btn-main">
+                <svg v-if="submitting" class="animate-spin" width="16" height="16" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                 </svg>
@@ -395,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </button>
             <button v-if="done" type="button" @click="close"
                 :style="{ backgroundColor: accentColor, color: contrastColor, borderColor: accentColor }"
-                class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all hover:opacity-90">
+                class="gk-fcm-btn gk-fcm-btn-main">
                 {{ __('messages.done') }}
             </button>
         </div>
@@ -418,4 +405,32 @@ document.addEventListener('DOMContentLoaded', function() {
 .follow-consent-fade-leave-to {
     opacity: 0;
 }
+{{-- The dialog in the stage's own colours (GuestTheme's --gk-stage-* on body): it opens over the
+     sheet, so it is a card raised on it, in the same inks. The kit's tokens are re-pointed here as
+     .gk-stage does, so the kit's pieces inside read on it. --}}
+.gk-fcm-backdrop { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgb(0 0 0 / .6); }
+.gk-fcm { --gk-ink: var(--gk-stage-ink, #111827); --gk-ink-2: var(--gk-stage-ink-2, #374151); --gk-ink-3: var(--gk-stage-ink-3, #5f6875); --gk-line: color-mix(in srgb, var(--gk-ink) 14%, transparent); box-sizing: border-box; width: 100%; max-width: 28rem; max-height: calc(100vh - 2rem); overflow: auto; border-radius: 1.5rem; background: var(--gk-stage-raised, #ffffff); color: var(--gk-ink); box-shadow: 0 2rem 4rem -1rem rgb(0 0 0 / .5); }
+.gk-fcm-head { display: flex; align-items: center; gap: .75rem; padding: 1.5rem 1.5rem .75rem; }
+.gk-fcm-avatar { flex: none; width: 2.75rem; height: 2.75rem; border-radius: .75rem; object-fit: cover; }
+.gk-fcm-title { flex: 1 1 auto; min-width: 0; margin: 0; font-size: 1.25rem; font-weight: 750; line-height: 1.25; color: var(--gk-ink); overflow-wrap: anywhere; }
+.gk-fcm-close { display: grid; flex: none; place-items: center; width: 2.25rem; height: 2.25rem; border: 0; border-radius: .625rem; background: none; color: var(--gk-ink-3); cursor: pointer; }
+.gk-fcm-close:hover { background: var(--gk-stage-well); color: var(--gk-ink); }
+.gk-fcm-body { display: flex; flex-direction: column; gap: .875rem; padding: 0 1.5rem 1.25rem; }
+.gk-fcm-lead { margin: 0; font-size: 1rem; line-height: 1.55; color: var(--gk-ink-2); }
+.gk-fcm-lead p { margin: 0; }
+.gk-fcm-fine { margin: 0; font-size: .8125rem; line-height: 1.55; color: var(--gk-ink-3); }
+.gk-fcm-link { color: var(--es-accent-readable); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.gk-fcm-label { display: block; margin-bottom: .375rem; font-size: .875rem; font-weight: 500; color: var(--gk-ink-2); }
+.gk-fcm .gk-fcm-input { display: block; box-sizing: border-box; width: 100%; height: 3.125rem; padding: 0 .875rem; border: 1px solid var(--gk-line); border-radius: .75rem; background: var(--gk-stage, #ffffff); color: var(--gk-ink); font: inherit; font-size: 1rem; box-shadow: none; }
+.gk-fcm .gk-fcm-input:focus { border-color: var(--es-accent-readable); outline: none; box-shadow: 0 0 0 1px var(--es-accent-readable); }
+.gk-fcm-check { display: flex; align-items: center; gap: .625rem; font-size: .9375rem; color: var(--gk-ink-2); cursor: pointer; }
+.gk-fcm-check input { width: 1.125rem; height: 1.125rem; accent-color: var(--es-accent); }
+.gk-fcm-err { margin: 0; font-size: .875rem; font-weight: 600; color: var(--gk-bad); }
+.gk-fcm-foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .75rem; padding: 1rem 1.5rem 1.5rem; border-top: 1px solid var(--gk-line); }
+.gk-fcm-btn { display: inline-flex; flex: 1 1 8rem; align-items: center; justify-content: center; gap: .5rem; min-height: 3.125rem; padding: 0 1.25rem; border: 1px solid transparent; border-radius: .75rem; font: inherit; font-size: 1rem; font-weight: 650; cursor: pointer; transition: background-color var(--gk-swap, 120ms), filter var(--gk-swap, 120ms); }
+.gk-fcm-btn:disabled { opacity: .55; cursor: not-allowed; }
+.gk-fcm-btn:focus-visible, .gk-fcm-close:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+.gk-fcm-btn-alt { border-color: color-mix(in srgb, var(--gk-ink) 22%, transparent); background: transparent; color: var(--gk-ink); }
+.gk-fcm-btn-alt:hover { background: var(--gk-stage-well); }
+.gk-fcm-btn-main:hover { filter: brightness(1.08); }
 </style>

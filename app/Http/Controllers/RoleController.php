@@ -1771,7 +1771,7 @@ class RoleController extends Controller
      *                                   placeholder (canMergeRoles() would then refuse every merge
      *                                   the page offered, and the notice would never clear).
      */
-    private function mergeableGroups(array $candidateGroups, array $dismissedHashes, \Illuminate\Support\Collection $levelsByRoleId, array $runIds): array
+    private function mergeableGroups(array $candidateGroups, array $dismissedHashes, Collection $levelsByRoleId, array $runIds): array
     {
         // Mirrors isEditableBy() in memory: owner or admin always, a follower only where nobody
         // runs it. Deciding what to DISPLAY is all this does - mergeMyDuplicatesGroup() still
@@ -7135,6 +7135,12 @@ class RoleController extends Controller
         // The two switches are stored here and not by the fill above: the map's settings have a
         // table of their own, because `roles` cannot take another column. Only on a save that
         // carries the switch, so a save from anywhere else leaves the map as it was.
+        // The page style (Style > Background), in a table of its own as the map's switches are:
+        // only on a save that carries it.
+        if (in_array($request->input('page_mode'), GuestPageSetting::MODES, true)) {
+            GuestPageSetting::store($role, ['page_mode' => $request->input('page_mode')]);
+        }
+
         $venueMapWasOn = VenueMap::enabledFor($role);
 
         if ($request->has('show_venues_map') && VenueMap::offeredTo($role)) {

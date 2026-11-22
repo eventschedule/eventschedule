@@ -964,7 +964,7 @@
      as role/partials/card-ticket-badge.) The admin and the dashboard keep both lists and the
      CSS switch, as before. --}}
 {{-- List View Skeleton (Desktop) --}}
-        <div v-if="currentView === 'list' && isLoadingEvents" class="hidden md:block space-y-4 animate-pulse">
+        <div v-if="currentView === 'list' && isLoadingEvents && {{ $guestRows ? 'false' : 'true' }}" class="hidden md:block space-y-4 animate-pulse">
             {{-- Date Header Skeleton (matches the real header's centered translucent pill) --}}
             <div class="flex items-center gap-4">
                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
@@ -1011,7 +1011,10 @@
             @endfor
         </div>
 
-{{-- List View (Desktop) --}}
+{{-- List View (Desktop). The admin's and the dashboard's: a guest page has one list at every
+     width, the rows below (role/partials/guest-row), which the stage lays out as the wide list
+     from a tablet up (partials/guest-stage-styles). --}}
+        @unless ($guestRows)
         <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && !isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="hidden md:block {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
             {{-- Upcoming Events --}}
             <div v-if="allListGroups.length" class="space-y-8">
@@ -1845,9 +1848,10 @@
                 </div>
             </div>
         </div>
+        @endunless
 
         {{-- List View Skeleton (Mobile) --}}
-        <div v-if="currentView === 'list' && isLoadingEvents" class="{{ $guestRows ? 'gk-list md:hidden' : 'md:hidden' }} animate-pulse">
+        <div v-if="currentView === 'list' && isLoadingEvents" class="{{ $guestRows ? 'gk-list' : 'md:hidden' }} animate-pulse">
             {{-- Date Header Skeleton --}}
             <div class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white dark:bg-gray-800">
                 <div class="px-4 pb-5 pt-3 flex items-center gap-4">
@@ -1888,7 +1892,7 @@
         {{-- List View (Mobile) --}}
         {{-- v-if on a guest page, and only on a phone: a list that is not the one on screen is
              not in the page at all (the cards above are the list from a tablet up). --}}
-        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="{{ $guestRows ? 'gk-list' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
+        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="{{ $guestRows ? 'gk-list' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
             @if ($guestRows)
             {{-- The guest list on a phone: each day under its date, a card for each event
                  (partials/guest-kit-styles: .gk-day, .gk-row).
@@ -1897,7 +1901,17 @@
                  second look: performers, the agenda, polls and the fan buttons are on the
                  cards a wider screen gets, and on the event's own page. data-reveal-* are the
                  hooks the schedule's list animation uses (resources/css/list-reveal.css). --}}
-            <div v-if="allListGroups.length > 0" class="gk-days">
+            {{-- One or two coming events: large cards, each saying its own day (there are no
+                 day headings to stand under), one across or two side by side. Three or more are
+                 the list (his call, 2026-11-22). --}}
+            <ul v-if="fewCount" class="gk-few" :class="'gk-few-' + fewCount" :style="{ '--gk-box': fewBox }">
+                <template v-for="group in allListGroups" :key="'few-' + group.date">
+                    <template v-for="event in group.events" :key="'few-' + event.uniqueKey">
+                        @include('role/partials/guest-row', ['rowFeature' => true])
+                    </template>
+                </template>
+            </ul>
+            <div v-else-if="allListGroups.length > 0" class="gk-days">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-m-' + group.date">
                     {{-- The end of the upcoming rows, which is above the past ones. --}}
                     <template v-if="groupIndex === firstPastGroupIndex">
@@ -1915,6 +1929,11 @@
                             <span v-if="dayWord(group.date)" class="gk-dayhead-word" v-text="dayWord(group.date)"></span>
                             {{-- A heading, as the day is over the cards a wider screen gets. --}}
                             <h2 class="gk-dayhead-title" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $ownPage) }}></h2>
+                            {{-- The same day as the list's date column draws it from a tablet up
+                                 (partials/guest-stage-styles): the heading above is what is read. --}}
+                            <span class="gk-dayhead-big" aria-hidden="true"><span class="gk-dh-week" v-text="formatDayName(group.date)"></span><span class="gk-dh-num" v-text="getDayNum(group.date)"></span><span class="gk-dh-month" v-text="getMonthLong(group.date)"></span></span>
+                            {{-- How many that day, as the wide list's date line said. --}}
+                            <span class="gk-dh-count"><span v-text="group.events.filter(e => isEventVisible(e)).length"></span>&nbsp;<span v-if="group.events.filter(e => isEventVisible(e)).length === 1">{{ __('messages.event') }}</span><span v-else>{{ __('messages.events') }}</span></span>
                         </div>
                         <ul class="gk-rows">
                             <template v-for="event in group.events" :key="'list-mob-' + event.uniqueKey">
@@ -1974,7 +1993,7 @@
             <div v-if="!hidePastEvents && hasMorePastEvents && activeFilterCount === 0" class="mt-6 text-center">
                 <button @click.stop="loadMorePastEvents()"
                         :disabled="loadingPastEvents"
-                        class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                        class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 shadow-sm {{ $guestRows ? 'gk-fill-btn' : 'transition-all duration-200 hover:scale-105 hover:shadow-lg' }}"
                         style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}">
                     <svg v-if="loadingPastEvents" class="animate-spin -ms-1 me-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -3322,6 +3341,32 @@ const calendarApp = createApp({
         // the end of the upcoming rows, which is above the past ones.
         firstPastGroupIndex() {
             return this.allListGroups.findIndex(group => group.events.every(e => e._isPast));
+        },
+        // A guest list of one or two coming events, and nothing else (no past rows, no
+        // "Show more", no rows cut by the server): drawn as large cards (.gk-few), so the flyers
+        // fill the page instead of standing small in a list built for dozens. 0 otherwise.
+        fewCount() {
+            if ({{ $guestRows && ! $guestEmbed ? 'false' : 'true' }} || this.hasMoreListRows || this.listTruncated) return 0;
+            let n = 0;
+            for (const group of this.allListGroups) {
+                for (const e of group.events) {
+                    if (e._isPast) return 0;
+                    if (this.isEventVisible(e) && ++n > 2) return 0;
+                }
+            }
+            return n;
+        },
+        // Two large cards share one picture box, so their feet line up: the shape of
+        // the tallest picture among them (a poster when any is a flyer, wider when all are photos).
+        fewBox() {
+            if (!this.fewCount) return null;
+            let r = 4 / 3;
+            for (const group of this.allListGroups) {
+                for (const e of group.events) {
+                    if (this.isEventVisible(e) && (e.image_url || e.flyer_url) && !e.is_password_protected) r = Math.min(r, Number(this.rowRatio(e)));
+                }
+            }
+            return Math.max(0.8, r).toFixed(3);
         },
         eventsGroupedByDate() {
             const grouped = {};
@@ -4786,6 +4831,18 @@ const calendarApp = createApp({
             const [year, month, day] = dateStr.split('-').map(Number);
             const eventDate = new Date(year, month - 1, day);
             return eventDate.toLocaleDateString(this.languageCode, { month: 'short' }).toUpperCase();
+        },
+        getMonthLong(dateStr) {
+            if (!dateStr) return '';
+            const [year, month, day] = dateStr.split('-').map(Number);
+            return new Date(year, month - 1, day).toLocaleDateString(this.languageCode, { month: 'long' });
+        },
+        // The shape of a large card's picture box: the flyer's own, held between a tall poster
+        // (0.7) and a square, so a landscape flyer is not a strip and a tall one not a column.
+        rowRatio(event) {
+            const w = Number(event.flyer_url && event.flyer_width), h = Number(event.flyer_url && event.flyer_height);
+            const r = w > 0 && h > 0 ? w / h : 0.8;
+            return Math.min(4 / 3, Math.max(0.7, r)).toFixed(3);
         },
         getDayNum(dateStr) {
             if (!dateStr) return '';

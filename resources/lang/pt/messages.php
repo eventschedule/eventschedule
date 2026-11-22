@@ -8474,4 +8474,8 @@ return [
     'mail_flag_dismissed' => 'A sinalização de :name foi removida.',
     'mail_paused_reason_word' => 'Uma palavra vigiada em uma newsletter',
     'admin_alert_mail_flagged' => '{1} :count conta pagante foi sinalizada|[0,*] :count contas pagantes foram sinalizadas',
+    'page_style' => 'Estilo da página',
+    'page_style_light' => 'Claro',
+    'page_style_dark' => 'Escuro',
+    'page_style_help' => 'Automático usa um estilo claro quando o fundo é uma cor ou gradiente claro, e um escuro nos outros casos. Ou escolha uma das três paletas claras ou três escuras.',
 ];

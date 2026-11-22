@@ -158,7 +158,7 @@ class CustomFieldEventPageTest extends TestCase
         $row = $this->factsRow($venue, $this->event($venue, ['new_0' => '1']));
 
         $this->assertStringContainsString('gk-fact-flag', $row);
-        $this->assertMatchesRegularExpression('/<dt class="text-lg[^"]*"[^>]*><bdi>Step-free access<\/bdi><\/dt>/', $row);
+        $this->assertMatchesRegularExpression('/<dt class="gk-fact-main[^"]*"[^>]*><bdi>Step-free access<\/bdi><\/dt>/', $row);
     }
 
     /** "Oct 12, 2026" in large type under the event's own date row reads as a second date for the event. */
@@ -168,7 +168,7 @@ class CustomFieldEventPageTest extends TestCase
 
         $row = $this->factsRow($venue, $this->event($venue, ['new_0' => '2026-10-12']));
 
-        $this->assertMatchesRegularExpression('/<dt class="text-lg[^"]*"[^>]*><bdi>Sign up by<\/bdi><\/dt>/', $row);
+        $this->assertMatchesRegularExpression('/<dt class="gk-fact-main[^"]*"[^>]*><bdi>Sign up by<\/bdi><\/dt>/', $row);
         $this->assertStringContainsString('Oct 12, 2026', $row);
     }
 

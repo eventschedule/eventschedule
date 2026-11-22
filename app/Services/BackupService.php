@@ -231,6 +231,7 @@ class BackupService
         // What the guest page shows lives beside the schedule too (guest_page_settings).
         $roleData['guest_page_settings'] = [
             'show_next_event' => (bool) $role->guestPageSetting->show_next_event,
+            'page_mode' => $role->guestPageSetting->page_mode ?? 'auto',
         ];
 
         // When ticket holders are reminded lives beside the schedule too (ticket_reminder_settings).
@@ -2012,6 +2013,9 @@ class BackupService
 
         if (is_array($data['guest_page_settings'] ?? null) && array_key_exists('show_next_event', $data['guest_page_settings'])) {
             GuestPageSetting::store($role, ['show_next_event' => (bool) $data['guest_page_settings']['show_next_event']]);
+        }
+        if (in_array($data['guest_page_settings']['page_mode'] ?? null, GuestPageSetting::MODES, true)) {
+            GuestPageSetting::store($role, ['page_mode' => $data['guest_page_settings']['page_mode']]);
         }
 
         if (is_array($data['ticket_reminder_settings'] ?? null)) {

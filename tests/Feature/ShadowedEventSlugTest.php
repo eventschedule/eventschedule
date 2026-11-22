@@ -274,7 +274,8 @@ class ShadowedEventSlugTest extends TestCase
         $board = $this->get(route('carpool.index', ['subdomain' => $venue->subdomain, 'event_hash' => UrlUtils::encodeId($rides->id)]))
             ->assertOk()
             ->getContent();
-        $back = '~<a href="([^"]+)"[^>]*>\s*(?:←|→)\s*'.preg_quote(__('messages.carpool_back_to_event'), '~').'~u';
+        // The arrow is an icon now, so anything inside the link may come before its words.
+        $back = '~<a href="([^"]+)"[^>]*>(?:(?!</a>).)*?'.preg_quote(__('messages.carpool_back_to_event'), '~').'~us';
         $this->assertSame(1, preg_match($back, $board, $m), 'the carpool page links back to its event');
         $this->get(html_entity_decode($m[1]))->assertOk()->assertViewIs('event.show-guest')->assertSee('Ride Share Night');
 

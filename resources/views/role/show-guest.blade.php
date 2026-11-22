@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :fonts="$fonts" :has-inline-lang-toggle="$role->headerStyle() !== 'banner'" :ad-slot="true" :banner-bar="true" :example-bar="true" :cart="true" :page-title="isset($selectedGroup) && $selectedGroup ? $selectedGroup->translatedName() : null" :upcoming="$upcoming ?? null" :schedule-home="! (isset($selectedGroup) && $selectedGroup)" :mobile-banner-image="(request()->embed || request()->graphic) ? null : $role->backgroundImageUrl(960, pageWidth: true)">
+<x-app-guest-layout :role="$role" :fonts="$fonts" :has-inline-lang-toggle="$role->headerStyle() !== 'banner'" :ad-slot="true" :banner-bar="true" :example-bar="true" :cart="true" :page-title="isset($selectedGroup) && $selectedGroup ? $selectedGroup->translatedName() : null" :upcoming="$upcoming ?? null" :schedule-home="! (isset($selectedGroup) && $selectedGroup)" :mobile-banner-image="null">
 
   @php
    $isRtl = is_rtl();
@@ -93,15 +93,17 @@ html[data-es-view="list"] #gp-calendar {
         @include('role.partials.headers.' . $headerStyle)
     @endif
     <div>
-      <div class="container mx-auto pt-3 md:pt-4 pb-3 md:pb-10 px-5 md:mt-0 relative z-10"
-      >
+      <div class="gk-stage gk-sched relative z-10">
         {{-- Mobile background wrapper - covers header and carousel only. It is the page's LCP
              element on a phone, so an upload is painted from its 960 derivative (a built-in
              background is already a phone-sized WebP), and the layout preloads the same URL
              (AppGuestLayout::$mobileBannerImage). An animated upload is its original, which
              moves (pageWidth). --}}
         @php
-            $mobileBannerUrl = request()->embed ? null : $role->backgroundImageUrl(960, pageWidth: true);
+            // Not since the 2026-11 redesign: the background is drawn as the glow at the top of the
+            // page (layouts/app-guest), and a photo at full strength behind the header made the
+            // name unreadable on a phone.
+            $mobileBannerUrl = null;
         @endphp
         @if ($mobileBannerUrl)
         <div class="relative {{ $headerStyle === 'banner' ? '-mt-10 pt-10' : '' }} md:m-0 md:p-0">
@@ -113,8 +115,18 @@ html[data-es-view="list"] #gp-calendar {
             <div class="absolute {{ $headerStyle === 'banner' ? '-top-40' : '-top-3' }} -bottom-3 left-1/2 -translate-x-1/2 w-screen bg-cover bg-no-repeat bg-top md:hidden -z-10"
                  style="background-image: url('{{ css_url($mobileBannerUrl) }}');"></div>
         @endif
+        {{-- Known before the header is drawn: where sponsors or the venue map stand between the
+             header and the list, the list's own bar (its heading, the filter and the view switch)
+             is drawn after them, directly above the events it acts on. --}}
+        @php
+          $sponsorLogos = $role->shownSponsorLogos();
+          $venueMapBand = (request()->embed || request()->graphic)
+              ? null
+              : \App\Services\VenueMap::band($role, $selectedGroup ?? null, $upcoming ?? null);
+          $toolsBelow = $headerStyle === 'banner' && (! empty($sponsorLogos) || $venueMapBand);
+        @endphp
         @if ($headerStyle === 'banner')
-        @include('role.partials.headers.banner')
+        @include('role.partials.headers.banner', ['toolsBelow' => $toolsBelow])
         @endif
 
         @if (! $role->isTalent() && ! $role->hide_videos)
@@ -164,7 +176,7 @@ html[data-es-view="list"] #gp-calendar {
         @endphp
         @foreach($upcomingEventsWithVideos as $eventData)
         @endforeach
-        <div id="gp-video-carousel" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mt-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
+        <div id="gp-video-carousel" class="gk-sec gk-sec-rule flex flex-col gap-6 mt-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
           <!-- Carousel Container -->
           <div class="relative group">
             <!-- Carousel Track -->
@@ -323,14 +335,12 @@ html[data-es-view="list"] #gp-calendar {
             70%  { transform: scaleX(1.003); }
             100% { transform: scaleX(1); }
         }
+        {{-- The month lies on the page's sheet (partials/guest-stage-styles), with no panel of its own. --}}
         .calendar-panel-border {
-          background: rgba(255,255,255,0.95) !important;
-          backdrop-filter: blur(4px) !important;
-          border-radius: 1rem !important;
+          background: transparent !important;
+          backdrop-filter: none !important;
+          border-radius: 0 !important;
           margin-top: 1rem;
-        }
-        .dark .calendar-panel-border {
-          background: rgba(30,30,30,0.95) !important;
         }
         .calendar-panel-border-transparent {
           background: transparent !important;
@@ -357,7 +367,7 @@ html[data-es-view="list"] #gp-calendar {
 
       {{-- shownSponsorLogos(), not getSponsorLogos(): the owner can switch the section off without
            deleting the sponsors (Page content > Sponsors), and the margin test below reads the same list. --}}
-      @php $sponsorLogos = $role->shownSponsorLogos(); @endphp
+      {{-- $sponsorLogos is read above the header. --}}
 
       @if (!empty($sponsorLogos))
       <div class="mt-2 md:mt-6 mb-6">
@@ -373,15 +383,18 @@ html[data-es-view="list"] #gp-calendar {
            in the same column as both. Only where the owner switched it on, its first pass of
            address lookups is done and two venues have a position (VenueMap::band()), and never
            in an embed, which is the list alone, nor in the picture ?graphic=1 renders. --}}
-      @php
-        $venueMapBand = (request()->embed || request()->graphic)
-            ? null
-            : \App\Services\VenueMap::band($role, $selectedGroup ?? null, $upcoming ?? null);
-      @endphp
+      {{-- $venueMapBand is read above the header. --}}
       @if ($venueMapBand)
       <div class="{{ empty($sponsorLogos) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 mx-auto transition-[max-width] duration-300 ease-in-out" data-view-width data-map-wrap
            style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
           <x-venue-map :role="$role" :band="$venueMapBand" :group="$selectedGroup ?? null" />
+      </div>
+      @endif
+
+      @if ($toolsBelow)
+      <div class="gk-tools-band mx-auto px-0 md:px-6 lg:px-16 mb-2 transition-[max-width] duration-300 ease-in-out" data-view-width
+           style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
+          @include('role.partials.headers.tools', ['toolsGift' => false])
       </div>
       @endif
 
@@ -442,7 +455,7 @@ html[data-es-view="list"] #gp-calendar {
         @endphp
         <div class="mt-2 md:mt-6 mb-4 px-0 md:px-6 lg:px-16 mx-auto transition-[max-width] duration-300 ease-in-out" data-view-width data-lead-wrap data-view="{{ $role->activeEventLayout() }}"
              style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
-          <a id="gp-next-event" class="gk-panel gk-lead {{ $leadImage ? '' : 'gk-lead-bare' }} bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm {{ $role->isRtl() ? 'rtl' : '' }}"
+          <a id="gp-next-event" class="gk-panel gk-lead {{ $leadImage ? '' : 'gk-lead-bare' }} {{ $role->isRtl() ? 'rtl' : '' }}"
              href="{{ $leadUrl }}" data-funnel="list_tap">
             @if ($leadImage)
               {{-- lazy: in the list view this card is display:none, and a picture that is not
@@ -496,7 +509,7 @@ html[data-es-view="list"] #gp-calendar {
       <div class="mb-6 mx-auto w-full transition-[max-width] duration-300 ease-in-out"
            data-view-width
            style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
-        @include('partials.subscribe-panel', ['panelClass' => 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 sm:py-8'])
+        @include('partials.subscribe-panel', ['panelClass' => 'gk-card gk-band'])
       </div>
 
       {{-- The schedule's photo gallery: below the calendar and its subscribe panel, because the
@@ -504,7 +517,7 @@ html[data-es-view="list"] #gp-calendar {
            panel here (56rem in list view, the full container in calendar view). --}}
       @if ($galleryImages->isNotEmpty())
       <section id="gp-gallery" aria-labelledby="es-gallery-title"
-          class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 sm:py-8 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto {{ $role->isRtl() ? 'rtl' : '' }}"
+          class="gk-sec gk-sec-rule mb-6 transition-[max-width] duration-300 ease-in-out mx-auto {{ $role->isRtl() ? 'rtl' : '' }}"
           data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
         @include('partials.gallery-card', ['galleryImages' => $galleryImages, 'galleryVariant' => 'schedule', 'galleryName' => $role->translatedName(), 'galleryLabel' => $role->customLabel('gallery'), 'galleryPriority' => false, 'accentColor' => $accentColor])
       </section>
@@ -526,7 +539,7 @@ html[data-es-view="list"] #gp-calendar {
         @if ($videoCount > 0)
           <div
               id="gp-videos"
-              class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-2xl px-6 lg:px-16 py-6 flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
+              class="gk-sec gk-sec-rule flex flex-col gap-6 mb-6 transition-[max-width] duration-300 ease-in-out mx-auto" data-view-width style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"
             >
               <div class="grid grid-cols-1 md:grid-cols-{{ $gridCols }} gap-8">
               @foreach ($videoLinks as $link)

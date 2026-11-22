@@ -8473,4 +8473,8 @@ return [
     'mail_flag_dismissed' => 'Se quitó la marca de :name.',
     'mail_paused_reason_word' => 'Una palabra vigilada en un boletín',
     'admin_alert_mail_flagged' => '{1} :count cuenta de pago fue marcada|[0,*] :count cuentas de pago fueron marcadas',
+    'page_style' => 'Estilo de la página',
+    'page_style_light' => 'Claro',
+    'page_style_dark' => 'Oscuro',
+    'page_style_help' => 'Automático usa un estilo claro cuando el fondo es un color o degradado claro, y uno oscuro en los demás casos. O elige una de las tres paletas claras o tres oscuras.',
 ];

@@ -2,103 +2,222 @@
 
 @if (!empty($sponsors))
 @php
-    // Panel background: null keeps the default translucent card, 'transparent' lets the
-    // schedule's own background show through, a hex value paints a custom colour.
+    // The owner's panel colour is the colour of each logo's CHIP, not of a block across the
+    // page: null is a soft white, 'transparent' sets the logos straight on the page, a hex
+    // paints the chips. A light chip lets a logo's own white box melt into it (multiply).
     $isTransparentPanel = $background === 'transparent';
     $customPanelColor = (is_string($background) && preg_match('/^#[0-9a-fA-F]{6}$/', $background)) ? $background : null;
-    $panelClasses = ($isTransparentPanel || $customPanelColor) ? '' : 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm';
-    $panelTextColor = $customPanelColor ? \App\Utils\ColorUtils::getContrastColor($customPanelColor) : null;
-
-    // Denser layout once the list outgrows the original 12-logo cap, otherwise a long
-    // partner list turns into a dozen rows of mostly empty space.
-    $sponsorCount = count($sponsors);
-    $isDense = $sponsorCount > 12;
-    if ($sponsorCount === 1) {
-        $gridColumns = 'grid-cols-1';
-    } elseif ($isDense) {
-        $gridColumns = 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6';
-    } else {
-        $gridColumns = 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4';
+    // Kept neutral: the owner's colour gives the chips their brightness, never their hue. A cream
+    // or a pink chip clashed with the page and with the logos on it; a soft grey with a breath of
+    // the page's own ink-blue sits under any logo.
+    if ($customPanelColor) {
+        [, , $chipLightness] = \App\Utils\ColorUtils::toHsl($customPanelColor);
+        $customPanelColor = \App\Utils\ColorUtils::fromHsl(0.56, 0.1, $chipLightness > 0.5 ? max(0.9, min($chipLightness, 0.95)) : min(max($chipLightness, 0.16), 0.24));
     }
-    $gridGap = $isDense ? 'gap-4 sm:gap-6' : 'gap-8';
-    $tileHeight = $isDense ? 'h-20' : 'h-24';
-    $logoStyles = $isDense ? 'max-height: 3.5rem; max-width: 120px;' : 'max-height: 5rem; max-width: 160px;';
+    $chipInk = $customPanelColor ? \App\Utils\ColorUtils::getContrastColor($customPanelColor) : null;
+    $isDarkChip = $chipInk === '#ffffff';
+
+    // Gold leads, in a row of its own and larger; then silver, bronze and the rest, each in
+    // the owner's own order. A sponsor with neither a logo nor a name has nothing to show.
+    $tierRank = ['gold' => 0, 'silver' => 1, 'bronze' => 2];
+    $items = [];
+    foreach (array_values($sponsors) as $i => $sponsor) {
+        $name = trim((string) ($sponsor['display_name'] ?? ''));
+        $logo = (string) ($sponsor['logo_url'] ?? '');
+        if ($name === '' && $logo === '') {
+            continue;
+        }
+        $tier = in_array($sponsor['tier'] ?? null, ['gold', 'silver', 'bronze'], true) ? $sponsor['tier'] : null;
+        // The url is client-built JSON that nothing validates: linked only through safeHref(),
+        // and a sponsor without a safe link shows unlinked.
+        $href = \App\Utils\UrlUtils::safeHref($sponsor['url'] ?? null);
+        $host = $href ? preg_replace('/^www\./i', '', (string) parse_url($href, PHP_URL_HOST)) : '';
+        $items[] = ['name' => $name, 'logo' => $logo, 'tier' => $tier, 'href' => $href, 'alt' => $name !== '' ? $name : $host, 'rank' => $tierRank[$tier] ?? 3, 'i' => $i];
+    }
+    usort($items, fn ($a, $b) => [$a['rank'], $a['i']] <=> [$b['rank'], $b['i']]);
+    $lead = array_values(array_filter($items, fn ($s) => $s['tier'] === 'gold'));
+    $rest = array_values(array_filter($items, fn ($s) => $s['tier'] !== 'gold'));
+    // Every sponsor gold is no distinction: one list.
+    if (! $rest) {
+        [$lead, $rest] = [[], $lead];
+    }
+    // Names under the chips for every sponsor or for none, so the rows keep one rhythm. A
+    // name not shown is still the logo's alt text and its tooltip.
+    $logoItems = array_filter($items, fn ($s) => $s['logo'] !== '');
+    $withNames = $logoItems && count(array_filter($logoItems, fn ($s) => $s['name'] !== '')) === count($logoItems);
+
+    $rootClasses = 'es-sp es-sponsors-pending'
+        .($isTransparentPanel ? ' es-sp-bare' : '')
+        .($isDarkChip ? ' es-sp-dark' : '')
+        .($withNames ? ' es-sp-named' : '');
+    $rootStyle = 'max-width: '.$maxWidth.';'.($customPanelColor ? ' --sp-chip: '.$customPanelColor.'; --sp-chip-ink: '.$chipInk.';' : '');
 @endphp
 
 @once
 <style {!! nonce_attr() !!}>
-    /* The banner is revealed as one block once every logo has loaded, so visitors never
-       watch it fill in one tile at a time. Width transitions stay off until then so the
-       view-toggle animation can't fire while the panel is still being laid out. */
+    {{-- The section is revealed as one block once every logo has loaded (and been sized), so
+         visitors never watch it fill in one logo at a time. Width transitions stay off until
+         then so the view-toggle animation can't fire while it is still being laid out. The look
+         itself is in partials/guest-stage-styles ("Sponsors on the sheet"). --}}
     [data-sponsor-grid] { transition: opacity 0.3s ease-in-out, max-width 0.3s ease-in-out; }
     [data-sponsor-grid].es-sponsors-pending { opacity: 0; transition: none !important; }
 </style>
 <noscript><style>[data-sponsor-grid].es-sponsors-pending { opacity: 1 !important; }</style></noscript>
 @endonce
 
-<div
+<section
     id="gp-sponsors"
-    class="w-full {{ $panelClasses }} sm:rounded-2xl px-6 py-6 mx-auto es-sponsors-pending"
+    class="{{ $rootClasses }}"
     data-sponsor-grid
     data-view-width
-    style="max-width: {{ $maxWidth }};{{ $customPanelColor ? ' background-color: '.$customPanelColor.';' : '' }}"
+    style="{{ $rootStyle }}"
 >
-    <h3 class="text-lg font-semibold {{ $panelTextColor ? '' : 'text-gray-900 dark:text-gray-100' }} text-center mb-6"
-        @if ($panelTextColor) style="color: {{ $panelTextColor }}" @endif>
-        {{ $title }}
-    </h3>
-    <div class="grid {{ $gridColumns }} {{ $gridGap }} place-content-center">
-        @foreach ($sponsors as $sponsor)
-            @php
-                // The url is client-built JSON that nothing validates: linked only through
-                // safeHref(), and a sponsor without a safe link shows unlinked.
-                $sponsorHref = \App\Utils\UrlUtils::safeHref($sponsor['url'] ?? null);
-            @endphp
-            <div class="flex flex-col items-center text-center">
-                @if ($sponsorHref)
-                    <a href="{{ $sponsorHref }}" target="_blank" rel="noopener noreferrer nofollow" class="flex flex-col items-center text-center w-full hover:opacity-80 transition-opacity">
-                @endif
-                <div class="{{ $tileHeight }} w-full flex items-end justify-center pb-2 overflow-hidden">
-                    @if (!empty($sponsor['logo_url']))
-                        <img src="{{ $sponsor['logo_url'] }}"
-                            alt="{{ $sponsor['display_name'] }}"
-                            style="{{ $logoStyles }}"
-                            class="object-contain"
-                            loading="eager"
-                            decoding="async" />
-                    @endif
-                </div>
-                @if (!empty($sponsor['display_name']))
-                    <span class="text-xs {{ $panelTextColor ? 'opacity-70' : 'text-gray-600 dark:text-gray-400' }} truncate max-w-full"
-                        @if ($panelTextColor) style="color: {{ $panelTextColor }}" @endif>{{ $sponsor['display_name'] }}</span>
-                @endif
-                @if (!empty($sponsor['tier']))
-                    <span class="inline-block text-xs px-1.5 py-0.5 rounded mt-0.5
-                        {{ $sponsor['tier'] === 'gold' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' : '' }}
-                        {{ $sponsor['tier'] === 'silver' ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300' : '' }}
-                        {{ $sponsor['tier'] === 'bronze' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' : '' }}
-                    ">{{ __('messages.' . $sponsor['tier']) }}</span>
-                @endif
-                @if ($sponsorHref)
-                    </a>
-                @endif
-            </div>
-        @endforeach
+    <div class="es-sp-head">
+        <h3 class="es-sp-title">{{ $title }}</h3>
+        <button type="button" class="es-sp-toggle" data-sp-toggle hidden aria-expanded="false"
+            data-more="{{ __('messages.show_more') }}" data-less="{{ __('messages.show_less') }}">{{ __('messages.show_more') }}</button>
     </div>
-</div>
+    @foreach (array_filter([$lead, $rest]) as $group)
+        @php $isLead = $loop->first && $lead; @endphp
+        <div class="es-sp-view {{ $isLead ? 'es-sp-view-lead' : '' }}" @unless ($isLead) data-sp-view @endunless>
+            <div class="es-sp-track" @unless ($isLead) data-sp-track @endunless>
+                <ul class="es-sp-list" role="list" @unless ($isLead) data-sp-list @endunless>
+                    @foreach ($group as $sponsor)
+                        <li class="es-sp-item {{ $sponsor['tier'] ? 'es-sp-'.$sponsor['tier'] : '' }}">
+                            @if ($sponsor['href'])
+                                <a href="{{ $sponsor['href'] }}" target="_blank" rel="noopener noreferrer nofollow" class="es-sp-link" @if ($sponsor['name'] !== '') title="{{ $sponsor['name'] }}" @endif>
+                            @else
+                                <span class="es-sp-link" @if ($sponsor['name'] !== '') title="{{ $sponsor['name'] }}" @endif>
+                            @endif
+                                <span class="es-sp-chip">
+                                    @if ($sponsor['logo'] !== '')
+                                        <img src="{{ $sponsor['logo'] }}" alt="{{ $sponsor['alt'] }}" class="es-sp-logo" loading="eager" decoding="async" />
+                                    @else
+                                        <span class="es-sp-word"><bdi>{{ $sponsor['name'] }}</bdi></span>
+                                    @endif
+                                </span>
+                                @if ($withNames && $sponsor['logo'] !== '')
+                                    <span class="es-sp-name" aria-hidden="true"><bdi>{{ $sponsor['name'] }}</bdi></span>
+                                @endif
+                                @if ($sponsor['tier'])
+                                    <span class="es-sp-sr">{{ __('messages.'.$sponsor['tier']) }}</span>
+                                @endif
+                            @if ($sponsor['href'])
+                                </a>
+                            @else
+                                </span>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    @endforeach
+</section>
 
 @once
 <script {!! nonce_attr() !!}>
 (function () {
+    var motion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    var stillOnly = function () { return !!(motion && motion.matches); };
+
+    // One optical size for every shape: a square logo fills the chip's height, a wide wordmark
+    // is drawn lower and longer, so a row reads as even rather than as boxes and slivers.
+    var sizeLogo = function (img) {
+        var w = img.naturalWidth, h = img.naturalHeight;
+        if (!w || !h) return;
+        var s = Math.max(0.5, Math.min(1, Math.pow(w / h, -0.45)));
+        img.style.setProperty('--sp-s', s.toFixed(3));
+    };
+
+    var rowsOf = function (list) {
+        var tops = [];
+        Array.prototype.forEach.call(list.children, function (li) {
+            var t = li.offsetTop;
+            if (tops.indexOf(t) === -1) tops.push(t);
+        });
+        return tops.sort(function (a, b) { return a - b; });
+    };
+
+    // The rest of the logos, laid out for the room they have: all of them when they fit one
+    // row; otherwise one row drifting slowly (paused under the pointer or on focus), or, for a
+    // visitor who asked for less motion, the first two rows. "Show more" opens every one.
+    var layout = function (root) {
+        var view = root.querySelector('[data-sp-view]');
+        var track = root.querySelector('[data-sp-track]');
+        var list = root.querySelector('[data-sp-list]');
+        var toggle = root.querySelector('[data-sp-toggle]');
+        if (!view || !track || !list || !toggle) return;
+        var clone = track.querySelector('[data-sp-clone]');
+        if (clone) clone.remove();
+        root.classList.remove('es-sp-run', 'es-sp-clamped');
+        root.style.removeProperty('--sp-clamp');
+        var open = root.classList.contains('es-sp-open');
+        var rows = rowsOf(list);
+        toggle.hidden = rows.length <= 1 && !open;
+        if (open || rows.length <= 1) return;
+
+        if (!stillOnly()) {
+            clone = list.cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true');
+            clone.setAttribute('data-sp-clone', '');
+            clone.removeAttribute('data-sp-list');
+            clone.querySelectorAll('a').forEach(function (a) { a.setAttribute('tabindex', '-1'); });
+            clone.querySelectorAll('img').forEach(function (img) { img.setAttribute('alt', ''); });
+            track.appendChild(clone);
+            root.classList.add('es-sp-run');
+            // About 32px a second: slow enough to read each logo as it passes.
+            root.style.setProperty('--sp-dur', Math.max(20, Math.round(list.offsetWidth / 32)) + 's');
+        } else if (rows.length > 2) {
+            root.style.setProperty('--sp-clamp', (rows[2] - rows[0] - 1) + 'px');
+            root.classList.add('es-sp-clamped');
+        } else {
+            toggle.hidden = true;
+        }
+    };
+
+    var setOpen = function (root, open) {
+        var toggle = root.querySelector('[data-sp-toggle]');
+        root.classList.toggle('es-sp-open', open);
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            toggle.textContent = open ? toggle.getAttribute('data-less') : toggle.getAttribute('data-more');
+        }
+        layout(root);
+    };
+
     var init = function () {
         document.querySelectorAll('[data-sponsor-grid].es-sponsors-pending').forEach(function (grid) {
             var images = Array.prototype.slice.call(grid.querySelectorAll('img'));
             var revealed = false;
+            var queued = false;
+            var relayout = function () {
+                if (queued) return;
+                queued = true;
+                requestAnimationFrame(function () { queued = false; layout(grid); });
+            };
             var reveal = function () {
                 if (revealed) return;
                 revealed = true;
+                layout(grid);
                 grid.classList.remove('es-sponsors-pending');
             };
+
+            var toggle = grid.querySelector('[data-sp-toggle]');
+            if (toggle) toggle.addEventListener('click', function () { setOpen(grid, !grid.classList.contains('es-sp-open')); });
+            // A keyboard visitor reaching a logo that is drifting or folded away gets them all,
+            // standing still, so the one in focus is always in view.
+            grid.addEventListener('focusin', function (e) {
+                if (e.target.closest('[data-sp-list]') && (grid.classList.contains('es-sp-run') || grid.classList.contains('es-sp-clamped'))) setOpen(grid, true);
+            });
+            if (motion && motion.addEventListener) motion.addEventListener('change', relayout);
+            var lastWidth = 0;
+            if (window.ResizeObserver) {
+                new ResizeObserver(function (entries) {
+                    var w = Math.round(entries[0].contentRect.width);
+                    if (w !== lastWidth) { lastWidth = w; if (revealed) relayout(); }
+                }).observe(grid);
+            }
 
             var remaining = images.length;
             if (!remaining) {
@@ -106,20 +225,22 @@
                 return;
             }
 
-            var tick = function () {
+            var settle = function (image) {
+                sizeLogo(image);
+                if (revealed) { relayout(); return; }
                 if (--remaining <= 0) reveal();
             };
 
             images.forEach(function (image) {
                 if (image.complete) {
-                    tick();
+                    settle(image);
                     return;
                 }
-                image.addEventListener('load', tick, { once: true });
-                image.addEventListener('error', tick, { once: true });
+                image.addEventListener('load', function () { settle(image); }, { once: true });
+                image.addEventListener('error', function () { settle(image); }, { once: true });
             });
 
-            // A slow or broken logo must never leave the banner permanently hidden.
+            // A slow or broken logo must never leave the section permanently hidden.
             setTimeout(reveal, 2500);
         });
     };

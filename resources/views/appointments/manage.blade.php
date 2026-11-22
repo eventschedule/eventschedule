@@ -2,14 +2,6 @@
     @php
         $manageParams = ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret];
 
-        // A pale accent is unreadable as text on the card and a pale accent behind white text is
-        // unreadable as a button label, so both directions get a contrast-checked value. The readable
-        // variant differs per mode because the card surface does.
-        $accent = $role->accent_color ?? '#4E81FA';
-        $accentText = accent_contrast_color($accent);
-        $accentOnLight = \App\Utils\ColorUtils::readableAccentColor($accent, '#ffffff', '#111827');
-        $accentOnDark = \App\Utils\ColorUtils::readableAccentColor($accent, '#252526', '#ffffff');
-
         // $rescheduleBlocked is supplied by the controller from the same helper the reschedule endpoints
         // use, so the button can never offer something the POST would refuse.
         $canReschedule = ($rescheduleBlocked ?? 'blocked') === null;
@@ -40,39 +32,62 @@
         }
     @endphp
 
+    {{-- Laid on the stage (partials/guest-stage-styles): what state the booking is in, large, the
+         booking's facts in one row, then what can be done with it. Every colour is a stage token or
+         the accent the guest layout checked against the stage, light and dark. --}}
     <style {!! nonce_attr() !!}>
-        #appt-manage { --es-accent: {{ $accent }}; --es-accent-text: {{ $accentText }}; --es-accent-readable: {{ $accentOnLight }}; }
-        .dark #appt-manage { --es-accent-readable: {{ $accentOnDark }}; }
-        /* x-appointment-add-to-calendar uses these, but they were only defined under #booking-app - so
-           the "primary" variant rendered with no background and no text colour on this page. */
-        #appt-manage .es-accent-fill { background-color: var(--es-accent); color: var(--es-accent-text); }
-        #appt-manage .es-accent-text { color: var(--es-accent-readable); }
+        .gk-p-manage { max-width: 52rem; display: flex; flex-direction: column; gap: 1.75rem; }
+        .gk-p-manage .gk-title { font-size: clamp(2.25rem, 1.5rem + 2.6vw, 3.5rem); }
+        .gk-p-manage-head { display: flex; flex-direction: column; gap: .875rem; }
+        .gk-p-manage-say { margin: 0; max-width: 62ch; font-size: 1.125rem; line-height: 1.6; color: var(--gk-ink-2); }
+        .gk-p-manage .gk-fact-main { overflow-wrap: anywhere; }
+        {{-- The label is a real dt here (the list is a dl), so the cell draws none of its own. --}}
+        .gk-p-manage .gk-fact-cell::before { content: none; }
+        .gk-p-dt { font-size: .8125rem; font-weight: 500; color: var(--gk-ink-3); }
+        .gk-p-manage .gk-fact-main a { color: var(--es-accent-readable); text-decoration: underline; text-underline-offset: 3px; }
+        .gk-p-manage-acts { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+        .gk-p-manage .gk-cta-main { background: var(--es-accent); color: var(--es-accent-text); border: 1px solid var(--es-accent-edge, transparent); cursor: pointer; }
+        .gk-p-manage .gk-cta-alt { text-decoration: none; cursor: pointer; }
+        .gk-p-manage-foot { display: flex; flex-direction: column; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--gk-line); }
+        .gk-p-manage-cancel { padding: 0; border: 0; background: none; color: var(--gk-bad); font: inherit; font-size: .9375rem; font-weight: 600; cursor: pointer; }
+        .gk-p-manage-cancel:hover { text-decoration: underline; text-underline-offset: 3px; }
+        .gk-p-manage-again { align-self: flex-start; font-size: 1rem; font-weight: 650; color: var(--es-accent-readable); text-decoration: none; }
+        .gk-p-manage-again:hover { text-decoration: underline; text-underline-offset: 3px; }
+        .gk-p-manage-hint { margin: 0; font-size: .875rem; color: var(--gk-ink-3); }
+        {{-- The Add to calendar menu (x-appointment-add-to-calendar). --}}
+        .gk-p-cal { position: relative; display: inline-block; }
+        .gk-p-cal > summary { list-style: none; }
+        .gk-p-cal > summary::-webkit-details-marker { display: none; }
+        .gk-p-cal-chev { width: 1.125rem; height: 1.125rem; transition: transform var(--gk-swap); }
+        .gk-p-cal[open] .gk-p-cal-chev { transform: rotate(180deg); }
+        .gk-p-cal-menu { position: absolute; inset-inline-start: 0; z-index: 20; width: 15rem; margin-top: .5rem; overflow: hidden; border: 1px solid var(--gk-line); border-radius: 1rem; background: var(--gk-stage-raised); box-shadow: 0 1.25rem 2.5rem -1rem rgb(0 0 0 / .4); }
+        .gk-p-cal-item { display: flex; align-items: center; gap: .75rem; min-height: 3rem; padding: 0 1rem; color: var(--gk-ink); font-size: .9375rem; text-decoration: none; transition: background-color var(--gk-swap); }
+        .gk-p-cal-item:hover { background: var(--gk-stage-well); }
+        .gk-p-cal-item svg { flex: none; width: 1.25rem; height: 1.25rem; color: var(--gk-ink-3); }
+        #appt-manage a:focus-visible, #appt-manage button:focus-visible, #appt-manage summary:focus-visible { outline: 2px solid var(--es-accent-readable); outline-offset: 2px; }
     </style>
 
-    <div id="appt-manage" class="max-w-2xl mx-auto px-4 py-10">
+    <div id="appt-manage" class="gk-stage gk-p-manage">
         @if (session('message'))
-            <div class="mb-4 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300">{{ session('message') }}</div>
+            <div class="gk-note gk-note-ok" role="status"><div class="gk-note-body">{{ session('message') }}</div></div>
         @endif
         @if (session('error'))
-            <div class="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300">{{ session('error') }}</div>
+            <div class="gk-note gk-note-bad" role="alert"><div class="gk-note-body">{{ session('error') }}</div></div>
         @endif
 
-        {{-- First landing after booking. The controller has always appended ?new=1 but nothing read
-             it. Presentation only - the param is guest-settable, so nothing is gated on it. --}}
         {{-- Landed here straight after a move. Both times are stated in full rather than "check your
              email", because appointmentCanSend() can silently suppress the mail entirely. --}}
         @if (request()->boolean('moved'))
-            @php $movedBand = $state === 'pending' ? 'amber' : 'green'; @endphp
-            <div class="mb-4 flex items-start gap-3 rounded-lg border p-4 {{ $movedBand === 'amber' ? 'border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200' : 'border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200' }}">
-                <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <div class="gk-note {{ $state === 'pending' ? 'gk-note-warn' : 'gk-note-ok' }}">
+                <svg class="gk-note-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <div class="text-sm">
+                <div class="gk-note-body">
                     @if ($state === 'pending')
                         <p>{{ __('messages.appointments_rescheduled_pending_message', ['time' => $shown['time'], 'schedule' => $role?->name ?? '']) }}</p>
                     @else
                         <p>{{ __('messages.appointments_rescheduled_message') }}</p>
-                        <p class="mt-1 text-xs">{{ __('messages.update_your_calendar_note') }}</p>
+                        <p style="margin-top: .25rem; font-size: .8125rem">{{ __('messages.update_your_calendar_note') }}</p>
                     @endif
                 </div>
             </div>
@@ -81,21 +96,20 @@
         {{-- Only when the mail really leaves: on hosted that needs the schedule's own mail settings
              (EmailService::appointmentCanSend()), and the Appointments tab warns the owner when not. --}}
         @if (request()->boolean('new') && in_array($state, ['confirmed', 'pending']) && app(\App\Services\EmailService::class)->appointmentGuestMailGoesOut($sale))
-            <div class="mb-4 flex items-start gap-3 rounded-lg border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 p-4 text-green-800 dark:text-green-200">
-                <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <div class="gk-note gk-note-ok">
+                <svg class="gk-note-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p class="text-sm">{{ __('messages.appointments_email_on_the_way', ['email' => $sale->email]) }}</p>
+                <p class="gk-note-body">{{ __('messages.appointments_email_on_the_way', ['email' => $sale->email]) }}</p>
             </div>
         @endif
 
-        {{-- Opaque surface: the schedule background is a photo or gradient by default, so a
-             transparent card leaves the whole confirmation unreadable in light mode. --}}
-        <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm p-6">
+        <header class="gk-p-manage-head">
+            <p class="gk-dateline" dir="auto">{{ $role?->name }}</p>
             @switch($state)
                 @case('pending')
-                    <h1 tabindex="-1" class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_request_sent') }}</h1>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('messages.appointments_pending_note', ['schedule' => $role?->name ?? '']) }}</p>
+                    <h1 tabindex="-1" class="gk-title">{{ __('messages.appointments_request_sent') }}</h1>
+                    <p class="gk-p-manage-say">{{ __('messages.appointments_pending_note', ['schedule' => $role?->name ?? '']) }}</p>
                     @break
                 @case('awaiting_payment')
                     {{-- Back from the payment page without paying (PaymentGatewayDriver::handleCancel(),
@@ -103,21 +117,20 @@
                          state, so reopening the address after paying says nothing. Same words as the
                          ticket page's (event/partials/payment-cancelled). --}}
                     @if (request()->query('payment') === 'cancelled')
-                        <div role="status" class="mb-4 flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-3">
-                            <svg class="w-5 h-5 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <div role="status" class="gk-note">
+                            <svg class="gk-note-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
                             </svg>
-                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.payment_cancelled_not_charged') }}</span>
+                            <span class="gk-note-body">{{ __('messages.payment_cancelled_not_charged') }}</span>
                         </div>
                     @endif
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_awaiting_payment') }}</h1>
+                    <h1 class="gk-title">{{ __('messages.appointments_awaiting_payment') }}</h1>
                     @if ($heldUntil)
-                        <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('messages.appointments_held_until', ['time' => $heldUntil]) }}</p>
+                        <p class="gk-p-manage-say">{{ __('messages.appointments_held_until', ['time' => $heldUntil]) }}</p>
                     @endif
-                    <form method="POST" action="{{ route('appointments.pay', $manageParams) }}" class="mt-3">
+                    <form method="POST" action="{{ route('appointments.pay', $manageParams) }}" class="gk-p-manage-acts">
                         @csrf
-                        <button type="submit" class="px-4 py-3 text-base rounded-lg font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-800"
-                                style="background-color: var(--es-accent); color: var(--es-accent-text); --tw-ring-color: var(--es-accent)">{{ __('messages.appointments_complete_payment') }}</button>
+                        <button type="submit" class="gk-cta-main">{{ __('messages.appointments_complete_payment') }}</button>
                     </form>
                     @break
                 @case('in_review')
@@ -126,128 +139,130 @@
                          confirming window (an Instant EFT can clear hours later). No pay button, which
                          would start a second payment, and no Cancel, which would leave the money with
                          no booking. No polling either, so nothing here says the page updates itself. --}}
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.ticket_confirming_payment') }}</h1>
-                    <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('messages.appointments_payment_in_review', ['schedule' => $role?->name ?? '']) }}</p>
+                    <h1 class="gk-title">{{ __('messages.ticket_confirming_payment') }}</h1>
+                    <p class="gk-p-manage-say">{{ __('messages.appointments_payment_in_review', ['schedule' => $role?->name ?? '']) }}</p>
                     @break
                 @case('confirming')
                     {{-- No pay button while the provider's confirmation is on its way: the guest has
                          just paid. ticket/partials/confirming-script asks ticket.status (any sale, by
                          event and secret) and reloads once the answer changes or the window closes. --}}
                     <div data-confirming="{{ \App\Services\Payments\PaymentGatewayDriver::landedSecondsLeft($sale) }}"
-                         data-status-url="{{ route('ticket.status', $manageParams, false) }}">
-                        <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.ticket_confirming_payment') }}</h1>
-                        <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('messages.ticket_confirming_payment_hint') }}</p>
+                         data-status-url="{{ route('ticket.status', $manageParams, false) }}" class="gk-p-manage-head">
+                        <h1 class="gk-title">{{ __('messages.ticket_confirming_payment') }}</h1>
+                        <p class="gk-p-manage-say">{{ __('messages.ticket_confirming_payment_hint') }}</p>
                     </div>
                     @break
                 @case('cancelled')
                     {{-- A hold that lapsed unpaid is not a booking somebody cancelled: read as one, the
                          guest says "it was cancelled" and the owner thinks they did it. --}}
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ $sale->status === 'expired' ? __('messages.this_reservation_has_expired') : __('messages.appointments_cancelled') }}</h1>
+                    <h1 class="gk-title">{{ $sale->status === 'expired' ? __('messages.this_reservation_has_expired') : __('messages.appointments_cancelled') }}</h1>
                     @break
                 @case('passed')
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_passed') }}</h1>
+                    <h1 class="gk-title">{{ __('messages.appointments_passed') }}</h1>
                     @break
                 @default
-                    <h1 tabindex="-1" class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.appointments_youre_booked') }}</h1>
+                    <h1 tabindex="-1" class="gk-title">{{ __('messages.appointments_youre_booked') }}</h1>
             @endswitch
+        </header>
 
-            {{-- A labelled two-column grid rather than a stack of bare lines: the date and the time
-                 pair naturally, and the whole block loses a third of its height. --}}
-            <div class="mt-4 text-gray-700 dark:text-gray-300">
-                <div class="font-semibold text-lg text-gray-900 dark:text-gray-100">{{ $type?->name ?? $event->name }}</div>
+        {{-- The booking's facts in one row: what, when, where. --}}
+        <dl class="gk-factrow" style="margin: 0">
+            <div class="gk-fact-cell">
+                <dt class="gk-p-dt">{{ __('messages.type') }}</dt>
+                <dd class="gk-fact-main" style="margin: 0" dir="auto">{{ $type?->name ?? $event->name }}</dd>
                 {{-- The team member the booking was made with, by name only. --}}
                 @if ($hostName = $event->appointmentHostName())
-                    <div class="text-sm text-gray-600 dark:text-gray-400" v-pre>{{ __('messages.appointments_with_host', ['name' => $hostName]) }}</div>
+                    <dd class="gk-fact-sub" style="margin: 0" dir="auto" v-pre>{{ __('messages.appointments_with_host', ['name' => $hostName]) }}</dd>
                 @endif
-                <dl class="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2">
-                    <div>
-                        <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.date') }}</dt>
-                        <dd>{{ $shown['date'] }}</dd>
-                    </div>
-                    <div>
-                        <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.time') }}</dt>
-                        {{-- Left to right inside a right-to-left page: "9:00 AM - 9:30 AM" drew as "AM - 9:30 AM 9:00". --}}
-                        <dd><bdi dir="ltr">{{ $shown['time'] }} ({{ $shown['tz'] }})</bdi></dd>
-                        @if ($inSchedule)
-                            <dd class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.appointments_schedule_in') }} <bdi dir="ltr">{{ $inSchedule['tz'] }} ({{ $inSchedule['time'] }})</bdi></dd>
-                        @endif
-                    </div>
-                    {{-- Labelled, and covering the phone case the confirmation email has always had.
-                         Full width: a meeting URL is long and wraps with break-all. --}}
-                    @if ($event->event_url)
-                        <div class="sm:col-span-2">
-                            <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.online') }}</dt>
-                            {{-- Linked only when it is a web link (eventUrlHref()); free-text join
-                                 instructions are shown to the guest as they were written. --}}
-                            @if ($joinHref = $event->eventUrlHref())
-                                <dd><a href="{{ $joinHref }}" class="break-all hover:underline" style="color: var(--es-accent-readable)">{{ $event->event_url }}</a></dd>
-                            @else
-                                <dd class="break-all">{{ $event->event_url }}</dd>
-                            @endif
-                        </div>
-                    @elseif ($type && $type->location_type === 'in_person' && $type->location_address)
-                        <div class="sm:col-span-2">
-                            <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.location') }}</dt>
-                            <dd>{{ $type->location_address }}</dd>
-                        </div>
-                    @elseif ($type && $type->location_type === 'phone' && ($type->location_phone || $sale->phone))
-                        <div class="sm:col-span-2">
-                            <dt class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.phone') }}</dt>
-                            <dd>{{ $type->location_phone ?: $sale->phone }}</dd>
-                        </div>
-                    @endif
-                </dl>
             </div>
-
-            {{-- One action row instead of two stacked blocks. Add to calendar is only offered for a
-                 confirmed booking: the pending state says outright that nothing is booked yet, so a
-                 calendar entry there would be misleading. Reschedule sits beside it; Cancel stays a
-                 quiet red link below, destructive-last, so it cannot be mis-tapped. --}}
-            @if ($state === 'confirmed' || $canReschedule)
-                <div class="mt-5 flex flex-wrap items-center gap-3">
-                    @if ($state === 'confirmed')
-                        <x-appointment-add-to-calendar :event="$event" :sale="$sale" :role="$role" :primary="request()->boolean('new')" />
-                    @endif
-                    @if ($canReschedule)
-                        <a href="{{ $rescheduleUrl }}"
-                           class="inline-flex items-center rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-3 text-base font-semibold text-gray-700 dark:text-gray-300 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            {{ $state === 'pending' ? __('messages.appointments_change_time') : __('messages.appointments_reschedule') }}
-                        </a>
-                    @endif
-                </div>
-            @endif
-
-            @if ($canReschedule)
-                {{-- Said BEFORE they commit: a confirmed booking on an approval type is about to be
-                     released the moment they pick a new time. --}}
-                @if ($state === 'confirmed' && $type?->requires_approval)
-                    <div class="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-amber-800 dark:text-amber-200">
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                        <p class="text-xs">{{ __('messages.appointments_reschedule_approval_warning', ['schedule' => $role?->name ?? '']) }}</p>
-                    </div>
+            <div class="gk-fact-cell">
+                <dt class="gk-p-dt">{{ __('messages.date') }}</dt>
+                <dd class="gk-fact-main" style="margin: 0">{{ $shown['date'] }}</dd>
+            </div>
+            <div class="gk-fact-cell">
+                <dt class="gk-p-dt">{{ __('messages.time') }}</dt>
+                {{-- Left to right inside a right-to-left page: "9:00 AM - 9:30 AM" drew as "AM - 9:30 AM 9:00". --}}
+                <dd class="gk-fact-main" style="margin: 0"><bdi dir="ltr">{{ $shown['time'] }}</bdi></dd>
+                <dd class="gk-fact-sub" style="margin: 0"><bdi dir="ltr">{{ $shown['tz'] }}</bdi></dd>
+                @if ($inSchedule)
+                    <dd class="gk-fact-sub" style="margin: 0">{{ __('messages.appointments_schedule_in') }} <bdi dir="ltr">{{ $inSchedule['tz'] }} ({{ $inSchedule['time'] }})</bdi></dd>
                 @endif
-            @elseif ($state === 'awaiting_payment')
-                {{-- An explanation with a real alternative, not a disabled button that reads as broken. --}}
-                <div class="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-amber-800 dark:text-amber-200">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                    <p class="text-xs">{{ __('messages.appointments_reschedule_blocked_payment') }}</p>
+            </div>
+            {{-- Labelled, and covering the phone case the confirmation email has always had. A
+                 meeting URL is long, so the cell takes the row's full width. --}}
+            @if ($event->event_url)
+                <div class="gk-fact-cell" style="grid-column: 1 / -1; border-top: 1px solid var(--gk-line)">
+                    <dt class="gk-p-dt">{{ __('messages.online') }}</dt>
+                    {{-- Linked only when it is a web link (eventUrlHref()); free-text join
+                         instructions are shown to the guest as they were written. --}}
+                    @if ($joinHref = $event->eventUrlHref())
+                        <dd class="gk-fact-main break-all" style="margin: 0"><a href="{{ $joinHref }}">{{ $event->event_url }}</a></dd>
+                    @else
+                        <dd class="gk-fact-main break-all" style="margin: 0">{{ $event->event_url }}</dd>
+                    @endif
+                </div>
+            @elseif ($type && $type->location_type === 'in_person' && $type->location_address)
+                <div class="gk-fact-cell">
+                    <dt class="gk-p-dt">{{ __('messages.location') }}</dt>
+                    <dd class="gk-fact-main" style="margin: 0" dir="auto">{{ $type->location_address }}</dd>
+                </div>
+            @elseif ($type && $type->location_type === 'phone' && ($type->location_phone || $sale->phone))
+                <div class="gk-fact-cell">
+                    <dt class="gk-p-dt">{{ __('messages.phone') }}</dt>
+                    <dd class="gk-fact-main" style="margin: 0"><bdi dir="ltr">{{ $type->location_phone ?: $sale->phone }}</bdi></dd>
                 </div>
             @endif
+        </dl>
+
+        {{-- One action row. Add to calendar is only offered for a confirmed booking: the pending
+             state says outright that nothing is booked yet, so a calendar entry there would be
+             misleading. Reschedule sits beside it; Cancel stays a quiet red link at the foot,
+             destructive-last, so it cannot be mis-tapped. --}}
+        @if ($state === 'confirmed' || $canReschedule)
+            <div class="gk-p-manage-acts">
+                @if ($state === 'confirmed')
+                    <x-appointment-add-to-calendar :event="$event" :sale="$sale" :role="$role" :primary="request()->boolean('new')" />
+                @endif
+                @if ($canReschedule)
+                    <a href="{{ $rescheduleUrl }}" class="gk-cta-alt">
+                        {{ $state === 'pending' ? __('messages.appointments_change_time') : __('messages.appointments_reschedule') }}
+                    </a>
+                @endif
+            </div>
+        @endif
+
+        @if ($canReschedule)
+            {{-- Said BEFORE they commit: a confirmed booking on an approval type is about to be
+                 released the moment they pick a new time. --}}
+            @if ($state === 'confirmed' && $type?->requires_approval)
+                <div class="gk-note gk-note-warn">
+                    <svg class="gk-note-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                    <p class="gk-note-body">{{ __('messages.appointments_reschedule_approval_warning', ['schedule' => $role?->name ?? '']) }}</p>
+                </div>
+            @endif
+        @elseif ($state === 'awaiting_payment')
+            {{-- An explanation with a real alternative, not a disabled button that reads as broken. --}}
+            <div class="gk-note gk-note-warn">
+                <svg class="gk-note-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                <p class="gk-note-body">{{ __('messages.appointments_reschedule_blocked_payment') }}</p>
+            </div>
+        @endif
+
+        <div class="gk-p-manage-foot">
+            {{-- 'passed' used to be a dead end: heading, details, nothing to do. A guest returning to
+                 an old link almost always wants to book again. --}}
+            @if (in_array($state, ['cancelled', 'passed']))
+                <a href="{{ route('appointments.book', ['subdomain' => $role->subdomain]) }}" class="gk-p-manage-again">{{ __('messages.appointments_book_again') }}</a>
+            @endif
+
+            <p class="gk-p-manage-hint">{{ __('messages.appointments_manage_link_hint') }}</p>
 
             @if (in_array($state, ['confirmed', 'pending', 'awaiting_payment']))
-                <form method="POST" action="{{ route('appointments.manage_cancel', $manageParams) }}" class="mt-6">
+                <form method="POST" action="{{ route('appointments.manage_cancel', $manageParams) }}">
                     @csrf
-                    <button type="submit" class="text-red-600 dark:text-red-400 text-sm hover:underline">{{ __('messages.appointments_cancel_booking') }}</button>
+                    <button type="submit" class="gk-p-manage-cancel">{{ __('messages.appointments_cancel_booking') }}</button>
                 </form>
             @endif
-
-            {{-- 'passed' used to be a dead end: heading, details, nothing to do. A guest returning to an
-                 old link almost always wants to book again. --}}
-            @if (in_array($state, ['cancelled', 'passed']))
-                <a href="{{ route('appointments.book', ['subdomain' => $role->subdomain]) }}" class="inline-block mt-6 text-sm hover:underline" style="color: var(--es-accent-readable)">{{ __('messages.appointments_book_again') }}</a>
-            @endif
-
-            <p class="mt-6 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.appointments_manage_link_hint') }}</p>
         </div>
     </div>
     @if ($state === 'confirming')

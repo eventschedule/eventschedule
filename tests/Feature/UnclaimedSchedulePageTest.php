@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\User;
 use App\Services\AuditService;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -321,7 +323,7 @@ class UnclaimedSchedulePageTest extends TestCase
         $placeholder = $this->placeholder(['name' => 'Second On']);
         [, $curator, $event] = $this->listedOn($placeholder);
 
-        $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'/'.$event->slug.'?id='.\App\Utils\UrlUtils::encodeId($event->id))
+        $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'/'.$event->slug.'?id='.UrlUtils::encodeId($event->id))
             ->assertOk()
             ->assertSee('Second On')
             ->assertSee($placeholder->getClaimUrl(), false)
@@ -352,12 +354,12 @@ class UnclaimedSchedulePageTest extends TestCase
             return $act;
         });
 
-        $html = $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'/'.$event->slug.'?id='.\App\Utils\UrlUtils::encodeId($event->id))
+        $html = $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'/'.$event->slug.'?id='.UrlUtils::encodeId($event->id))
             ->assertOk()
             ->getContent();
 
         $body = substr($html, strpos($html, '<body'));
-        $cards = preg_match_all('/<div class="bg-white\/95 dark:bg-gray-900\/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">/', $body);
+        $cards = preg_match_all('/<div class="gk-card">/', $body);
         $this->assertSame(1, $cards, 'only the act with something to show gets a card of its own');
 
         foreach ($bare->push($withBio) as $act) {
@@ -375,14 +377,18 @@ class UnclaimedSchedulePageTest extends TestCase
         $placeholder = $this->placeholder(['name' => 'Second On', 'profile_image_url' => 'https://example.com/act.jpg']);
         [, $curator, $event] = $this->listedOn($placeholder);
 
-        $html = $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'/'.$event->slug.'?id='.\App\Utils\UrlUtils::encodeId($event->id))
+        $html = $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]).'/'.$event->slug.'?id='.UrlUtils::encodeId($event->id))
             ->assertOk()
             ->getContent();
 
         // Count <img> tags only: og:image, twitter:image and the JSON-LD all legitimately name the
         // same file, and the JSON-LD block sits in the body.
-        preg_match_all('/<img[^>]*act\\.jpg/', $html, $tags);
-        $this->assertCount(1, $tags[0], 'the act\'s picture belongs in its card, not also above it');
+        // Since the 2026-11 redesign an event with no flyer always has a picture in the poster
+        // column (a performer's first), and the bill under About shows each act small beside its
+        // name: the file twice, at two sizes, once as each. Never twice as the same thing.
+        preg_match_all('/<img[^>]*act\\.jpg[^>]*>/', $html, $tags);
+        $this->assertCount(2, $tags[0]);
+        $this->assertSame(1, preg_match_all('/<img[^>]*act\\.jpg[^>]*class="gk-card-avatar"/', $html), 'small, in the act\'s own row');
     }
 
     public function test_a_deleted_placeholder_is_gone(): void
@@ -409,7 +415,7 @@ class UnclaimedSchedulePageTest extends TestCase
         $placeholder = $this->placeholder(['email' => 'band@gmail.com']);
         // Not createOwner() then ->email = ...: changing users.email un-verifies the account, and
         // holding the address is the entire proof this door accepts.
-        $claimant = \App\Models\User::factory()->create(['email' => 'band@gmail.com', 'email_verified_at' => now()]);
+        $claimant = User::factory()->create(['email' => 'band@gmail.com', 'email_verified_at' => now()]);
 
         // The GET only renders: ownership must not move because something fetched a URL, and the
         // act should be able to read the page before deciding.
@@ -506,7 +512,7 @@ class UnclaimedSchedulePageTest extends TestCase
     public function test_holding_the_address_takes_the_page_down(): void
     {
         $placeholder = $this->placeholder(['email' => 'band@gmail.com']);
-        $holder = \App\Models\User::factory()->create(['email' => 'band@gmail.com', 'email_verified_at' => now()]);
+        $holder = User::factory()->create(['email' => 'band@gmail.com', 'email_verified_at' => now()]);
         $subdomain = $placeholder->subdomain;
 
         $this->actingAs($holder)

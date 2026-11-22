@@ -63,7 +63,7 @@ class GuestEventWhenTest extends TestCase
 
         $nextYear = $this->createEvent($this->role, ['starts_at' => $this->at('2027-01-15'), 'duration' => 3, 'creator_role_id' => $this->role->id]);
         $when = $this->when($nextYear);
-        $this->assertStringContainsString('Friday, January 15, 2027', $when);
+        $this->assertStringContainsString('Fri, Jan 15, 2027', $when);
         $this->assertStringContainsString('data-event-zone>EST</bdi>', $when, 'and the zone is the one in force that day');
     }
 
@@ -76,7 +76,8 @@ class GuestEventWhenTest extends TestCase
         $text = $this->text($when);
 
         $this->assertStringContainsString('10:00 PM - 2:00 AM', $text);
-        $this->assertMatchesRegularExpression('/\bOct\s+16\s+Friday\b/', $text, 'the tile is one day and the line is its weekday');
+        // The facts row says the day itself (the 2026-11 redesign: "Fri, Oct 16"), one day.
+        $this->assertMatchesRegularExpression('/\bFri, Oct 16\b/', $text, 'one day, said with its date');
         $this->assertStringNotContainsString('16-17', $text);
         $this->assertStringNotContainsString('October 16 - 17', $text);
         $this->assertStringNotContainsString('data-event-ends', $when, 'two in the morning needs no day beside it');

@@ -22,6 +22,11 @@ use App\Models\Role;
  *  - glow               the accent as a light on a dark ground (the ticket). "r g b", for
  *                       rgb(var(--es-glow) / .35).
  *  - glowInk            that light as ink on the dark ground: the ticket's title and icons.
+ *  - stage, raised, well the page's own ground (one surface every guest page sits on, over the
+ *                       schedule's background), a card raised on it, and a sunken field. A
+ *                       paper in light mode and a deep ink in dark, each faintly in the accent's
+ *                       hue, so a schedule's pages carry its colour without a coloured panel.
+ *  - stageInk 1..3      text on those three, each at least 4.5:1 on all of them.
  *
  * Each has a light and a dark value, because a panel is white in one and near-black in the other.
  *
@@ -73,7 +78,55 @@ final class GuestTheme
         public readonly string $tintDark,
         public readonly string $glow,
         public readonly string $glowInk,
+        public readonly array $stageLight = [],
+        public readonly array $stageDark = [],
     ) {}
+
+    /**
+     * The stage's surfaces and inks for one mode, in the accent's hue. A grey accent gets a
+     * neutral cool grey, never the accident of its rounding.
+     *
+     * @return array{stage: string, raised: string, well: string, ink: string, ink2: string, ink3: string}
+     */
+    private static function stage(float $hue, float $saturation, bool $neutral, bool $dark): array
+    {
+        $h = $neutral ? 0.6 : $hue;
+        $s = $neutral ? 0.06 : min($saturation, $dark ? 0.3 : 0.5);
+
+        if ($dark) {
+            // One deep ink-blue for every schedule, as the owner's mock draws it (#0d1a22): the
+            // schedule's colour is the glow, the button and the date line, never a muddy ground
+            // (a yellow accent made the ink an olive).
+            $stage = ColorUtils::fromHsl(0.56, 0.45, 0.092);
+            $raised = ColorUtils::fromHsl(0.56, 0.34, 0.135);
+            $well = ColorUtils::fromHsl(0.56, 0.3, 0.17);
+            [$h, $s] = [0.55, 0.45];
+            $grounds = [$stage, $raised, $well];
+
+            return [
+                'stage' => $stage,
+                'raised' => $raised,
+                'well' => $well,
+                'ink' => ColorUtils::shiftUntil(ColorUtils::fromHsl($h, $s * 0.3, 0.96), $grounds, false, 7.0) ?? '#f5f5f5',
+                'ink2' => ColorUtils::shiftUntil(ColorUtils::fromHsl($h, $s * 0.25, 0.83), $grounds, false, 5.5) ?? '#e5e5e5',
+                'ink3' => ColorUtils::shiftUntil(ColorUtils::fromHsl($h, $s * 0.2, 0.68), $grounds, false) ?? '#d4d4d4',
+            ];
+        }
+
+        $stage = ColorUtils::fromHsl($h, $s * 0.45, 0.982);
+        $raised = '#ffffff';
+        $well = ColorUtils::fromHsl($h, $s * 0.4, 0.95);
+        $grounds = [$stage, $raised, $well];
+
+        return [
+            'stage' => $stage,
+            'raised' => $raised,
+            'well' => $well,
+            'ink' => ColorUtils::shiftUntil(ColorUtils::fromHsl($h, $s * 0.35, 0.1), $grounds, true, 7.0) ?? '#111111',
+            'ink2' => ColorUtils::shiftUntil(ColorUtils::fromHsl($h, $s * 0.2, 0.28), $grounds, true, 5.5) ?? '#333333',
+            'ink3' => ColorUtils::shiftUntil(ColorUtils::fromHsl($h, $s * 0.15, 0.4), $grounds, true) ?? '#555555',
+        ];
+    }
 
     public static function for(?Role $role): self
     {
@@ -109,6 +162,8 @@ final class GuestTheme
         $text = $neutral ? ColorUtils::fromHsl(0.0, 0.0, $lightness) : $source;
         $tint = ColorUtils::mix($source, self::LIGHT_PANELS[0], 0.12);
         $tintDark = ColorUtils::mix($source, self::DARK_PANELS[0], 0.24);
+        $stageLight = self::stage($hue, $saturation, $neutral, false);
+        $stageDark = self::stage($hue, $saturation, $neutral, true);
 
         return new self(
             source: $source,
@@ -122,14 +177,17 @@ final class GuestTheme
             edgeDark: ColorUtils::getContrastRatio($fillDark, self::DARK_PANELS[0]) < 1.25 ? '#4b5563' : 'transparent',
             // On its own tint as well: that pair is the accent chip, and a readable that was
             // only checked against white fell to 4:1 there.
-            readable: ColorUtils::shiftUntil($text, [...self::LIGHT_PANELS, $tint], true) ?? self::INK,
-            readableDark: ColorUtils::shiftUntil($text, [...self::DARK_PANELS, $tintDark], false) ?? self::PAPER,
+            // And on the stage's three grounds, where the date line and the section links use it.
+            readable: ColorUtils::shiftUntil($text, [...self::LIGHT_PANELS, $tint, $stageLight['stage'], $stageLight['well']], true) ?? self::INK,
+            readableDark: ColorUtils::shiftUntil($text, [...self::DARK_PANELS, $tintDark, $stageDark['stage'], $stageDark['raised'], $stageDark['well']], false) ?? self::PAPER,
             tint: $tint,
             tintDark: $tintDark,
             glow: implode(' ', ColorUtils::toRgb($glow)),
             // The light as INK on the dark ticket: a title, an icon. Mixed here rather than with
             // CSS color-mix(), which an older browser drops along with the whole declaration.
             glowInk: ColorUtils::mix($glow, '#ffffff', 0.62),
+            stageLight: $stageLight,
+            stageDark: $stageDark,
         );
     }
 
@@ -162,6 +220,131 @@ final class GuestTheme
     }
 
     /**
+     * The portal's six palettes (config('app.ap_palettes'), resources/css/app.css), for a guest
+     * page whose owner picked one (Style > Background > Page style): its brightness, the page's
+     * ground, a card raised on it, a sunken field, and three inks.
+     */
+    public const PALETTES = [
+        'sand' => ['light', '#f6f4ef', '#ffffff', '#efebe1', '#1a1814', '#4a4540', '#857f73'],
+        'mist' => ['light', '#eceef2', '#ffffff', '#e3e7ee', '#16171a', '#444649', '#7a7e85'],
+        'paper' => ['light', '#ffffff', '#fafaf9', '#f0f0ef', '#18181a', '#45454a', '#7c7c82'],
+        'espresso' => ['dark', '#15140f', '#1f1e18', '#2a2820', '#f6f4ef', '#c8c2b5', '#a39d91'],
+        'midnight' => ['dark', '#0f1115', '#181b21', '#22262e', '#eceef2', '#b7bcc8', '#979ca8'],
+        'carbon' => ['dark', '#000000', '#0e0e0e', '#1a1a1a', '#f2f2f2', '#b8b8b8', '#9a9a9a'],
+    ];
+
+    /** The schedule whose look the page wears (the layout's rule), for pageMode() and pagePalette(). */
+    private static function lookOf(Role $role, ?Role $otherRole, $event): Role
+    {
+        return ($event && $otherRole && $otherRole->isClaimed() && $otherRole->hasConfiguredBackground()) ? $otherRole : $role;
+    }
+
+    /**
+     * The hosts of the guest pages this page links to that sit on a domain of their own (a
+     * schedule's custom domain): a link there carries the visitor's light or dark in its
+     * fragment (theme-script), since the cookie cannot follow. Links under the platform's own
+     * domain need nothing, and the script never decorates a link to any other site.
+     */
+    public static function carryHosts(?Role $role, ?Role $otherRole = null, $event = null): array
+    {
+        $roles = collect([$role, $otherRole]);
+        if ($event && $event->relationLoaded('roles')) {
+            $roles = $roles->merge($event->roles);
+        }
+        $base = function_exists('_base_domain') ? _base_domain() : '';
+        $hosts = [];
+        foreach ($roles->filter() as $r) {
+            // Only a domain that draws the page itself reads the fragment: a redirect-mode domain
+            // 301s to the subdomain (the cookie's own ground), and is never printed on a page
+            // whose canonical is the subdomain (CustomDomainCanonicalTest).
+            if (! $r->exists || ! $r->servesOnCustomDomain()) {
+                continue;
+            }
+            $host = parse_url((string) $r->getGuestUrl(true), PHP_URL_HOST);
+            if ($host && ! ($base !== '' && ($host === $base || str_ends_with($host, '.'.$base)))) {
+                $hosts[$host] = true;
+            }
+        }
+
+        return array_keys($hosts);
+    }
+
+    /** The palette the owner picked, or null for Automatic. */
+    public static function pagePalette(Role $role, ?Role $otherRole = null, $event = null): ?string
+    {
+        $bg = self::lookOf($role, $otherRole, $event);
+        $chosen = $bg->exists ? $bg->guestPageSetting->page_mode : 'auto';
+
+        return isset(self::PALETTES[$chosen]) ? $chosen : null;
+    }
+
+    /**
+     * A picked palette's stage tokens, as CSS for body (the page is forced to the palette's own
+     * mode, so one rule). Every ink, and the accent as text, is held to 4.5:1 or better on the
+     * palette's three grounds. Only colours made here, never the owner's own string.
+     */
+    public function paletteCss(string $palette): string
+    {
+        [$mode, $stage, $raised, $well, $ink, $ink2, $ink3] = self::PALETTES[$palette];
+        $grounds = [$stage, $raised, $well];
+        $darker = $mode === 'light';
+        $fix = fn (string $c, float $r) => ColorUtils::shiftUntil($c, $grounds, $darker, $r) ?? ($darker ? '#111111' : '#f5f5f5');
+        $tokens = [
+            '--gk-stage' => $stage,
+            '--gk-stage-raised' => $raised,
+            '--gk-stage-well' => $well,
+            '--gk-stage-ink' => $fix($ink, 7.0),
+            '--gk-stage-ink-2' => $fix($ink2, 5.5),
+            '--gk-stage-ink-3' => $fix($ink3, 4.5),
+            '--es-accent-readable' => $fix($darker ? $this->readable : $this->readableDark, 4.5),
+        ];
+
+        // Only in the palette's own brightness: a visitor whose first page set the other one keeps
+        // it (theme-script, es_gp_mode), and this schedule then shows its automatic colours.
+        $selector = $mode === 'dark' ? 'html.dark body' : 'html:not(.dark) body';
+
+        return $selector.' { '.implode(' ', array_map(fn ($k, $v) => $k.': '.$v.';', array_keys($tokens), $tokens)).' }';
+    }
+
+    /**
+     * The mode a guest page is drawn in (the 2026-11 redesign): the owner's choice of light or dark
+     * where they made one, and otherwise ("auto") dark unless the schedule whose
+     * background the page wears (the layout's rule, see lookRole()) chose a LIGHT solid colour or
+     * gradient, which gets the light version of the same design. A photo or Aurora stays dark: a
+     * picture's brightness is not known here, and Aurora is drawn as light on dark.
+     */
+    public static function pageMode(Role $role, ?Role $otherRole = null, $event = null): string
+    {
+        $bg = self::lookOf($role, $otherRole, $event);
+
+        // The owner's own choice, where they made one (Style > Background > Page style): a
+        // palette is light or dark by itself.
+        if ($palette = self::pagePalette($role, $otherRole, $event)) {
+            return self::PALETTES[$palette][0];
+        }
+        // A plain 'light' or 'dark' (not offered by the form; kept for a stored value of the first
+        // version of this setting) forces the brightness with the accent-tinted colours.
+        $plain = $bg->exists ? $bg->guestPageSetting->page_mode : null;
+        if ($plain === 'light' || $plain === 'dark') {
+            return $plain;
+        }
+
+        $colours = match ($bg->background) {
+            'solid' => [$bg->background_color],
+            'gradient' => explode(',', (string) $bg->background_colors),
+            default => [],
+        };
+        $colours = array_values(array_filter(array_map(fn ($c) => ColorUtils::normalizeHex(trim((string) $c)), $colours)));
+        if (! $colours) {
+            return 'dark';
+        }
+
+        $luminance = array_sum(array_map(fn ($c) => ColorUtils::getLuminance($c), $colours)) / count($colours);
+
+        return $luminance > 0.45 ? 'light' : 'dark';
+    }
+
+    /**
      * The custom properties, as two rule bodies: [light, dark].
      *
      * @return array{0: array<string, string>, 1: array<string, string>}
@@ -177,6 +360,7 @@ final class GuestTheme
                 '--es-accent-tint' => $this->tint,
                 '--es-glow' => $this->glow,
                 '--es-glow-ink' => $this->glowInk,
+                ...self::stageTokens($this->stageLight),
             ],
             [
                 '--es-accent' => $this->fillDark,
@@ -184,8 +368,22 @@ final class GuestTheme
                 '--es-accent-edge' => $this->edgeDark,
                 '--es-accent-readable' => $this->readableDark,
                 '--es-accent-tint' => $this->tintDark,
+                ...self::stageTokens($this->stageDark),
             ],
         ];
+    }
+
+    /** @return array<string, string> */
+    private static function stageTokens(array $stage): array
+    {
+        return $stage ? [
+            '--gk-stage' => $stage['stage'],
+            '--gk-stage-raised' => $stage['raised'],
+            '--gk-stage-well' => $stage['well'],
+            '--gk-stage-ink' => $stage['ink'],
+            '--gk-stage-ink-2' => $stage['ink2'],
+            '--gk-stage-ink-3' => $stage['ink3'],
+        ] : [];
     }
 
     /**

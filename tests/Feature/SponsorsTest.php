@@ -67,19 +67,22 @@ class SponsorsTest extends TestCase
         $response->assertSee('<noscript><style>[data-sponsor-grid].es-sponsors-pending', false);
     }
 
-    public function test_sponsor_grid_gets_denser_columns_past_the_original_twelve(): void
+    /**
+     * Since the 2026-11 redesign the sponsors are a row of logo chips: every logo is in the page
+     * and linked whatever the count, and a long list has the way to lay them all out.
+     */
+    public function test_every_sponsor_is_listed_and_a_long_list_can_be_shown_whole(): void
     {
         $owner = $this->createOwner();
 
         $sparse = $this->createSponsoredRole($owner, 4);
-        $this->get(route('role.view_guest', ['subdomain' => $sparse->subdomain]))
-            ->assertOk()
-            ->assertSee('grid-cols-2 sm:grid-cols-3 md:grid-cols-4', false);
+        $html = $this->get(route('role.view_guest', ['subdomain' => $sparse->subdomain]))->assertOk()->getContent();
+        $this->assertSame(4, substr_count($html, 'class="es-sp-item'));
 
         $dense = $this->createSponsoredRole($owner, 20);
-        $this->get(route('role.view_guest', ['subdomain' => $dense->subdomain]))
-            ->assertOk()
-            ->assertSee('grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6', false);
+        $html = $this->get(route('role.view_guest', ['subdomain' => $dense->subdomain]))->assertOk()->getContent();
+        $this->assertSame(20, substr_count($html, 'class="es-sp-item'));
+        $this->assertStringContainsString('data-sp-toggle', $html);
     }
 
     public function test_default_background_keeps_the_translucent_panel(): void
@@ -112,9 +115,9 @@ class SponsorsTest extends TestCase
         $response = $this->get(route('role.view_guest', ['subdomain' => $role->subdomain]));
 
         $response->assertOk();
-        $response->assertSee('background-color: #102030', false);
-        // Dark panel, so the title/name text flips to white.
-        $response->assertSee('color: #ffffff', false);
+        // The owner's colour sets the chips' brightness, kept neutral (no hue of its own, so it
+        // never clashes with the page or the logos), with an ink that reads on it (white here).
+        $response->assertSee('--sp-chip: #252a2d; --sp-chip-ink: #ffffff;', false);
     }
 
     public function test_malformed_background_falls_back_to_the_default_panel(): void

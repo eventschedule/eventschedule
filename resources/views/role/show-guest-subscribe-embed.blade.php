@@ -12,14 +12,20 @@
          background, which cropped into a few hundred pixels only looks broken. After the layout's
          <head> styles, and more specific than its `body` rule, so this wins even over a solid
          background declared !important. Never a filter or transform here (see CLAUDE.md). --}}
+    {{-- The card is a stage (partials/guest-stage-styles) with nothing of its own around it: no
+         sheet colour, no shadow, no corners, no light over the top, so only the band itself (a
+         card raised on it, in the schedule's stage colours) sits on the owner's website. --}}
     <style {!! nonce_attr() !!}>
         html, html body { background: transparent !important; min-height: 0 !important; }
+        .gk-stage.gk-p-subembed { max-width: none; margin: 0; padding: .25rem; border-radius: 0; background: transparent; box-shadow: none; }
+        .gk-stage.gk-p-subembed::before { content: none; }
+        .gk-p-subembed .gk-band { padding: clamp(1.125rem, 4vw, 1.75rem); }
     </style>
 
-    <div id="gp-subscribe-embed" class="p-1">
+    <div id="gp-subscribe-embed" class="gk-stage gk-p-subembed">
         @include('partials.subscribe-panel', [
             'subscribeEmbed' => true,
-            'panelClass' => 'bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-5 sm:p-6',
+            'panelClass' => 'gk-card gk-band',
         ])
     </div>
 

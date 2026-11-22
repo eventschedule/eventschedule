@@ -8478,4 +8478,8 @@ return [
     'mail_flag_dismissed' => 'Le signalement de :name est levé.',
     'mail_paused_reason_word' => 'Un mot surveillé dans une newsletter',
     'admin_alert_mail_flagged' => '{1} :count compte payant a été signalé|[0,*] :count comptes payants ont été signalés',
+    'page_style' => 'Style de la page',
+    'page_style_light' => 'Clair',
+    'page_style_dark' => 'Sombre',
+    'page_style_help' => 'Automatique utilise un style clair lorsque l\'arrière-plan est une couleur ou un dégradé clair, et un style sombre sinon. Ou choisissez l\'une des trois palettes claires ou des trois palettes sombres.',
 ];

@@ -122,12 +122,18 @@ class GuestFanContentRenderTest extends TestCase
 
         $html = $this->get($event->getPhotoGalleryUrl($role->subdomain))->assertOk()->getContent();
 
-        $widget = strpos($html, 'id="fan-content-turnstile"');
-        $panel = strpos($html, 'x-show="showUpload"');
+        $this->assertStringContainsString('id="fan-content-turnstile"', $html, 'gallery must render the shared widget');
+        $this->assertStringContainsString('id="gallery-upload" v-show="store.showUpload"', $html);
 
-        $this->assertNotFalse($widget, 'gallery must render the shared widget');
-        $this->assertNotFalse($panel);
-        $this->assertLessThan($panel, $widget, 'widget must sit outside (before) the collapsible upload panel');
+        // Outside the folded upload card, and outside the Vue app too (a template drops the
+        // widget's own script): no ancestor of the widget is either.
+        $dom = new \DOMDocument;
+        @$dom->loadHTML($html);
+        $node = $dom->getElementById('fan-content-turnstile');
+        $this->assertNotNull($node);
+        for ($up = $node->parentNode; $up instanceof \DOMElement; $up = $up->parentNode) {
+            $this->assertNotContains($up->getAttribute('id'), ['gallery-upload', 'gallery-app'], 'widget must sit outside the collapsible upload panel and the app');
+        }
     }
 
     public function test_no_turnstile_markup_when_turnstile_is_not_configured(): void

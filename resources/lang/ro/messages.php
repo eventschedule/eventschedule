@@ -8493,4 +8493,8 @@ return [
     'mail_flag_dismissed' => 'Semnalarea pentru :name a fost ștearsă.',
     'mail_paused_reason_word' => 'Un cuvânt urmărit într-un buletin informativ',
     'admin_alert_mail_flagged' => '{1} Cont plătitor semnalat: :count|[0,*] Conturi plătitoare semnalate: :count',
+    'page_style' => 'Stilul paginii',
+    'page_style_light' => 'Luminos',
+    'page_style_dark' => 'Întunecat',
+    'page_style_help' => 'Automat folosește un stil luminos când fundalul este o culoare sau un gradient deschis, iar altfel unul întunecat. Sau alege una dintre cele trei palete luminoase sau trei întunecate.',
 ];

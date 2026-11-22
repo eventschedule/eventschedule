@@ -90,7 +90,7 @@ class MonthGridTest extends TestCase
         $this->assertFalse($summary['free'], 'not every type is free: there is still something to pay for');
         $html = $this->get($this->guestEventUrl($this->role, $event))->assertOk()->getContent();
         $this->assertSame(1, preg_match('/data-ticket-price>\s*(.*?)\s*<\/span>/s', $html, $line));
-        $this->assertSame(e($freeTo), trim($line[1]));
+        $this->assertSame(e($freeTo), trim(strip_tags($line[1])));
         $this->assertStringNotContainsString($this->role->customLabel('free_entry'), $line[1]);
         $this->assertStringNotContainsString($zero, $line[1]);
 
@@ -122,7 +122,7 @@ class MonthGridTest extends TestCase
         $this->assertSame('from', $paid->fresh()->ticketPriceSummary($date)['says']);
         $this->assertSame(1, preg_match('/data-ticket-price>\s*(.*?)\s*<\/span>/s', $this->get($this->guestEventUrl($this->role, $paid))->assertOk()->getContent(), $paidLine));
         $range = __('messages.price_range', ['min' => MoneyUtils::format(10, 'USD'), 'max' => MoneyUtils::format(25, 'USD')]);
-        $this->assertSame($range, trim($paidLine[1]), 'the event page has room for the whole range');
+        $this->assertSame($range, trim(strip_tags($paidLine[1])), 'the event page has room for the whole range');
     }
 
     /**

@@ -4,8 +4,13 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\User;
+use App\Repos\EventRepo;
+use App\Utils\DateUtils;
 use App\Utils\MoneyUtils;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -21,7 +26,7 @@ use Tests\TestCase;
  *
  * For a short while the rows were the list at every width. On a wide screen they read as a
  * table and lost what the cards have, so the cards are back there and say what the rows learnt
- * to: test_the_wide_list_is_cards_again_and_a_card_says_what_tickets_cost.
+ * to: test_the_wide_list_is_the_rows_and_a_row_says_what_tickets_cost.
  */
 class GuestListRowsTest extends TestCase
 {
@@ -62,13 +67,14 @@ class GuestListRowsTest extends TestCase
     {
         $html = $this->get('/'.$this->role->subdomain)->assertOk()->getContent();
 
-        // The cards from a tablet up, the rows on a phone: each is v-if on the width, so an
-        // event is in the page once. Both used to be there, one hidden by CSS.
-        $this->assertSame(1, substr_count($html, '<div v-if="currentView === \'list\' && !isLoadingEvents && !isNarrow"'));
-        $this->assertSame(1, substr_count($html, '<div v-if="currentView === \'list\' && !isLoadingEvents && isNarrow"'));
+        // One list at every width (the 2026-11 redesign: the rows, laid out as wide cards from a
+        // tablet up by partials/guest-stage-styles), so an event is in the page once. There used
+        // to be two, one hidden by CSS, and then one per width.
+        $this->assertSame(1, substr_count($html, '<div v-if="currentView === \'list\' && !isLoadingEvents"'));
+        $this->assertStringNotContainsString('&& !isNarrow"', $html);
         $this->assertStringNotContainsString('v-show="currentView === \'list\' && !isLoadingEvents"', $html);
         $this->assertStringContainsString('class="gk-days"', $html);
-        $this->assertSame(2, substr_count($html, 'class="gk-row gk-row-press"'), 'one row, drawn by the phone\'s list and by the phone\'s month');
+        $this->assertSame(3, substr_count($html, 'class="gk-row gk-row-press"'), 'one row, drawn by the list, by its large cards for one or two events, and by the phone\'s month');
 
         $row = file_get_contents(resource_path('views/role/partials/guest-row.blade.php'));
         // The event's name is a real link inside a heading, as it is on a card: a reader can
@@ -88,33 +94,45 @@ class GuestListRowsTest extends TestCase
      * performers and the fan buttons. They said "Free entry" for a sign-up and the price an
      * owner typed for an event sold elsewhere, and nothing about tickets sold here.
      */
-    public function test_the_wide_list_is_cards_again_and_a_card_says_what_tickets_cost(): void
+    public function test_one_or_two_coming_events_are_large_cards_and_three_are_the_list(): void
+    {
+        $html = $this->get('/'.$this->role->subdomain)->assertOk()->getContent();
+
+        // The large cards stand in front of the list and are chosen in the browser, from what
+        // the list would draw: one or two coming events, no past rows, nothing cut off, never an
+        // embed (his call, 2026-11-22: three stay a list).
+        $this->assertStringContainsString('<ul v-if="fewCount" class="gk-few"', $html);
+        $this->assertStringContainsString('<div v-else-if="allListGroups.length > 0" class="gk-days">', $html);
+        $this->assertStringContainsString('++n > 2) return 0;', $html);
+        $this->assertStringContainsString('if (e._isPast) return 0;', $html);
+        $this->assertStringContainsString('this.hasMoreListRows || this.listTruncated) return 0;', $html);
+        // A card says its own day, shows its picture whole over a blurred copy, and stands a
+        // day in for a picture it does not have.
+        $this->assertStringContainsString('class="gk-row-day"', $html);
+        $this->assertStringContainsString('class="gk-row-img-fill"', $html);
+        $this->assertStringContainsString('gk-row-media gk-row-media-day', $html);
+
+        $embed = $this->get('/'.$this->role->subdomain.'?embed=true')->getContent();
+        $this->assertStringContainsString('if (true || this.hasMoreListRows', $embed, 'an embed keeps the list');
+    }
+
+    public function test_the_wide_list_is_the_rows_and_a_row_says_what_tickets_cost(): void
     {
         $html = $this->get('/'.$this->role->subdomain.'?layout=list')->assertOk()->getContent();
 
-        // The cards, keyed as they always were, under a date set between two lines.
-        $this->assertStringContainsString("'list-d-' + group.date", $html);
-        $this->assertStringContainsString('v-list-reveal:d="event.uniqueKey"', $html);
-        // Today and Tomorrow are said on that date, by the schedule's clock.
-        $this->assertSame(1, preg_match('/<span v-if="dayWord\(group\.date\)" class="[^"]*" v-text="dayWord\(group\.date\)"><\/span>\s*<span class="font-semibold text-xl/', $html));
-
-        // One line for our own tickets in each of the card's two shapes (with a flyer, without).
-        $this->assertSame(2, substr_count($html, 'data-card-tickets'));
-        $badge = file_get_contents(resource_path('views/role/partials/card-ticket-badge.blade.php'));
-        $this->assertStringContainsString('<div v-if="cardHasTickets(event)"', $badge);
-        $this->assertSame(1, preg_match('/<span v-if="rowSoldOut\(event\)">.*<span v-else-if="event\.ticket_free">.*<bdi v-else v-text="rowPrice\(event\)"><\/bdi>/s', $badge));
-        $this->assertStringContainsString('<span v-if="!rowSoldOut(event) && rowLow(event)"', $badge);
-        // Never beside the sign-up's own badge or behind a password, and nothing once it is over.
-        $this->assertStringContainsString('if (event._isPast || event.is_password_protected || event.rsvp_enabled) return false;', $html);
-
-        // One card, one price: the price an owner typed for an event that used to be sold
-        // somewhere else stands aside for our own line (both stay saved on the event).
-        $this->assertSame(2, substr_count($html, 'event.ticket_price != null && !event.is_password_protected && !cardHasTickets(event)"'));
+        // The rows at every width (the 2026-11 redesign replaced the wide cards, whose date tile,
+        // performers and fan buttons are on the event's own page): what it costs, as chips.
+        $this->assertStringNotContainsString("'list-d-' + group.date", $html);
+        $this->assertStringNotContainsString('data-card-tickets', $html);
+        $row = file_get_contents(resource_path('views/role/partials/guest-row.blade.php'));
+        $this->assertStringContainsString('<span v-if="rowSoldOut(event)" class="gk-chip gk-chip-out">', $row);
+        $this->assertStringContainsString('<span v-else-if="rowPrice(event)" class="gk-chip"><bdi v-text="rowPrice(event)"></bdi></span>', $row);
+        $this->assertStringContainsString('<span v-if="rowLow(event)" class="gk-chip gk-chip-few">', $row);
 
         // The admin's Schedule tab is as it was, rendered and not read from the source: both
         // lists in the page behind the CSS switch, the phone's old cards, no ticket line, no
         // chips, and the typed price shown whatever the event sells here.
-        $owner = $this->role->fresh()->members()->first() ?? \App\Models\User::find($this->role->user_id);
+        $owner = $this->role->fresh()->members()->first() ?? User::find($this->role->user_id);
         $admin = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
         $this->assertSame(2, substr_count($admin, 'v-show="currentView === \'list\' && !isLoadingEvents"'));
         $this->assertStringContainsString('id="mobileEventsList"', $admin);
@@ -220,7 +238,7 @@ class GuestListRowsTest extends TestCase
     {
         $role = $this->createRole($this->createOwner(), 'venue', ['timezone' => 'UTC']);
         $this->travelTo(now('UTC')->addDay()->setTime(18, 0));
-        $repo = app(\App\Repos\EventRepo::class);
+        $repo = app(EventRepo::class);
 
         $class = $this->createEvent($role, [
             'name' => 'Morning Class', 'creator_role_id' => $role->id,
@@ -237,10 +255,10 @@ class GuestListRowsTest extends TestCase
         $this->assertSame([$class->id, $tomorrow], [$lead['event']->id, $lead['date']]);
         // And that walk is remembered for the day: it runs on every view of the page, once a
         // series that has begun, and an "after N events" series counts from its start each time.
-        $this->assertSame($tomorrow, \Illuminate\Support\Facades\Cache::get('guest_lead_next:'.$class->id.':'.$today.':'.$class->fresh()->updated_at->getTimestamp()));
+        $this->assertSame($tomorrow, Cache::get('guest_lead_next:'.$class->id.':'.$today.':'.$class->fresh()->updated_at->getTimestamp()));
 
         // Tonight's show is what is next.
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         $show = $this->createEvent($role, [
             'name' => 'Tonight Show', 'creator_role_id' => $role->id,
             'starts_at' => now('UTC')->setTime(21, 0)->format('Y-m-d H:i:s'), 'duration' => 3,
@@ -257,7 +275,7 @@ class GuestListRowsTest extends TestCase
 
         // Nothing but an event already under way (one over several days: a shorter one is
         // not listed once it has begun): it leads rather than nothing.
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         $class->delete();
         $show->update(['duration' => 48]);
         $this->travelTo(now('UTC')->setTime(21, 30));
@@ -268,22 +286,22 @@ class GuestListRowsTest extends TestCase
     /** The day on the card is written in the order the language writes it, as the list's are. */
     public function test_a_day_is_written_in_the_languages_own_order(): void
     {
-        $day = \Carbon\Carbon::create(now()->year, 10, 9, 20, 0, 0, 'UTC');
+        $day = Carbon::create(now()->year, 10, 9, 20, 0, 0, 'UTC');
         if (now()->gt($day)) {
             $day->addYear();
         }
         $this->travelTo($day->copy()->subDays(3));
 
-        $english = \App\Utils\DateUtils::dayLabel($day, 'en');
+        $english = DateUtils::dayLabel($day, 'en');
         $this->assertStringContainsString('October 9', $english);
         $this->assertStringNotContainsString((string) $day->year, $english, 'this year is not said');
 
         if (class_exists(\IntlDatePatternGenerator::class)) {
-            $this->assertStringContainsString('9 octobre', \App\Utils\DateUtils::dayLabel($day, 'fr'), 'not "octobre 9"');
-            $this->assertStringContainsString('9. Oktober', \App\Utils\DateUtils::dayLabel($day, 'de'));
+            $this->assertStringContainsString('9 octobre', DateUtils::dayLabel($day, 'fr'), 'not "octobre 9"');
+            $this->assertStringContainsString('9. Oktober', DateUtils::dayLabel($day, 'de'));
         }
         // Another year is said.
-        $this->assertStringContainsString((string) ($day->year + 1), \App\Utils\DateUtils::dayLabel($day->copy()->addYear(), 'en'));
+        $this->assertStringContainsString((string) ($day->year + 1), DateUtils::dayLabel($day->copy()->addYear(), 'en'));
     }
 
     public function test_the_filter_most_visitors_want_is_a_row_of_chips_above_the_list(): void
@@ -340,7 +358,7 @@ class GuestListRowsTest extends TestCase
 
         // Its rows are the list's own row, and the old phone list (#mobileEventsList) is the
         // admin's and the dashboard's now. Only the view on screen is in the page (v-if).
-        $this->assertSame(2, substr_count($html, 'class="gk-row gk-row-press"'), 'the list and the phone month draw the same row');
+        $this->assertSame(3, substr_count($html, 'class="gk-row gk-row-press"'), 'the list, its large cards and the phone month draw the same row');
         $this->assertStringNotContainsString('id="mobileEventsList"', $html);
         $this->assertStringContainsString('<div v-if="isNarrow && currentView === \'calendar\' && !isLoadingEvents" class="gk-list" data-phone-month>', $html);
 
@@ -685,8 +703,8 @@ class GuestListRowsTest extends TestCase
         $role = $this->createRole($owner, 'venue');
 
         $guest = $this->get('/'.$role->subdomain)->assertOk()->getContent();
-        // Once for the cards a wide screen gets, once for a phone's rows.
-        $this->assertSame(2, preg_match_all('~class="gk-past" role="heading" aria-level="2">\s*<span class="gk-past-label"><svg ~', $guest));
+        // Once, for the list's rows at every width.
+        $this->assertSame(1, preg_match_all('~class="gk-past" role="heading" aria-level="2">\s*<span class="gk-past-label"><svg ~', $guest));
         $this->assertStringNotContainsString('gk-days-past', $guest);
         $this->assertStringNotContainsString('class="flex-1 h-px bg-gray-300 dark:bg-gray-600"', $guest, 'no grey hairline over the owner\'s background');
         // The label on the panel's own ground, and the rule a light line over a dark one.

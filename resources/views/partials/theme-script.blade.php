@@ -77,6 +77,64 @@
             var darkParam = new URLSearchParams(window.location.search).get('dark');
             forced = darkParam === 'true' ? 'dark' : (darkParam === 'false' ? 'light' : null);
         } catch (e) {}
+        // The guest pages are in the mode their schedule's look asks for, whatever the visitor's
+        // setting ($forceMode, from the guest layout); a pin above still wins.
+        var FORCE_MODE = @json(in_array($forceMode ?? null, ['dark', 'light'], true) ? $forceMode : null);
+        // The first guest page a visitor opens decides light or dark for the rest of the visit, so
+        // moving between schedules (each with its own palette) never flips the page between the
+        // two (es_gp_mode, a cookie that lasts until the browser closes; on the platform's own
+        // domain it is set there, so it carries across schedules' subdomains). A schedule then
+        // shows its own palette when it is of that brightness, and its automatic one otherwise.
+        // A cookie cannot cross to another domain (a schedule's own, or the platform's from one),
+        // so a link that leaves for one carries the mode in its fragment (#es_mode=dark), which
+        // the page it opens takes, stores and removes from the address (never sent to a server).
+        if (!forced && FORCE_MODE) {
+            var carryDomain = @json($carryDomain ?? null);
+            var carryHosts = @json(array_values($carryHosts ?? []));
+            var underBase = function (h) { return !!carryDomain && (h === carryDomain || h.slice(-(carryDomain.length + 1)) === '.' + carryDomain); };
+            var writeMode = function (m) {
+                try { document.cookie = 'es_gp_mode=' + m + '; path=/; SameSite=Lax' + (underBase(window.location.hostname) ? '; domain=' + carryDomain : '') + (window.location.protocol === 'https:' ? '; Secure' : ''); } catch (e) {}
+            };
+            var carried = null;
+            try {
+                var hm = /^#es_mode=(light|dark)(?:&(.*))?$/.exec(window.location.hash);
+                if (hm) {
+                    carried = hm[1];
+                    writeMode(carried);
+                    history.replaceState(history.state, '', window.location.pathname + window.location.search + (hm[2] ? '#' + hm[2] : ''));
+                    if (hm[2]) {
+                        document.addEventListener('DOMContentLoaded', function () { var t = document.getElementById(decodeURIComponent(hm[2])); if (t) { t.scrollIntoView(); } });
+                    }
+                }
+            } catch (e) {}
+            if (!carried) {
+                try { var cm = document.cookie.match(/(?:^|;\s*)es_gp_mode=(light|dark)(?:;|$)/); carried = cm ? cm[1] : null; } catch (e) {}
+            }
+            if (!carried) {
+                carried = FORCE_MODE;
+                writeMode(carried);
+            }
+            forced = carried;
+            // Only a link to another of this platform's guest pages, and only when it leaves
+            // the domain the cookie covers.
+            var decorate = function (e) {
+                var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+                if (!a) { return; }
+                try {
+                    var u = new URL(a.href, window.location.href);
+                    var here = window.location.hostname, there = u.hostname;
+                    if (there === here || (underBase(here) && underBase(there))) { return; }
+                    if (!underBase(there) && carryHosts.indexOf(there) === -1) { return; }
+                    if (/^#?es_mode=/.test(u.hash)) { return; }
+                    var rest = u.hash ? u.hash.slice(1) : '';
+                    u.hash = 'es_mode=' + carried + (rest ? '&' + rest : '');
+                    a.href = u.toString();
+                } catch (err) {}
+            };
+            document.addEventListener('click', decorate, true);
+            document.addEventListener('auxclick', decorate, true);
+            document.addEventListener('contextmenu', decorate, true);
+        }
 
         apply(forced || mode());
 

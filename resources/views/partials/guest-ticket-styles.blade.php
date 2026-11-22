@@ -6,14 +6,21 @@
      violet for every schedule and is the schedule's own colour now (--es-glow, from
      App\Utils\GuestTheme), nothing loops, and the code is the largest thing on it.
 
+     The PAGE around it is the stage (partials/guest-stage-styles, which the including page loads
+     with the kit): the ticket's own dark ground and light stand for the schedule's background,
+     the way back sits on them in a glass pill, and the ticket stands on one sheet in the stage's
+     colours (.gk-tk-sheet), a paper in light mode and a deep ink in dark. The sibling pages (an
+     order, a payment plan) are that sheet with no ticket on it.
+
      Colours go through the --tk- tokens so the print sheet can turn the whole ticket black on
      white by redefining six of them. Sizes are in rem and properties are logical, as in the kit.
      The door view is NOT inside .gk-ticket: that element has a filter, which would make it the
      containing block of a fixed child and un-fix it. --}}
 <style {!! nonce_attr() !!}>
     {{-- The ticket is dark in light mode too, so its buttons take the schedule's DARK values
-         whatever the visitor's mode (GuestTheme::darkCss()). $themeRole is the including page's. --}}
-    {!! \App\Utils\GuestTheme::for(($themeRole ?? null) ? \App\Utils\GuestTheme::lookRole($themeRole, null, null) : null)->darkCss('.gk-tkpage') !!}
+         whatever the visitor's mode (GuestTheme::darkCss()). On the ticket alone, not the page:
+         the sheet it stands on follows the visitor's mode. $themeRole is the including page's. --}}
+    {!! \App\Utils\GuestTheme::for(($themeRole ?? null) ? \App\Utils\GuestTheme::lookRole($themeRole, null, null) : null)->darkCss('.gk-ticket, .gk-tk-card') !!}
     .gk-tkpage {
         --tk-ink: #ffffff;
         --tk-ink-2: #c3c6d4;
@@ -26,14 +33,14 @@
         position: relative;
         z-index: 0;
         min-height: 100vh;
-        padding: 1rem;
+        padding: 0 0 1rem;
         font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         font-size: .9375rem;
         line-height: 1.45;
         color: var(--tk-ink-2);
         background: var(--tk-ground);
     }
-    @media (min-width: 40rem) { .gk-tkpage { padding: 1.5rem; } }
+    @media (min-width: 40rem) { .gk-tkpage { padding: .5rem 1.5rem 1.5rem; } }
     {{-- The light. A fixed layer of its own, not background-attachment: fixed, which phones ignore. --}}
     .gk-tkpage::before {
         content: '';
@@ -50,12 +57,47 @@
     @if (($themeRole ?? null) && $themeRole->background === 'aurora')
     .gk-tkpage::before { background: {{ \App\Utils\Aurora::for($themeRole)->staticGradient('dark') }}; }
     @endif
-    .gk-tkpage :focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; border-radius: .375rem; }
+    .gk-ticket :focus-visible, .gk-tk-card :focus-visible, .gk-tk-topbar :focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; border-radius: .375rem; }
     .gk-tk-wrap { display: grid; gap: .875rem; justify-items: start; width: 100%; max-width: 26rem; margin: 0 auto; }
     .gk-tk-wrap > * { min-width: 0; max-width: 100%; }
 
+    {{-- The sheet the ticket stands on, narrower than a page's: one column. On a phone it runs
+         edge to edge under the way back, as every stage does. --}}
+    .gk-tk-topbar { max-width: 36rem; }
+    {{-- Over the ticket itself, which stands on the page with no sheet: its own width. --}}
+    .gk-tk-topbar-ticket { max-width: 26rem; padding-inline: 0; }
+    .gk-tk-sheet.gk-stage { max-width: 36rem; justify-items: stretch; gap: 1.5rem; margin-top: .875rem; font-family: inherit; }
+    @media (min-width: 40rem) { .gk-tk-sheet.gk-stage { margin-top: .875rem; padding: 2.25rem 2.25rem 2.5rem; } }
+    .gk-tk-sheet .gk-ticket { justify-self: center; max-width: 27rem; }
+    {{-- The sheet's own type, for the pages that are only a sheet: the order, the payment plan. --}}
+    .gk-tk-head { display: grid; gap: .625rem; }
+    .gk-tk-head-logo { display: block; width: 3.5rem; height: 3.5rem; margin-bottom: .5rem; border-radius: .875rem; object-fit: cover; }
+    .gk-tk-sheet .gk-title { font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem); }
+    .gk-tk-sheet .gk-subtitle { font-size: clamp(1.0625rem, .95rem + .5vw, 1.25rem); }
+    .gk-tk-sheet .gk-note strong { font-weight: 700; }
+    .gk-tk-sheet .gk-note svg { flex: none; width: 1.25rem; height: 1.25rem; margin-top: .0625rem; }
+    .gk-tk-body-sheet { display: grid; gap: 2rem; }
+    .gk-tk-body-rows { display: grid; gap: 1.25rem; }
+    {{-- The payment plan on the sheet (partials/installment-plan-panel, variant stage). --}}
+    .gk-plan { padding-top: 1.75rem; border-top: 1px solid var(--gk-line); }
+    .gk-plan-head { margin-bottom: 1rem; }
+    .gk-plan-title { margin: 0; font-size: 1.25rem; font-weight: 700; }
+    .gk-plan-lab { color: var(--gk-ink-2); }
+    .gk-plan-val { color: var(--gk-ink); font-variant-numeric: tabular-nums; }
+    .gk-plan-mut { color: var(--gk-ink-3); }
+    .gk-plan-ok { color: var(--gk-ok); }
+    .gk-plan-rule { border-color: var(--gk-line); }
+    .gk-plan-text { font-size: 1rem; }
+    .gk-plan-small { font-size: .875rem; }
+    .gk-plan-line { margin-bottom: .625rem; }
+    .gk-plan-rows { margin-top: 1rem; padding-top: .75rem; }
+    .gk-plan-row { padding-block: .4375rem; }
+    .gk-plan-state { min-width: 5.5rem; font-size: .8125rem; font-weight: 600; text-align: end; }
+    .gk-plan-actions { gap: .625rem; margin-top: 1.5rem; }
+    .gk-tk-quiet-s { margin: 0; font-size: .875rem; line-height: 1.5; color: var(--gk-ink-3); }
+
     {{-- The way back to the event. --}}
-    .gk-tk-back { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: 0 .875rem 0 .5rem; border-radius: 999px; background: rgb(255 255 255 / .09); color: #eceef4; font-size: .875rem; font-weight: 600; text-decoration: none; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); transition: background-color 120ms; }
+    .gk-tk-back { display: inline-flex; flex: none; align-items: center; gap: .5rem; min-height: 2.75rem; padding: 0 .875rem 0 .5rem; border-radius: 999px; background: rgb(255 255 255 / .09); color: #eceef4; font-size: .875rem; font-weight: 600; text-decoration: none; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); transition: background-color 120ms; }
     .gk-tk-back:hover { background: rgb(255 255 255 / .15); }
     .gk-tk-back svg { flex: none; width: 1.125rem; height: 1.125rem; }
     .gk-tk-back span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -195,17 +237,19 @@
     .gk-tk-card { width: 100%; overflow: hidden; border-radius: 1.375rem; background: linear-gradient(180deg, var(--tk-card-top), var(--tk-card)); filter: drop-shadow(0 1.625rem 3.125rem rgb(var(--es-glow) / .2)); }
     .gk-tk-body { display: grid; gap: .875rem; padding: 1.125rem 1.25rem 1.25rem; }
     .gk-tk-body > p { margin: 0; }
-    .gk-tk-legs { display: grid; gap: .625rem; margin: 0; padding: 0; list-style: none; }
-    .gk-tk-leg { border: 1px solid var(--tk-line); border-radius: .875rem; background: var(--tk-well); }
+    {{-- An order's events: rows of the sheet between hairlines, each a way to its ticket. --}}
+    .gk-tk-legs { display: grid; margin: 0; padding: 0; list-style: none; border-block: 1px solid var(--gk-line); }
+    .gk-tk-leg + .gk-tk-leg { border-top: 1px solid var(--gk-line); }
     .gk-tk-leg-off { opacity: .6; }
-    .gk-tk-leg-main { display: flex; align-items: center; justify-content: space-between; gap: .75rem; min-height: 4rem; padding: .75rem 1rem; color: var(--tk-ink); text-decoration: none; }
-    a.gk-tk-leg-main:hover { background: rgb(255 255 255 / .05); }
-    .gk-tk-leg-main b { display: block; font-size: 1rem; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
-    .gk-tk-leg-main small { display: block; margin-top: .125rem; font-size: .84375rem; color: var(--tk-ink-2); }
-    .gk-tk-leg-go { display: inline-flex; align-items: center; gap: .25rem; flex: none; font-size: .875rem; font-weight: 700; color: var(--es-glow-ink); white-space: nowrap; }
+    .gk-tk-leg-main { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 4.5rem; padding-block: 1rem; color: var(--gk-ink); text-decoration: none; }
+    a.gk-tk-leg-main:hover b { text-decoration: underline; text-underline-offset: 3px; }
+    .gk-tk-leg-main b { display: block; font-size: 1.1875rem; font-weight: 650; line-height: 1.3; overflow-wrap: anywhere; }
+    .gk-tk-leg-main small { display: block; margin-top: .25rem; font-size: .9375rem; color: var(--gk-ink-2); }
+    .gk-tk-leg-main .gk-tk-quiet { color: var(--gk-ink-3); }
+    .gk-tk-leg-go { display: inline-flex; align-items: center; gap: .25rem; flex: none; font-size: .9375rem; font-weight: 650; color: var(--es-accent-readable); white-space: nowrap; }
     .gk-tk-leg-go svg { width: 1rem; height: 1rem; }
     [dir="rtl"] .gk-tk-leg-go svg { transform: scaleX(-1); }
-    .gk-tk-leg-extra { padding: 0 1rem 1rem; }
+    .gk-tk-leg-extra { padding: 0 0 1rem; }
 
     {{-- A class that sets display outranks the hidden attribute, so the blocks a button opens
          say it themselves. --}}
@@ -243,6 +287,8 @@
         body { background: #ffffff; }
         .gk-tkpage { --tk-ink: #000000; --tk-ink-2: #1f2937; --tk-ink-3: #4b5563; --tk-line: #cbd5e1; --tk-well: #ffffff; --tk-card: #ffffff; --tk-card-top: #ffffff; --tk-ground: #ffffff; min-height: 0; padding: 0; }
         .gk-tkpage::before { display: none; }
+        .gk-tk-sheet.gk-stage { margin: 0 auto; padding: 0; border-radius: 0; background: #ffffff; color: #000000; box-shadow: none; }
+        .gk-tk-sheet.gk-stage::before, .gk-tk-topbar { display: none; }
         .gk-ticket { filter: none; animation: none; border: 1px solid #94a3b8; border-radius: 1rem; }
         .gk-tk-card { filter: none; background: #ffffff; border: 1px solid #94a3b8; border-radius: 1rem; }
         .gk-ticket-a, .gk-ticket-b { background: #ffffff; -webkit-mask: none; mask: none; border-radius: 0; }

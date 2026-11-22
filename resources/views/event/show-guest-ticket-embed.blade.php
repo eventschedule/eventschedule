@@ -1,29 +1,29 @@
 <x-app-guest-layout :role="$role" :event="$event" :date="$date" :fonts="$fonts">
 
     @php
-        $accentColor = $role->accent_color ?? '#4E81FA';
-        $contrastColor = accent_contrast_color($accentColor);
         $isTicketMode = request()->get('tickets') === 'true';
         $isRsvpMode = request()->get('rsvp') === 'true';
         $eventDate = $date ?? $event->saleEventDateFromStartsAt();
     @endphp
 
+    {{-- The widget on the stage (partials/guest-stage-styles): one small sheet over the
+         schedule's background, the date line in the accent, the event's name large, what the
+         tickets cost as rows between hairlines and one large button. Smaller than a page's stage
+         and rounded at every width, because it is a card inside somebody else's page. --}}
     <style {!! nonce_attr() !!}>
-        .ticket-embed-card {
-            background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
-            border: 1px solid #d1d5db;
-        }
-        .dark .ticket-embed-card {
-            background: rgb(var(--ap-surface));
-            border-color: rgb(var(--ap-border));
-        }
-        {{-- The form's bar, fitted to this card. The kit's bar bleeds to the edges of the event
-             page's panel and sticks to the foot of the screen; this card has its own padding
-             (1.5rem and 1.25rem), is as tall as what it holds, and clips, so here the bar is the
-             card's plain foot, in the card's own colour. --}}
-        .ticket-embed-card .gk-buybar { position: static; margin: 1.25rem -1.5rem -1.25rem; padding: .875rem 1.5rem; border-radius: 0; background: transparent; }
+        .gk-p-tembed { max-width: 36rem; margin: 0 auto; padding: 1.5rem 1.5rem 1.25rem; border-radius: 1.25rem; box-shadow: 0 1.25rem 2.5rem -1.25rem rgb(0 0 0 / .4); }
+        @media (min-width: 40rem) { .gk-p-tembed { margin: 0 auto; padding: 1.75rem 2rem 1.5rem; border-radius: 1.5rem; } }
+        .gk-p-tembed .gk-title { margin-top: .375rem; font-size: clamp(1.625rem, 1.3rem + 1.4vw, 2.25rem); }
+        .gk-p-tembed .gk-title a { color: inherit; text-decoration: none; }
+        .gk-p-tembed .gk-title a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+        .gk-tembed-body { margin-top: 1.25rem; }
+        .gk-tembed-go { display: flex; width: 100%; max-width: none; margin-top: 1.5rem; }
+        .gk-tembed-help { margin: .75rem 0 0; text-align: center; font-size: .84375rem; color: var(--gk-ink-3); }
+        .gk-tembed-none { padding: 1.5rem 0 .5rem; text-align: center; color: var(--gk-ink-2); }
+        .gk-tembed-none a { display: inline-block; margin-top: 1rem; font-weight: 600; color: var(--es-accent-readable); text-decoration: underline; text-underline-offset: 3px; }
+        .gk-tembed-foot { margin-top: 1.25rem; padding-top: .875rem; border-top: 1px solid var(--gk-line); text-align: end; }
+        .gk-tembed-foot a { font-size: .75rem; color: var(--gk-ink-3); text-decoration: none; }
+        .gk-tembed-foot a:hover { color: var(--gk-ink); }
     </style>
 
     @php
@@ -33,36 +33,33 @@
         // anyway. So the widget lists what is on offer and its one button opens the event's page in
         // a new tab with the form open, where the buyer finishes (App\Support\EmbedEventView).
         $widgetDate = \App\Models\Event::isOccurrenceDate($date ?? null) ? $date : null;
-        $widgetButtonClass = 'inline-flex w-full items-center justify-center gap-x-2 rounded-md px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:shadow-md';
+        $widgetButtonClass = 'gk-btn gk-btn-primary gk-cta-main gk-tembed-go';
     @endphp
     <div class="pt-4 pb-4 px-4" data-embed-root>
-        <div class="ticket-embed-card max-w-xl mx-auto overflow-hidden">
+        <div class="ticket-embed-card gk-stage gk-p-tembed">
 
-            {{-- Header --}}
-            {{-- The tokens the layout prints, as the form's own buttons below take them, so the
-                 card is in one schedule's colours from its header to Checkout. The header used
-                 to paint this schedule's raw accent while the layout painted the event's other
-                 schedule's background, and once the buttons moved onto the tokens a performer's
-                 widget for a show at a venue had a header in one colour and Checkout in another. --}}
-            <div class="px-6 py-4" style="background-color: var(--es-accent); color: var(--es-accent-text);">
-                <h1 class="text-lg font-bold">
-                    <a href="{{ $event->getGuestUrl($subdomain, $date) }}" target="_top" style="color: inherit; text-decoration: none;">
-                        {{ $event->name }}
-                    </a>
-                </h1>
-                <p class="text-sm mt-1" style="opacity: 0.85;">
-                    {{ $event->is_multi_day ? $event->getDateRangeDisplay($eventDate) : $event->getStartDateTime($eventDate, true)->format('l, F j, Y') }}
+            {{-- Header: the date line, then the name. Both in the tokens the layout prints, as the
+                 button below takes them, so the card is in one schedule's colours from top to
+                 bottom: the header used to paint this schedule's raw accent while the layout
+                 painted the event's other schedule's background. --}}
+            <div class="gk-tembed-head">
+                <p class="gk-dateline">
+                    <span>{{ $event->is_multi_day ? $event->getDateRangeDisplay($eventDate) : $event->getStartDateTime($eventDate, true)->format('l, F j, Y') }}</span>
                     @if ($event->getStartEndTime($eventDate))
-                        &middot; {{ $event->getStartEndTime($eventDate) }}
+                        <span class="gk-dateline-dot" aria-hidden="true">&middot;</span>
+                        <span>{{ $event->getStartEndTime($eventDate) }}</span>
                     @endif
                 </p>
+                <h1 class="gk-title">
+                    <a href="{{ $event->getGuestUrl($subdomain, $date) }}" target="_top">{{ $event->name }}</a>
+                </h1>
             </div>
 
             {{-- Body --}}
-            <div class="px-6 py-5">
+            <div class="gk-tembed-body">
 
                 @if (session('error'))
-                <div class="mb-4 p-3 rounded-lg text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+                <div class="gk-note gk-note-bad mb-4">
                     {{ session('error') }}
                 </div>
                 @endif
@@ -77,15 +74,15 @@
                         @endphp
                         <a href="{{ \App\Support\EmbedEventView::pageUrl($event, $subdomain, $widgetDate, 'tickets') }}" target="_blank" rel="noopener"
                            data-embed-checkout="tickets" aria-label="{{ $widgetLabel }} ({{ __('messages.opens_in_new_tab') }})"
-                           class="mt-5 {{ $widgetButtonClass }}" style="background-color: var(--es-accent); color: var(--es-accent-text);">
+                           class="{{ $widgetButtonClass }}">
                             {{ $widgetLabel }}
-                            <svg class="h-4 w-4 {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                            <svg class="h-5 w-5 {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
                         </a>
-                        <p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">{{ __('messages.embed_events_help') }}</p>
+                        <p class="gk-tembed-help">{{ __('messages.embed_events_help') }}</p>
                     @else
-                        <div class="text-center py-8">
-                            <p class="text-gray-500 dark:text-gray-400">{{ __('messages.tickets_not_available_embed') }}</p>
-                            <a href="{{ $event->getGuestUrl($subdomain, $date) }}" target="_top" class="mt-4 inline-block text-sm font-medium" style="color: {{ $accentColor }};">
+                        <div class="gk-tembed-none">
+                            <p>{{ __('messages.tickets_not_available_embed') }}</p>
+                            <a href="{{ $event->getGuestUrl($subdomain, $date) }}" target="_top">
                                 {{ __('messages.view_event') }}
                             </a>
                         </div>
@@ -101,15 +98,15 @@
                         @endphp
                         <a href="{{ \App\Support\EmbedEventView::pageUrl($event, $subdomain, $widgetDate, 'rsvp') }}" target="_blank" rel="noopener"
                            data-embed-checkout="rsvp" aria-label="{{ $widgetLabel }} ({{ __('messages.opens_in_new_tab') }})"
-                           class="{{ $widgetButtonClass }}" style="background-color: var(--es-accent); color: var(--es-accent-text);">
+                           class="{{ $widgetButtonClass }}">
                             {{ $widgetLabel }}
-                            <svg class="h-4 w-4 {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                            <svg class="h-5 w-5 {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
                         </a>
-                        <p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-400">{{ __('messages.embed_events_help') }}</p>
+                        <p class="gk-tembed-help">{{ __('messages.embed_events_help') }}</p>
                     @else
-                        <div class="text-center py-8">
-                            <p class="text-gray-500 dark:text-gray-400">{{ __('messages.registration_not_available_embed') }}</p>
-                            <a href="{{ $event->getGuestUrl($subdomain, $date) }}" target="_top" class="mt-4 inline-block text-sm font-medium" style="color: {{ $accentColor }};">
+                        <div class="gk-tembed-none">
+                            <p>{{ __('messages.registration_not_available_embed') }}</p>
+                            <a href="{{ $event->getGuestUrl($subdomain, $date) }}" target="_top">
                                 {{ __('messages.view_event') }}
                             </a>
                         </div>
@@ -120,8 +117,8 @@
 
             {{-- Powered by footer --}}
             @if ($role->showBranding())
-            <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 text-end">
-                <a href="https://eventschedule.com" target="_blank" rel="noopener noreferrer" class="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors" style="text-decoration: none;">
+            <div class="gk-tembed-foot">
+                <a href="https://eventschedule.com" target="_blank" rel="noopener noreferrer">
                     {{ \App\Models\Role::creditChipTitle() }}
                 </a>
             </div>

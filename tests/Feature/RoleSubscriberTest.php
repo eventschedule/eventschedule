@@ -8,8 +8,17 @@ use App\Models\NewsletterUnsubscribe;
 use App\Models\Role;
 use App\Models\RoleSubscriber;
 use App\Models\User;
+use App\Services\AudienceResolver;
+use App\Services\DemoService;
+use App\Utils\HoneypotUtils;
+use App\Utils\UrlUtils;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Socialite\Contracts\Provider;
+use Laravel\Socialite\Facades\Socialite;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -423,14 +432,14 @@ class RoleSubscriberTest extends TestCase
         // VerifyCsrfToken::handle() short-circuits on runningUnitTests(), so a feature-test POST
         // succeeds whether or not the exemption exists - that version of this test passed with
         // 'sub/u/*' deleted from bootstrap/app.php, i.e. it pinned nothing.
-        $middleware = new \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken(
+        $middleware = new VerifyCsrfToken(
             app(), app('encrypter')
         );
 
         $matches = new \ReflectionMethod($middleware, 'inExceptArray');
         $matches->setAccessible(true);
 
-        $request = \Illuminate\Http\Request::create('/sub/u/'.str_repeat('a', 64), 'POST');
+        $request = Request::create('/sub/u/'.str_repeat('a', 64), 'POST');
 
         $this->assertTrue(
             $matches->invoke($middleware, $request),
@@ -503,15 +512,9 @@ class RoleSubscriberTest extends TestCase
 
     public function test_the_event_page_panel_carries_its_own_card(): void
     {
-        // This test used to assert the exact opposite, on a premise that was never true: that the
-        // include sits inside the right column's card, so a card of its own would nest one inside
-        // an identical one. That container opens above the breadcrumb and closes at the mobile
-        // calendar sheet, a thousand lines before the include - so what the panel actually got was
-        // a border-t rule with negative margins over the SCHEDULE'S BACKGROUND. On a light
-        // background image in dark mode that is near-white text on a photo.
-        //
-        // Every other block in the column (tickets, description, agenda, media, reviews,
-        // x-sponsor-grid) carries the guest-portal card, and so must this one.
+        // The panel is never drawn straight on the schedule's background: on the 2026-11 sheet
+        // (partials/guest-stage-styles) it is a band of its own under the event's two columns,
+        // a raised card with its own padding (.gk-card .gk-band), as the owner's mock draws it.
         //
         // Local dev cannot show this - every schedule here belongs to the demo user, so the panel
         // is (correctly) suppressed - which is exactly why it is pinned here instead.
@@ -522,75 +525,24 @@ class RoleSubscriberTest extends TestCase
         preg_match('/id="gp-subscribe"[^>]*class="([^"]*)"/', $html, $m);
         $this->assertNotEmpty($m, 'the panel did not render on the event page');
 
-        $this->assertStringContainsString('bg-white/95', $m[1],
-            'the panel renders over the schedule background and needs an opaque surface of its own');
-        $this->assertStringContainsString('backdrop-blur-sm', $m[1],
-            'the panel must use the same card treatment as every sibling in the column');
-        $this->assertStringContainsString('p-6', $m[1],
-            'a card without padding puts the form flush against its own edge');
+        $this->assertStringContainsString('gk-card', $m[1], 'a raised surface of its own on the sheet');
+        $this->assertStringContainsString('gk-band', $m[1], 'a card without padding puts the form flush against its own edge');
+        $this->assertMatchesRegularExpression('/\.gk-band \{ padding: /', $html, 'the band\'s padding is the kit\'s');
+        // Under both columns, not inside the right one.
+        $this->assertTrue(strpos($html, 'class="gk-event-after"') < strpos($html, 'id="gp-subscribe"'));
     }
 
     public function test_the_schedule_page_panel_keeps_its_own_card_and_padding(): void
     {
-        // The other side of the same change: padding moved INSIDE $panelClass, so a caller that
-        // passes one now owns it. If the schedule page's class string ever loses the padding
-        // again, the form renders flush against the card edge.
-        //
-        // Asserted as the two axes separately rather than as 'p-6', because the horizontal half is
-        // px-6 lg:px-16 now (see the test below) and neither px-6 nor py-6 contains 'p-6'.
+        // The other side of the same change: padding lives INSIDE $panelClass, so a caller that
+        // passes one owns it. The schedule page passes the same band as the event page.
         $html = $this->get($this->role->getGuestUrl())->assertOk()->getContent();
 
         preg_match('/id="gp-subscribe"[^>]*class="([^"]*)"/', $html, $m);
         $this->assertNotEmpty($m, 'the panel did not render on the schedule page');
 
-        $this->assertStringContainsString('rounded-2xl', $m[1]);
-        $this->assertStringContainsString('px-6', $m[1]);
-        $this->assertStringContainsString('py-6', $m[1]);
-    }
-
-    public function test_the_subscribe_panel_indents_its_content_like_the_calendar_panel(): void
-    {
-        // Card EDGES already line up - that is the width test below. This is the inner inset, and
-        // it is a different thing that can regress on its own: every sibling card in the column
-        // (the banner header's inner <header>, the carousel, the calendar wrapper, the video grid)
-        // steps to lg:px-16, so a panel that stopped at its own p-8 put "Stay up to date" 32px to
-        // the left of "September 2026" on every screen at lg or wider.
-        //
-        // Asserted as an equality against the calendar's own lg step rather than against the
-        // literal 'lg:px-16', for the same reason the width test compares against the calendar:
-        // the requirement is "the same inset as the calendar", not any particular number.
-        //
-        // Only the lg step is compared. Below it the calendar is deliberately px-0 md:px-6 - it
-        // runs edge to edge once .calendar-panel-border drops its background under 768px - and in
-        // LIST view #gp-calendar is zeroed outright by the CSS in show-guest.blade.php
-        // (padding: 0 !important, transparent background), because a list has no card of its own.
-        // That override is CSS-only, so the rendered class attribute still carries lg:px-16 in
-        // both views and this assertion holds; in list view the panel's inset is matching the
-        // header, carousel and video grid, which keep px-6 lg:px-16 in both views.
-        $html = $this->get($this->role->getGuestUrl())->assertOk()->getContent();
-
-        // Grab the whole opening tag first, then read class out of it: [^>]* cannot cross a '>',
-        // so the tag match is anchored to one element, and pulling class separately means neither
-        // side depends on the attribute ORDER. The calendar wrapper writes class before id and the
-        // panel writes it after, which is exactly the trap a single combined pattern falls into.
-        preg_match('/<[^>]*id="gp-calendar"[^>]*>/', $html, $calendarTag);
-        $this->assertNotEmpty($calendarTag, 'the calendar wrapper did not render');
-        preg_match('/class="([^"]*)"/', $calendarTag[0], $calendar);
-        $this->assertNotEmpty($calendar, 'the calendar wrapper rendered no class attribute');
-
-        preg_match('/<[^>]*id="gp-subscribe"[^>]*>/', $html, $panelTag);
-        $this->assertNotEmpty($panelTag, 'the panel did not render on the schedule page');
-        preg_match('/class="([^"]*)"/', $panelTag[0], $panel);
-        $this->assertNotEmpty($panel, 'the panel rendered no class attribute');
-
-        preg_match('/(?:^|\s)(lg:px-\S+)/', $calendar[1], $calendarStep);
-        $this->assertNotEmpty($calendarStep, 'the calendar wrapper lost its lg inset');
-
-        preg_match('/(?:^|\s)(lg:px-\S+)/', $panel[1], $panelStep);
-        $this->assertNotEmpty($panelStep, 'the subscribe panel lost its lg inset');
-
-        $this->assertSame($calendarStep[1], $panelStep[1],
-            'the subscribe panel must indent its content as far as the calendar panel does');
+        $this->assertStringContainsString('gk-card', $m[1]);
+        $this->assertStringContainsString('gk-band', $m[1]);
     }
 
     public function test_the_subscribe_panel_matches_the_calendar_panel_width(): void
@@ -923,7 +875,7 @@ class RoleSubscriberTest extends TestCase
         // get email_verified_at stamped and be signed in. NewPasswordController deliberately
         // refuses to do either off a reset token.
         $victim = User::factory()->create(['password' => null, 'email_verified_at' => null]);
-        $token = \Illuminate\Support\Facades\Password::createToken($victim);
+        $token = Password::createToken($victim);
 
         $this->post(route('subscriber.claim_account'), [
             'email' => $victim->email,
@@ -1026,7 +978,7 @@ class RoleSubscriberTest extends TestCase
 
         $this->post(route('subscriber.confirm', ['token' => $sub->confirm_token]), [
             'password' => 'sup3rsecret',
-            \App\Utils\HoneypotUtils::FIELD => 'https://example.com',
+            HoneypotUtils::FIELD => 'https://example.com',
         ])->assertSessionHasErrors('password');
 
         $sub->refresh();
@@ -1060,7 +1012,7 @@ class RoleSubscriberTest extends TestCase
 
         $this->get(route('subscriber.show_confirm', ['token' => $sub->confirm_token]))
             ->assertOk()
-            ->assertDontSee('name="'.\App\Utils\HoneypotUtils::FIELD.'"', false);
+            ->assertDontSee('name="'.HoneypotUtils::FIELD.'"', false);
     }
 
     public function test_a_confirm_page_offering_a_password_reports_a_tripped_honeypot(): void
@@ -1068,11 +1020,11 @@ class RoleSubscriberTest extends TestCase
         $sub = $this->subscribeOnly('fan@fans.test');
 
         $page = $this->get(route('subscriber.show_confirm', ['token' => $sub->confirm_token]));
-        $page->assertOk()->assertSee('name="'.\App\Utils\HoneypotUtils::FIELD.'"', false);
+        $page->assertOk()->assertSee('name="'.HoneypotUtils::FIELD.'"', false);
 
         $this->from(route('subscriber.show_confirm', ['token' => $sub->confirm_token]))
             ->post(route('subscriber.confirm', ['token' => $sub->confirm_token]), [
-                \App\Utils\HoneypotUtils::FIELD => 'https://example.com',
+                HoneypotUtils::FIELD => 'https://example.com',
             ])->assertSessionHasErrors('password');
 
         // And the surface that renders that error is still on the page it lands back on.
@@ -1146,11 +1098,11 @@ class RoleSubscriberTest extends TestCase
         $socialUser->shouldReceive('getAvatar')->andReturn(null);
         $socialUser->user = ['locale' => 'en'];
 
-        $provider = \Mockery::mock(\Laravel\Socialite\Contracts\Provider::class);
+        $provider = \Mockery::mock(Provider::class);
         $provider->shouldReceive('redirectUrl')->andReturnSelf();
         $provider->shouldReceive('user')->andReturn($socialUser);
 
-        \Laravel\Socialite\Facades\Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+        Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
 
         $this->get(route('auth.google.callback'))->assertRedirect();
 
@@ -1248,7 +1200,7 @@ class RoleSubscriberTest extends TestCase
         $this->actingAs($this->role->owner())
             ->delete(route('role.subscribers.remove', [
                 'subdomain' => $this->role->subdomain,
-                'hash' => \App\Utils\UrlUtils::encodeId($sub->id),
+                'hash' => UrlUtils::encodeId($sub->id),
             ]))->assertRedirect();
 
         $this->assertSame(0, RoleSubscriber::where('role_id', $this->role->id)->count());
@@ -1271,7 +1223,7 @@ class RoleSubscriberTest extends TestCase
 
         $this->actingAs($this->role->owner())->delete(route('role.subscribers.remove', [
             'subdomain' => $this->role->subdomain,
-            'hash' => \App\Utils\UrlUtils::encodeId($sub->id),
+            'hash' => UrlUtils::encodeId($sub->id),
         ]));
 
         $this->assertSame(1, $this->followerPivots($this->role, $follower),
@@ -1292,7 +1244,7 @@ class RoleSubscriberTest extends TestCase
         $sub = RoleSubscriber::where('role_id', $this->role->id)->firstOrFail();
         $this->actingAs($this->role->owner())->delete(route('role.subscribers.remove', [
             'subdomain' => $this->role->subdomain,
-            'hash' => \App\Utils\UrlUtils::encodeId($sub->id),
+            'hash' => UrlUtils::encodeId($sub->id),
         ]));
 
         $this->assertSame(1, $this->followerPivots($this->role, $follower));
@@ -1324,7 +1276,7 @@ class RoleSubscriberTest extends TestCase
 
         $this->actingAs($owner)->delete(route('role.subscribers.remove', [
             'subdomain' => $this->role->subdomain,
-            'hash' => \App\Utils\UrlUtils::encodeId($sub->id),
+            'hash' => UrlUtils::encodeId($sub->id),
         ]));
 
         $this->assertSame(1, \DB::table('role_user')
@@ -1374,7 +1326,7 @@ class RoleSubscriberTest extends TestCase
         $other = $this->createRole($this->createOwner());
         $this->subscribeAndConfirm('fan@fans.test', $other);
 
-        $recipients = app(\App\Services\AudienceResolver::class)
+        $recipients = app(AudienceResolver::class)
             ->announcementRecipients($other->fresh())
             ->pluck('email');
 
@@ -1527,7 +1479,7 @@ class RoleSubscriberTest extends TestCase
         // top of a subscribe form that 404s. Confirmed against the live demo schedule before this
         // was written.
         $demoOwner = $this->createOwner();
-        $demoOwner->forceFill(['email' => \App\Services\DemoService::DEMO_EMAIL])->save();
+        $demoOwner->forceFill(['email' => DemoService::DEMO_EMAIL])->save();
         $demo = $this->createRole($demoOwner, 'venue', ['accept_requests' => false]);
         $this->assertTrue(is_demo_role($demo->fresh()));
         $this->assertFalse($demo->fresh()->willCreateAccountOnConfirm());
@@ -1564,7 +1516,7 @@ class RoleSubscriberTest extends TestCase
         $this->post(route('event.rsvp', ['subdomain' => $this->role->subdomain]), [
             'name' => 'A Fan',
             'email' => 'fan@fans.test',
-            'event_id' => \App\Utils\UrlUtils::encodeId($event->id),
+            'event_id' => UrlUtils::encodeId($event->id),
             'event_date' => $event->getStartDateTime()->format('Y-m-d'),
             'audience_opt_in' => '1',
         ]);
@@ -1593,7 +1545,7 @@ class RoleSubscriberTest extends TestCase
         $this->post(route('event.rsvp', ['subdomain' => $this->role->subdomain]), [
             'name' => '<b> </b>',
             'email' => 'fan@fans.test',
-            'event_id' => \App\Utils\UrlUtils::encodeId($event->id),
+            'event_id' => UrlUtils::encodeId($event->id),
             'event_date' => $event->getStartDateTime()->format('Y-m-d'),
             'audience_opt_in' => '1',
         ]);
@@ -1611,7 +1563,7 @@ class RoleSubscriberTest extends TestCase
         $this->post(route('event.rsvp', ['subdomain' => $this->role->subdomain]), [
             'name' => '<b> </b>Fan',
             'email' => 'fan@fans.test',
-            'event_id' => \App\Utils\UrlUtils::encodeId($event->id),
+            'event_id' => UrlUtils::encodeId($event->id),
             'event_date' => $event->getStartDateTime()->format('Y-m-d'),
             'audience_opt_in' => '1',
         ]);
@@ -1632,7 +1584,7 @@ class RoleSubscriberTest extends TestCase
         $this->post(route('event.rsvp', ['subdomain' => $curator->subdomain]), [
             'name' => 'A Fan',
             'email' => 'fan@fans.test',
-            'event_id' => \App\Utils\UrlUtils::encodeId($event->id),
+            'event_id' => UrlUtils::encodeId($event->id),
             'event_date' => $event->getStartDateTime()->format('Y-m-d'),
             'audience_opt_in' => '1',
         ]);
@@ -1651,7 +1603,7 @@ class RoleSubscriberTest extends TestCase
         $this->post(route('event.rsvp', ['subdomain' => $this->role->subdomain]), [
             'name' => 'A Fan',
             'email' => 'fan@fans.test',
-            'event_id' => \App\Utils\UrlUtils::encodeId($event->id),
+            'event_id' => UrlUtils::encodeId($event->id),
             'event_date' => $event->getStartDateTime()->format('Y-m-d'),
         ]);
 
@@ -1735,7 +1687,7 @@ class RoleSubscriberTest extends TestCase
         ]);
 
         $this->actingAs($viewer)
-            ->delete(route('role.subscribers.remove', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($sub->id)]))
+            ->delete(route('role.subscribers.remove', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($sub->id)]))
             ->assertStatus(403);
 
         $this->assertSame(1, RoleSubscriber::count());

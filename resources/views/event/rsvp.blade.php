@@ -290,6 +290,25 @@
 </script>
 </x-slot>
 
+{{-- The form's look on the event page's card (partials/guest-stage-styles): fields in the stage's
+     colours, the kit's buttons. Outside the Vue mount, which would drop a style element. --}}
+<style {!! nonce_attr() !!}>
+    #rsvp-form .gk-rsvp-in { min-height: 3.125rem; border: 1px solid var(--gk-line); border-radius: .75rem; background-color: var(--gk-stage); color: var(--gk-ink); box-shadow: none; }
+    #rsvp-form .gk-rsvp-in::placeholder { color: var(--gk-ink-3); }
+    #rsvp-form .gk-rsvp-in:focus { outline: none; border-color: var(--es-accent-readable); box-shadow: 0 0 0 3px color-mix(in srgb, var(--es-accent-readable) 24%, transparent); }
+    #rsvp-form .gk-rsvp-lb { font-size: .875rem; font-weight: 500; color: var(--gk-ink-2); }
+    #rsvp-form .gk-rsvp-ink { color: var(--gk-ink); }
+    #rsvp-form .gk-rsvp-say { color: var(--gk-ink-2); }
+    #rsvp-form .gk-rsvp-mute { color: var(--gk-ink-3); }
+    #rsvp-form .gk-rsvp-guest { padding: 1rem; border: 1px solid var(--gk-line); border-radius: 1rem; background: var(--gk-stage); }
+    #rsvp-form .gk-rsvp-guest .gk-rsvp-in { background-color: var(--gk-stage-raised); }
+    #rsvp-form input[type="checkbox"] { border-color: color-mix(in srgb, var(--gk-ink) 35%, transparent); background-color: var(--gk-stage); color: var(--es-accent-readable); }
+    #rsvp-form input[type="checkbox"]:checked { border-color: transparent; background-color: var(--es-accent-readable); }
+    #rsvp-form .gk-rsvp-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .75rem; padding-top: .5rem; }
+    #rsvp-form .gk-rsvp-actions .gk-cta-main { flex: none; }
+    #rsvp-form .gk-btn[disabled] { opacity: .5; cursor: not-allowed; }
+</style>
+
 <div id="rsvp-form" data-vue-root>
     @if ($event->isRsvpFull($date ?? $event->saleEventDateFromStartsAt()))
         <div>
@@ -301,41 +320,40 @@
             <div v-if="!waitlistSuccess">
                 {{-- Said before the fields: the button that led here reads "Join waitlist", and
                      nothing on the form used to say why there was a waitlist at all. --}}
-                <p class="mb-6 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-base font-semibold text-amber-900 dark:text-amber-100" role="status">{{ __('messages.registration_full') }}</p>
+                <p class="mb-6 gk-note gk-note-warn font-semibold" role="status">{{ __('messages.registration_full') }}</p>
                 <div class="mb-6">
-                    <label for="waitlist_name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
-                    <input type="text" id="waitlist_name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+                    <label for="waitlist_name" class="gk-rsvp-lb">{{ __('messages.name') . ' *' }}</label>
+                    <input type="text" id="waitlist_name" class="mt-1 block w-full gk-rsvp-in"
                         v-model="name" required autocomplete="name" />
                 </div>
                 <div class="mb-6">
-                    <label for="waitlist_email" class="text-gray-900 dark:text-gray-100">{{ __('messages.email') . ' *' }}</label>
-                    <input type="email" id="waitlist_email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+                    <label for="waitlist_email" class="gk-rsvp-lb">{{ __('messages.email') . ' *' }}</label>
+                    <input type="email" id="waitlist_email" class="mt-1 block w-full gk-rsvp-in"
                         v-model="email" required autocomplete="email" />
                 </div>
             </div>
 
-            <div v-if="waitlistMessage" class="mb-4 p-4 rounded-lg text-sm" :class="waitlistSuccess ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'">
+            <div v-if="waitlistMessage" class="mb-4" :class="waitlistSuccess ? 'gk-note gk-note-ok' : 'gk-note gk-note-bad'">
                 @{{ waitlistMessage }}
             </div>
-            <div v-if="!waitlistSuccess" class="flex justify-end items-center pt-2 gap-8">
+            <div v-if="!waitlistSuccess" class="gk-rsvp-actions">
                 @if (! request()->embed)
                 <button type="button"
                     @click="hideForm"
-                    class="px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                    class="gk-btn gk-cta-alt">
                     {{ __('messages.cancel') }}
                 </button>
                 @endif
                 <button type="button" @click="joinWaitlist"
                     :disabled="!name.trim() || !email.trim() || waitlistSubmitting"
-                    class="inline-flex items-center justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    style="background-color: var(--es-accent); color: var(--es-accent-text);">
+                    class="gk-btn gk-btn-primary gk-cta-main">
                     <span v-if="waitlistSubmitting">{{ __('messages.processing') }}</span>
                     <span v-else>{{ __('messages.join_waitlist') }}</span>
                 </button>
             </div>
             @if (! request()->embed)
-            <div v-else class="flex justify-end pt-2">
-                <button type="button" @click="hideForm" class="px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+            <div v-else class="gk-rsvp-actions">
+                <button type="button" @click="hideForm" class="gk-btn gk-cta-alt">
                     {{ __('messages.back') }}
                 </button>
             </div>
@@ -362,16 +380,16 @@
 
         @if ($event->rsvp_limit)
         @php $remaining = $event->rsvpRemaining($date ?? $event->saleEventDateFromStartsAt()); @endphp
-        <div class="mb-6 text-sm text-gray-600 dark:text-gray-400">
+        <div class="mb-6 text-sm gk-rsvp-mute">
             {{ __('messages.spots_remaining', ['count' => $remaining]) }}
         </div>
         @endif
 
         @if ($event->individual_tickets)
         <div class="mb-6" v-if="maxRsvpQuantity > 1">
-            <label for="rsvp_quantity" class="text-gray-900 dark:text-gray-100">{{ __('messages.number_of_guests') }}</label>
+            <label for="rsvp_quantity" class="gk-rsvp-lb">{{ __('messages.number_of_guests') }}</label>
             <select id="rsvp_quantity" name="rsvp_quantity" v-model="rsvpQuantity"
-                class="mt-1 block w-32 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                class="mt-1 block w-32 gk-rsvp-in">
                 <template v-for="n in maxRsvpQuantity">
                     <option :value="n">@{{ n }}</option>
                 </template>
@@ -381,15 +399,15 @@
 
         <div v-if="!showGuestForms">
         <div class="mb-6">
-            <label for="name" class="text-gray-900 dark:text-gray-100">{{ __('messages.name') . ' *' }}</label>
-            <input type="text" name="name" id="name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+            <label for="name" class="gk-rsvp-lb">{{ __('messages.name') . ' *' }}</label>
+            <input type="text" name="name" id="name" class="mt-1 block w-full gk-rsvp-in"
                 v-model="name" required autocomplete="name" />
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
 
         <div class="mb-6">
-            <label for="email" class="text-gray-900 dark:text-gray-100">{{ __('messages.email') . ' *' }}</label>
-            <input type="email" name="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+            <label for="email" class="gk-rsvp-lb">{{ __('messages.email') . ' *' }}</label>
+            <input type="email" name="email" id="email" class="mt-1 block w-full gk-rsvp-in"
                 v-model="email" required autocomplete="email" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
@@ -399,20 +417,20 @@
                         <input id="create_account" name="create_account" type="checkbox"
                             v-model="createAccount" value="1"
                             class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded">
-                        <label for="create_account" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                        <label for="create_account" class="ms-3 block text-sm font-medium leading-6 gk-rsvp-ink">
                             {{ __('messages.create_account') }}
                         </label>
                     </div>
 
                     <div class="mt-6" v-if="createAccount">
-                        <label for="password" class="text-gray-900 dark:text-gray-100">{{ __('messages.password') . ' *' }}</label>
+                        <label for="password" class="gk-rsvp-lb">{{ __('messages.password') . ' *' }}</label>
                         <div class="relative mt-1">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password" class="block w-full pe-10 rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password" class="block w-full pe-10 gk-rsvp-in"
                                 v-model="password" required autocomplete="new-password" />
                             <button
                                 type="button"
                                 @click="showPassword = !showPassword"
-                                class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                class="absolute inset-y-0 end-0 flex items-center pe-3 gk-rsvp-mute"
                             >
                                 <svg v-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -432,10 +450,10 @@
                                         class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                 </div>
                                 <div class="ms-3 text-sm leading-6">
-                                    <label for="terms" class="font-medium text-gray-900 dark:text-gray-300">
+                                    <label for="terms" class="font-medium gk-rsvp-ink">
                                         {!! str_replace([':terms', ':privacy'], [
-                                            '<a href="' . policy_url('terms') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
-                                            '<a href="' . policy_url('privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                            '<a href="' . policy_url('terms') . '" target="_blank" class="gk-link"> ' . __('messages.terms_of_service') . '</a>',
+                                            '<a href="' . policy_url('privacy') . '" target="_blank" class="gk-link">' . __('messages.privacy_policy') . '</a>'
                                         ], __('messages.i_accept_the_terms_and_privacy')) !!}
                                     </label>
                                 </div>
@@ -471,7 +489,7 @@
                          Vue mount (#rsvp-form / #ticket-selector), so without it a name like
                          "{{constructor.constructor('...')()}}" is compiled as a template and runs.
                          Same guard as the custom-content block further down this file. --}}
-                    <label for="audience_opt_in" v-pre class="ms-3 block text-sm text-gray-900 dark:text-gray-100">
+                    <label for="audience_opt_in" v-pre class="ms-3 block text-sm gk-rsvp-ink">
                         {{ __('messages.audience_opt_in_label', ['schedule' => $event->creatorRole->name]) }}
                     </label>
                 </div>
@@ -479,13 +497,13 @@
         </div>
 
         <div class="mb-6" v-if="askPhone">
-            <label for="phone_input" class="block text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
+            <label for="phone_input" class="block gk-rsvp-lb">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
             @if ($event->country_code_phone)
             <input type="hidden" name="phone" id="phone_hidden" v-model="phone">
-            <input type="tel" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+            <input type="tel" id="phone_input" class="mt-1 block w-full gk-rsvp-in"
                 :required="requirePhone" autocomplete="tel" />
             @else
-            <input type="tel" name="phone" id="phone_input" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+            <input type="tel" name="phone" id="phone_input" class="mt-1 block w-full gk-rsvp-in"
                 v-model="phone" :required="requirePhone" autocomplete="tel" />
             @endif
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
@@ -494,28 +512,28 @@
 
         <!-- Per-Guest Forms (Individual Tickets for RSVP) -->
         <div v-if="showGuestForms">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.guest_information') }}</h3>
-            <div v-for="(guest, gIndex) in guests" :key="gIndex" class="mb-4 bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-600">
-                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            <h3 class="gk-h mb-4">{{ __('messages.guest_information') }}</h3>
+            <div v-for="(guest, gIndex) in guests" :key="gIndex" class="mb-4 gk-rsvp-guest">
+                <h4 class="text-sm font-semibold gk-rsvp-say mb-3">
                     {{ __('messages.guest_n', ['n' => '']) }}@{{ gIndex + 1 }}
-                    <span v-if="gIndex === 0" class="text-xs text-gray-500 dark:text-gray-400"> - {{ __('messages.you') }}</span>
+                    <span v-if="gIndex === 0" class="text-xs gk-rsvp-mute"> - {{ __('messages.you') }}</span>
                 </h4>
                 <div class="mb-3">
-                    <label :for="'guest_name_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.name') }} *</label>
+                    <label :for="'guest_name_' + gIndex" class="gk-rsvp-lb">{{ __('messages.name') }} *</label>
                     <input type="text" :id="'guest_name_' + gIndex" v-model="guest.name" required
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
+                        class="mt-1 block w-full gk-rsvp-in text-sm" />
                     <input type="hidden" :name="'guests[' + gIndex + '][name]'" :value="guest.name">
                 </div>
                 <div class="mb-3">
-                    <label :for="'guest_email_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.email') }} *</label>
+                    <label :for="'guest_email_' + gIndex" class="gk-rsvp-lb">{{ __('messages.email') }} *</label>
                     <input type="email" :id="'guest_email_' + gIndex" v-model="guest.email" required
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
+                        class="mt-1 block w-full gk-rsvp-in text-sm" />
                     <input type="hidden" :name="'guests[' + gIndex + '][email]'" :value="guest.email">
                 </div>
                 <div class="mb-3" v-if="askPhone">
-                    <label :for="'guest_phone_' + gIndex" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
+                    <label :for="'guest_phone_' + gIndex" class="gk-rsvp-lb">{{ __('messages.phone_number') }}<span v-if="requirePhone"> *</span></label>
                     <input type="tel" :id="'guest_phone_' + gIndex" v-model="guest.phone" :required="requirePhone"
-                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm" />
+                        class="mt-1 block w-full gk-rsvp-in text-sm" />
                     <input type="hidden" :name="'guests[' + gIndex + '][phone]'" :value="guest.phone">
                 </div>
 
@@ -525,16 +543,16 @@
                         <input id="create_account_rsvp_guest" name="create_account" type="checkbox"
                             v-model="createAccount" value="1"
                             class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                        <label for="create_account_rsvp_guest" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                        <label for="create_account_rsvp_guest" class="ms-3 block text-sm font-medium leading-6 gk-rsvp-ink">
                             {{ __('messages.create_account') }}
                         </label>
                     </div>
                     <div class="mt-3" v-if="createAccount">
-                        <label for="password_rsvp_guest" class="text-sm text-gray-900 dark:text-gray-100">{{ __('messages.password') }} *</label>
+                        <label for="password_rsvp_guest" class="gk-rsvp-lb">{{ __('messages.password') }} *</label>
                         <div class="relative mt-1">
-                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password_rsvp_guest" class="block w-full pe-10 text-sm rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
+                            <input :type="showPassword ? 'text' : 'password'" name="password" id="password_rsvp_guest" class="block w-full pe-10 text-sm gk-rsvp-in"
                                 v-model="password" required autocomplete="new-password" />
-                            <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 gk-rsvp-mute">
                                 <svg v-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                 <svg v-show="showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
                             </button>
@@ -547,10 +565,10 @@
                                         class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                 </div>
                                 <div class="ms-3 text-sm leading-6">
-                                    <label for="terms_rsvp_guest" class="font-medium text-gray-900 dark:text-gray-300">
+                                    <label for="terms_rsvp_guest" class="font-medium gk-rsvp-ink">
                                         {!! str_replace([':terms', ':privacy'], [
-                                            '<a href="' . policy_url('terms') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline"> ' . __('messages.terms_of_service') . '</a>',
-                                            '<a href="' . policy_url('privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
+                                            '<a href="' . policy_url('terms') . '" target="_blank" class="gk-link"> ' . __('messages.terms_of_service') . '</a>',
+                                            '<a href="' . policy_url('privacy') . '" target="_blank" class="gk-link">' . __('messages.privacy_policy') . '</a>'
                                         ], __('messages.i_accept_the_terms_and_privacy')) !!}
                                     </label>
                                 </div>
@@ -569,7 +587,7 @@
         @if ($event->isPro())
         <div v-if="hasEventCustomFields" class="mb-6">
             <div v-for="(field, fieldKey) in eventCustomFields" :key="fieldKey" class="mb-4">
-                <label :for="`event_custom_${fieldKey}`" class="text-gray-900 dark:text-gray-100">
+                <label :for="`event_custom_${fieldKey}`" class="gk-rsvp-lb">
                     @{{ field.name }}@{{ field.required ? ' *' : '' }}
                 </label>
                 <!-- Text input -->
@@ -578,7 +596,7 @@
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                    class="mt-1 block w-full gk-rsvp-in" />
                 <!-- Multiline text -->
                 <textarea v-else-if="field.type === 'multiline_string'"
                     :name="`event_custom_values[${fieldKey}]`"
@@ -587,14 +605,14 @@
                     :required="field.required"
                     rows="3"
                     dir="auto"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"></textarea>
+                    class="mt-1 block w-full gk-rsvp-in"></textarea>
                 <!-- Yes/No switch -->
                 <div v-else-if="field.type === 'switch'" class="mt-1">
                     <select :name="`event_custom_values[${fieldKey}]`"
                         :id="`event_custom_${fieldKey}`"
                         v-model="eventCustomValues[fieldKey]"
                         :required="field.required"
-                        class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        class="block w-full gk-rsvp-in">
                         <option value="">{{ __('messages.please_select') }}</option>
                         <option value="Yes">{{ __('messages.yes') }}</option>
                         <option value="No">{{ __('messages.no') }}</option>
@@ -606,21 +624,21 @@
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                    class="mt-1 block w-full gk-rsvp-in" />
                 <!-- Dropdown -->
                 <select v-else-if="field.type === 'dropdown'"
                     :name="`event_custom_values[${fieldKey}]`"
                     :id="`event_custom_${fieldKey}`"
                     v-model="eventCustomValues[fieldKey]"
                     :required="field.required"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    class="mt-1 block w-full gk-rsvp-in">
                     <option value="">{{ __('messages.please_select') }}</option>
                     <option v-for="option in (field.options || '').split(',')" :key="option.trim()" :value="option.trim()">@{{ option.trim() }}</option>
                 </select>
                 <!-- Multi-select -->
                 <div v-else-if="field.type === 'multiselect'" class="mt-1 space-y-1">
                     <input type="hidden" :name="`event_custom_values[${fieldKey}]`" :value="(eventMultiselectValues[fieldKey] || []).join(', ')">
-                    <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                    <label v-for="option in (field.options || '').split(',')" :key="option.trim()" class="flex items-center gap-2 gk-rsvp-ink">
                         <input type="checkbox" :value="option.trim()"
                             v-model="eventMultiselectValues[fieldKey]"
                             class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 dark:border-gray-600 rounded" />
@@ -640,7 +658,7 @@
 
         @if (session('error'))
         {{-- v-pre: this is inside the form's Vue mount, and a refusal can name an event. --}}
-        <div v-pre class="mb-6 text-sm text-red-600 dark:text-red-400">
+        <div v-pre class="mb-6 gk-note gk-note-bad">
             {{ session('error') }}
         </div>
         @endif
@@ -650,19 +668,18 @@
              reading its own template, until Vue started. --}}
         <style {!! nonce_attr() !!}>#rsvp-form [v-cloak] { display: none; }</style>
         <p v-if="problem" v-cloak id="rsvp-problem" role="alert"
-            class="mb-4 rounded-lg border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm font-medium text-amber-900 dark:text-amber-100">@{{ problem }}</p>
-        <div class="flex justify-end items-center pt-2 gap-8">
+            class="mb-4 gk-note gk-note-warn font-medium">@{{ problem }}</p>
+        <div class="gk-rsvp-actions">
             @if (! request()->embed)
             <button type="button"
                 @click="hideForm"
-                class="px-6 py-3 text-lg font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-all duration-200 hover:scale-105">
+                class="gk-btn gk-cta-alt">
                 {{ __('messages.cancel') }}
             </button>
             @endif
             <button type="submit"
                 :disabled="isSubmitting"
-                class="inline-flex items-center justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                style="background-color: var(--es-accent); color: var(--es-accent-text);">
+                class="gk-btn gk-btn-primary gk-cta-main">
                 <span v-if="isSubmitting">...</span>
                 <span v-else>{{ __('messages.submit') }}</span>
             </button>

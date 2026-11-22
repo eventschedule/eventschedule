@@ -96,71 +96,57 @@
 @if ($subscribePanelOn && ($subscribeEmbed || (! auth()->user() && ! request()->embed)) && ! is_demo_mode() && ! is_demo_role($subscribePanelRole))
 {{-- v-pre: the schedule name is user-controlled text rendered server-side, and the app runs Vue's
      full build, so anything Vue mounts has its markup compiled as a template. On the schedule page
-     this panel currently sits 244 characters after #calendar-app closes - one careless move inside
-     and an unguarded name like "{{constructor.constructor('...')()}}" would execute. v-pre is inert
-     where there is no mount and correct where there is, so it costs nothing to keep.
+     this panel sits just after #calendar-app closes - one careless move inside and an unguarded
+     name like "{{constructor.constructor('...')()}}" would execute. v-pre is inert where there is
+     no mount and correct where there is, so it costs nothing to keep.
      AudienceTemplateInjectionTest pins that it appears within 200 characters of the id. --}}
-{{-- Padding lives INSIDE $panelClass, not beside it: the event page includes this within a
-     container that already pads, and a hardcoded p-6 sm:p-8 there could only be fought with
-     conflicting utilities whose winner is decided by stylesheet order. scroll-mt-24 is outside it
-     so neither include site has to know about the fragment redirect, and tabindex="-1" is what
-     makes that fragment actually move FOCUS rather than dumping a keyboard user back at <body>. --}}
+{{-- Padding lives INSIDE $panelClass, not beside it: each include site supplies its own card.
+     scroll-mt-24 is outside it so neither include site has to know about the fragment redirect,
+     and tabindex="-1" is what makes that fragment actually move FOCUS rather than dumping a
+     keyboard user back at <body>. --}}
 <div v-pre id="gp-subscribe" tabindex="-1" role="region" aria-labelledby="gp-subscribe-heading"
-    class="scroll-mt-24 {{ $panelClass ?? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8' }}">
-    <h2 id="gp-subscribe-heading" class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-        {{ __('messages.subscribe_panel_heading') }}
-    </h2>
-    {{-- v-pre again, on the element that actually carries the name. The wrapper's v-pre already
-         covers this subtree, but the panel's attributes and heading push this line past the
-         400-character window AudienceTemplateInjectionTest looks back through - and a guard that
-         only a heuristic can see is one refactor away from being silently lost. --}}
-    <p v-pre class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('messages.subscribe_panel_body', ['schedule' => $subscribePanelRole->name]) }}
-    </p>
+    class="gk-sub scroll-mt-24 {{ $panelClass ?? 'gk-card gk-band' }}">
+    <div class="gk-sub-head">
+        <h2 id="gp-subscribe-heading" class="gk-sub-title">{{ __('messages.subscribe_panel_heading') }}</h2>
+        {{-- v-pre again, on the element that actually carries the name: a guard that only a
+             heuristic can see is one refactor away from being silently lost. --}}
+        <p v-pre class="gk-sub-lead">{{ __('messages.subscribe_panel_body', ['schedule' => $subscribePanelRole->name]) }}</p>
+    </div>
 
     @if ($subscribeDone)
     {{-- Replaces the form rather than sitting above it. An empty form under "check your email"
          invites a second submit, which is rate limited and sends a second email. --}}
-    <div role="status" class="mt-4 max-w-4xl flex items-start gap-3 rounded-lg border border-green-200 dark:border-green-700/50 bg-green-50 dark:bg-green-500/10 p-4">
-        <svg class="h-5 w-5 shrink-0 mt-0.5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+    <div role="status" class="gk-note gk-note-ok">
+        <svg class="gk-note-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
         </svg>
-        <div>
-            <p class="text-sm font-semibold text-green-800 dark:text-green-300">
-                {{ __('messages.subscribe_done_heading') }}
-            </p>
+        <div class="gk-note-body">
+            <p style="font-weight: 650">{{ __('messages.subscribe_done_heading') }}</p>
             {{-- Deliberately does NOT name the address, even though it is the visitor's own and
                  would help them spot a typo. CLAUDE.md's rule is that a follower email never
                  appears on a guest-facing surface, and this panel is one;
                  RoleSubscriberTest::test_subscriber_emails_never_reach_a_guest_surface pins it.
                  The "use a different address" link below covers the typo case instead. --}}
-            <p class="mt-1 text-sm text-green-700 dark:text-green-400">
-                {{ __('messages.subscribe_done_body') }}
-            </p>
-            <p class="mt-1 text-xs text-green-700/80 dark:text-green-400/80">
-                {{ __('messages.subscribe_done_note') }}
-            </p>
+            <p style="margin-top: .25rem">{{ __('messages.subscribe_done_body') }}</p>
+            <p style="margin-top: .25rem; font-size: .8125rem">{{ __('messages.subscribe_done_note') }}</p>
             {{-- The no-JS way back to the form: ?subscribe=1 re-renders it and the deep-link script
                  below scrolls and focuses it. --}}
-            <p class="mt-2 text-xs">
+            <p style="margin-top: .5rem; font-size: .8125rem">
                 <x-link href="{{ $subscribeAgainUrl }}">{{ __('messages.subscribe_use_another_email') }}</x-link>
             </p>
         </div>
     </div>
     @else
-    {{-- max-w-4xl is what lets the schedule page's wrapper track the calendar's width: that
-         card runs to the full container in calendar view, and both inputs below are flex-1
-         min-w-0, so without a cap here each would stretch to roughly 650px. The heading, body and
-         the cadence/privacy footnote still span the card - only the form slot is capped. On the
-         event page the column is narrower than 56rem, so this is a no-op there. --}}
     @php
         // Which input the rejection is about. respond() flashes it; the fallback keeps the
         // pre-existing behaviour for bails that name no field (honeypot, rate limit, mailer).
         $subscribeInvalidField = $subscribeError ? $subscribeErrorFieldValue : null;
     @endphp
+    {{-- max-w-4xl caps the row: the schedule page's band runs as wide as its calendar, and both
+         fields grow, so without a cap each would stretch to roughly 650px. --}}
     <form method="POST"
         action="{{ $subscribeFormAction }}"
-        class="mt-4 max-w-4xl flex flex-col sm:flex-row gap-3">
+        class="gk-sub-form max-w-4xl">
         @csrf
         <x-honeypot />
         @if ($subscribeEmbed)
@@ -174,23 +160,22 @@
         @endif
 
         {{-- Visible labels, not sr-only + placeholder. A placeholder is the only label these fields
-             had, and it disappears the moment the visitor types - taking "(optional)" with it,
-             exactly when that matters. --}}
-        <div class="flex-1 min-w-0">
-            <label for="subscribe_email_{{ $subscribePanelRole->id }}" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+             had, and it disappears the moment the visitor types. --}}
+        <div class="gk-sub-field">
+            <label for="subscribe_email_{{ $subscribePanelRole->id }}" class="gk-sub-label">
                 {{ __('messages.subscribe_your_email') }}
             </label>
             {{-- $subscribeEmailValue is the session flash on the guest page, not old() - see the
                  @php block at the top. --}}
             <input type="email" name="email" id="subscribe_email_{{ $subscribePanelRole->id }}" required
-                autocomplete="email"
+                autocomplete="email" dir="ltr"
                 value="{{ $subscribeEmailValue }}"
                 @if ($subscribeInvalidField === 'email') aria-invalid="true" aria-describedby="subscribe_error_{{ $subscribePanelRole->id }}" autofocus @endif
-                class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                class="gk-sub-input" />
         </div>
 
-        <div class="flex-1 min-w-0">
-            <label for="subscribe_name_{{ $subscribePanelRole->id }}" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <div class="gk-sub-field">
+            <label for="subscribe_name_{{ $subscribePanelRole->id }}" class="gk-sub-label">
                 {{ __('messages.subscribe_your_name') }}
             </label>
             {{-- Required, like the address. The schedule owner sees this name on the followers tab
@@ -209,78 +194,87 @@
                 autocomplete="name"
                 value="{{ $subscribeNameValue }}"
                 @if ($subscribeInvalidField === 'name') aria-invalid="true" aria-describedby="subscribe_error_{{ $subscribePanelRole->id }}" autofocus @endif
-                class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" />
+                class="gk-sub-input" />
         </div>
 
-        {{-- Accent colour, not brand blue: the guest portal is the schedule's surface, and every
-             other primary button on these pages follows the schedule's accent. sm:self-end keeps it
-             on the inputs' baseline now that they carry labels. --}}
-        <button type="submit"
-            style="background-color: var(--es-accent, #4E81FA); color: var(--es-accent-text, #ffffff)"
-            class="shrink-0 sm:self-end inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md">
+        {{-- The schedule's colour, not brand blue: the guest portal is the schedule's surface. --}}
+        <button type="submit" class="gk-sub-btn">
             {{ $subscribePanelRole->customLabel('email_me_new_events') }}
         </button>
     </form>
 
     @if ($subscribeError)
-    <p id="subscribe_error_{{ $subscribePanelRole->id }}" role="alert" class="mt-2 max-w-4xl text-sm text-red-600 dark:text-red-400">
+    <p id="subscribe_error_{{ $subscribePanelRole->id }}" role="alert" class="gk-sub-err">
         {{ $subscribeError }}
     </p>
     @endif
     @endif
 
-    {{-- Cadence first, then what the schedule gets. The cadence line answers the bigger objection
-         and it is the concrete reassurance that replaces the per-event promise this copy used to
-         make; it lives in one block with the privacy note so the footer stays two lines rather than
-         three. subscription_confirm_cadence is deliberately vague about the number, because
-         usage.audience_announcement_min_hours is configurable. --}}
-    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-        {{ __('messages.subscription_confirm_cadence') }}
-        {{ __('messages.subscribe_privacy_note') }}
-        <x-link href="{{ policy_url('privacy') }}" target="_blank">{{ __('messages.privacy_policy') }}</x-link>
-    </p>
+    <div class="gk-sub-fine">
+        {{-- Cadence first, then what the schedule gets. subscription_confirm_cadence is
+             deliberately vague about the number, because usage.audience_announcement_min_hours is
+             configurable. --}}
+        <p>
+            {{ __('messages.subscription_confirm_cadence') }}
+            {{ __('messages.subscribe_privacy_note') }}
+            <x-link href="{{ policy_url('privacy') }}" target="_blank">{{ __('messages.privacy_policy') }}</x-link>
+        </p>
 
-    {{-- There is no second path any more. This used to offer "Prefer an account? Sign up and follow
-         instead", which was confusing for the good reason that it was a choice between a thing and
-         the same thing: RoleSubscriberController::linkAccount() has minted an account on confirm
-         since bdf545417, and /sub/done then offers a password for it.
+        {{-- willCreateAccountOnConfirm() is the same predicate linkAccount() refuses on, which is
+             the only way a sentence like this stays true. --}}
+        @if ($subscribePanelRole->willCreateAccountOnConfirm())
+        <p>{{ __('messages.subscribe_account_note') }}</p>
+        @endif
+    </div>
 
-         willCreateAccountOnConfirm() is the same predicate linkAccount() refuses on, which is the
-         only way a sentence like this stays true. No border-t - the rule that was here separated
-         an alternative, and a statement of what happens is not one. --}}
-    @if ($subscribePanelRole->willCreateAccountOnConfirm())
-    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-        {{ __('messages.subscribe_account_note') }}
-    </p>
-    @endif
-
-    {{-- The no-address alternative, and for a lot of people the better one.
-         FeedController::icalFeed has always been public and unauthenticated, but it was linked only
-         from a signed-in user's following list and the owner's own settings - so a guest had no way
-         to subscribe to a schedule's calendar and could only take a one-off .ics snapshot, which
-         never updates when a date moves.
-
-         It costs no email address, no consent and nothing against the platform's sending
-         reputation, which makes it the one half of "stay in touch" that cannot fail on
-         deliverability. The feed itself already restricts to accepted, upcoming, non-private,
-         non-draft, non-cancelled, password-free events, so surfacing it exposes nothing new. --}}
-    {{-- v-pre: the schedule name is user-controlled and this panel sits inside a Vue mount, so
-         without it a name like "{{constructor.constructor('...')()}}" is compiled as a template and
-         runs. Blade's {{ }} escaping does NOT stop Vue compiling a mustache in the VALUE. Same
-         guard the audience opt-in labels carry, and AudienceTemplateInjectionTest fails the build
-         if it goes missing. --}}
+    {{-- The no-address alternative, and for a lot of people the better one: the schedule's
+         calendar feed (FeedController::icalFeed, public and unauthenticated), which updates itself
+         when a date moves. It costs no email address, no consent and nothing against the
+         platform's sending reputation. The feed already restricts to accepted, upcoming,
+         non-private, non-draft, non-cancelled, password-free events. --}}
+    {{-- v-pre: the schedule name is user-controlled and this panel may sit inside a Vue mount.
+         Blade's {{ }} escaping does NOT stop Vue compiling a mustache in the VALUE.
+         AudienceTemplateInjectionTest fails the build if it goes missing. --}}
     {{-- Not in the embedded form, which is kept to the one ask so it stays short on someone
          else's page; the calendar feed is a click away on the schedule itself. --}}
     @if (! $subscribeEmbed)
-    <p v-pre class="mt-4 border-t border-gray-200 pt-4 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
-        <a href="{{ route('feed.ical', ['subdomain' => $subscribePanelRole->subdomain]) }}"
-           class="font-medium text-[var(--brand-blue)] hover:underline">
-            {{ __('messages.event_interest_subscribe_feed', ['schedule' => $subscribePanelRole->translatedName()]) }}
-        </a>
+    <p v-pre class="gk-sub-feed">
+        <a href="{{ route('feed.ical', ['subdomain' => $subscribePanelRole->subdomain]) }}">{{ __('messages.event_interest_subscribe_feed', ['schedule' => $subscribePanelRole->translatedName()]) }}</a>
         <span class="ms-1">{{ __('messages.event_interest_subscribe_feed_help') }}</span>
     </p>
     @endif
 </div>
+
+{{-- The band's own look (the mock's "stay updated" band): a heading, one line, the address, the
+     name and the button in one row from a tablet up, the fine print small below. Every colour is a
+     kit token, which the stage (partials/guest-stage-styles) re-points at its own inks, so the band
+     reads on the event page's sheet, the schedule page's and the embedded form's alike. Printed
+     after the panel, outside any Vue mount (the schedule page's #calendar-app closes above it),
+     and never between the panel and the wrapper before it, which RoleSubscriberTest reads back
+     from the panel's id. --}}
+<style {!! nonce_attr() !!}>
+    .gk-sub { display: flex; flex-direction: column; gap: 1.125rem; color: var(--gk-ink); }
+    .gk-sub-head { display: flex; flex-direction: column; gap: .5rem; }
+    .gk-sub-title { margin: 0; font-size: clamp(1.375rem, 1.15rem + .8vw, 1.625rem); font-weight: 750; line-height: 1.2; letter-spacing: -.01em; color: var(--gk-ink); }
+    .gk-sub-lead { margin: 0; max-width: 62ch; font-size: 1rem; line-height: 1.55; color: var(--gk-ink-2); text-wrap: pretty; }
+    .gk-sub-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem; margin: 0; }
+    .gk-sub-field { display: flex; flex: 1 1 11.25rem; flex-direction: column; gap: .375rem; min-width: 0; }
+    .gk-sub-label { font-size: .875rem; font-weight: 500; color: var(--gk-ink-2); }
+    .gk-sub .gk-sub-input { box-sizing: border-box; width: 100%; height: 3.125rem; padding: 0 .875rem; border: 1px solid var(--gk-line); border-radius: .75rem; background: var(--gk-stage, var(--gk-solid)); color: var(--gk-ink); font: inherit; font-size: 1rem; box-shadow: none; }
+    .gk-sub .gk-sub-input:focus { border-color: var(--es-accent-readable); outline: none; box-shadow: 0 0 0 1px var(--es-accent-readable); }
+    .gk-sub .gk-sub-input[aria-invalid="true"] { border-color: var(--gk-bad); }
+    .gk-sub-btn { flex: 0 0 auto; height: 3.125rem; padding: 0 1.5rem; border: 1px solid var(--es-accent-edge, transparent); border-radius: .75rem; background: var(--es-accent); color: var(--es-accent-text); font: inherit; font-size: 1rem; font-weight: 700; cursor: pointer; transition: filter var(--gk-swap), transform var(--gk-press); }
+    .gk-sub-btn:hover { filter: brightness(1.08); }
+    .gk-sub-btn:active { transform: scale(.985); }
+    .gk-sub-btn:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    @media (max-width: 39.99rem) { .gk-sub-btn { flex: 1 1 100%; } }
+    .gk-sub-fine { display: flex; flex-direction: column; gap: .625rem; font-size: .8125rem; line-height: 1.6; color: var(--gk-ink-3); }
+    .gk-sub-fine p { margin: 0; text-wrap: pretty; }
+    .gk-sub-feed { margin: 0; padding-top: 1rem; border-top: 1px solid var(--gk-line); font-size: .875rem; line-height: 1.6; color: var(--gk-ink-3); text-wrap: pretty; }
+    .gk-sub-feed a { font-weight: 600; color: var(--es-accent-readable); text-decoration: underline; text-underline-offset: 3px; }
+    .gk-sub-err { margin: 0; font-size: .9375rem; font-weight: 600; color: var(--gk-bad); }
+    .gk-sub .gk-note p { margin: 0; }
+</style>
 
 @if (request()->boolean('subscribe') && ! $subscribeEmbed)
 {{-- Arrived from a scanned QR code or a shared link. Scroll rather than anchor-jump so the

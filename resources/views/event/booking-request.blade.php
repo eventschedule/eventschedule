@@ -2,11 +2,8 @@
 <x-app-guest-layout :role="$role" :showMobileBackground="true" :page-title="$role->isTalent() && $role->user_id ? __('messages.booking_request') : __('messages.submit_event')" :no-index="true">
 
 @php
-  $hasHeaderImage = ($role->header_image && ! in_array($role->header_image, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true)) || $role->header_image_url;
-  $accentColor = $role->accent_color ?: '#4E81FA';
-  $contrastColor = accent_contrast_color($accentColor);
-  $accentOnLight = \App\Utils\ColorUtils::readableAccentColor($accentColor, '#ffffff', '#111827');
-  $accentOnDark = \App\Utils\ColorUtils::readableAccentColor($accentColor, '#252526', '#ffffff');
+  // The cover the schedule shows on its own page, or none (Role::headerImageUrl()).
+  $coverUrl = $role->headerImageUrl();
   $use24hr = get_use_24_hour_time($role);
   $scheduleName = $role->getDisplayName(true);
   // A schedule nobody has claimed has no address of its own to hand out, but it has a page.
@@ -75,10 +72,10 @@
       $requiredFields['date_time'] = true;
   }
 
-  $in = 'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm';
-  $lb = 'block font-medium text-sm text-gray-700 dark:text-gray-300';
-  $star = '<span class="text-red-500" aria-hidden="true">*</span>';
-  $opt = '<span class="font-normal text-gray-500 dark:text-gray-400">('.e(__('messages.optional')).')</span>';
+  $in = 'gs-in';
+  $lb = 'gs-lb';
+  $star = '<span class="gs-star" aria-hidden="true">*</span>';
+  $opt = '<span class="gs-opt">('.e(__('messages.optional')).')</span>';
 
   $words = [
       'required' => __('messages.field_required'),
@@ -126,16 +123,17 @@
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer {!! nonce_attr() !!}></script>
 @endif
 
+@include('partials.guest-form-pages-styles')
 <style {!! nonce_attr() !!}>
 @include('partials.request-form-styles')
     {{-- The country picker is a library's own control: give it the height and edge of the boxes around it. --}}
-    #gs-page .iti--country-only { display: block; width: 100%; margin-top: 0.25rem; }
-    #gs-page .gs-fixed-place { padding: 0.875rem 1rem; border-radius: 0.5rem; background: rgb(0 0 0 / 0.03); }
-    .dark #gs-page .gs-fixed-place { background: rgb(255 255 255 / 0.04); }
+    #gs-page .iti--country-only { display: block; width: 100%; margin-top: 0.375rem; }
+    #gs-page .iti--country-only input { border: 1px solid var(--gk-line); border-radius: 0.75rem; background-color: var(--gk-stage); color: var(--gk-ink); }
+    #gs-page .gs-fixed-place { padding: 0.875rem 1rem; border-radius: 0.75rem; background: var(--gk-stage); }
     {{-- The phone box is a tel input, which the guest pages' text-box sizing does not name. --}}
     #gs-page #contact_phone { padding: 0.75rem 1rem; font-size: 115%; }
     #gs-page .gs-inline-link { color: var(--brand-blue); text-decoration: underline; }
-    #gs-page .gs-account { margin-top: 1.25rem; padding: 1rem; border-radius: 0.75rem; border: 1px solid rgb(var(--ap-border)); }
+    #gs-page .gs-account { margin-top: 1.25rem; padding: 1rem; border-radius: 0.875rem; border: 1px solid var(--gk-line); }
 </style>
 
 {{-- The country picker's own assets, once, outside the Vue mount (a mount re-creates its markup,
@@ -144,92 +142,68 @@
 <div hidden><x-country-input name="_country_picker_assets" id="_country_picker_assets" value="us" :auto-init="false" :disabled="true" /></div>
 @endunless
 
-  @if ($role->profile_image_url && !$hasHeaderImage && $role->language_code == 'en')
-  <div class="pt-8"></div>
-  @endif
-
   <main>
-    <div>
-      <div id="gs-page" class="container mx-auto pt-7 pb-20 px-5 max-w-3xl">
-        {{-- Header card --}}
-        <div class="ap-card mb-4 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} rounded-lg shadow-md">
-          <div class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0">
-            @if ($role->header_image && ! in_array($role->header_image, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true))
-            <picture>
-              <source srcset="{{ asset('images/headers') }}/{{ $role->header_image }}.webp" type="image/webp">
-              <img class="block max-h-72 w-full object-cover rounded-t-2xl" src="{{ asset('images/headers') }}/{{ $role->header_image }}.png" alt="" />
-            </picture>
-            @elseif ($role->header_image_url)
-            <img class="block max-h-72 w-full object-cover rounded-t-2xl" src="{{ $role->header_image_url }}" alt="" />
-            @endif
-          </div>
-          <div class="px-4 sm:px-8 pb-5 relative z-10">
-            @if ($role->profile_image_url)
-            <div class="rounded-lg w-[130px] h-[130px] -mt-[100px] -ms-1 mb-6 bg-white dark:bg-gray-800 flex items-center justify-center">
-              <img class="rounded-lg w-[120px] h-[120px] object-cover" src="{{ $role->profile_image_url }}" alt="" />
-            </div>
-            @else
-            <div style="height: 42px;"></div>
-            @endif
-
-            <div class="flex justify-between items-start gap-4">
-              <div class="min-w-0">
-                <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:text-2xl sm:tracking-tight">
-                  {{ $asksToBook ? __('messages.booking_request') : __('messages.submit_your_event') }}
-                </h2>
-                <h3 class="text-gray-700 dark:text-gray-300">{{ $scheduleName }}</h3>
-              </div>
-              @if ($scheduleUrl)
-              <a href="{{ $scheduleUrl }}" class="gs-quiet hidden sm:block">{{ __('messages.view_schedule') }}</a>
-              @endif
-            </div>
-
-            {{-- What pressing Send leads to, before any of the typing. --}}
-            <p class="gs-next" data-gs-before>
-              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                @if ($landsAtOnce)
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                @else
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                @endif
-              </svg>
-              <span>{{ $whatHappens }}</span>
-            </p>
-
-            @if ($cannotSend)
-            <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2" data-gs-before>
-              <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-              </svg>
-              <p class="text-sm text-amber-700 dark:text-amber-300">{{ __('messages.booking_cannot_send') }} <x-link href="{{ app_url(route('login', [], false)) }}">{{ __('messages.log_in') }}</x-link></p>
-            </div>
-            @endif
-
-            {{-- The owner's terms for requests, read before the form and not after it. Outside the
-                 Vue mount, so the owner's text is never compiled as a template. --}}
-            @if ($requestTermsText)
-            <div class="gs-terms" data-gs-before>
-              <h3>{{ __('messages.request_terms') }}</h3>
-              <div dir="{{ content_dir($role, showing_translation($role) && filled($role->request_terms_en), $requestTermsText) }}">{!! nl2br(e($requestTermsText)) !!}</div>
-            </div>
-            @endif
-          </div>
+      {{-- One sheet: the schedule's cover across its top when it has one, then the head (whose
+           page, the title, what Send leads to, the owner's terms) and the form beside it. --}}
+      <div id="gs-page" class="gk-stage gk-pg">
+        @if ($coverUrl)
+        <div class="gk-pg-cover">
+          <img src="{{ $coverUrl }}" alt="" decoding="async" fetchpriority="high">
         </div>
+        @endif
+        <div class="gs-layout">
+        <header class="gs-head">
+          @include('role.partials.form-page-who', ['whoRole' => $role, 'whoLink' => $scheduleUrl, 'whoName' => $scheduleName])
+          <h1 class="gk-title">
+            {{ $asksToBook ? __('messages.booking_request') : __('messages.submit_your_event') }}
+          </h1>
+          {{-- What pressing Send leads to, before any of the typing. --}}
+          <p class="gs-next" data-gs-before>
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              @if ($landsAtOnce)
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              @else
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              @endif
+            </svg>
+            <span>{{ $whatHappens }}</span>
+          </p>
 
+          @if ($cannotSend)
+          <div class="gk-note gk-note-warn" data-gs-before>
+            <svg class="gk-note-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <p class="gk-note-body">{{ __('messages.booking_cannot_send') }} <x-link href="{{ app_url(route('login', [], false)) }}">{{ __('messages.log_in') }}</x-link></p>
+          </div>
+          @endif
+
+          {{-- The owner's terms for requests, read before the form and not after it. Outside the
+               Vue mount, so the owner's text is never compiled as a template. --}}
+          @if ($requestTermsText)
+          <div class="gs-terms" data-gs-before>
+            <h3>{{ __('messages.request_terms') }}</h3>
+            <div dir="{{ content_dir($role, showing_translation($role) && filled($role->request_terms_en), $requestTermsText) }}">{!! nl2br(e($requestTermsText)) !!}</div>
+          </div>
+          @endif
+        </header>
+
+        <div class="gs-main">
         <div id="event-submit-app" data-vue-root>
           <form id="booking-request-form" v-show="!submitted && step === 'form'" @submit.prevent="submitEvent" novalidate>
 
-            <div v-if="draftRestored" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center gap-3 text-sm text-blue-800 dark:text-blue-200" aria-live="polite">
+            <div v-if="draftRestored" class="gk-note mb-4 items-center gap-3" aria-live="polite">
               <span class="flex-1">{{ __('messages.booking_draft_restored') }}</span>
               <button type="button" @click="startFresh" class="underline hover:no-underline shrink-0">{{ __('messages.start_fresh') }}</button>
-              <button type="button" @click="draftRestored = false" aria-label="{{ __('messages.close') }}" class="shrink-0 p-1 text-blue-400 hover:text-blue-600 dark:hover:text-blue-200">
+              <button type="button" @click="draftRestored = false" aria-label="{{ __('messages.close') }}" class="shrink-0 p-1 gs-x">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
               </button>
             </div>
 
+            <div class="gk-card gs-sheet">
             {{-- 1. The event --}}
-            <div class="ap-card p-4 sm:p-8 shadow-md rounded-xl">
-              <div class="max-w-2xl mx-auto">
+            <div class="gs-sec">
+              <div>
                 <h3 class="gs-h">{{ __('messages.event_details') }}</h3>
 
                 <div class="mb-4">
@@ -243,13 +217,13 @@
                   <div>
                     <label for="submit_event_date" id="submit_event_date_label" class="{{ $lb }}">{{ __('messages.date') }}
                       {{-- A date and a time are kept together or not at all, so each becomes needed once the other is given. --}}
-                      <span v-if="required.date_time || event.event_start_time" class="text-red-500" aria-hidden="true">*</span><span v-else class="font-normal text-gray-500 dark:text-gray-400" v-text="'(' + words.optional + ')'"></span></label>
+                      <span v-if="required.date_time || event.event_start_time" class="gs-star" aria-hidden="true">*</span><span v-else class="gs-opt" v-text="'(' + words.optional + ')'"></span></label>
                     <input id="submit_event_date" type="text" autocomplete="off" aria-label="{{ __('messages.date') }}" data-required="{{ $requiredFields['date_time'] ? '1' : '0' }}" class="{{ $in }}">
                     <p v-if="msg('event_date')" id="err_event_date" class="gs-err">@{{ msg('event_date') }}</p>
                   </div>
                   <div>
                     <label for="submit_event_time" class="{{ $lb }}">{{ __('messages.start_time') }}
-                      <span v-if="required.date_time || event.event_date || event.event_end_time" class="text-red-500" aria-hidden="true">*</span><span v-else class="font-normal text-gray-500 dark:text-gray-400" v-text="'(' + words.optional + ')'"></span></label>
+                      <span v-if="required.date_time || event.event_date || event.event_end_time" class="gs-star" aria-hidden="true">*</span><span v-else class="gs-opt" v-text="'(' + words.optional + ')'"></span></label>
                     <div class="relative">
                       <input id="submit_event_time" type="text" v-model="timeText.start" autocomplete="off" dir="ltr" role="combobox" aria-autocomplete="list" aria-required="{{ $requiredFields['date_time'] ? 'true' : 'false' }}"
                         aria-controls="submit_event_time_list" :aria-expanded="timeOpen === 'start' ? 'true' : 'false'" :placeholder="timeExample('start')"
@@ -285,11 +259,11 @@
                 <p class="gs-hint">
                   {{ __('messages.times_are_in_timezone') }} <bdi class="font-medium" v-text="timezoneLabel"></bdi>.
                 </p>
-                <div v-if="timezoneMismatch" class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
-                  <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <div v-if="timezoneMismatch" class="gk-note gk-note-warn mt-3">
+                  <svg class="gk-note-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                   </svg>
-                  <p class="text-sm text-amber-700 dark:text-amber-300">@{{ timezoneMismatchMessage }}</p>
+                  <p class="gk-note-body">@{{ timezoneMismatchMessage }}</p>
                 </div>
                 @endif
 
@@ -306,8 +280,8 @@
             </div>
 
             {{-- 2. Where --}}
-            <div class="ap-card p-4 sm:p-8 shadow-md rounded-xl mt-4">
-              <div class="max-w-2xl mx-auto">
+            <div class="gs-sec">
+              <div>
                 <h3 class="gs-h" style="margin-bottom: 0.75rem" id="submit_location_heading">{{ __('messages.location') }} @if ($requiredFields['location']) {!! $star !!} @elseif (! $role->isVenue()) <span class="text-sm">{!! $opt !!}</span> @endif</h3>
 
                 @if ($allowOnline)
@@ -315,13 +289,13 @@
                 <div class="mb-4">
                   <div class="flex flex-wrap items-center gap-x-6 gap-y-2" role="group" aria-labelledby="submit_location_heading">
                     @unless ($role->isVenue())
-                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                      <input type="checkbox" id="in_person" v-model="event.in_person" class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    <label class="inline-flex items-center gap-2 gs-check font-medium cursor-pointer">
+                      <input type="checkbox" id="in_person" v-model="event.in_person" class="h-4 w-4 rounded focus:ring-[var(--brand-blue)]">
                       {{ __('messages.in_person') }}
                     </label>
                     @endunless
-                    <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                      <input type="checkbox" id="is_online" v-model="event.is_online" class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    <label class="inline-flex items-center gap-2 gs-check font-medium cursor-pointer">
+                      <input type="checkbox" id="is_online" v-model="event.is_online" class="h-4 w-4 rounded focus:ring-[var(--brand-blue)]">
                       {{ $role->isVenue() ? __('messages.booking_also_online') : __('messages.online') }}
                     </label>
                   </div>
@@ -342,9 +316,9 @@
                 @if ($role->isVenue())
                 {{-- A venue schedule is its own location. --}}
                 <div class="gs-fixed-place">
-                  <div class="text-sm font-medium text-gray-900 dark:text-gray-100" v-pre>{{ $role->name }}</div>
+                  <div class="text-sm font-medium gs-ink" v-pre>{{ $role->name }}</div>
                   @if ($role->fullAddress())
-                  <div class="text-sm text-gray-500 dark:text-gray-400 mt-1" v-pre>{{ $role->fullAddress() }}</div>
+                  <div class="text-sm gs-mute mt-1" v-pre>{{ $role->fullAddress() }}</div>
                   @endif
                 </div>
                 @else
@@ -385,13 +359,13 @@
             </div>
 
             {{-- 3. The schedule's own questions --}}
-            <div class="ap-card p-4 sm:p-8 shadow-md rounded-xl mt-4" v-if="requestCustomFields.length">
-              <div class="max-w-2xl mx-auto">
+            <div class="gs-sec" v-if="requestCustomFields.length">
+              <div>
                 <h3 class="gs-h" v-text="words.questions"></h3>
 
                 <div v-for="field in requestCustomFields" :key="field.key" class="mb-4">
                   <label v-if="field.type !== 'switch'" :id="'submit_custom_field_label_' + field.key" :for="'submit_custom_field_' + field.key" class="{{ $lb }}">
-                    @{{ field.label }}<span v-if="field.required" class="text-red-500" aria-hidden="true"> *</span><span v-else class="font-normal text-gray-500 dark:text-gray-400" v-text="' (' + words.optional + ')'"></span>
+                    @{{ field.label }}<span v-if="field.required" class="gs-star" aria-hidden="true"> *</span><span v-else class="gs-opt" v-text="' (' + words.optional + ')'"></span>
                   </label>
                   {{-- Under the question and before its control, not after it: under a list of
                        eight rooms it was nine rows below the question, and under a text box it was
@@ -399,10 +373,10 @@
                   <p v-if="field.on_event" :id="'pub_cf_' + field.key" class="gs-hint" data-answer-on-event>{{ __('messages.request_answer_on_event') }}</p>
                   <input v-if="field.type === 'string'" :id="'submit_custom_field_' + field.key" type="text" v-model="customFieldValues[field.key]" :pattern="field.regex || null" :class="bad('cf_' + field.key)" :aria-required="field.required ? 'true' : 'false'" :aria-describedby="[msg('cf_' + field.key) ? 'err_cf_' + field.key : null, field.on_event ? 'pub_cf_' + field.key : null].filter(Boolean).join(' ') || null" dir="auto" autocomplete="off" class="{{ $in }}">
                   <textarea v-else-if="field.type === 'multiline_string'" :id="'submit_custom_field_' + field.key" rows="3" dir="auto" v-model="customFieldValues[field.key]" :class="bad('cf_' + field.key)" :aria-required="field.required ? 'true' : 'false'" :aria-describedby="[msg('cf_' + field.key) ? 'err_cf_' + field.key : null, field.on_event ? 'pub_cf_' + field.key : null].filter(Boolean).join(' ') || null" class="{{ $in }}"></textarea>
-                  <label v-else-if="field.type === 'switch'" class="flex items-start gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label v-else-if="field.type === 'switch'" class="flex items-start gap-2 gs-check font-medium">
                     <input type="checkbox" :id="'submit_custom_field_' + field.key" v-model="customFieldValues[field.key]" true-value="1" false-value="0"
-                      class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                    <span>@{{ field.label }}<span v-if="field.required" class="text-red-500" aria-hidden="true"> *</span></span>
+                      class="mt-0.5 h-4 w-4 rounded focus:ring-[var(--brand-blue)]">
+                    <span>@{{ field.label }}<span v-if="field.required" class="gs-star" aria-hidden="true"> *</span></span>
                   </label>
                   <input v-else-if="field.type === 'date'" :id="'submit_custom_field_' + field.key" type="text" data-gs-date :data-key="field.key" :data-required="field.required ? '1' : '0'" autocomplete="off" :class="bad('cf_' + field.key)" class="{{ $in }}">
                   <select v-else-if="field.type === 'dropdown'" :id="'submit_custom_field_' + field.key" v-model="customFieldValues[field.key]" :class="bad('cf_' + field.key)" :aria-required="field.required ? 'true' : 'false'" :aria-describedby="[msg('cf_' + field.key) ? 'err_cf_' + field.key : null, field.on_event ? 'pub_cf_' + field.key : null].filter(Boolean).join(' ') || null" class="{{ $in }}">
@@ -410,8 +384,8 @@
                     <option v-for="option in field.options" :key="option" :value="option">@{{ option }}</option>
                   </select>
                   <div v-else-if="field.type === 'multiselect'" :id="'submit_custom_field_' + field.key" class="mt-1 space-y-1 rounded-lg" :class="bad('cf_' + field.key)">
-                    <label v-for="option in field.options" :key="option" class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                      <input type="checkbox" :value="option" v-model="customFieldValues[field.key]" class="h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    <label v-for="option in field.options" :key="option" class="flex items-center gap-2 gs-check">
+                      <input type="checkbox" :value="option" v-model="customFieldValues[field.key]" class="h-4 w-4 rounded focus:ring-[var(--brand-blue)]">
                       @{{ option }}
                     </label>
                   </div>
@@ -423,8 +397,8 @@
             </div>
 
             {{-- 4. Who is asking --}}
-            <div class="ap-card p-4 sm:p-8 shadow-md rounded-xl mt-4">
-              <div class="max-w-2xl mx-auto">
+            <div class="gs-sec">
+              <div>
                 <h3 class="gs-h">{{ __('messages.your_details') }}</h3>
 
                 @auth
@@ -458,13 +432,13 @@
                 @if ($offerAccount)
                 <div class="gs-account">
                   @if ($mustHaveAccount)
-                  <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.booking_needs_account') }}</p>
+                  <p class="gs-check font-medium">{{ __('messages.booking_needs_account') }}</p>
                   @else
                   <label class="flex items-start gap-2 cursor-pointer">
-                    <input type="checkbox" id="create_account" v-model="createAccount" class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    <input type="checkbox" id="create_account" v-model="createAccount" class="mt-0.5 h-4 w-4 rounded focus:ring-[var(--brand-blue)]">
                     <span>
-                      <span class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.create_an_account') }}</span>
-                      <span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5" v-pre>{{ __('messages.booking_account_benefits', ['name' => $scheduleName]) }}</span>
+                      <span class="block gs-check font-medium">{{ __('messages.create_an_account') }}</span>
+                      <span class="block text-xs gs-mute mt-0.5" v-pre>{{ __('messages.booking_account_benefits', ['name' => $scheduleName]) }}</span>
                     </span>
                   </label>
                   @endif
@@ -474,7 +448,7 @@
                     <div class="relative">
                       <input id="account_password" :type="showPassword ? 'text' : 'password'" v-model="userPassword" autocomplete="new-password" aria-required="true" :class="bad('account_password')" :aria-invalid="msg('account_password') ? 'true' : 'false'" :aria-describedby="msg('account_password') ? 'err_account_password' : null" class="{{ $in }} pe-12">
                       <button type="button" @click="showPassword = !showPassword" :aria-label="showPassword ? words.hide_password : words.show_password" :aria-pressed="showPassword ? 'true' : 'false'"
-                        class="absolute inset-y-0 end-0 mt-1 px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        class="absolute inset-y-0 end-0 mt-1 px-3 gs-x">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                       </button>
                     </div>
@@ -482,8 +456,8 @@
                     {{-- Said before the button is pressed: on the hosted app the next screen is a code, not "sent". --}}
                     <p v-else-if="requiresCode" class="gs-hint">{{ __('messages.booking_code_first') }}</p>
 
-                    <label class="flex items-start gap-2 mt-3 text-sm text-gray-700 dark:text-gray-300">
-                      <input id="account_terms" type="checkbox" v-model="acceptedTerms" :aria-invalid="msg('terms') ? 'true' : 'false'" :aria-describedby="msg('terms') ? 'err_terms' : null" class="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    <label class="flex items-start gap-2 mt-3 gs-check">
+                      <input id="account_terms" type="checkbox" v-model="acceptedTerms" :aria-invalid="msg('terms') ? 'true' : 'false'" :aria-describedby="msg('terms') ? 'err_terms' : null" class="mt-0.5 h-4 w-4 rounded focus:ring-[var(--brand-blue)]">
                       <span v-pre>
                         @if (config('app.hosted'))
                           {!! str_replace([':terms', ':privacy'], [
@@ -514,6 +488,8 @@
               </div>
             </div>
 
+            </div>
+
             {{-- The bar. Always on screen; its line is what Send will do, or what it still needs. --}}
             <div class="gs-bar" id="submit-bar">
               <div class="gs-bar-status" :class="{ 'is-bad': bar.kind === 'bad', 'is-ready': bar.kind === 'ready', 'is-todo': bar.kind === 'todo' }" v-show="bar.kind !== 'quiet'" role="status" aria-live="polite" aria-atomic="true" tabindex="-1" id="submit-error-box">
@@ -541,11 +517,11 @@
           </form>
 
           {{-- The emailed code, after Send, for someone making an account. --}}
-          <div v-show="!submitted && step === 'code'" class="ap-card gs-code-card p-6 sm:p-10 shadow-md rounded-xl">
+          <div v-show="!submitted && step === 'code'" class="gk-card gs-sheet gs-code-card">
             <div class="gs-step">
               <h2 id="submit_code_heading" tabindex="-1" class="focus:outline-none">{{ __('messages.check_your_email') }}</h2>
-              <p id="submit_code_sent_to" class="mt-2 text-gray-600 dark:text-gray-400" aria-live="polite">
-                {{ __('messages.code_sent_to_prefix') }} <span class="font-medium text-gray-900 dark:text-gray-100">@{{ userEmail }}</span>. {{ __('messages.booking_code_not_sent_yet') }}
+              <p id="submit_code_sent_to" class="mt-2 gs-say" aria-live="polite">
+                {{ __('messages.code_sent_to_prefix') }} <span class="font-medium gs-ink">@{{ userEmail }}</span>. {{ __('messages.booking_code_not_sent_yet') }}
               </p>
               <div class="gs-ticket">
                 <div class="min-w-0">
@@ -558,7 +534,7 @@
               <div id="code-boxes" class="relative" dir="ltr" :class="{ 'is-invalid': !!codeError, 'is-busy': saving }">
                 <div class="code-slots" aria-hidden="true">
                   <template v-for="i in 6" :key="i">
-                    <div data-code-slot class="code-slot bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700"
+                    <div data-code-slot class="code-slot"
                       :class="{ 'is-filled': !!verificationCode.charAt(i - 1), 'is-active': codeFocused && (i - 1) === Math.min(verificationCode.length, 5), 'is-new': (i - 1) >= codeFrom && !!verificationCode.charAt(i - 1) }">
                       <span data-digit :key="i + verificationCode.charAt(i - 1)" v-text="verificationCode.charAt(i - 1)"></span><span data-caret></span>
                     </div>
@@ -586,16 +562,16 @@
           </div>
 
           {{-- Sent. v-if: its bindings read submissionResult, which is null until then. --}}
-          <div v-if="submitted" class="ap-card p-6 sm:p-10 shadow-md rounded-xl">
-            <div class="max-w-2xl mx-auto text-center">
+          <div v-if="submitted" class="gk-card gs-sheet">
+            <div class="text-center">
               <div class="gs-tick">
                 <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
               </div>
-              <h2 id="submission-success-heading" tabindex="-1" class="text-2xl font-bold text-gray-900 dark:text-gray-100 focus:outline-none">
+              <h2 id="submission-success-heading" tabindex="-1" class="gs-done-h focus:outline-none">
                 <span v-if="submissionResult.status === 'live'">{{ __('messages.youre_live_title') }}</span>
                 <span v-else>{{ __('messages.booking_sent_title') }}</span>
               </h2>
-              <p class="mt-3 text-gray-600 dark:text-gray-400">
+              <p class="mt-3 gs-say">
                 {{-- v-pre switches off every directive on its own element, so the choice is made one level up. --}}
                 <template v-if="submissionResult.status === 'live'"><span v-pre>{{ __('messages.booking_live_body', ['name' => $scheduleName]) }}</span></template>
                 <template v-else><span v-pre>{{ __('messages.booking_sent_body', ['name' => $scheduleName]) }}</span></template>
@@ -618,7 +594,7 @@
               <p v-if="submissionResult.status !== 'live' && !submissionResult.emails_you" class="gs-hint mt-3" v-text="words.reply_note.replace(':email', sent.email)"></p>
 
               <div class="gs-after mt-6">
-                <button type="button" @click="resetForAnother" class="gs-after-again text-sm text-gray-500 dark:text-gray-400 underline hover:no-underline">{{ $asksToBook ? __('messages.booking_send_another') : __('messages.submit_another') }}</button>
+                <button type="button" @click="resetForAnother" class="gs-after-again text-sm gs-mute underline hover:no-underline">{{ $asksToBook ? __('messages.booking_send_another') : __('messages.submit_another') }}</button>
                 @if ($scheduleUrl)
                 <a href="{{ $scheduleUrl }}" class="gs-fill gs-after-btn gs-after-main">{{ __('messages.view_schedule') }}</a>
                 @endif
@@ -626,8 +602,9 @@
             </div>
           </div>
         </div>
+        </div>
+        </div>
       </div>
-    </div>
   </main>
 
   @include('partials.request-form-kit')

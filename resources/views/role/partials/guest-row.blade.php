@@ -17,6 +17,10 @@
      Names are the owner's text, drawn by Vue from data (v-text), never compiled. --}}
 <li v-if="isEventVisible(event)" v-list-reveal:m="event.uniqueKey" class="gk-row-item" :class="{ 'gk-row-editable': event.can_edit }" @click="navigateToEvent(event, $event)">
     <div class="gk-row gk-row-press" :class="{ 'gk-row-bare': !(event.image_url || event.flyer_url) || event.is_password_protected }">
+        @if ($rowFeature ?? false)
+        {{-- A large card (.gk-few) stands under no day heading, so it says its own day. --}}
+        <div class="gk-row-day"><b v-if="dayWord(group.date)" v-text="dayWord(group.date)"></b><span v-text="formatDateHeader(group.date)"></span></div>
+        @endif
         <div class="gk-row-time">
             <i v-if="getEventDotColor(event)" class="gk-row-dot" :style="{ backgroundColor: getEventDotColor(event) }"></i><bdi v-text="getEventTime(event)"></bdi><span v-if="event._multiDayNum > 1" v-text="event._multiDayNum + ' / ' + event._multiDayTotal"></span>
         </div>
@@ -43,6 +47,12 @@
             <p v-if="!event.wording && event.venue_name && !event.is_password_protected && event.venue_subdomain !== subdomain" class="gk-row-where" :dir="event.venue_dir || 'auto'">
                 <a v-if="event.venue_guest_url" :href="event.venue_guest_url" :target="eventLinkTarget()" v-text="event.venue_name"></a><template v-else><span v-text="event.venue_name"></span></template>
             </p>
+            {{-- Who is on, as the wide cards said it: their pictures small, their names as links to
+                 their own pages. Names are the owners' text, so v-text inside <bdi>. --}}
+            <p v-if="event.talent && event.talent.length && !event.is_password_protected" class="gk-row-who">
+                <span class="gk-row-who-faces" aria-hidden="true"><template v-for="(t, ti) in event.talent.slice(0, 3)" :key="'tf' + ti"><img v-if="t.profile_image" :src="t.profile_image" alt="" loading="lazy" decoding="async"><i v-else v-text="t.name.charAt(0)"></i></template></span>
+                <span class="gk-row-who-names"><template v-for="(t, ti) in event.talent" :key="'tn' + ti"><template v-if="ti > 0">, </template><a v-if="t.guest_url" :href="t.guest_url" :target="eventLinkTarget()" @click.stop><bdi v-text="t.name"></bdi></a><bdi v-else v-text="t.name"></bdi></template></span>
+            </p>
             {{-- What it costs and whether there is any left, said before anybody has to open the
                  event to find out. Never a number of seats, nothing on a day that is over, and
                  no price for a night whose sales have closed. --}}
@@ -64,17 +74,36 @@
                 <span v-if="event.is_internal" class="gk-chip gk-chip-few">{{ __('messages.internal') }}</span>
                 <span v-else-if="event.is_draft" class="gk-chip">{{ __('messages.draft') }}</span>
             </div>
+            {{-- The way in, said in words at the foot of the card (the whole card is pressed): what
+                 the event page offers, never a way round it. Nothing on a night that is sold out
+                 (its chip says so) or over. --}}
+            <span v-if="!event._isPast && !rowSoldOut(event)" class="gk-row-more" aria-hidden="true"><template v-if="event.rsvp_enabled">{{ $label('register') }}</template><template v-else-if="cardHasTickets(event) && rowFree(event)">{{ $label('get_tickets') }}</template><template v-else-if="cardHasTickets(event)">{{ $label('tickets') }}</template><template v-else>{{ __('messages.details') }}</template></span>
         </div>
         {{-- The card's end, edge to edge: the 480 derivative, and the 960 where a screen needs it
              (the picture is cut to fill its box, so a landscape flyer is drawn wider than the
              column). A flyer's own width and height, so its card is the right height before the
              picture arrives; a performer's or the venue's picture standing in for a flyer is
              square. --}}
+        @if ($rowFeature ?? false)
+        {{-- A large card's picture is shown whole (a flyer's words are at its edges), in a box of
+             about its own shape; the same picture, blurred, fills what is left of the box. With no
+             picture, the day itself fills the box, so the cards beside it stay one size. --}}
+        <div v-if="(event.image_url || event.flyer_url) && !event.is_password_protected" class="gk-row-media" :style="{ '--gk-ratio': rowRatio(event) }" data-reveal-media>
+            <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" tabindex="-1" aria-hidden="true">
+                <img class="gk-row-img-fill" :src="event.image_thumb_url || event.image_url || event.flyer_url" alt="" loading="lazy" decoding="async">
+                <img class="gk-row-img" :src="event.image_url || event.flyer_url" :srcset="event.image_srcset || null" sizes="(min-width: 48rem) 28rem, 100vw" :width="event.flyer_url && event.flyer_width ? event.flyer_width : 160" :height="event.flyer_url && event.flyer_height ? event.flyer_height : 160" loading="lazy" decoding="async" alt="">
+            </a>
+        </div>
+        <div v-else class="gk-row-media gk-row-media-day" aria-hidden="true">
+            <span v-text="formatDayName(group.date)"></span><b v-text="getDayNum(group.date)"></b><span v-text="getMonthLong(group.date)"></span>
+        </div>
+        @else
         <div v-if="(event.image_url || event.flyer_url) && !event.is_password_protected" class="gk-row-media" data-reveal-media>
             <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" tabindex="-1" aria-hidden="true">
                 <img class="gk-row-img" :class="{ 'gk-row-img-square': !event.flyer_url }" :src="event.image_thumb_url || event.image_url || event.flyer_url" :srcset="event.image_srcset || null" sizes="15rem" :width="event.flyer_url && event.flyer_width ? event.flyer_width : 160" :height="event.flyer_url && event.flyer_height ? event.flyer_height : 160" loading="lazy" decoding="async" alt="">
             </a>
         </div>
+        @endif
     </div>
     <a v-if="event.can_edit" :href="editUrl(event)" class="gk-row-edit" @click.stop>{{ __('messages.edit_event') }}</a>
 </li>

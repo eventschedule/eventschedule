@@ -70,21 +70,21 @@ class GuestListEndsTest extends TestCase
 
         $this->assertStringNotContainsString('this.maxEvents || 200', $html, 'a fixed cut with nothing after it');
 
-        // At both places each of a guest page's two lists can end (the cards from a tablet up,
-        // the rows on a phone; only one of them is in the page at a time): above its past
-        // rows, and at its foot when it has none. The phone's month is a whole month read
+        // At both places a guest page's list can end (one list at every width since the
+        // 2026-11 redesign, the rows; the old cards from a tablet up are the admin's alone):
+        // above its past rows, and at its foot when it has none. The phone's month is a whole month read
         // from the server's map of it, with the next month one press away, so it has no cut
         // to raise and none to explain.
-        $this->assertSame(4, substr_count($html, 'data-list-more'));
-        $this->assertSame(4, substr_count($html, 'data-list-truncated'), 'where the server cut what it sent, each end of each list says so');
+        $this->assertSame(2, substr_count($html, 'data-list-more'));
+        $this->assertSame(2, substr_count($html, 'data-list-truncated'), 'where the server cut what it sent, each end of the list says so');
         $this->assertStringContainsString('@click.stop="showMoreListRows"', $html);
 
         // An embed too narrow for a month grid lists every upcoming day instead, which IS a
         // cut list, so it has the way on and the note as well.
         $role = $this->createRole($this->createOwner());
         $embed = $this->get('/'.$role->subdomain.'?embed=true')->assertOk()->getContent();
-        $this->assertSame(5, substr_count($embed, 'data-list-more'));
-        $this->assertSame(5, substr_count($embed, 'data-list-truncated'));
+        $this->assertSame(3, substr_count($embed, 'data-list-more'));
+        $this->assertSame(3, substr_count($embed, 'data-list-truncated'));
 
         $this->assertStringContainsString(__('messages.later_events_not_listed'), $html);
         $this->assertStringContainsString('this.listTruncated = !!data.truncated', $html);
@@ -108,10 +108,10 @@ class GuestListEndsTest extends TestCase
         // No empty state may be drawn while the load has failed: every one is a statement about
         // the schedule ("No scheduled events", "No events found").
         preg_match_all('/v-(?:else-)?if="(!isLoadingEvents && [^"]*)"/', $html, $matches);
-        // Six on a guest page: two for the cards, two for the phone's rows, the phone month's,
-        // and the month grid's one (nothing for the filters that are set; an empty month is just
+        // Four on a guest page: two for the list's rows, the phone month's, and the month
+        // grid's one (nothing for the filters that are set; an empty month is just
         // its empty weeks, role/partials/month).
-        $this->assertSame(6, count($matches[1]), 'the two lists\' empty states, the phone month\'s and the month grid\'s one');
+        $this->assertSame(4, count($matches[1]), 'the list\'s empty states, the phone month\'s and the month grid\'s one');
         foreach ($matches[1] as $condition) {
             $this->assertStringContainsString('!loadFailed', $condition, 'empty state shown on a failed load: '.$condition);
         }

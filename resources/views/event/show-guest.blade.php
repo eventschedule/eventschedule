@@ -251,10 +251,35 @@
       $backUrl = \App\Support\EmbedEventView::calendarUrl($role);
     }
   @endphp
-  <div class="container mx-auto gk-event-page px-0 sm:px-5 pt-4 {{ $embedEvent ? 'pb-6' : 'pb-20 sm:pb-8' }}" @if ($embedEvent) data-embed-root @endif>
+  <div class="gk-stage gk-event-page {{ $embedEvent ? 'pb-6' : 'pb-20 sm:pb-8' }}" @if ($embedEvent) data-embed-root @endif>
+
     {{-- Two columns on a laptop; on a phone their children are dealt into one, in the order the
          kit's .gk-o rules give (partials/guest-kit-styles says why). --}}
     <div class="gk-event">
+    {{-- The way back, across the top of both columns (inside the grid, so a page with one
+         column lines it up with that column). --}}
+    <div class="gk-topline">
+        <nav id="gp-back-link" aria-label="Breadcrumb" class="gk-crumbs {{ $role->isRtl() ? 'rtl' : '' }}">
+          @if ($embedEvent)
+          {{-- Stays in the frame. embed-frame's script makes it the browser's Back when the frame
+               came from the calendar, which brings the list back where it was, and in the
+               overlay it closes the overlay. --}}
+          <a href="{{ $backUrl }}" target="_self" data-embed-back class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
+            {{ $role->isRtl() ? '→' : '←' }} {{ __('messages.embed_back_to_calendar') }}
+          </a>
+          @else
+          <a href="{{ $backUrl }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
+            {{ $role->isRtl() ? '→' : '←' }} {{ $role->customLabel('back_to_schedule') }}
+          </a>
+          @endif
+          @if (auth()->user() && auth()->user()->canEditEvent($event))
+            <span>|</span>
+            <a href="{{ app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false)) }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
+              {{ __('messages.edit_event') }}
+            </a>
+          @endif
+        </nav>
+    </div>
 
       {{-- LEFT COLUMN: the flyer, the performers, the venue --}}
       <div class="contents">
@@ -299,7 +324,7 @@
           $flyerSrcset = $event->imageVariantSrcset('default', true, pageWidth: true);
           $flyerSize = $event->imageSourceDimensions();
         @endphp
-        <div id="gp-flyer" class="gk-o1 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+        <div id="gp-flyer" class="gk-o1 gk-poster">
           <a href="{{ $event->flyer_image_url }}" data-lightbox-set="flyer" data-lightbox-index="0" class="block">
             <img src="{{ $event->getImageUrl(960, pageWidth: true) }}"
                  @if ($flyerSrcset) srcset="{{ $flyerSrcset }}" sizes="(min-width: 1024px) 380px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
@@ -322,7 +347,9 @@
         <script {!! nonce_attr() !!}>(window.EsLightboxSets = window.EsLightboxSets || {}).flyer = @json($flyerLightbox, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);</script>
         @endif
 
-        @if (! $hasTalentImage && ! $event->flyer_image_url)
+        {{-- With the performers drawn small in the words column (the lineup below), a page with
+             no flyer always gets a stand-in here, a performer's picture first. --}}
+        @if (! $event->flyer_image_url)
         @php
           // The schedule whose photo stands in: with no performer's photo on the page, the
           // venue's, else this one's. Event::pagePhotoRoles() lists them in the page's order, and
@@ -339,7 +366,7 @@
              No order class: on a phone a stand-in does not lead the page. It is the schedule's
              square profile picture, not this event's, and it pushed the title and the date to
              the second screen; it comes with the other cards of this column, after the facts. --}}
-        <div id="gp-event-hero-image" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+        <div id="gp-event-hero-image" class="gk-poster">
             <img src="{{ $fallbackImageRole->getProfileImageUrl(960) }}"
                  @if ($fallbackImageSrcset) srcset="{{ $fallbackImageSrcset }}" sizes="(min-width: 1024px) 380px, (min-width: 640px) calc(100vw - 40px), 100vw" @endif
                  alt="{{ $eventName }}"
@@ -349,283 +376,26 @@
         @endif
         @endif
 
+        {{-- Venue card. Not for a venue with nothing to say beyond the name and address the facts
+             row already gives (no picture, story, links or ways to reach it): an empty card was
+             the only thing in the picture column of a sparse event. Kept while it carries the
+             calendar links a ticketed event falls back on. --}}
         @php
-          // Resolved once for the whole talent loop, not per video: VideoUtils::canRemoveVideo()
-          // runs an isEditor() query per call. A strict subset of that rule - the partial still
-          // calls it and remains the authority - so this can only ever be more restrictive.
-          $canRemoveVideos = auth()->check() && ! is_demo_mode() && auth()->user()->isEditor($role->subdomain);
+          $venueBare = $event->venue
+              && ! $event->venue->headerImageUrl() && ! $event->venue->profile_image_url
+              && ! $event->venue->textInLanguage('description_html', $displayLang)
+              && ! $event->venue->decodeLinks('social_links') && ! $event->venue->website
+              && ! ($event->venue->email && $event->venue->show_email) && ! $event->venue->showsPhone()
+              && ! (! $event->is_draft && $event->tickets_enabled)
+              && ! ($event->venue->formatted_address && config('services.google.maps') && ! request()->attributes->get('custom_domain_host'));
         @endphp
-        {{-- class="contents" so each card stays a direct flex item of the column above and the
-             gap-4 spacing is unchanged; the wrapper exists only to give the whole set one id.
-             display:none on a display:contents box still removes the subtree. --}}
-        <div id="gp-talent" class="contents gk-event-flat">
-        @foreach ($talentMembers as $talentIndex => $each)
-        @php
-          // The header this act's own page shows (Role::headerImageUrl()): a built-in one, or an
-          // upload only while "custom" is selected - never an old upload behind 'none' or 'logos'.
-          $talentHeaderUrl = $each->headerImageUrl(960);
-          $hasTalentHeader = (bool) $talentHeaderUrl;
-        @endphp
-        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
-          @if ($hasTalentHeader)
-            {{-- Header banner: a built-in header's bundled WebP, or an upload's 960 derivative. --}}
-            @php $talentHeaderSize = $each->headerImageDimensions(); @endphp
-            <img class="block max-h-40 w-full object-cover" src="{{ $talentHeaderUrl }}" @if ($talentHeaderSize) width="{{ $talentHeaderSize[0] }}" height="{{ $talentHeaderSize[1] }}" @endif alt="{{ $each->nameInLanguage($displayLang) }}"/>
-            <div class="px-5 pb-5">
-              {{-- Profile image overlapping header --}}
-              @if ($each->profile_image_url)
-                <div class="rounded-xl w-[100px] h-[100px] -mt-[60px] bg-white/95 dark:bg-gray-900/95 p-[5px] mb-3">
-                  @if ($each->isClaimed())
-                    @php
-                      $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
-                      $tQueryParams = [];
-                      if (request('category')) $tQueryParams['category'] = request('category');
-                      if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
-                      if ($rawDateParam) {
-                        $tDate = $rawDateParam;
-                        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
-                          $tDateParts = explode('-', $tDate);
-                          $tQueryParams['month'] = (int)$tDateParts[1];
-                          $tQueryParams['year'] = (int)$tDateParts[0];
-                        }
-                      } else {
-                        if (request('month')) $tQueryParams['month'] = request('month');
-                        if (request('year')) $tQueryParams['year'] = request('year');
-                      }
-                      if (!empty($tQueryParams)) {
-                        $talentUrl .= '?' . http_build_query($tQueryParams);
-                      }
-                    @endphp
-                    <a href="{{ $talentUrl }}">
-                      <img src="{{ $each->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="rounded-lg w-full h-full object-cover"/>
-                    </a>
-                  @else
-                    <img src="{{ $each->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="rounded-lg w-full h-full object-cover"/>
-                  @endif
-                </div>
-              @else
-                <div class="pt-4"></div>
-              @endif
-          @else
-            <div class="p-5">
-              {{-- Profile image (no header) --}}
-              @if ($each->profile_image_url)
-                @if ($each->isClaimed())
-                  @php
-                    $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
-                    $tQueryParams = [];
-                    if (request('category')) $tQueryParams['category'] = request('category');
-                    if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
-                    if ($rawDateParam) {
-                      $tDate = $rawDateParam;
-                      if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
-                        $tDateParts = explode('-', $tDate);
-                        $tQueryParams['month'] = (int)$tDateParts[1];
-                        $tQueryParams['year'] = (int)$tDateParts[0];
-                      }
-                    } else {
-                      if (request('month')) $tQueryParams['month'] = request('month');
-                      if (request('year')) $tQueryParams['year'] = request('year');
-                    }
-                    if (!empty($tQueryParams)) {
-                      $talentUrl .= '?' . http_build_query($tQueryParams);
-                    }
-                  @endphp
-                  <a href="{{ $talentUrl }}">
-                    <img src="{{ $each->getProfileImageUrl(960) }}" @if ($eachSrcset = $each->imageVariantSrcset()) srcset="{{ $eachSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="{{ $each->nameInLanguage($displayLang) }}" class="w-full aspect-square object-cover rounded-xl mb-4"/>
-                  </a>
-                @else
-                  <img src="{{ $each->getProfileImageUrl(960) }}" @if ($eachSrcset = $each->imageVariantSrcset()) srcset="{{ $eachSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="{{ $each->nameInLanguage($displayLang) }}" class="w-full aspect-square object-cover rounded-xl mb-4"/>
-                @endif
-              @endif
-          @endif
-
-              <div class="flex flex-col gap-4">
-                {{-- Name + follow/manage button --}}
-                <div class="flex items-center justify-between gap-4">
-                  <div class="min-w-0">
-                    @if ($each->isClaimed())
-                      @if (!isset($talentUrl))
-                        @php
-                          $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
-                          $tQueryParams = [];
-                          if (request('category')) $tQueryParams['category'] = request('category');
-                          if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
-                          if ($rawDateParam) {
-                            $tDate = $rawDateParam;
-                            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
-                              $tDateParts = explode('-', $tDate);
-                              $tQueryParams['month'] = (int)$tDateParts[1];
-                              $tQueryParams['year'] = (int)$tDateParts[0];
-                            }
-                          } else {
-                            if (request('month')) $tQueryParams['month'] = request('month');
-                            if (request('year')) $tQueryParams['year'] = request('year');
-                          }
-                          if (!empty($tQueryParams)) {
-                            $talentUrl .= '?' . http_build_query($tQueryParams);
-                          }
-                        @endphp
-                      @endif
-                      <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
-                        <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
-                          {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
-                          <svg class="inline-block w-5 h-5 {{ $role->isRtl() ? 'ms-1 scale-x-[-1]' : 'ms-1' }} align-text-bottom fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
-                          </svg>
-                        </span>
-                      </a>
-                    @elseif ($eachClaimUrl = $each->getClaimUrl())
-                      {{-- The act has a page of its own now, unclaimed but real, and this link is
-                           the only way anybody reaches one without an invitation in hand. Assigned
-                           in the condition so the value is computed once: getClaimUrl() reaches
-                           hasRealOwner(), and this runs for every act on every event page. --}}
-                      <a href="{{ $eachClaimUrl }}" rel="nofollow" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
-                        <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
-                          {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
-                        </span>
-                      </a>
-                    @else
-                      <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $otherRole->font_family ?? 'sans-serif') }}', sans-serif;" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
-                        {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
-                      </p>
-                    @endif
-                  </div>
-
-                  <div class="flex items-center gap-2">
-                    @if ($each->isClaimed() && (config('app.hosted') || config('app.is_testing')) && ! is_demo_mode())
-                      @if (auth()->user() && auth()->user()->isMember($each->subdomain))
-                        <a href="{{ app_url(route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false)) }}"
-                          class="inline-flex items-center justify-center">
-                          <button type="button" name="follow"
-                            style="background-color: var(--es-accent); color: var(--es-accent-text)"
-                            class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold border-2 border-transparent shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md">
-                            {{ __('messages.manage') }}
-                          </button>
-                        </a>
-                      @else
-                        <button type="button"
-                          data-follow-trigger
-                          data-follow-url="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
-                          data-subscribe-url="{{ route('role.audience.join', ['subdomain' => $each->subdomain]) }}"
-                          data-subscribe-label="{{ $each->customLabel('email_me_new_events') }}"
-                          data-account-note="{{ $each->willCreateAccountOnConfirm() ? '1' : '' }}"
-                          data-schedule-name="{{ $each->name }}"
-                          data-schedule-image="{{ $each->profile_image_url }}"
-                          data-accent-color="{{ $accentColor }}"
-                          data-contrast-color="{{ $contrastColor }}"
-                          style="background-color: var(--es-accent); color: var(--es-accent-text)"
-                          class="inline-flex items-center justify-center rounded-md px-4 py-2 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs font-semibold shadow-sm">
-                          {{ __('messages.follow') }}
-                        </button>
-                      @endif
-                    @endif
-
-                    {{-- A sibling @if, not the @elseif this used to be: chained, it could never fire
-                         alongside the Manage/Follow buttons. The gate now matches the endpoint it
-                         calls exactly - EventController::clearVideos authorises through the event
-                         policy (the event's owner, or an owner/admin of any schedule on it), which
-                         is wider than the event's creator alone, but it also only ever touches
-                         UNCLAIMED roles, so showing the button for a claimed one would flash
-                         "cleared" while doing nothing. A claimed act's own team still gets the
-                         per-video control below. Only worth offering for more than one video;
-                         otherwise the per-video remove says the same thing.  --}}
-                    @if (auth()->user() && auth()->user()->canEditEvent($event) && ! $each->isClaimed() && $each->youtube_links && count($each->decodeLinks('youtube_links')) > 1)
-                      <button type="button"
-                        class="clear-videos-btn inline-flex items-center rounded-md px-3 py-1.5 text-xs font-semibold text-red-600 bg-white dark:bg-gray-800 border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm"
-                        data-clear-url="{{ route('event.clear_videos', ['subdomain' => $role->subdomain, 'event_hash' => App\Utils\UrlUtils::encodeId($event->id), 'role_hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}">
-                        {{ __('messages.clear_videos') }}
-                      </button>
-                    @endif
-                  </div>
-                </div>
-
-                {{-- Description with expand/collapse. demoteH1(): the event name is the page's one
-                     <h1>, so an act's own "# Heading" prints as an <h2>. --}}
-                @if ($each->description_html)
-                  @php $eachDir = content_dir($each, false, $each->description_html); @endphp
-                  {{-- Cut by LINES, by the browser, and only when it overflows. It used to be cut
-                       after five words, and the test for "is it long" was str_word_count(), which
-                       counts no words at all in Hebrew or Arabic: those were never shortened,
-                       however long they ran. --}}
-                  <div x-data="{ expanded: false, long: false }"
-                       x-init="$nextTick(() => { long = $refs.blurb.scrollHeight > $refs.blurb.clientHeight + 1 })"
-                       class="text-sm text-gray-700 dark:text-gray-300">
-                    <div x-ref="blurb" :class="{ 'line-clamp-3': !expanded }" class="custom-content line-clamp-3 {{ $eachDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $eachDir }}">
-                      {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($each->description_html)) !!}
-                    </div>
-                    <button type="button" x-show="long && !expanded" x-cloak :aria-expanded="expanded" @click="expanded = true" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
-                      {{ __('messages.show_more') }}
-                    </button>
-                    <button type="button" x-show="long && expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
-                      {{ __('messages.show_less') }}
-                    </button>
-                  </div>
-                @endif
-
-                {{-- YouTube videos --}}
-                @if ($each->youtube_links)
-                  @php
-                    $sidebarVideoLinks = $each->decodeLinks('youtube_links');
-                  @endphp
-                  @foreach ($sidebarVideoLinks as $sLink)
-                      @php $sLinkEmbedUrl = \App\Utils\UrlUtils::getYouTubeEmbed($sLink->url); @endphp
-                      @continue (! $sLinkEmbedUrl)
-                      <div class="rounded-lg overflow-hidden">
-                        <x-consent-embed :src="$sLinkEmbedUrl" :title="$each->nameInLanguage($displayLang).' - YouTube video'" frame-class="w-full" frame-style="aspect-ratio:16/9" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($sLink->url)" />
-                        @if ($canRemoveVideos)
-                          @include('partials.remove-video-button', [
-                            'schedule' => $role,
-                            'target' => $each,
-                            'videoUrl' => $sLink->url,
-                            'class' => 'mt-1 text-end',
-                          ])
-                        @endif
-                      </div>
-                  @endforeach
-                @endif
-              </div>
-            </div>
-        </div>
-        @php unset($talentUrl); @endphp
-        @endforeach
-        </div>{{-- /#gp-talent --}}
-
-        {{-- The rest of the bill: acts somebody typed in by name and nothing more. One card and a
-             list, not one card each - see the note where $bareTalent is built. Each name links to
-             its own claim page where it has one, which is how an act finds out a page exists for
-             them without an invitation in hand. --}}
-        @if ($bareTalent->isNotEmpty())
-        <div id="gp-talent-list" class="gk-o6 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-5">
-          <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            {{ __('messages.talent') }}
-          </h2>
-          <ul class="mt-2 flex flex-col gap-1">
-            @foreach ($bareTalent as $bare)
-            <li dir="{{ content_dir_for_language($bare->nameInLanguage($displayLang), $displayLang) }}">
-              @if ($bareClaimUrl = $bare->getClaimUrl())
-                <a href="{{ $bareClaimUrl }}" rel="nofollow" class="text-base text-gray-900 dark:text-gray-100 hover:underline">
-                  {!! str_replace(' , ', '<br>', e($bare->nameInLanguage($displayLang))) !!}
-                </a>
-              @else
-                <span class="text-base text-gray-900 dark:text-gray-100">
-                  {!! str_replace(' , ', '<br>', e($bare->nameInLanguage($displayLang))) !!}
-                </span>
-              @endif
-            </li>
-            @endforeach
-          </ul>
-        </div>
-        @endif
-
-        {{-- Venue card --}}
-        @if ($event->venue && ($event->venue->name || $event->venue->formatted_address))
+        @if ($event->venue && ($event->venue->name || $event->venue->formatted_address) && ! $venueBare)
         @php
           // As for the talent cards above: the header the venue's own page shows, or none.
           $venueHeaderUrl = $event->venue->headerImageUrl(960);
           $hasVenueHeader = (bool) $venueHeaderUrl;
         @endphp
-        <div id="gp-venue" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl z-20 relative {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-venue" class="gk-card z-20 relative {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($hasVenueHeader)
             <div class="overflow-hidden rounded-t-2xl">
               @php $venueHeaderSize = $event->venue->headerImageDimensions(); @endphp
@@ -633,14 +403,14 @@
             </div>
           @endif
           <div class="p-5 relative z-10">
-            @if ($event->venue->profile_image_url && $hasVenueHeader)
-              <div class="rounded-lg w-[100px] h-[100px] -mt-[60px] bg-white/95 dark:bg-gray-900/95 flex items-center justify-center mb-3">
-                <img class="rounded-md w-[90px] h-[90px] object-cover" src="{{ $event->venue->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
-              </div>
-            @elseif ($event->venue->profile_image_url)
-              <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->getProfileImageUrl(960) }}" @if ($venueSrcset = $event->venue->imageVariantSrcset()) srcset="{{ $venueSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="{{ $event->venue->nameInLanguage($displayLang) }}" loading="lazy" decoding="async"/>
-            @endif
             <div class="flex flex-col gap-2">
+              {{-- The venue as the mock draws it: its picture small beside its name, the address
+                   under the name. Never the picture overlapping the cover. --}}
+              <div class="gk-venue-row">
+              @if ($event->venue->profile_image_url)
+                <img class="gk-venue-logo" src="{{ $event->venue->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="" loading="lazy" decoding="async"/>
+              @endif
+              <div class="gk-venue-id">
               @if ($event->venue->name)
                 @if ($event->venue->isClaimed())
                   @php
@@ -664,6 +434,11 @@
                   {{ $event->venue->shortAddress() }}
                 </p>
               @endif
+              @if ($event->venue->name && $event->venue->shortAddress())
+                <span class="gk-venue-addr">{{ $event->venue->shortAddress() }}</span>
+              @endif
+              </div>
+              </div>
               @if ($event->venue->textInLanguage("description_html", $displayLang))
                 @php $venueDir = content_dir_for_language($event->venue->textInLanguage("description_html", $displayLang), $displayLang); @endphp
                 {{-- demoteH1(): the event name is the page's one <h1>, so the venue's "# Heading" prints as an <h2>. --}}
@@ -682,6 +457,8 @@
                   </button>
                 </div>
               @endif
+              {{-- Only when there is something to put in it: empty, its margin left a gap above the icons. --}}
+              @if (($event->venue->email && $event->venue->show_email) || $event->venue->showsPhone() || $event->venue->website)
               <div class="flex flex-col gap-4 mt-2">
                 @if ($event->venue->email && $event->venue->show_email)
                 <div class="flex flex-row gap-2 items-center relative duration-300 text-gray-700 dark:text-gray-300 fill-gray-700 dark:fill-gray-300 {{ $role->isRtl() ? 'rtl' : '' }}">
@@ -720,18 +497,28 @@
                 </div>
                 @endif
               </div>
+              @endif
 
               @if ($event->venue->social_links)
-              <div id="gp-venue-socials" class="flex flex-row gap-3 items-center mt-2 {{ $role->isRtl() ? 'rtl' : '' }}">
+              <div id="gp-venue-socials" class="flex flex-row flex-wrap gap-2 items-center mt-3 {{ $role->isRtl() ? 'rtl' : '' }}">
                 @foreach ($event->venue->decodeLinks('social_links') as $link)
                   {{-- No icon for a link a browser should not open - see Role::socialLinkHref(). --}}
                   @if ($venueLinkHref = $event->venue->socialLinkHref($link, $loop->index))
+                  @php
+                    // A round icon, as the venue card always had; the platform (or a website's
+                    // own domain) is its name for a reader and its tooltip.
+                    $venueLinkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url);
+                    $venueLinkWord = $venueLinkPlatform === 'website'
+                        ? (\App\Utils\UrlUtils::linkHost($venueLinkHref) ?: \App\Utils\UrlUtils::clean($link->url))
+                        : \App\Utils\UrlUtils::getPlatformBrandName($venueLinkPlatform);
+                  @endphp
                   <a
                     href="{{ $venueLinkHref }}" target="_blank" rel="noopener noreferrer nofollow"
-                    class="w-10 h-10 rounded-full flex justify-center items-center bg-gray-100 dark:bg-gray-700 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
-                    title="{{ App\Utils\UrlUtils::clean($link->url) }}"
+                    class="gk-icon-link"
+                    title="{{ $venueLinkWord }}"
+                    aria-label="{{ $venueLinkWord }}"
                     >
-                    <x-url-icon class="w-5 h-5" color="#6B7280">
+                    <x-url-icon class="w-5 h-5" color="currentColor">
                       {{ \App\Utils\UrlUtils::clean($link->url) }}
                     </x-url-icon>
                   </a>
@@ -747,8 +534,7 @@
               @if (!$event->is_draft && $event->tickets_enabled)
               <div class="relative mt-4">
                 <button type="button"
-                    class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                    style="background-color: var(--es-accent); color: var(--es-accent-text);"
+                    class="gk-card-btn calendar-card-toggle inline-flex justify-center gap-x-1.5 px-6 py-3 text-base font-semibold"
                     aria-expanded="true" aria-haspopup="true">
                   {{ $role->customLabel('add_to_calendar') }}
                   <svg class="-me-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -821,8 +607,7 @@
         @if (!$event->is_draft && !($event->venue && ($event->venue->name || $event->venue->formatted_address)) && $event->tickets_enabled)
         <div class="relative {{ $role->isRtl() ? 'rtl' : '' }}">
           <button type="button"
-              class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-              style="background-color: var(--es-accent); color: var(--es-accent-text);"
+              class="gk-card-btn calendar-card-toggle inline-flex justify-center gap-x-1.5 px-6 py-3 text-base font-semibold"
               aria-expanded="true" aria-haspopup="true">
             {{ $role->customLabel('add_to_calendar') }}
             <svg class="-me-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -858,9 +643,6 @@
 
         {{-- The schedule's other upcoming events carry on down this column, as they always
              did (event/partials/more-events says what changed about how). --}}
-        @unless ($embedEvent)
-        @include('event.partials.more-events')
-        @endunless
 
         </div>
       </div>
@@ -902,39 +684,29 @@
 
       {{-- RIGHT COLUMN: the facts and the button, the form, the story --}}
       <div class="gk-event-col gk-event-main">
-        <div id="gp-event-details" class="gk-o2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 flex flex-col gap-6 z-10">
+        <div id="gp-event-details" class="gk-o2 gk-sec gk-details z-10">
 
-        {{-- Breadcrumb --}}
-        <nav id="gp-back-link" aria-label="Breadcrumb" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 {{ $role->isRtl() ? 'rtl' : '' }}">
-          @if ($embedEvent)
-          {{-- Stays in the frame. embed-frame's script makes it the browser's Back when the frame
-               came from the calendar, which brings the list back where it was, and in the
-               overlay it closes the overlay. --}}
-          <a href="{{ $backUrl }}" target="_self" data-embed-back class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
-            {{ $role->isRtl() ? '→' : '←' }} {{ __('messages.embed_back_to_calendar') }}
-          </a>
-          @else
-          <a href="{{ $backUrl }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
-            {{ $role->isRtl() ? '→' : '←' }} {{ $role->customLabel('back_to_schedule') }}
-          </a>
-          @endif
-          @if (auth()->user() && auth()->user()->canEditEvent($event))
-            <span>|</span>
-            <a href="{{ app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($event->id)], false)) }}" class="px-3 py-2 -mx-3 hover:underline hover:text-gray-700 dark:hover:text-gray-200">
-              {{ __('messages.edit_event') }}
-            </a>
-          @endif
-        </nav>
 
         @php
             $translateMode = showing_translation($role);
         @endphp
 
+        {{-- The head: a line saying when in the schedule's colour, the name, the short
+             description. The facts row below says it all again in full. --}}
+        @php
+          $headDt = $event->getStartDateTime($date, true, $event->scheduleTimezone());
+          $headHasTime = strlen((string) $event->starts_at) > 10;
+          $headYear = $headDt->year !== \Carbon\Carbon::now($event->scheduleTimezone())->year;
+        @endphp
+        <div class="gk-ev-head">
+        <p class="gk-dateline" data-event-dateline>
+          <span>{{ $headDt->translatedFormat('l') }}</span><span class="gk-dateline-dot" aria-hidden="true">·</span><span>{{ $headDt->translatedFormat($headYear ? 'M j, Y' : 'M j') }}</span>@if ($headHasTime)<span class="gk-dateline-dot" aria-hidden="true">·</span><bdi dir="ltr">{{ $headDt->format(get_use_24_hour_time($role) ? 'H:i' : 'g:i A') }}</bdi>@endif
+        </p>
         {{-- Event title --}}
         <h1
           id="gp-event-title"
           @if ($embedEvent) tabindex="-1" data-embed-heading @endif
-          class="text-gray-900 dark:text-gray-100 text-[28px] sm:text-[36px] lg:text-[44px] leading-snug font-bold {{ $role->isRtl() ? 'rtl text-right' : '' }}"
+          class="gk-title {{ mb_strlen($eventName) > 64 ? 'gk-title-s' : (mb_strlen($eventName) > 36 ? 'gk-title-m' : '') }} {{ $role->isRtl() ? 'rtl text-right' : '' }}"
           dir="{{ content_dir_for_language($eventName, $displayLang) }}"
         >
           {!! str_replace(' , ', '<br>', e($eventName)) !!}
@@ -945,11 +717,12 @@
 
         {{-- Short description --}}
         @if ($eventShortDescription)
-        <p id="gp-event-short-description" class="text-gray-600 dark:text-gray-400 text-lg mt-2 {{ $role->isRtl() ? 'rtl text-right' : '' }}"
+        <p id="gp-event-short-description" class="gk-subtitle {{ $role->isRtl() ? 'rtl text-right' : '' }}"
           dir="{{ content_dir_for_language($eventShortDescription, $displayLang) }}">
           {{ $eventShortDescription }}
         </p>
         @endif
+        </div>
 
         {{-- When. The day in the tile, then what a visitor has to know to be there: the year
              when it is not this one, the hours with the zone they are in, how it repeats and the
@@ -982,9 +755,10 @@
           $moreDates = $event->days_of_week ? $event->occurrencesAfter($date ?: null, 3) : [];
           $recurrence = ($moreDates || ($event->recurring_end_type ?? 'never') !== 'after_events') ? $event->recurrenceSummary() : null;
         @endphp
-        <div id="gp-event-date" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div class="gk-factrow" data-event-facts>
+        <div id="gp-event-date" class="gk-fact-cell {{ $role->isRtl() ? 'rtl' : '' }}" data-label="{{ __('messages.date_and_time') }}">
           @if ($manyDays && $endDt && $startDt->format('m') === $endDt->format('m'))
-          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+          <div class="gk-tile flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
                   style="color: var(--es-accent-readable);">
@@ -995,7 +769,7 @@
             </span>
           </div>
           @else
-          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+          <div class="gk-tile flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
                   style="color: var(--es-accent-readable);">
@@ -1008,7 +782,7 @@
           @endif
           <div class="flex flex-col min-w-0">
             @if ($manyDays && $endDt)
-              <span class="text-lg font-semibold text-gray-900 dark:text-white">
+              <span class="gk-fact-main">
                 <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">
                   {{ $event->getDateRangeDisplay($date) }}
                 </time>
@@ -1018,7 +792,7 @@
                 $multiStartTime = $startDt->format($timeFormat);
                 $multiEndTime = $endDt->format($timeFormat);
               @endphp
-              <span class="text-sm text-gray-500 dark:text-gray-400">
+              <span class="gk-fact-sub">
                 @if ($startDt->format('m') === $endDt->format('m'))
                   {{ $startDt->translatedFormat('M j') }}, <bdi dir="ltr">{{ $multiStartTime }}</bdi> - {{ $endDt->format('j') }}, <bdi dir="ltr">{{ $multiEndTime }}</bdi>
                 @else
@@ -1027,20 +801,20 @@
                 @if ($zone) <bdi dir="ltr" data-event-zone>{{ $zone }}</bdi>@endif
               </span>
             @else
-              <span class="text-lg font-semibold text-gray-900 dark:text-white">
+              <span class="gk-fact-main">
                 <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">
                   {{-- The tile has no room for a year, and next October is not this October. --}}
-                  {{ $otherYear ? $startDt->translatedFormat('l, F j, Y') : $startDt->translatedFormat('l') }}
+                  {{ $startDt->translatedFormat($otherYear ? 'D, M j, Y' : 'D, M j') }}
                 </time>
               </span>
-              <span class="text-sm text-gray-500 dark:text-gray-400">
+              <span class="gk-fact-sub">
                 <time dir="ltr" datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">{{ $event->getStartEndTime($date, $use24) }}</time>@if ($endsNextDay) <span data-event-ends>({{ $endDt->translatedFormat('D') }})</span>@endif
                 @if ($zone) <bdi dir="ltr" data-event-zone>{{ $zone }}</bdi>@endif
               </span>
             @endif
             @if ($recurrence)
               {{-- A label and a list, not a sentence (Event::recurrenceSummary() says why). --}}
-              <span class="text-sm text-gray-500 dark:text-gray-400" data-event-repeats>
+              <span class="gk-fact-sub" data-event-repeats>
                 {{ $recurrence['label'] }}@if ($recurrence['days']) · {{ implode(', ', $recurrence['days']) }}@endif
                 @if ($recurrence['until'])
                   · {{ __('messages.repeats_until', ['date' => \Carbon\Carbon::parse($recurrence['until'])->translatedFormat('M j, Y')]) }}
@@ -1056,7 +830,7 @@
                nofollow, and never a day past the horizon Event::occurrencesAfter() keeps from
                today: each of these is a real page, and a link from every date to the next
                three is a chain a crawler would follow for ever. --}}
-          <div class="gk-more-dates flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm {{ $role->isRtl() ? 'rtl' : '' }}" data-event-more-dates>
+          <div class="gk-more-dates gk-fact-cell-wide flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm {{ $role->isRtl() ? 'rtl' : '' }}" data-event-more-dates>
             <span class="text-gray-500 dark:text-gray-400">{{ __('messages.more_dates') }}</span>
             @foreach ($moreDates as $moreDate)
               @php
@@ -1073,9 +847,9 @@
         {{-- Location icon badge. An online event shows the domain of its link, or "Online" when
              the link is free text or has no public domain - never the link itself. --}}
         @if (($event->venue && ($event->venue->name || $event->venue->shortAddress())) || $event->event_url)
-        <div id="gp-event-location">
+        <div id="gp-event-location" class="gk-fact-cell" data-label="{{ __('messages.location') }}">
           <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
-            <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
+            <div class="gk-tile flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
                         flex items-center justify-center shadow-sm">
               @if ($event->venue && $event->venue->profile_image_url)
                 <img src="{{ $event->venue->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $event->venue->nameInLanguage($displayLang) }}" class="w-11 h-11 rounded-lg object-cover" loading="lazy" decoding="async">
@@ -1111,22 +885,22 @@
                       }
                     @endphp
                     <a href="{{ $venueUrl }}" class="group inline-flex items-center gap-1 w-fit">
-                      <span dir="{{ content_dir_for_language($event->venue->nameInLanguage($displayLang), $displayLang) }}" class="text-lg font-semibold text-gray-900 dark:text-white group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->nameInLanguage($displayLang))) !!}</span>
+                      <span dir="{{ content_dir_for_language($event->venue->nameInLanguage($displayLang), $displayLang) }}" class="gk-fact-main group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->nameInLanguage($displayLang))) !!}</span>
                       <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                       </svg>
                     </a>
                   @else
-                    <span dir="{{ content_dir_for_language($event->venue->nameInLanguage($displayLang), $displayLang) }}" class="text-lg font-semibold text-gray-900 dark:text-white">{!! str_replace(' , ', '<br>', e($event->venue->nameInLanguage($displayLang))) !!}</span>
+                    <span dir="{{ content_dir_for_language($event->venue->nameInLanguage($displayLang), $displayLang) }}" class="gk-fact-main">{!! str_replace(' , ', '<br>', e($event->venue->nameInLanguage($displayLang))) !!}</span>
                   @endif
                 @else
                   {{-- Also reached by a venue with no name in this language, which must never read
                        "Online": the fallback is only for an event that has a link. --}}
-                  <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->event_url ? ($event->getEventUrlDomain() ?: __('messages.online')) : '' }}</span>
+                  <span class="gk-fact-main">{{ $event->event_url ? ($event->getEventUrlDomain() ?: __('messages.online')) : '' }}</span>
                 @endif
               </span>
               @if ($event->venue && $event->venue->shortAddress())
-              <span class="text-sm text-gray-500 dark:text-gray-400">
+              <span class="gk-fact-sub">
                 <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" :nofollow="true">
                   {{ $event->venue->shortAddress() }}
                 </x-link>
@@ -1161,12 +935,12 @@
               || \App\Utils\CustomFieldDisplay::eventPageFieldCount($event) > 1
               || $loneFact['type'] === 'multiline_string'
               || mb_strlen($loneFact['value']) > 60);
-          $factLead = 'text-lg font-semibold text-gray-900 dark:text-white';
-          $factQuiet = 'text-sm text-gray-500 dark:text-gray-400';
+          $factLead = 'gk-fact-main';
+          $factQuiet = 'gk-fact-sub';
         @endphp
         @if ($eventFacts)
-        <div id="gp-event-fields" class="flex {{ $factList ? 'items-start' : 'items-center' }} gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+        <div id="gp-event-fields" class="gk-fact-cell gk-fact-cell-bare {{ $role->isRtl() ? 'rtl' : '' }}">
+          <div class="gk-tile flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
             <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" style="color: var(--es-accent)" aria-hidden="true">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
@@ -1177,7 +951,7 @@
             @foreach ($eventFacts as $fact)
             <div class="gk-fact-pair" data-event-field="{{ $fact['key'] }}">
               <dt class="{{ $factQuiet }} gk-fact-text"><bdi>{{ $fact['label'] }}</bdi></dt>
-              <dd class="text-base {{ $fact['type'] === 'multiline_string' ? 'font-normal' : 'font-semibold' }} text-gray-900 dark:text-white gk-fact-text"><bdi>{{ $fact['value'] }}</bdi></dd>
+              <dd class="gk-fact-main gk-fact-text"><bdi>{{ $fact['value'] }}</bdi></dd>
             </div>
             @endforeach
           </dl>
@@ -1201,15 +975,15 @@
 
         {{-- RSVP Free badge --}}
         @if ($event->rsvp_enabled)
-        <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+        <div id="gp-event-price" class="gk-fact-cell {{ $role->isRtl() ? 'rtl' : '' }}" data-label="{{ __('messages.price') }}">
+          <div class="gk-tile flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
             <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" style="color: var(--es-accent)" aria-hidden="true">
               <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
             </svg>
           </div>
           <div class="flex flex-col">
-            <span class="text-lg font-semibold text-gray-900 dark:text-white">
+            <span class="gk-fact-main">
               {{ __('messages.free_entry') }}
             </span>
           </div>
@@ -1219,15 +993,15 @@
         {{-- Ticket price. The registration link is read through registrationHref() here and at
              every CTA below, never the column: a legacy value that is no link offers nothing. --}}
         @if ($event->registrationHref() && $event->ticket_price !== null && !$event->tickets_enabled && !$event->rsvp_enabled)
-        <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+        <div id="gp-event-price" class="gk-fact-cell {{ $role->isRtl() ? 'rtl' : '' }}" data-label="{{ __('messages.price') }}">
+          <div class="gk-tile flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
             <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" style="color: var(--es-accent)" aria-hidden="true">
               <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
             </svg>
           </div>
           <div class="flex flex-col">
-            <span class="text-lg font-semibold text-gray-900 dark:text-white">
+            <span class="gk-fact-main">
               @if ($event->ticket_price == 0)
                 {{ __('messages.free_entry') }}
               @else
@@ -1242,7 +1016,7 @@
                 ]);
             @endphp
             @if ($eventCouponBits)
-            <span class="text-sm text-gray-500 dark:text-gray-400">
+            <span class="gk-fact-sub">
               {{ implode(' • ', $eventCouponBits) }}
             </span>
             @endif
@@ -1257,21 +1031,21 @@
             $ticketPrice = (! $event->rsvp_enabled && $event->canSellTickets($date)) ? $event->ticketPriceSummary($date) : null;
         @endphp
         @if ($ticketPrice)
-        <div id="gp-event-price" class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+        <div id="gp-event-price" class="gk-fact-cell {{ $role->isRtl() ? 'rtl' : '' }}" data-label="{{ __('messages.price') }}">
+          <div class="gk-tile flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
             <svg width="24" height="24" viewBox="0 0 20 20" fill="currentColor" style="color: var(--es-accent)" aria-hidden="true">
               <path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.879a2.5 2.5 0 00.732 1.767l7.5 7.5a2.5 2.5 0 003.536 0l2.878-2.878a2.5 2.5 0 000-3.536l-7.5-7.5A2.5 2.5 0 008.38 3H5.5zM6 7a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
             </svg>
           </div>
           <div class="flex flex-col">
-            <span class="text-lg font-semibold text-gray-900 dark:text-white" data-ticket-price>
+            <span class="gk-fact-main" data-ticket-price>
               {{-- The owner's "Free entry" only where every way in is free: beside paid types it
                    is "Free - lei 280", and paid prices that differ are the whole range. --}}
               @if ($ticketPrice['says'] === 'free')
                 {{ $role->customLabel('free_entry') }}
               @else
-                {{ \App\Models\Event::priceText($ticketPrice['says'], $ticketPrice['min'], $ticketPrice['max'], $ticketPrice['currency'], true) }}
+                <bdi>{{ \App\Models\Event::priceText($ticketPrice['says'], $ticketPrice['min'], $ticketPrice['max'], $ticketPrice['currency'], true) }}</bdi>
               @endif
             </span>
             @if ($ticketPrice['low'])
@@ -1283,8 +1057,8 @@
 
         {{-- Already registered indicator --}}
         @if ($userSale)
-        <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
-          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+        <div class="gk-fact-cell {{ $role->isRtl() ? 'rtl' : '' }}" data-label="{{ __('messages.your_tickets') }}">
+          <div class="gk-tile flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
             <svg width="24" height="24" viewBox="0 0 20 20" fill="none" aria-hidden="true">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" style="fill: var(--es-accent)" />
@@ -1297,7 +1071,7 @@
               // party this same visitor bought.
               $userTicketCount = (int) $userSales->sum(fn ($s) => $s->isRsvp() ? 0 : ($s->isPrimarySale() ? $s->legTotalQuantity() : $s->quantity()));
             @endphp
-            <span class="text-lg font-semibold text-gray-900 dark:text-white" data-user-tickets="{{ $userTicketCount }}">
+            <span class="gk-fact-main" data-user-tickets="{{ $userTicketCount }}">
               {{-- "You're registered" said nothing of how many, to somebody deciding whether to
                    get one more. A sign-up has no tickets to count. --}}
               {{ $userTicketCount > 0 ? trans_choice('messages.you_have_tickets', $userTicketCount, ['count' => $userTicketCount]) : __('messages.you_are_registered') }}
@@ -1314,6 +1088,8 @@
           </div>
         </div>
         @endif
+
+        </div>{{-- .gk-factrow --}}
 
         {{-- Moment B: the exit ramp for somebody who is interested but not buying today.
              Deliberately a quiet text link rather than a second button - it sits beside the primary
@@ -1333,7 +1109,7 @@
         @endif
 
         {{-- CTA buttons --}}
-        <div id="gp-event-cta" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left {{ ($showCarpool || $embedEvent) ? 'inline-flex flex-wrap' : 'hidden sm:inline-flex' }} self-start {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-event-cta" x-data="{ shareState: 'idle' }" class="gk-cta relative items-center gap-3 text-left {{ ($showCarpool || $embedEvent) ? 'inline-flex flex-wrap' : 'hidden sm:inline-flex' }} self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         <div class="gp-cta-wide">
         @php
           // In a frame, one way to buy or sign up: the event's own page in a new tab, with the form
@@ -1351,7 +1127,7 @@
         @elseif ($embedEvent && $event->canAcceptRsvp($date))
             @php $cta = $embedCta('rsvp', $event->isRsvpFull($date) ? __('messages.join_waitlist') : $role->customLabel('register')); @endphp
             <a href="{{ $cta['href'] }}" target="_blank" rel="noopener" data-embed-checkout="rsvp" aria-label="{{ $cta['aria'] }}"
-               class="min-w-[180px] inline-flex items-center justify-center gap-x-2 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+               class="gk-cta-main min-w-[180px] inline-flex items-center justify-center gap-x-2 rounded-md px-6 py-3 text-lg font-semibold shadow-sm"
                style="background-color: var(--es-accent); color: var(--es-accent-text);">
               {{ $cta['label'] }}
               <svg class="h-4 w-4 {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
@@ -1366,7 +1142,7 @@
                   : ($event->areTicketsFree() ? $role->customLabel('get_tickets') : $role->customLabel('buy_tickets'))));
             @endphp
             <a href="{{ $cta['href'] }}" target="_blank" rel="noopener" data-embed-checkout="tickets" aria-label="{{ $cta['aria'] }}"
-               class="min-w-[180px] inline-flex items-center justify-center gap-x-2 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+               class="gk-cta-main min-w-[180px] inline-flex items-center justify-center gap-x-2 rounded-md px-6 py-3 text-lg font-semibold shadow-sm"
                style="background-color: var(--es-accent); color: var(--es-accent-text);">
               {{ $cta['label'] }}
               <svg class="h-4 w-4 {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
@@ -1377,7 +1153,7 @@
         @elseif ($event->canAcceptRsvp($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
-                  class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  class="gk-cta-main min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm"
                   style="background-color: var(--es-accent); color: var(--es-accent-text);">
               @if ($event->isRsvpFull($date))
                 {{ __('messages.join_waitlist') }}
@@ -1393,7 +1169,7 @@
             @if ($saleShowsRows)
             <button type="button" data-sale-rows
                   @click="$dispatch('show-event-form')"
-                  class="inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200 hover:shadow-md">
+                  class="gk-cta-alt inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm">
               {{ $role->customLabel('tickets') }}
             </button>
             @endif
@@ -1405,7 +1181,7 @@
           @elseif ($event->canSellTickets($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
-                  class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  class="gk-cta-main min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm"
                   style="background-color: var(--es-accent); color: var(--es-accent-text);">
               @if ($saleState === 'sold_out')
                 {{-- Only reached where a waitlist will be accepted: $saleOffersForm is false otherwise. --}}
@@ -1422,7 +1198,7 @@
               @endif
             >
                 <button type="button"
-                      class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg bg-green-600 hover:bg-green-700 text-white">
+                      class="gk-cta-main min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm bg-green-600 text-white">
                   {{ __('messages.view_event') }}
                 </button>
             </a>
@@ -1439,7 +1215,7 @@
 
         @if (!empty($showCalendarPopup))
               <button type="button"
-                  class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                  class="gk-cta-main calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm"
                   style="background-color: var(--es-accent); color: var(--es-accent-text);"
                   id="menu-button" aria-expanded="true" aria-haspopup="true">
               {{ $role->customLabel('add_to_calendar') }}
@@ -1519,7 +1295,7 @@
         @endphp
         <a href="{{ $carpoolUrl }}"
            id="gp-event-carpool"
-           class="flex-shrink-0 h-[42px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors px-3"
+           class="gk-cta-icon flex-shrink-0 h-[42px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-3"
            title="{{ __('messages.carpool') }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
@@ -1536,7 +1312,7 @@
                 data-embed-share
                 data-share-title="{{ $eventName }}"
                 data-share-url="{{ \App\Support\EmbedEventView::pageUrl($event, $subdomain, $requestedOccurrence) }}"
-                class="flex-shrink-0 w-[42px] h-[42px] inline-flex items-center justify-center rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                class="gk-cta-icon flex-shrink-0 w-[42px] h-[42px] inline-flex items-center justify-center rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300"
                 title="{{ $role->customLabel('share') }}" aria-label="{{ $role->customLabel('share') }}">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gk-share-icon w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gk-share-done w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
@@ -1557,7 +1333,7 @@
                     setTimeout(() => shareState = 'idle', 2000);
                   }
                 "
-                class="flex-shrink-0 w-[42px] h-[42px] inline-flex items-center justify-center rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                class="gk-cta-icon flex-shrink-0 w-[42px] h-[42px] inline-flex items-center justify-center rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300"
                 :title="shareState === 'copied' ? '{{ __('messages.copied') }}' : '{{ $role->customLabel('share') }}'">
           <template x-if="shareState !== 'copied'">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
@@ -1565,6 +1341,7 @@
           <template x-if="shareState === 'copied'">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
           </template>
+          <span class="gk-cta-word">{{ $role->customLabel('share') }}</span>
         </button>
         </div>
         @endif
@@ -1654,10 +1431,10 @@
              @if (request()->get('rsvp') === 'true' || $formRefused)
              data-show-initial="true"
              @endif>
-            <div class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
+            <div class="flex flex-col gap-10 gk-card gk-band">
               <div class="flex-1">
                 <div class="flex flex-col gap-4">
-                  <h2 class="text-[28px] leading-snug text-gray-900 dark:text-gray-100">
+                  <h2 class="gk-band-title">
                     @if ($event->isRsvpFull($date))
                         {{ __('messages.join_waitlist') }}
                     @else
@@ -1682,7 +1459,7 @@
              @if (request()->get('tickets') === 'true' || $formRefused)
              data-show-initial="true"
              @endif>
-            <div class="flex flex-col gap-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl border border-gray-200 dark:border-gray-700 px-5 py-6 sm:p-8">
+            <div class="flex flex-col gap-10 gk-card gk-band">
               <div class="flex-1">
                 @include('event.partials.payment-cancelled')
                 @include('event.tickets', ['event' => $event, 'subdomain' => $subdomain])
@@ -1827,7 +1604,7 @@
              image (the hero fallback in the other column gives it up). Ordered AFTER the form on
              a phone, as it is in the markup: an open form hides what follows it, and a gallery
              drawn above the form used to vanish from the top of the page on pressing Buy. --}}
-        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="gk-o4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="gk-o4 gk-sec gk-sec-rule {{ $role->isRtl() ? 'rtl' : '' }}">
           @include('partials.gallery-card', ['galleryImages' => $galleryImages, 'galleryVariant' => 'event', 'galleryName' => $eventName, 'galleryLabel' => $role->customLabel('gallery'), 'galleryPriority' => true, 'accentColor' => $accentColor])
         </section>
         @endif
@@ -1838,30 +1615,307 @@
           $descriptionHtml = $eventDescriptionHtml;
           $descriptionDir = content_dir_for_language($descriptionHtml, $displayLang);
         @endphp
-        <article id="gp-about" class="gk-o4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
-          <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
+        <article id="gp-about" class="gk-o4 gk-sec gk-sec-rule">
+          <h2 class="gk-label">
             {{ $role->customLabel('about') }}
           </h2>
           <div class="{{ $descriptionDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $descriptionDir }}">
             {{-- demoteH1(): the event name above is the page's one <h1>, so an owner's "# Heading"
                  renders as a marked <h2> that keeps the H1's look (custom-content-styles). --}}
-            <div class="text-gray-700 dark:text-gray-300 text-base custom-content">
+            <div class="gk-story custom-content">
               {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($descriptionHtml)) !!}
             </div>
           </div>
         </article>
         @endif
 
+        {{-- The bill, in the words column under the story, as the mock draws it: a quiet name over
+             each act (Talent), its picture small beside it, never a card in the picture column. --}}
+        @php
+          // Resolved once for the whole talent loop, not per video: VideoUtils::canRemoveVideo()
+          // runs an isEditor() query per call. A strict subset of that rule - the partial still
+          // calls it and remains the authority - so this can only ever be more restrictive.
+          $canRemoveVideos = auth()->check() && ! is_demo_mode() && auth()->user()->isEditor($role->subdomain);
+        @endphp
+        @if ($talentMembers->isNotEmpty() || $bareTalent->isNotEmpty())
+        <section class="gk-lineup gk-o6 gk-sec gk-sec-rule" aria-labelledby="es-lineup-title">
+          <h2 id="es-lineup-title" class="gk-label">{{ __('messages.talent') }}</h2>
+        {{-- class="contents" so each card stays a direct flex item of the column above and the
+             gap-4 spacing is unchanged; the wrapper exists only to give the whole set one id.
+             display:none on a display:contents box still removes the subtree. --}}
+        <div id="gp-talent" class="contents gk-event-flat">
+        @foreach ($talentMembers as $talentIndex => $each)
+        @php
+          // The header this act's own page shows (Role::headerImageUrl()): a built-in one, or an
+          // upload only while "custom" is selected - never an old upload behind 'none' or 'logos'.
+          $talentHeaderUrl = $each->headerImageUrl(960);
+          $hasTalentHeader = (bool) $talentHeaderUrl;
+        @endphp
+        <div class="gk-card">
+          @if ($hasTalentHeader)
+            {{-- Header banner: a built-in header's bundled WebP, or an upload's 960 derivative. --}}
+            @php $talentHeaderSize = $each->headerImageDimensions(); @endphp
+            <img class="block max-h-40 w-full object-cover" src="{{ $talentHeaderUrl }}" @if ($talentHeaderSize) width="{{ $talentHeaderSize[0] }}" height="{{ $talentHeaderSize[1] }}" @endif alt="{{ $each->nameInLanguage($displayLang) }}"/>
+            <div class="px-5 pb-5">
+              {{-- Profile image overlapping header --}}
+              @if ($each->profile_image_url)
+                <div class="rounded-xl w-[100px] h-[100px] -mt-[60px] gk-avatar-frame p-[5px] mb-3">
+                  @if ($each->isClaimed())
+                    @php
+                      $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
+                      $tQueryParams = [];
+                      if (request('category')) $tQueryParams['category'] = request('category');
+                      if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
+                      if ($rawDateParam) {
+                        $tDate = $rawDateParam;
+                        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
+                          $tDateParts = explode('-', $tDate);
+                          $tQueryParams['month'] = (int)$tDateParts[1];
+                          $tQueryParams['year'] = (int)$tDateParts[0];
+                        }
+                      } else {
+                        if (request('month')) $tQueryParams['month'] = request('month');
+                        if (request('year')) $tQueryParams['year'] = request('year');
+                      }
+                      if (!empty($tQueryParams)) {
+                        $talentUrl .= '?' . http_build_query($tQueryParams);
+                      }
+                    @endphp
+                    <a href="{{ $talentUrl }}">
+                      <img src="{{ $each->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="rounded-lg w-full h-full object-cover"/>
+                    </a>
+                  @else
+                    <img src="{{ $each->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="{{ $each->nameInLanguage($displayLang) }}" class="rounded-lg w-full h-full object-cover"/>
+                  @endif
+                </div>
+              @else
+                <div class="pt-4"></div>
+              @endif
+          @else
+            <div class="p-5">
+              {{-- Profile image (no header) --}}
+              @if ($each->profile_image_url)
+                @if ($each->isClaimed())
+                  @php
+                    $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
+                    $tQueryParams = [];
+                    if (request('category')) $tQueryParams['category'] = request('category');
+                    if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
+                    if ($rawDateParam) {
+                      $tDate = $rawDateParam;
+                      if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
+                        $tDateParts = explode('-', $tDate);
+                        $tQueryParams['month'] = (int)$tDateParts[1];
+                        $tQueryParams['year'] = (int)$tDateParts[0];
+                      }
+                    } else {
+                      if (request('month')) $tQueryParams['month'] = request('month');
+                      if (request('year')) $tQueryParams['year'] = request('year');
+                    }
+                    if (!empty($tQueryParams)) {
+                      $talentUrl .= '?' . http_build_query($tQueryParams);
+                    }
+                  @endphp
+                  <a href="{{ $talentUrl }}">
+                    <img src="{{ $each->getProfileImageUrl(960) }}" @if ($eachSrcset = $each->imageVariantSrcset()) srcset="{{ $eachSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="{{ $each->nameInLanguage($displayLang) }}" class="gk-card-avatar"/>
+                  </a>
+                @else
+                  <img src="{{ $each->getProfileImageUrl(960) }}" @if ($eachSrcset = $each->imageVariantSrcset()) srcset="{{ $eachSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="{{ $each->nameInLanguage($displayLang) }}" class="gk-card-avatar"/>
+                @endif
+              @endif
+          @endif
+
+              <div class="flex flex-col gap-4">
+                {{-- Name + follow/manage button --}}
+                <div class="flex items-center justify-between gap-4">
+                  <div class="min-w-0">
+                    @if ($each->isClaimed())
+                      @if (!isset($talentUrl))
+                        @php
+                          $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
+                          $tQueryParams = [];
+                          if (request('category')) $tQueryParams['category'] = request('category');
+                          if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
+                          if ($rawDateParam) {
+                            $tDate = $rawDateParam;
+                            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $tDate)) {
+                              $tDateParts = explode('-', $tDate);
+                              $tQueryParams['month'] = (int)$tDateParts[1];
+                              $tQueryParams['year'] = (int)$tDateParts[0];
+                            }
+                          } else {
+                            if (request('month')) $tQueryParams['month'] = request('month');
+                            if (request('year')) $tQueryParams['year'] = request('year');
+                          }
+                          if (!empty($tQueryParams)) {
+                            $talentUrl .= '?' . http_build_query($tQueryParams);
+                          }
+                        @endphp
+                      @endif
+                      <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
+                        <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
+                          {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
+                          <svg class="inline-block w-5 h-5 {{ $role->isRtl() ? 'ms-1 scale-x-[-1]' : 'ms-1' }} align-text-bottom fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
+                          </svg>
+                        </span>
+                      </a>
+                    @elseif ($eachClaimUrl = $each->getClaimUrl())
+                      {{-- The act has a page of its own now, unclaimed but real, and this link is
+                           the only way anybody reaches one without an invitation in hand. Assigned
+                           in the condition so the value is computed once: getClaimUrl() reaches
+                           hasRealOwner(), and this runs for every act on every event page. --}}
+                      <a href="{{ $eachClaimUrl }}" rel="nofollow" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
+                        <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
+                          {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
+                        </span>
+                      </a>
+                    @else
+                      <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $otherRole->font_family ?? 'sans-serif') }}', sans-serif;" dir="{{ content_dir_for_language($each->nameInLanguage($displayLang), $displayLang) }}">
+                        {!! str_replace(' , ', '<br>', e($each->nameInLanguage($displayLang))) !!}
+                      </p>
+                    @endif
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    @if ($each->isClaimed() && (config('app.hosted') || config('app.is_testing')) && ! is_demo_mode())
+                      @if (auth()->user() && auth()->user()->isMember($each->subdomain))
+                        <a href="{{ app_url(route('role.view_admin', ['subdomain' => $each->subdomain, 'tab' => 'schedule'], false)) }}"
+                          class="inline-flex items-center justify-center">
+                          <button type="button" name="follow"
+                            style="background-color: var(--es-accent); color: var(--es-accent-text)"
+                            class="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold border-2 border-transparent shadow-sm gk-fill-btn">
+                            {{ __('messages.manage') }}
+                          </button>
+                        </a>
+                      @else
+                        <button type="button"
+                          data-follow-trigger
+                          data-follow-url="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
+                          data-subscribe-url="{{ route('role.audience.join', ['subdomain' => $each->subdomain]) }}"
+                          data-subscribe-label="{{ $each->customLabel('email_me_new_events') }}"
+                          data-account-note="{{ $each->willCreateAccountOnConfirm() ? '1' : '' }}"
+                          data-schedule-name="{{ $each->name }}"
+                          data-schedule-image="{{ $each->profile_image_url }}"
+                          data-accent-color="{{ $accentColor }}"
+                          data-contrast-color="{{ $contrastColor }}"
+                          style="background-color: var(--es-accent); color: var(--es-accent-text)"
+                          class="inline-flex items-center justify-center rounded-md px-4 py-2 gk-fill-btn text-xs font-semibold shadow-sm">
+                          {{ __('messages.follow') }}
+                        </button>
+                      @endif
+                    @endif
+
+                    {{-- A sibling @if, not the @elseif this used to be: chained, it could never fire
+                         alongside the Manage/Follow buttons. The gate now matches the endpoint it
+                         calls exactly - EventController::clearVideos authorises through the event
+                         policy (the event's owner, or an owner/admin of any schedule on it), which
+                         is wider than the event's creator alone, but it also only ever touches
+                         UNCLAIMED roles, so showing the button for a claimed one would flash
+                         "cleared" while doing nothing. A claimed act's own team still gets the
+                         per-video control below. Only worth offering for more than one video;
+                         otherwise the per-video remove says the same thing.  --}}
+                    @if (auth()->user() && auth()->user()->canEditEvent($event) && ! $each->isClaimed() && $each->youtube_links && count($each->decodeLinks('youtube_links')) > 1)
+                      <button type="button"
+                        class="clear-videos-btn inline-flex items-center rounded-md px-3 py-1.5 text-xs font-semibold text-red-600 bg-white dark:bg-gray-800 border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm"
+                        data-clear-url="{{ route('event.clear_videos', ['subdomain' => $role->subdomain, 'event_hash' => App\Utils\UrlUtils::encodeId($event->id), 'role_hash' => App\Utils\UrlUtils::encodeId($each->id)]) }}">
+                        {{ __('messages.clear_videos') }}
+                      </button>
+                    @endif
+                  </div>
+                </div>
+
+                {{-- Description with expand/collapse. demoteH1(): the event name is the page's one
+                     <h1>, so an act's own "# Heading" prints as an <h2>. --}}
+                @if ($each->description_html)
+                  @php $eachDir = content_dir($each, false, $each->description_html); @endphp
+                  {{-- Cut by LINES, by the browser, and only when it overflows. It used to be cut
+                       after five words, and the test for "is it long" was str_word_count(), which
+                       counts no words at all in Hebrew or Arabic: those were never shortened,
+                       however long they ran. --}}
+                  <div x-data="{ expanded: false, long: false }"
+                       x-init="$nextTick(() => { long = $refs.blurb.scrollHeight > $refs.blurb.clientHeight + 1 })"
+                       class="text-sm text-gray-700 dark:text-gray-300">
+                    <div x-ref="blurb" :class="{ 'line-clamp-3': !expanded }" class="custom-content line-clamp-3 {{ $eachDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $eachDir }}">
+                      {!! \App\Utils\UrlUtils::convertUrlsToLinks(\App\Utils\MarkdownUtils::demoteH1($each->description_html)) !!}
+                    </div>
+                    <button type="button" x-show="long && !expanded" x-cloak :aria-expanded="expanded" @click="expanded = true" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
+                      {{ __('messages.show_more') }}
+                    </button>
+                    <button type="button" x-show="long && expanded" x-cloak :aria-expanded="expanded" @click="expanded = false" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
+                      {{ __('messages.show_less') }}
+                    </button>
+                  </div>
+                @endif
+
+                {{-- YouTube videos --}}
+                @if ($each->youtube_links)
+                  @php
+                    $sidebarVideoLinks = $each->decodeLinks('youtube_links');
+                  @endphp
+                  @foreach ($sidebarVideoLinks as $sLink)
+                      @php $sLinkEmbedUrl = \App\Utils\UrlUtils::getYouTubeEmbed($sLink->url); @endphp
+                      @continue (! $sLinkEmbedUrl)
+                      <div class="rounded-lg overflow-hidden">
+                        <x-consent-embed :src="$sLinkEmbedUrl" :title="$each->nameInLanguage($displayLang).' - YouTube video'" frame-class="w-full" frame-style="aspect-ratio:16/9" :poster="\App\Utils\UrlUtils::getYouTubeThumbnail($sLink->url)" />
+                        @if ($canRemoveVideos)
+                          @include('partials.remove-video-button', [
+                            'schedule' => $role,
+                            'target' => $each,
+                            'videoUrl' => $sLink->url,
+                            'class' => 'mt-1 text-end',
+                          ])
+                        @endif
+                      </div>
+                  @endforeach
+                @endif
+              </div>
+            </div>
+        </div>
+        @php unset($talentUrl); @endphp
+        @endforeach
+        </div>{{-- /#gp-talent --}}
+
+        {{-- The rest of the bill: acts somebody typed in by name and nothing more. One card and a
+             list, not one card each - see the note where $bareTalent is built. Each name links to
+             its own claim page where it has one, which is how an act finds out a page exists for
+             them without an invitation in hand. --}}
+        @if ($bareTalent->isNotEmpty())
+        <div id="gp-talent-list" class="gk-o6 gk-card p-5">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            {{ __('messages.talent') }}
+          </h2>
+          <ul class="mt-2 flex flex-col gap-1">
+            @foreach ($bareTalent as $bare)
+            <li class="gk-bare-act">
+              @if ($bareClaimUrl = $bare->getClaimUrl())
+                <a href="{{ $bareClaimUrl }}" rel="nofollow" class="text-base text-gray-900 dark:text-gray-100 hover:underline">
+                  <bdi>{!! str_replace(' , ', '<br>', e($bare->nameInLanguage($displayLang))) !!}</bdi>
+                </a>
+              @else
+                <span class="text-base text-gray-900 dark:text-gray-100">
+                  <bdi>{!! str_replace(' , ', '<br>', e($bare->nameInLanguage($displayLang))) !!}</bdi>
+                </span>
+              @endif
+            </li>
+            @endforeach
+          </ul>
+        </div>
+        @endif
+
+        </section>
+        @endif
+
         {{-- The organizer's gallery, after the description when a flyer leads the page. --}}
         @if ($galleryImages->isNotEmpty() && ! $galleryInFlyerSlot)
-        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="gk-o4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <section id="gp-gallery" aria-labelledby="es-gallery-title" class="gk-o4 gk-sec gk-sec-rule {{ $role->isRtl() ? 'rtl' : '' }}">
           @include('partials.gallery-card', ['galleryImages' => $galleryImages, 'galleryVariant' => 'event', 'galleryName' => $eventName, 'galleryLabel' => $role->customLabel('gallery'), 'galleryPriority' => false, 'accentColor' => $accentColor])
         </section>
         @endif
 
         {{-- Agenda image --}}
         @if ($event->agenda_image_url)
-        <div id="gp-agenda-image" class="gk-o5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
+        <div id="gp-agenda-image" class="gk-o5 gk-poster">
           <img src="{{ $event->agenda_image_url }}"
             alt="{{ $eventName }} - {{ $role->customLabel('agenda') }}"
             class="w-full" loading="lazy" decoding="async"/>
@@ -1870,7 +1924,7 @@
 
         {{-- Event parts --}}
         @if ($event->parts->count() > 0)
-        <div id="gp-agenda" class="gk-o5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-agenda" class="gk-o5 gk-sec gk-sec-rule {{ $role->isRtl() ? 'rtl' : '' }}">
           @php
             $hasTimes = $event->parts->contains(fn($part) => !empty($part->start_time));
           @endphp
@@ -1978,19 +2032,19 @@
                   @if ($event->isFanContentEnabled())
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
                     @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
-                    <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
+                    <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                       {{ __('messages.add_photo') }}
                     </button>
                     @endif
                     @if ($event->isFanVideosEnabled())
-                    <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
+                    <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
                     @endif
                     @if ($event->isFanCommentsEnabled())
-                    <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
+                    <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -2009,7 +2063,7 @@
                         @endif
                         <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                         @include('partials.fan-content-guest-fields')
-                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded gk-fill-btn" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     @endif
@@ -2049,7 +2103,7 @@
                                @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
                         <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
                         @include('partials.fan-content-guest-fields')
-                        <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.upload_photo') }}</button>
+                        <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded gk-fill-btn" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.upload_photo') }}</button>
                       </form>
                     </div>
                     @endif
@@ -2063,7 +2117,7 @@
                         @endif
                         <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
                         @include('partials.fan-content-guest-fields')
-                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start gk-fill-btn" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     @endif
@@ -2172,19 +2226,19 @@
                   @if ($event->isFanContentEnabled())
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
                     @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
-                    <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
+                    <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
                       {{ __('messages.add_photo') }}
                     </button>
                     @endif
                     @if ($event->isFanVideosEnabled())
-                    <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
+                    <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                       {{ __('messages.add_video') }}
                     </button>
                     @endif
                     @if ($event->isFanCommentsEnabled())
-                    <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
+                    <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
                       {{ __('messages.add_comment') }}
                     </button>
@@ -2203,7 +2257,7 @@
                         @endif
                         <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                         @include('partials.fan-content-guest-fields')
-                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded gk-fill-btn" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     @endif
@@ -2243,7 +2297,7 @@
                                @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
                         <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
                         @include('partials.fan-content-guest-fields')
-                        <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.upload_photo') }}</button>
+                        <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded gk-fill-btn" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.upload_photo') }}</button>
                       </form>
                     </div>
                     @endif
@@ -2257,7 +2311,7 @@
                         @endif
                         <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
                         @include('partials.fan-content-guest-fields')
-                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
+                        <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start gk-fill-btn" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
                     @endif
@@ -2290,7 +2344,7 @@
           }
         @endphp
         @if (!is_demo_role($role) && ! $embedEvent && ($eventLevelVideos->count() > 0 || $eventLevelComments->count() > 0 || $eventLevelPhotos->count() > 0 || $myEventLevelPendingVideos->count() > 0 || $myEventLevelPendingComments->count() > 0 || $myEventLevelPendingPhotos->count() > 0 || ($role->isPro() && $event->polls->count() > 0) || $allPhotoData->count() > 0 || ($event->parts->count() == 0 && $event->isFanContentEnabled())))
-        <div id="gp-fan-content" class="gk-o8 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-fan-content" class="gk-o8 gk-sec gk-sec-rule {{ $role->isRtl() ? 'rtl' : '' }}">
 
           {{-- Polls --}}
           @if ($role->isPro() && $event->polls->count() > 0)
@@ -2522,19 +2576,19 @@
           @if ($event->parts->count() == 0 && $event->isFanContentEnabled())
           <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
             @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
-            <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
+            <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
               {{ __('messages.add_photo') }}
             </button>
             @endif
             @if ($event->isFanVideosEnabled())
-            <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
+            <button @click="showVideo = !showVideo; showComment = false; showPhoto = false; showVideo && setTimeout(() => $refs.videoInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
               {{ __('messages.add_video') }}
             </button>
             @endif
             @if ($event->isFanCommentsEnabled())
-            <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: var(--es-accent);" data-accent="var(--es-accent)" data-contrast="var(--es-accent-text)">
+            <button @click="showComment = !showComment; showVideo = false; showPhoto = false; showComment && setTimeout(() => $refs.commentInput.focus(), 50)" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
               {{ __('messages.add_comment') }}
             </button>
@@ -2552,7 +2606,7 @@
                 @endif
                 <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
                 @include('partials.fan-content-guest-fields')
-                <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
+                <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded gk-fill-btn" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
               </form>
             </div>
             @endif
@@ -2591,7 +2645,7 @@
                        @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
                 <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
                 @include('partials.fan-content-guest-fields')
-                <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.upload_photo') }}</button>
+                <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded gk-fill-btn" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.upload_photo') }}</button>
               </form>
             </div>
             @endif
@@ -2604,7 +2658,7 @@
                 @endif
                 <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
                 @include('partials.fan-content-guest-fields')
-                <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
+                <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start gk-fill-btn" style="background-color: var(--es-accent); color: var(--es-accent-text);">{{ __('messages.submit') }}</button>
               </form>
             </div>
             @endif
@@ -2615,7 +2669,7 @@
 
         {{-- Public feedback / reviews --}}
         @if ($publicFeedbacks->count() > 0)
-        <div id="gp-reviews" class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="gp-reviews" class="gk-sec gk-sec-rule {{ $role->isRtl() ? 'rtl' : '' }}">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.feedback_reviews') }}</h3>
 
           {{-- Average rating summary --}}
@@ -2684,16 +2738,21 @@
              written assumption that the container was still open. It was not, so the panel
              rendered straight onto the schedule's background: on a light background image in
              dark mode, near-white heading and body text on a photo, which is unreadable. --}}
-        @unless ($embedEvent)
-        @include('partials.subscribe-panel')
-        @endunless
-
         {{-- End of content section --}}
 
       </div>
       {{-- End RIGHT COLUMN --}}
 
     </div>
+
+    {{-- Under both columns, across the sheet: the mailing list as a band of its own, then the
+         schedule's other events, as cards side by side under each day. --}}
+    @unless ($embedEvent)
+    <div class="gk-event-after">
+      @include('partials.subscribe-panel', ['panelClass' => 'gk-card gk-band'])
+      @include('event.partials.more-events')
+    </div>
+    @endunless
 
     {{-- The foot, under both columns: the free tier's "create your own". The wrapper is drawn
          only with the card: empty, it was a blank 2.5rem at the end of every paid schedule's
@@ -2731,7 +2790,7 @@
   {{-- Sticky mobile CTA. Not in a frame, whose one row of buttons is drawn at every width. --}}
   @unless ($embedEvent)
   <div id="gp-mobile-cta" x-data="{ shareState: 'idle' }"
-       class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
+       class="gk-phonebar sm:hidden fixed bottom-0 inset-x-0 z-40 border-t px-5 py-3 shadow-lg" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
       {{-- Mobile share button --}}
       @if (!$event->is_draft)
@@ -2748,7 +2807,7 @@
                   setTimeout(() => shareState = 'idle', 2000);
                 }
               "
-              class="flex-shrink-0 w-[48px] h-[48px] inline-flex items-center justify-center rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              class="flex-shrink-0 w-[48px] h-[48px] inline-flex items-center justify-center rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300">
         <template x-if="shareState !== 'copied'">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
         </template>
@@ -2772,7 +2831,7 @@
       @elseif ($event->canAcceptRsvp($date))
           <button type="button"
                 @click="$dispatch('show-event-form')"
-                class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm"
                 style="background-color: var(--es-accent); color: var(--es-accent-text);">
             @if ($event->isRsvpFull($date))
               {{ __('messages.join_waitlist') }}
@@ -2787,7 +2846,7 @@
           @if ($saleShowsRows)
           <button type="button" data-sale-rows
                 @click="$dispatch('show-event-form')"
-                class="flex-shrink-0 inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm transition-all duration-200 hover:shadow-md">
+                class="flex-shrink-0 inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm">
             {{ $role->customLabel('tickets') }}
           </button>
           @elseif ($phoneCalendar)
@@ -2801,7 +2860,7 @@
         @elseif ($event->canSellTickets($date))
           <button type="button"
                 @click="$dispatch('show-event-form')"
-                class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm"
                 style="background-color: var(--es-accent); color: var(--es-accent-text);">
             @if ($saleState === 'sold_out')
               {{ __('messages.join_waitlist') }}
@@ -2819,7 +2878,7 @@
             @endif
           >
             <button type="button"
-                  class="w-full justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg bg-green-600 hover:bg-green-700 text-white">
+                  class="w-full justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm bg-green-600 text-white">
               {{ __('messages.view_event') }}
             </button>
           </a>
@@ -2847,7 +2906,7 @@
       @elseif ($phoneCalendar)
         <button type="button"
             id="mobile-calendar-cta"
-            class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
+            class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm"
             style="background-color: var(--es-accent); color: var(--es-accent-text);">
           {{ $role->customLabel('add_to_calendar') }}
         </button>
@@ -3048,20 +3107,6 @@
         form.submit();
       }
     }
-
-    // Accent hover buttons (onmouseover/onmouseout replacement)
-    document.querySelectorAll('.accent-hover-btn').forEach(function(btn) {
-      var accent = btn.getAttribute('data-accent');
-      var contrast = btn.getAttribute('data-contrast');
-      btn.addEventListener('mouseover', function() {
-        this.style.backgroundColor = accent;
-        this.style.color = contrast;
-      });
-      btn.addEventListener('mouseout', function() {
-        this.style.backgroundColor = 'transparent';
-        this.style.color = '';
-      });
-    });
 
     // Clear videos buttons
     document.querySelectorAll('.clear-videos-btn').forEach(function(btn) {
