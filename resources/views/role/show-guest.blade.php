@@ -424,7 +424,7 @@ html[data-es-view="list"] #gp-calendar {
         // apps lead IAW's gallery).
         $leadRows = (request()->embed || request()->graphic || $leadNarrowed || ! $role->guestPageSetting->show_next_event)
             ? []
-            : app(\App\Repos\EventRepo::class)->leadRowsOf($upcoming ?? collect(), $leadCategory);
+            : app(\App\Repos\EventRepo::class)->leadRowsOf($upcoming ?? collect(), $leadCategory, 3, $role->id);
       @endphp
       @if ($leadRows)
         <div class="mt-2 md:mt-6 mb-4 px-0 md:px-6 lg:px-16 mx-auto transition-[max-width] duration-300 ease-in-out" data-view-width data-lead-wrap data-view="{{ $role->activeEventLayout() }}"

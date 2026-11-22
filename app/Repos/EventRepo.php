@@ -3318,19 +3318,28 @@ class EventRepo
 
     /**
      * The next few events the month leads with (#gp-next-event): leadOf()'s first, then the ones
-     * after it, each event once (a weekly class is not three of the three), soonest first. The
+     * after it, each event once (a weekly class is not three of the three) and at most one for
+     * each venue and performer, soonest first. The
      * same rules as leadOf(): a series whose occurrence today has begun is counted by its next
      * one, and a one-off that has begun only when nothing else is to come.
      *
      * @param  Collection<int, array{event: Event, date: string}>  $upcoming
      * @return array<int, array{event: Event, date: string}>
      */
-    public function leadRowsOf(Collection $upcoming, string $category = '', int $count = 3): array
+    public function leadRowsOf(Collection $upcoming, string $category = '', int $count = 3, ?int $ownRoleId = null): array
     {
         $first = $this->leadOf($upcoming, $category);
         if (! $first) {
             return [];
         }
+
+        // At most one event for each venue and each performer, so three nights at one bar are
+        // not the three cards; the schedule's own page is no venue or act of the three (on a
+        // venue's page every event is there). From the roles the list already loaded.
+        $keysOf = fn (Event $event) => $event->relationLoaded('roles')
+            ? $event->roles->filter(fn ($role) => in_array($role->type, ['venue', 'talent'], true) && $role->id !== $ownRoleId)->pluck('id')->all()
+            : [];
+        $used = array_fill_keys($keysOf($first['event']), true);
 
         $picked = [$first];
         $seen = [$first['event']->id => true];
@@ -3358,7 +3367,15 @@ class EventRepo
         }
 
         usort($ahead, fn (array $a, array $b) => $a['at'] <=> $b['at']);
-        foreach (array_slice($ahead, 0, max(0, $count - 1)) as $row) {
+        foreach ($ahead as $row) {
+            if (count($picked) >= $count) {
+                break;
+            }
+            $keys = array_fill_keys($keysOf($row['event']), true);
+            if (array_intersect_key($keys, $used)) {
+                continue;
+            }
+            $used += $keys;
             $picked[] = ['event' => $row['event'], 'date' => $row['date']];
         }
 

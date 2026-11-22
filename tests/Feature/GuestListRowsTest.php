@@ -131,6 +131,34 @@ class GuestListRowsTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/<link rel="preload" as="image" href="[^"]*(lantern|second|third)\.jpg"/', $html);
     }
 
+    /** The next three lead the month, each event once and at most one for a venue or a performer. */
+    public function test_the_month_leads_with_three_events_one_per_venue(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $bar = $this->createRole($owner, 'venue', ['name' => 'The Bar']);
+        $hall = $this->createRole($owner, 'venue', ['name' => 'The Hall']);
+        $at = fn (int $days) => now('UTC')->addDays($days)->setTime(20, 0)->format('Y-m-d H:i:s');
+        $make = function (string $name, int $days, $venue) use ($curator, $at) {
+            $event = $this->createEvent($venue, ['name' => $name, 'creator_role_id' => $venue->id, 'starts_at' => $at($days)]);
+            $event->roles()->syncWithoutDetaching([$curator->id => ['is_accepted' => true]]);
+
+            return $event;
+        };
+        $first = $make('Bar One', 1, $bar);
+        $make('Bar Two', 2, $bar);
+        $make('Bar Three', 3, $bar);
+        $hallNight = $make('Hall Night', 4, $hall);
+
+        $repo = app(EventRepo::class);
+        $rows = $repo->leadRowsOf($repo->upcomingForGuest($curator->fresh(), null, 12), '', 3, $curator->id);
+        $this->assertSame([$first->id, $hallNight->id], array_map(fn ($row) => $row['event']->id, $rows), 'one from the bar, then the hall: never three nights at one bar');
+
+        // On the bar's own page the bar is no venue of the three: its next three are the three.
+        $rows = $repo->leadRowsOf($repo->upcomingForGuest($bar->fresh(), null, 12), '', 3, $bar->id);
+        $this->assertCount(3, $rows);
+    }
+
     public function test_the_wide_list_is_the_rows_and_a_row_says_what_tickets_cost(): void
     {
         $html = $this->get('/'.$this->role->subdomain.'?layout=list')->assertOk()->getContent();
