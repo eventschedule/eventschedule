@@ -165,7 +165,7 @@ class GuestListRowsTest extends TestCase
         $event = $this->event(['name' => 'Coming Up']);
         $this->assertSame(1, preg_match('/data-lead-wrap data-view="list"/', $this->get('/'.$this->role->subdomain.'?layout=list')->assertOk()->getContent()));
         $this->assertSame(1, preg_match('/data-lead-wrap data-view="calendar"/', $this->get('/'.$this->role->subdomain.'?layout=calendar')->assertOk()->getContent()));
-        $this->assertSame(1, preg_match('/<img class="gk-lead-img"[^>]* loading="lazy"/', file_get_contents(resource_path('views/role/show-guest.blade.php'))));
+        $this->assertSame(1, preg_match('/<img class="gk-lead-img"[^>]* loading="lazy"/', file_get_contents(resource_path('views/role/partials/lead-card.blade.php'))));
     }
 
     /**

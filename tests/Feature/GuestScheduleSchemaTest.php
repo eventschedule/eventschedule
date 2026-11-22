@@ -164,11 +164,11 @@ class GuestScheduleSchemaTest extends TestCase
         [$node] = $this->schedulePage('/'.$venue->subdomain, 'EventVenue');
 
         // The list of thirteen is read without its tickets, as it always was. The ONE query is
-        // the next-event card's (role/show-guest), which says what its one event costs: it
-        // asks for that event's tickets and no other's, however long the list is.
+        // the next-event cards' (role/show-guest), which asks for the tickets of the three events
+        // it shows and no other's, however long the list is.
         $this->assertCount(1, $ticketQueries, 'the upcoming list must not load tickets: '.implode(' | ', $ticketQueries));
         $this->assertSame(1, preg_match('/event_id[`"]? in \(([^)]*)\)/i', $ticketQueries[0], $ids), $ticketQueries[0]);
-        $this->assertStringNotContainsString(',', $ids[1], 'for one event, never the list');
+        $this->assertLessThanOrEqual(3, count(explode(',', $ids[1])), 'for the cards\' events, never the list');
         $this->assertArrayNotHasKey('performerIn', $node);
         $this->assertCount(Role::SCHEMA_UPCOMING_LIMIT, $node['event']);
 

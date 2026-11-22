@@ -77,7 +77,7 @@ return array_replace(require __DIR__.'/../pt/messages.php', function_exists('ope
     'accept_requests_help' => 'Permita que outros enviem eventos para a sua agenda.',
     'accept_requests_help_talent' => 'Permita que outros solicitem reservá-lo.',
     'direct_registration' => 'Link Direto para Registo',
-    'show_next_event_help' => 'Um cartão acima do calendário que mostra o seu próximo evento. A vista em lista nunca o mostra, porque a lista já começa pelo próximo evento.',
+    'show_next_event_help' => 'Cartões acima do calendário para os seus próximos três eventos, o primeiro em destaque. A vista em lista nunca os mostra, porque a lista já começa pelo próximo evento.',
     'draft_events_default' => 'Novos eventos como rascunho por predefinição',
     'draft_events_default_help' => 'Quando ativado, novos eventos serão guardados como rascunhos. Pode publicá-los quando estiverem prontos.',
     'default_category' => 'Categoria predefinida',

@@ -142,7 +142,7 @@ return [
     'hide_past_events' => 'Hide Past Events',
     'hide_past_events_help' => 'When enabled, past events will not be shown on the public schedule.',
     'show_next_event' => 'Show Next Event',
-    'show_next_event_help' => 'A card above the calendar that names your next event. The list view never shows it, because the list opens on the next event itself.',
+    'show_next_event_help' => 'Cards above the calendar for your next three events, the first one large. The list view never shows them, because the list opens on the next event itself.',
     'hide_videos' => 'Hide Performers\' Videos',
     'hide_videos_help' => 'When enabled, the strip of videos from your upcoming events\' performers will not be shown on the public schedule.',
     'show_accessibility_widget' => 'Show Accessibility Widget',

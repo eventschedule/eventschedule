@@ -677,4 +677,32 @@
          name and arrows instead of squeezing between them. --}}
     .gk-stage.gk-sched .calendar-panel-border { padding-inline: 0; }
     .gk-stage .gk-pills-head { order: 10; flex-basis: 100%; }
+    {{-- The events the month leads with (#gp-next-event, role/partials/lead-card), laid out as
+         the first three apps lead IAW's gallery: the next event large, the two after it beside it,
+         stacked; under it on a phone. The block runs the page's column, as the month does. --}}
+    .gk-stage.gk-sched [data-lead-wrap] { padding-inline: 0; }
+    .gk-leads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .gk-leads > .gk-lead { max-width: none; margin: 0; }
+    .gk-leads > .gk-lead:first-child { grid-column: 1 / -1; }
+    .gk-leads-2 > .gk-lead:nth-child(2) { grid-column: 1 / -1; }
+    .gk-leads .gk-lead-compact { grid-template-columns: minmax(0, 1fr); align-content: start; }
+    .gk-leads .gk-lead-compact .gk-lead-img { height: auto; aspect-ratio: 16 / 9; }
+    .gk-leads .gk-lead-compact .gk-lead-body { gap: .25rem; padding: .875rem 1rem 1rem; }
+    .gk-leads .gk-lead-compact .gk-lead-title { font-size: 1.0625rem; }
+    .gk-leads .gk-lead-compact .gk-lead-where { font-size: .875rem; }
+    .gk-leads .gk-lead-compact .gk-lead-when { font-size: .8125rem; }
+    @media (min-width: 40rem) {
+        .gk-leads .gk-lead-compact { grid-template-columns: minmax(0, 1fr); }
+        .gk-leads .gk-lead-compact .gk-lead-img { height: auto; aspect-ratio: 16 / 9; }
+        .gk-leads-2 > .gk-lead:nth-child(2) { grid-column: auto; }
+        .gk-leads-2 { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+        .gk-leads-2 > .gk-lead:first-child { grid-column: auto; }
+    }
+    @media (min-width: 64rem) {
+        .gk-leads-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto auto; }
+        .gk-leads-3 > .gk-lead:first-child { grid-column: 1 / span 2; grid-row: 1 / span 2; }
+        .gk-leads-3 > .gk-lead-compact { grid-column: 3; }
+        .gk-leads-3 > .gk-lead:first-child .gk-lead-img { height: 100%; aspect-ratio: auto; }
+        .gk-leads > .gk-lead:first-child .gk-lead-title { font-size: 1.875rem; }
+    }
 </style>

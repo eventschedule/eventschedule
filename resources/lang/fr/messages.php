@@ -143,7 +143,7 @@ return [
     'hide_past_events' => 'Masquer les événements passés',
     'hide_past_events_help' => 'Lorsqu\'activé, les événements passés ne seront pas affichés sur le calendrier public.',
     'show_next_event' => 'Afficher le prochain événement',
-    'show_next_event_help' => 'Une carte au-dessus du calendrier qui présente votre prochain événement. La vue en liste ne l\'affiche jamais, car la liste commence elle-même par le prochain événement.',
+    'show_next_event_help' => 'Des cartes au-dessus du calendrier pour vos trois prochains événements, la première en grand. La vue en liste ne les affiche jamais, car la liste commence elle-même par le prochain événement.',
     'hide_videos' => 'Masquer les vidéos des artistes',
     'hide_videos_help' => 'Lorsqu\'activé, le bandeau de vidéos des artistes de vos prochains événements ne sera pas affiché sur le calendrier public.',
     'show_accessibility_widget' => 'Afficher le widget d\'accessibilité',

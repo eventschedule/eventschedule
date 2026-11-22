@@ -930,7 +930,7 @@ return [
     'hide_past_events' => 'Vergangene Veranstaltungen ausblenden',
     'hide_past_events_help' => 'Wenn aktiviert, werden vergangene Veranstaltungen nicht im öffentlichen Kalender angezeigt.',
     'show_next_event' => 'Nächste Veranstaltung anzeigen',
-    'show_next_event_help' => 'Eine Karte über dem Kalender, die Ihre nächste Veranstaltung nennt. In der Listenansicht erscheint sie nie, weil die Liste selbst mit der nächsten Veranstaltung beginnt.',
+    'show_next_event_help' => 'Karten über dem Kalender für Ihre nächsten drei Veranstaltungen, die erste groß. In der Listenansicht erscheinen sie nie, weil die Liste selbst mit der nächsten Veranstaltung beginnt.',
     'hide_videos' => 'Videos der Künstler ausblenden',
     'hide_videos_help' => 'Wenn aktiviert, wird die Leiste mit Videos der Künstler Ihrer kommenden Veranstaltungen nicht im öffentlichen Kalender angezeigt.',
     'show_accessibility_widget' => 'Barrierefreiheits-Widget anzeigen',

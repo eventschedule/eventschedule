@@ -142,7 +142,7 @@ return [
     'hide_past_events' => 'Nascondi Eventi Passati',
     'hide_past_events_help' => 'Quando abilitato, gli eventi passati non verranno mostrati nel calendario pubblico.',
     'show_next_event' => 'Mostra Prossimo Evento',
-    'show_next_event_help' => 'Una scheda sopra il calendario che mostra il tuo prossimo evento. La vista elenco non la mostra mai, perché l\'elenco si apre già sul prossimo evento.',
+    'show_next_event_help' => 'Schede sopra il calendario per i tuoi prossimi tre eventi, la prima in grande. La vista elenco non le mostra mai, perché l’elenco si apre già sul prossimo evento.',
     'hide_videos' => 'Nascondi Video degli Artisti',
     'hide_videos_help' => 'Quando abilitato, la striscia di video degli artisti dei tuoi prossimi eventi non verrà mostrata nel calendario pubblico.',
     'show_accessibility_widget' => 'Mostra Widget di Accessibilità',

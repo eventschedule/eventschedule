@@ -142,7 +142,7 @@ return [
     'hide_past_events' => 'Verberg Afgelopen Evenementen',
     'hide_past_events_help' => 'Wanneer ingeschakeld, worden afgelopen evenementen niet weergegeven op de openbare agenda.',
     'show_next_event' => 'Toon Volgend Evenement',
-    'show_next_event_help' => 'Een kaart boven de agenda die je volgende evenement toont. De lijstweergave toont deze nooit, omdat de lijst zelf met het volgende evenement begint.',
+    'show_next_event_help' => 'Kaarten boven de agenda voor je volgende drie evenementen, de eerste groot. De lijstweergave toont ze nooit, omdat de lijst zelf met het volgende evenement begint.',
     'hide_videos' => 'Video\'s van artiesten verbergen',
     'hide_videos_help' => 'Wanneer ingeschakeld, wordt de strook met video\'s van de artiesten van uw komende evenementen niet weergegeven op de openbare agenda.',
     'show_accessibility_widget' => 'Toegankelijkheidswidget weergeven',

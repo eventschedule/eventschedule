@@ -143,7 +143,7 @@ return [
     'hide_past_events' => 'Ascunde Evenimentele Trecute',
     'hide_past_events_help' => 'Când este activat, evenimentele trecute nu vor fi afișate în calendarul public.',
     'show_next_event' => 'Afișează Evenimentul Următor',
-    'show_next_event_help' => 'Un card deasupra calendarului care prezintă următorul tău eveniment. Vizualizarea listă nu îl afișează niciodată, deoarece lista începe chiar cu următorul eveniment.',
+    'show_next_event_help' => 'Carduri deasupra calendarului pentru următoarele tale trei evenimente, primul mare. Vizualizarea listă nu le afișează niciodată, deoarece lista începe chiar cu următorul eveniment.',
     'hide_videos' => 'Ascunde Videoclipurile Artiștilor',
     'hide_videos_help' => 'Când este activat, banda de videoclipuri cu artiștii evenimentelor tale viitoare nu va fi afișată în calendarul public.',
     'show_accessibility_widget' => 'Afișează Widget-ul de Accesibilitate',

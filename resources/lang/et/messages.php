@@ -143,7 +143,7 @@ return [
     'hide_past_events' => 'Peida Möödunud Sündmused',
     'hide_past_events_help' => 'Kui see on lubatud, ei kuvata möödunud sündmusi avalikus kalendris.',
     'show_next_event' => 'Näita Järgmist Sündmust',
-    'show_next_event_help' => 'Kaart kalendri kohal, mis näitab teie järgmist sündmust. Loendivaates seda ei kuvata, sest loend algab ise järgmise sündmusega.',
+    'show_next_event_help' => 'Kaardid kalendri kohal teie järgmise kolme sündmusega, esimene suurelt. Loendivaates neid ei kuvata, sest loend algab ise järgmise sündmusega.',
     'hide_videos' => 'Peida Esinejate Videod',
     'hide_videos_help' => 'Kui see on lubatud, ei kuvata avalikus kalendris teie eelseisvate sündmuste esinejate videoriba.',
     'show_accessibility_widget' => 'Näita juurdepääsetavuse vidinat',
