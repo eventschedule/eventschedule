@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Jobs\SendQueuedEmail;
 use App\Mail\FederationAddressConfirmed;
+use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
 use App\Utils\UrlUtils;
 use Illuminate\Support\Facades\Cache;
@@ -232,6 +233,8 @@ class FederationAddressService
             'flagged_at' => null,
         ])->syncOriginal();
 
+        $this->moveListings($instance, (string) $previous, (string) $reported);
+
         AuditService::log(
             AuditService::ADMIN_FEDERATION_ACCEPT_ADDRESS,
             $userId,
@@ -247,6 +250,74 @@ class FederationAddressService
         $this->tellOperator($instance);
 
         return true;
+    }
+
+    /**
+     * Point the install's listings at its new address, at once. They were sent with the old one,
+     * and the install sends them again only on its next push (it may check in once a day): until
+     * then a press on /browse or /search led to an address that no longer answers. A listing at
+     * the old host, or at one of its subdomains (a hosted-mode install's schedules), moves to the
+     * same place on the new one: https://djwebster.eventschedule.co.za/dj-webster/x becomes
+     * https://djwebster.primestage.co.za/dj-webster/x. A path the old address had is swapped for
+     * the new one's. Anything elsewhere (a schedule's own custom domain) is left as it is.
+     */
+    public function moveListings(FederatedInstance $instance, string $from, string $to): int
+    {
+        $old = parse_url(rtrim($from, '/'));
+        $new = parse_url(rtrim($to, '/'));
+        if (empty($old['host']) || empty($new['host'])) {
+            return 0;
+        }
+        $oldHost = strtolower($old['host']);
+        $newHost = strtolower($new['host']);
+        $oldPath = rtrim($old['path'] ?? '', '/');
+        $newPath = rtrim($new['path'] ?? '', '/');
+        $newScheme = $new['scheme'] ?? 'https';
+        $newPort = isset($new['port']) ? ':'.$new['port'] : '';
+
+        $move = function (?string $url) use ($oldHost, $newHost, $oldPath, $newPath, $newScheme, $newPort): ?string {
+            $parts = $url ? parse_url($url) : false;
+            if (! $parts || empty($parts['host'])) {
+                return null;
+            }
+            $host = strtolower($parts['host']);
+            if ($host === $oldHost) {
+                $host = $newHost;
+            } elseif (str_ends_with($host, '.'.$oldHost)) {
+                $host = substr($host, 0, -strlen($oldHost)).$newHost;
+            } else {
+                return null;
+            }
+            $path = $parts['path'] ?? '';
+            if ($oldPath !== '' && ($path === $oldPath || str_starts_with($path, $oldPath.'/'))) {
+                $path = $newPath.substr($path, strlen($oldPath));
+            }
+
+            return $newScheme.'://'.$host.$newPort.$path
+                .(isset($parts['query']) ? '?'.$parts['query'] : '')
+                .(isset($parts['fragment']) ? '#'.$parts['fragment'] : '');
+        };
+
+        $moved = 0;
+        FederatedEvent::where('federated_instance_id', $instance->id)
+            ->select(['id', 'url', 'schedule_url', 'image_url'])
+            ->chunkById(500, function ($listings) use ($move, &$moved) {
+                foreach ($listings as $listing) {
+                    $changes = [];
+                    foreach (['url', 'schedule_url', 'image_url'] as $column) {
+                        $value = $move($listing->{$column});
+                        if ($value !== null && $value !== $listing->{$column}) {
+                            $changes[$column] = $value;
+                        }
+                    }
+                    if ($changes) {
+                        FederatedEvent::whereKey($listing->id)->update($changes);
+                        $moved++;
+                    }
+                }
+            });
+
+        return $moved;
     }
 
     /**

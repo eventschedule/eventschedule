@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Mail\FederationAddressConfirmed;
 use App\Models\Event;
+use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
 use App\Models\Setting;
 use App\Models\User;
@@ -244,6 +245,45 @@ class FederationAddressMoveTest extends TestCase
             'status' => FederatedInstance::STATUS_APPROVED,
             'approved_at' => now()->subMonth(),
         ], $attributes));
+    }
+
+    /**
+     * Accepting a move points the install's listings at the new address at once: the install
+     * sends them again only on its next push, and until then a press led to an address that no
+     * longer answered. A hosted-mode install's schedules are subdomains, and keep theirs.
+     */
+    public function test_accepting_an_address_moves_the_listings_to_it(): void
+    {
+        Mail::fake();
+        $instance = $this->claimingInstance(['site_url' => 'https://eventschedule.co.za', 'reported_site_url' => 'https://primestage.co.za']);
+        $make = fn (array $attrs) => FederatedEvent::create($attrs + [
+            'federated_instance_id' => $instance->id, 'external_id' => Str::random(8), 'name' => 'Pens Down', 'next_occurrence_at' => now()->addWeek(),
+        ]);
+        $sub = $make(['url' => 'https://djwebster.eventschedule.co.za/dj-webster/vJQt8Z', 'schedule_url' => 'https://djwebster.eventschedule.co.za', 'image_url' => 'https://eventschedule.co.za/storage/f.jpg']);
+        $own = $make(['url' => 'https://the-own-domain.example/x', 'schedule_url' => 'https://the-own-domain.example']);
+        $lookalike = $make(['url' => 'https://noteventschedule.co.za/x']);
+
+        $this->assertTrue(app(FederationAddressService::class)->adopt($instance, null));
+
+        $sub->refresh();
+        $this->assertSame('https://djwebster.primestage.co.za/dj-webster/vJQt8Z', $sub->url);
+        $this->assertSame('https://djwebster.primestage.co.za', $sub->schedule_url);
+        $this->assertSame('https://primestage.co.za/storage/f.jpg', $sub->image_url);
+        $this->assertSame('https://the-own-domain.example/x', $own->fresh()->url, 'a schedule\'s own domain is not the install\'s');
+        $this->assertSame('https://noteventschedule.co.za/x', $lookalike->fresh()->url, 'only the host itself and its subdomains');
+    }
+
+    /** An install served under a path moves its listings' path with it. */
+    public function test_a_moved_path_moves_with_the_listings(): void
+    {
+        $instance = $this->claimingInstance(['site_url' => 'https://old.test/events', 'reported_site_url' => 'https://new.test/cal']);
+        $listing = FederatedEvent::create([
+            'federated_instance_id' => $instance->id, 'external_id' => 'a1', 'name' => 'X', 'next_occurrence_at' => now()->addWeek(),
+            'url' => 'https://old.test/events/band/abc?date=2026-12-01',
+        ]);
+
+        $this->assertSame(1, app(FederationAddressService::class)->moveListings($instance, 'https://old.test/events', 'https://new.test/cal'));
+        $this->assertSame('https://new.test/cal/band/abc?date=2026-12-01', $listing->fresh()->url);
     }
 
     public function test_accepting_an_address_tells_the_operator(): void
