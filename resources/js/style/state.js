@@ -431,6 +431,27 @@ function shiftUntil(colour, backgrounds, darker, ratio) {
     return null;
 }
 
+// A fill and its label, held to 4.5:1 as App\Utils\GuestTheme::labelledFill() holds them: where
+// white is the pick and falls short, the fill is deepened along its own hue until white reads,
+// unless that would sink it into the panel given (a dark fill lifted to stand out), which then
+// keeps its lift and takes the black label.
+function labelledFill(fill, panel) {
+    const label = contrastColor(fill);
+    if (contrastRatio(fill, label) >= 4.5) {
+        return [fill, label];
+    }
+    if (label === '#ffffff') {
+        const deeper = shiftUntil(fill, ['#ffffff'], true, 4.5);
+        if (deeper && (!panel || contrastRatio(deeper, panel) >= 1.6)) {
+            return [deeper, '#ffffff'];
+        }
+
+        return [fill, '#000000'];
+    }
+
+    return [fill, '#ffffff'];
+}
+
 export function theme(accent) {
     const base = normalizeHex(accent) || DEFAULT_ACCENT;
     const [hue, saturation, lightness] = toHsl(base);
@@ -452,15 +473,20 @@ export function theme(accent) {
         fillDark = shiftUntil(base, DARK_PANELS, false, 3) || PAPER;
     }
 
+    let onFill;
+    let onFillDark;
+    [fill, onFill] = labelledFill(fill, null);
+    [fillDark, onFillDark] = labelledFill(fillDark, DARK_PANELS[0]);
+
     const text = neutral ? fromHsl(0, 0, lightness) : base;
     const tint = mix(base, LIGHT_PANELS[0], 0.12);
     const tintDark = mix(base, DARK_PANELS[0], 0.24);
 
     return {
         fill,
-        onFill: contrastColor(fill),
+        onFill,
         fillDark,
-        onFillDark: contrastColor(fillDark),
+        onFillDark,
         readable: shiftUntil(text, LIGHT_PANELS.concat([tint]), true, 4.5) || INK,
         readableDark: shiftUntil(text, DARK_PANELS.concat([tintDark]), false, 4.5) || PAPER,
         glow: neutral ? '#94a3b8' : fromHsl(hue, saturation, Math.max(lightness, 0.55)),
