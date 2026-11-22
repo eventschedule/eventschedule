@@ -628,29 +628,26 @@
          stage's raised ground, the privacy link marked by a green dot, the cookie choice, and the
          credit, where it is owed, as a filled light-blue pill with the ES mark and an arrow. The
          links share one hover: the words darken and underline, never the marks. --}}
-    .es-foot { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .375rem 1.75rem; max-width: 100%; margin: 0; padding: .375rem .375rem .375rem 1.25rem; border: 1px solid var(--gk-line); border-radius: 999px; background: var(--gk-stage-raised); color: var(--gk-ink-2); font-size: .9375rem; line-height: 1.3; }
-    [dir="rtl"] .es-foot { padding: .375rem 1.25rem .375rem .375rem; }
-    .es-foot:not(:has(.es-foot-credit)) { padding-inline-end: 1.25rem; padding-block: .625rem; }
-    .es-foot-link { display: inline-flex; align-items: center; gap: .5rem; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: none; transition: color var(--gk-swap, 120ms); }
-    .es-foot-link:hover { color: var(--gk-ink); }
-    .es-foot-link:hover .es-foot-word { text-decoration: underline; text-underline-offset: 3px; }
-    .es-foot-link:focus-visible, .es-foot-credit:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 3px; border-radius: 999px; }
-    .es-foot-dot { flex: none; width: .5rem; height: .5rem; border-radius: 999px; background: #22c55e; }
-    .es-foot-sep { width: 1px; height: 1.5rem; background: var(--gk-line); }
-    .es-foot-credit { display: inline-flex; align-items: center; gap: .625rem; padding: .375rem 1.125rem .375rem .375rem; border-radius: 999px; background: #38bdf8; color: #0b1220; font-weight: 650; text-decoration: none; transition: filter var(--gk-swap, 120ms); }
-    [dir="rtl"] .es-foot-credit { padding: .375rem .375rem .375rem 1.125rem; }
-    .es-foot-credit:hover { filter: brightness(1.08); }
-    .es-foot-es { display: inline-grid; flex: none; place-items: center; width: 2rem; height: 2rem; border-radius: 999px; background: #0b1220; color: #7dd3fc; font-size: .6875rem; font-weight: 800; letter-spacing: .02em; }
-    .es-foot-arrow { width: 1.125rem; height: 1.125rem; }
+    .es-foot { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; max-width: 100%; margin: 0; padding: 5px; border: 1px solid var(--gk-line); border-radius: 999px; background: var(--gk-stage-raised); color: var(--gk-ink-2); font-size: .9375rem; line-height: 1.3; white-space: nowrap; }
+    {{-- Each link is a pill of its own that lights up under the pointer (design 3a). --}}
+    .es-foot-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border: 0; border-radius: 999px; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: none; transition: background-color var(--gk-swap, 120ms), color var(--gk-swap, 120ms); }
+    .es-foot-link:hover { background: var(--gk-stage-well); color: var(--gk-ink); }
+    .es-foot-link:focus-visible, .es-foot-credit:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    .es-foot-dot { flex: none; width: 8px; height: 8px; border-radius: 999px; background: #2bc48a; background: oklch(0.74 0.15 160); }
+    .es-foot-sep { width: 1px; height: 18px; margin: 0 6px; background: var(--gk-line); }
+    .es-foot-credit { display: inline-flex; align-items: center; gap: 9px; padding: 6px 16px 6px 7px; border-radius: 999px; background: #3eb0ee; background: oklch(0.74 0.15 240); color: #06121a; font-weight: 600; text-decoration: none; transition: background-color var(--gk-swap, 120ms); }
+    [dir="rtl"] .es-foot-credit { padding: 6px 7px 6px 16px; }
+    .es-foot-credit:hover { background: #5cc4fb; background: oklch(0.8 0.15 240); }
+    .es-foot-es { display: inline-grid; flex: none; place-items: center; width: 24px; height: 24px; border-radius: 999px; background: #06121a; color: #5cc4fb; color: oklch(0.8 0.15 240); font-size: 10px; font-weight: 600; letter-spacing: .02em; }
+    .es-foot-arrow { width: 1rem; height: 1rem; }
     [dir="rtl"] .es-foot-arrow { transform: scaleX(-1); }
-    {{-- A phone: tighter, and without the divider and the arrow, so the pill stays one line. --}}
+    {{-- A phone: tighter, and without the divider, so the pill stays one line. --}}
     @media (max-width: 30rem) {
-        .es-foot { gap: .375rem .75rem; padding-inline-start: .875rem; font-size: .875rem; }
-        [dir="rtl"] .es-foot { padding-inline-start: .375rem; padding-inline-end: .875rem; }
-        .es-foot-sep, .es-foot-arrow { display: none; }
-        .es-foot-credit { gap: .5rem; padding-inline-end: .875rem; }
-        [dir="rtl"] .es-foot-credit { padding-inline-start: .875rem; padding-inline-end: .375rem; }
-        .es-foot-es { width: 1.75rem; height: 1.75rem; }
+        .es-foot { font-size: .875rem; }
+        .es-foot-link { padding: 8px 10px; }
+        .es-foot-sep { display: none; }
+        .es-foot-credit { gap: 7px; padding-inline-end: 12px; }
+        [dir="rtl"] .es-foot-credit { padding-inline-start: 12px; }
     }
     {{-- A picture whose size was never recorded keeps its own shape on a phone, where a stacked
          card has no neighbour to match (a landscape photo stood in a poster's box between two
