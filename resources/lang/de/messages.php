@@ -8478,4 +8478,5 @@ return [
     'page_style_dark' => 'Dunkel',
     'page_style_help' => 'Automatisch verwendet einen hellen Stil, wenn der Hintergrund eine helle Farbe oder ein heller Verlauf ist, sonst einen dunklen. Oder wählen Sie eine der drei hellen oder drei dunklen Paletten.',
     'day_event_count' => '{1} :count Veranstaltung|[2,*] :count Veranstaltungen',
+    'page_footer' => 'Fußzeile',
 ];

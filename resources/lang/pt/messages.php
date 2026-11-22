@@ -8479,4 +8479,5 @@ return [
     'page_style_dark' => 'Escuro',
     'page_style_help' => 'Automático usa um estilo claro quando o fundo é uma cor ou gradiente claro, e um escuro nos outros casos. Ou escolha uma das três paletas claras ou três escuras.',
     'day_event_count' => '{1} :count evento|[2,*] :count eventos',
+    'page_footer' => 'Rodapé',
 ];

@@ -8498,4 +8498,5 @@ return [
     'page_style_dark' => 'Întunecat',
     'page_style_help' => 'Automat folosește un stil luminos când fundalul este o culoare sau un gradient deschis, iar altfel unul întunecat. Sau alege una dintre cele trei palete luminoase sau trei întunecate.',
     'day_event_count' => ':count eveniment|:count evenimente|:count de evenimente',
+    'page_footer' => 'Subsolul paginii',
 ];

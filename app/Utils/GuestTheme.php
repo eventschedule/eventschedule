@@ -156,6 +156,14 @@ final class GuestTheme
             $fillDark = ColorUtils::shiftUntil($source, self::DARK_PANELS, false, 3.0) ?? self::PAPER;
         }
 
+        // The label on a filled button holds 4.5:1. getContrastColor() picks white up to a quarter
+        // luminance, where white is under 4.5:1 on the mid colours (3.6:1 on the default
+        // #4e81fa), so such a fill is deepened along its own hue until white reads on it, as the
+        // portal's own brand button is a deeper blue than its text blue. In dark mode a fill that
+        // was lifted to stand out keeps its lift and takes the black label instead.
+        [$fill, $onFill] = self::labelledFill($fill, null);
+        [$fillDark, $onFillDark] = self::labelledFill($fillDark, self::DARK_PANELS[0]);
+
         $glow = $neutral ? '#94a3b8' : ColorUtils::fromHsl($hue, $saturation, max($lightness, 0.55));
         // A grey is moved as a grey. Its hue is an accident of rounding (#010000 is "red"), and
         // lightening along it turned a near-black into a pink.
@@ -169,9 +177,9 @@ final class GuestTheme
             source: $source,
             neutral: $neutral,
             fill: $fill,
-            onFill: ColorUtils::getContrastColor($fill),
+            onFill: $onFill,
             fillDark: $fillDark,
-            onFillDark: ColorUtils::getContrastColor($fillDark),
+            onFillDark: $onFillDark,
             // A fill with no edge of its own against the panel (a cream on white) gets a hairline.
             edge: ColorUtils::getContrastRatio($fill, self::LIGHT_PANELS[0]) < 1.25 ? '#cbd5e1' : 'transparent',
             edgeDark: ColorUtils::getContrastRatio($fillDark, self::DARK_PANELS[0]) < 1.25 ? '#4b5563' : 'transparent',
@@ -232,6 +240,34 @@ final class GuestTheme
         'midnight' => ['dark', '#0f1115', '#181b21', '#22262e', '#eceef2', '#b7bcc8', '#979ca8'],
         'carbon' => ['dark', '#000000', '#0e0e0e', '#1a1a1a', '#f2f2f2', '#b8b8b8', '#9a9a9a'],
     ];
+
+    /**
+     * A button fill and the label on it, the pair held to 4.5:1: the label getContrastColor()
+     * picks, or, where that is white and falls short, the fill deepened until white reads; when
+     * deepening would sink the fill into $panel (under 1.6:1), the black label on the fill as it
+     * was. Neither ever leaves a pair under 4.5:1: at the luminance where they cross, both are
+     * about 4.6:1.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private static function labelledFill(string $fill, ?string $panel): array
+    {
+        $label = ColorUtils::getContrastColor($fill);
+        if (ColorUtils::getContrastRatio($fill, $label) >= 4.5) {
+            return [$fill, $label];
+        }
+
+        if ($label === '#ffffff') {
+            $deeper = ColorUtils::shiftUntil($fill, ['#ffffff'], true);
+            if ($deeper && (! $panel || ColorUtils::getContrastRatio($deeper, $panel) >= 1.6)) {
+                return [$deeper, '#ffffff'];
+            }
+
+            return [$fill, '#000000'];
+        }
+
+        return [$fill, '#ffffff'];
+    }
 
     /** The schedule whose look the page wears (the layout's rule), for pageMode() and pagePalette(). */
     private static function lookOf(Role $role, ?Role $otherRole, $event): Role

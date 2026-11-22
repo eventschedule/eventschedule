@@ -23,6 +23,7 @@ pre-flight, P9 to P11 are v1.0.132's, and steps 1 to 9 are v1.0.130's runbook.
 
 | Version | Tagged | What it needs from you |
 |---|---|---|
+| [Unreleased](#unreleased-guest-portal-redesign-2026-11-22) | not yet | One migration (in the start command); after: look at a schedule page, an event page and a checkout on a phone and a laptop |
 | [Unreleased](#unreleased-other-sites-on-browse-the-homepage-test-against-a-new-page-no-jquery-2026-11-18) | not yet | One migration (in the start command); before: check the site's custom header and footer code for jQuery; after: purge `/` at the edge, look at `/?home=new`, `/browse` and `/admin` |
 | [Unreleased](#unreleased-federation-address-moves-network-search-and-the-home-schedule-2026-11-18) | not yet | Nothing; after: watch `/admin/federation` and the first `federation:maintain` run |
 | [Unreleased](#unreleased-promoter-links-2026-11-11) | not yet | One migration (in the start command); nothing after |
@@ -103,6 +104,30 @@ included.
 
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
+
+## Unreleased: guest portal redesign (2026-11-22)
+
+**What ships:**
+- **Every public page on one stage** (`partials/guest-stage-styles`): the schedule, event, ticket,
+  form, booking, gift card, carpool and embed pages. Dark ink by default with a light version,
+  Rubik, big type, the schedule's own background as a glow across the top.
+- **Page style** (Style > Background): Automatic or one of the six palettes, stored in
+  `guest_page_settings.page_mode`. The first guest page a visitor opens sets light or dark for the
+  visit (`es_gp_mode`, a session cookie on the base domain; `#es_mode=` on links to a schedule's
+  own domain). Neither is read by the server, so the edge cache is unaffected.
+- **One or two coming events** are drawn as large cards with the whole flyer; three or more stay
+  the list.
+- **A filled button's label holds 4.5:1:** a mid accent such as the default `#4e81fa` is deepened
+  a little along its own hue so white text reads on it (`GuestTheme::labelledFill()`).
+- **Image variants:** a PNG is budgeted at 8 bytes a pixel while it decodes (Sentry
+  EVENTSCHEDULE-PHP-51: a 6250px PNG killed the scheduler container on every retry). The stuck job
+  was already cleared by hand on 2026-11-22 (schedule 23616 recorded as `too_large`).
+
+**Migration:** `2026_11_22_000001_add_page_mode_to_guest_page_settings`, one `varchar(8)` with a
+default on `guest_page_settings` (a small table). Runs in the start command.
+
+**After:** look at a schedule page, an event page and a checkout on a phone and on a laptop, in the
+visitor's light and dark.
 
 ## Unreleased: other sites on /browse, the homepage test against a new page, no jQuery (2026-11-18)
 

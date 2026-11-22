@@ -8478,4 +8478,5 @@ return [
     'page_style_dark' => 'Oscuro',
     'page_style_help' => 'Automático usa un estilo claro cuando el fondo es un color o degradado claro, y uno oscuro en los demás casos. O elige una de las tres paletas claras o tres oscuras.',
     'day_event_count' => '{1} :count evento|[2,*] :count eventos',
+    'page_footer' => 'Pie de página',
 ];

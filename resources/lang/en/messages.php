@@ -8550,4 +8550,5 @@ return [
     'page_style_dark' => 'Dark',
     'page_style_help' => 'Automatic uses a light style when your background is a light color or gradient, and a dark one otherwise. Or pick one of the three light or three dark palettes.',
     'day_event_count' => '{1} :count event|[2,*] :count events',
+    'page_footer' => 'Footer',
 ];

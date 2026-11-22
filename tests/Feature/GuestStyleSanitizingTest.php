@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\Role;
 use App\Utils\GeminiUtils;
+use App\Utils\GuestTheme;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -130,7 +131,7 @@ class GuestStyleSanitizingTest extends TestCase
         $this->assertStringContainsString('at 50% -8rem, #12345640, transparent', $html, 'fixture: the page does wear the act\'s look');
         // The page falls back to the default accent, as it does for a schedule without one: in
         // the tokens its fills are drawn from, and in the one literal still handed to script.
-        $this->assertMatchesRegularExpression('/body \{ --es-accent: #4e81fa;/i', $html);
+        $this->assertMatchesRegularExpression('/body \{ --es-accent: '.preg_quote(GuestTheme::fromAccent('#4e81fa')->fill, '/').';/i', $html);
         $this->assertStringContainsString('background-color: var(--es-accent); color: var(--es-accent-text)', $html);
     }
 

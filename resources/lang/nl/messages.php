@@ -8480,4 +8480,5 @@ return [
     'page_style_dark' => 'Donker',
     'page_style_help' => 'Automatisch gebruikt een lichte stijl als de achtergrond een lichte kleur of verloop is, en anders een donkere. Of kies een van de drie lichte of drie donkere paletten.',
     'day_event_count' => '{1} :count evenement|[2,*] :count evenementen',
+    'page_footer' => 'Voettekst',
 ];

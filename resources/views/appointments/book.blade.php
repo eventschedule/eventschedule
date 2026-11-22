@@ -35,6 +35,9 @@
         .gk-p-type-go { display: inline-flex; align-items: center; gap: .375rem; margin-inline-start: auto; font-weight: 650; color: var(--es-accent-readable); }
         [dir="rtl"] .gk-p-type-go svg { transform: scaleX(-1); }
         .gk-p-type-head { display: flex; flex-direction: column; gap: .25rem; }
+        .gk-p-type-fact { display: inline-flex; gap: .875rem; }
+        {{-- An odd last card takes the whole row, so two-up never leaves an empty cell. --}}
+        .gk-p-types > .gk-p-type:last-child:nth-child(odd) { grid-column: 1 / -1; }
     </style>
 
     {{-- Wider, with the types two-up: showBook() redirects when there is only one type, so this page
@@ -93,11 +96,10 @@
                         <div class="gk-p-type-foot">
                             <span class="gk-chip gk-chip-accent">{{ $type->duration_minutes }} {{ __('messages.minutes') }}</span>
                             <span>{{ $priceLabel }}</span>
-                            <span aria-hidden="true">&middot;</span>
-                            <span>{{ $locationLabel($type) }}</span>
+                            {{-- Each dot travels with the fact after it, so a line that wraps never ends on one. --}}
+                            <span class="gk-p-type-fact"><span aria-hidden="true">&middot;</span><span>{{ $locationLabel($type) }}</span></span>
                             @if ($type->requires_approval)
-                                <span aria-hidden="true">&middot;</span>
-                                <span>{{ __('messages.appointments_requires_confirmation') }}</span>
+                                <span class="gk-p-type-fact"><span aria-hidden="true">&middot;</span><span>{{ __('messages.appointments_requires_confirmation') }}</span></span>
                             @endif
                             <span class="gk-p-type-go" aria-hidden="true">
                                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>

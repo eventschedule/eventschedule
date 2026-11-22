@@ -351,6 +351,11 @@
              hand every visitor's IP address to Google without asking. --}}
         {{-- The guest pages' own type (the 2026-11 redesign): Rubik, served from this install. --}}
         @if ($stageGround && ($rubikStylesheet = font_stylesheet_url('Rubik')))
+        {{-- Its Latin file (one variable font for every weight, and the digits of every script)
+             asked for with the stylesheet rather than after it, so the swap comes sooner. --}}
+        @if (is_file(public_path('vendor/fonts/Rubik/iJWKBXyIfDnIV7nBrXyw023e.woff2')))
+        <link rel="preload" as="font" type="font/woff2" href="{{ asset('vendor/fonts/Rubik/iJWKBXyIfDnIV7nBrXyw023e.woff2') }}" crossorigin>
+        @endif
         <link href="{{ $rubikStylesheet }}" rel="stylesheet">
         @endif
         @foreach(array_filter($fonts) as $font)
@@ -752,7 +757,7 @@
          small mark of its own, in colour like the credit's, so the two halves balance, and the
          links share one hover (partials/guest-stage-styles, .es-foot-link). It is the last thing on the page, so it
          keeps room under it (and es-credit-chip's lift clear of the phone's bar). --}}
-    <nav aria-label="{{ __('messages.privacy_policy') }}" data-privacy-pill class="es-credit-chip flex justify-center px-4 pt-8 pb-8 {{ $creditReason && $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
+    <nav aria-label="{{ __('messages.page_footer') }}" data-privacy-pill class="es-credit-chip flex justify-center px-4 pt-8 pb-8 {{ $creditReason && $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
         <p class="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-white/80 px-3.5 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-gray-900/80 dark:text-gray-300 dark:ring-white/10">
             <a href="{{ policy_url('privacy') }}" class="es-foot-link">
                 <span aria-hidden="true" class="es-foot-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5 4.5 5.6v5.3c0 4.7 3.2 8.9 7.5 10.6 4.3-1.7 7.5-5.9 7.5-10.6V5.6L12 2.5zm-1.2 13.2-3.3-3.3 1.4-1.4 1.9 1.9 4.4-4.4 1.4 1.4-5.8 5.8z"/></svg></span>

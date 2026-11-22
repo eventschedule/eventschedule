@@ -104,12 +104,37 @@ class GuestThemeTest extends TestCase
 
     public function test_a_colour_keeps_its_own_fill(): void
     {
-        foreach (['#4e81fa', '#ffd90f', '#dc2626', '#a3e635'] as $accent) {
+        foreach (['#ffd90f', '#dc2626', '#a3e635', '#9333ea'] as $accent) {
             $theme = GuestTheme::fromAccent($accent);
 
             $this->assertFalse($theme->neutral);
             $this->assertSame($accent, $theme->fill, 'an owner\'s colour is the button, as it has always been');
             $this->assertSame($accent, $theme->fillDark);
+        }
+    }
+
+    /**
+     * Unless its label could not be read on it: white on a mid blue such as the default #4e81fa
+     * was 3.6:1, so the fill is deepened along its own hue until white holds 4.5:1 (the portal's
+     * brand button is a deeper blue than its text blue for the same reason). Swept over the hue
+     * wheel at three lightnesses, every pair holds.
+     */
+    public function test_a_buttons_label_holds_four_and_a_half_to_one_on_any_fill(): void
+    {
+        $theme = GuestTheme::fromAccent('#4e81fa');
+        $this->assertNotSame('#4e81fa', $theme->fill);
+        $this->assertSame('#ffffff', $theme->onFill);
+        [$hue] = ColorUtils::toHsl($theme->fill);
+        [$sourceHue] = ColorUtils::toHsl('#4e81fa');
+        $this->assertEqualsWithDelta($sourceHue, $hue, 0.02, 'the same blue, deeper');
+
+        for ($h = 0; $h < 360; $h += 15) {
+            foreach ([0.35, 0.5, 0.62] as $l) {
+                $accent = ColorUtils::fromHsl($h / 360, 0.85, $l);
+                $t = GuestTheme::fromAccent($accent);
+                $this->assertGreaterThanOrEqual(4.5, ColorUtils::getContrastRatio($t->fill, $t->onFill), $accent);
+                $this->assertGreaterThanOrEqual(4.5, ColorUtils::getContrastRatio($t->fillDark, $t->onFillDark), $accent.' (dark)');
+            }
         }
     }
 

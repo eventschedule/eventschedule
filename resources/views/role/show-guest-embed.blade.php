@@ -17,6 +17,9 @@
                and here 100% is the frame, not this 64rem sheet, so a wide frame left the list a
                strip in the middle (EmbedEventJourneyTest, 290px of a 1886px frame). --}}
           .gk-stage.gk-p-embed { max-width: 64rem; margin-block: 0 1rem; padding-inline: clamp(1rem, 4vw, 2.5rem); }
+          {{-- No accent light on a sheet that sits inside somebody else's page: there it read as a
+               pale rectangle on the site around it. --}}
+          .gk-stage.gk-p-embed::before { display: none; }
           .calendar-panel-border,
           .calendar-panel-border-transparent {
             background: transparent !important;
