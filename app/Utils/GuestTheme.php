@@ -301,7 +301,9 @@ final class GuestTheme
 
         // Only in the palette's own brightness: a visitor whose first page set the other one keeps
         // it (theme-script, es_gp_mode), and this schedule then shows its automatic colours.
-        $selector = $mode === 'dark' ? 'html.dark body' : 'html:not(.dark) body';
+        // :where() keeps it as light as css()'s own `body`: the owner's custom CSS, printed after
+        // it, must be able to overrule a palette as it overrules the automatic colours.
+        $selector = $mode === 'dark' ? ':where(html.dark) body' : ':where(html:not(.dark)) body';
 
         return $selector.' { '.implode(' ', array_map(fn ($k, $v) => $k.': '.$v.';', array_keys($tokens), $tokens)).' }';
     }

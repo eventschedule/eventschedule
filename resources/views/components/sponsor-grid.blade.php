@@ -121,8 +121,8 @@
     var motion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
     var stillOnly = function () { return !!(motion && motion.matches); };
 
-    // One optical size for every shape: a square logo fills the chip's height, a wide wordmark
-    // is drawn lower and longer, so a row reads as even rather than as boxes and slivers.
+    {{-- One optical size for every shape: a square logo fills the chip's height, a wide wordmark
+         is drawn lower and longer, so a row reads as even rather than as boxes and slivers. --}}
     var sizeLogo = function (img) {
         var w = img.naturalWidth, h = img.naturalHeight;
         if (!w || !h) return;
@@ -139,9 +139,9 @@
         return tops.sort(function (a, b) { return a - b; });
     };
 
-    // The rest of the logos, laid out for the room they have: all of them when they fit one
-    // row; otherwise one row drifting slowly (paused under the pointer or on focus), or, for a
-    // visitor who asked for less motion, the first two rows. "Show more" opens every one.
+    {{-- The rest of the logos, laid out for the room they have: all of them when they fit one
+         row; otherwise one row drifting slowly (paused under the pointer or on focus), or, for a
+         visitor who asked for less motion, the first two rows. "Show more" opens every one. --}}
     var layout = function (root) {
         var view = root.querySelector('[data-sp-view]');
         var track = root.querySelector('[data-sp-track]');
@@ -166,7 +166,7 @@
             clone.querySelectorAll('img').forEach(function (img) { img.setAttribute('alt', ''); });
             track.appendChild(clone);
             root.classList.add('es-sp-run');
-            // About 32px a second: slow enough to read each logo as it passes.
+            {{-- About 32px a second: slow enough to read each logo as it passes. --}}
             root.style.setProperty('--sp-dur', Math.max(20, Math.round(list.offsetWidth / 32)) + 's');
         } else if (rows.length > 2) {
             root.style.setProperty('--sp-clamp', (rows[2] - rows[0] - 1) + 'px');
@@ -205,8 +205,8 @@
 
             var toggle = grid.querySelector('[data-sp-toggle]');
             if (toggle) toggle.addEventListener('click', function () { setOpen(grid, !grid.classList.contains('es-sp-open')); });
-            // A keyboard visitor reaching a logo that is drifting or folded away gets them all,
-            // standing still, so the one in focus is always in view.
+            {{-- A keyboard visitor reaching a logo that is drifting or folded away gets them all,
+                 standing still, so the one in focus is always in view. --}}
             grid.addEventListener('focusin', function (e) {
                 if (e.target.closest('[data-sp-list]') && (grid.classList.contains('es-sp-run') || grid.classList.contains('es-sp-clamped'))) setOpen(grid, true);
             });
@@ -240,7 +240,7 @@
                 image.addEventListener('error', function () { settle(image); }, { once: true });
             });
 
-            // A slow or broken logo must never leave the section permanently hidden.
+            {{-- A slow or broken logo must never leave the section permanently hidden. --}}
             setTimeout(reveal, 2500);
         });
     };

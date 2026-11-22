@@ -175,7 +175,10 @@
     .gk-tx-upper { text-transform: uppercase; }
     .gk-tx-upper::placeholder { text-transform: none; }
     .gk-tx-lab { display: block; font-size: .9375rem; font-weight: 500; line-height: 1.4; color: var(--gk-ink-2); }
-    .gk-tx-fields { display: grid; gap: 1.25rem; }
+    {{-- minmax(0, 1fr): an auto column cannot shrink below an input's own width, which pushed the
+         gift card's Apply past the card on a phone. --}}
+    .gk-tx-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+    .gk-tx-fields > * { min-width: 0; }
     .gk-tx-checklab { font-size: .9375rem; line-height: 1.5; color: var(--gk-ink-2); }
     .gk-tx-check { flex: none; width: 1.125rem; height: 1.125rem; border: 1px solid color-mix(in srgb, var(--gk-ink) 38%, transparent); border-radius: .3125rem; color: var(--es-accent-readable); }
     .gk-tx-check:not(:checked) { background-color: var(--gk-stage); }
@@ -227,6 +230,8 @@
     .gk-tx-problem { flex: 1 0 100%; align-items: center; font-weight: 600; }
     .gk-tx-bar .gk-cta-alt, .gk-tx-actions .gk-cta-alt { flex: 0 0 auto; white-space: nowrap; cursor: pointer; }
     .gk-tx-bar .gk-cta-main, .gk-tx-actions .gk-cta-main { flex: 1 1 13.75rem; white-space: nowrap; cursor: pointer; }
+    {{-- On a phone the main button shares Cancel's row instead of dropping under it alone. --}}
+    @media (max-width: 39.99rem) { .gk-tx-bar .gk-cta-main, .gk-tx-actions .gk-cta-main { flex-basis: 0; } }
     .gk-tx-cart { border-color: var(--es-accent-readable); color: var(--es-accent-readable); }
     .gk-tx-blocked { opacity: .5; cursor: not-allowed; }
     .gk-tx-blocked:active { transform: none; }

@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * How a schedule's guest pages are drawn (Style > Background > Page style): 'auto' (light for a
- * light colour or gradient background, dark otherwise; App\Utils\GuestTheme::pageMode()),
- * 'light' or 'dark'. On guest_page_settings, not `roles`, which is at MySQL's row-size limit.
+ * light colour or gradient background, dark otherwise; App\Utils\GuestTheme::pageMode()), or
+ * one of the six palettes (GuestPageSetting::MODES). On guest_page_settings, not `roles`, which is at MySQL's row-size limit.
  */
 return new class extends Migration
 {

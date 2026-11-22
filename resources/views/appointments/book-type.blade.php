@@ -231,7 +231,8 @@
         .gk-p-back { display: inline-flex; align-items: center; gap: .375rem; align-self: flex-start; font-size: .9375rem; font-weight: 500; color: var(--gk-ink-3); text-decoration: none; }
         .gk-p-back:hover { color: var(--gk-ink); text-decoration: underline; text-underline-offset: 3px; }
         [dir="rtl"] .gk-p-back svg { transform: scaleX(-1); }
-        .gk-p-book .gk-factrow { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); }
+        {{-- From a tablet up: on a phone the facts are the stage's one column, as everywhere. --}}
+        @media (min-width: 40rem) { .gk-p-book .gk-factrow { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); } }
         .gk-p-book .gk-fact-main { font-size: 1.0625rem; }
         .gk-p-small { margin: 0; font-size: .875rem; line-height: 1.5; color: var(--gk-ink-3); }
         .gk-p-desc { margin: 0; font-size: 1.0625rem; line-height: 1.65; color: var(--gk-ink-2); white-space: pre-line; overflow-wrap: anywhere; }

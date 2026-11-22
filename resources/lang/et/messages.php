@@ -8477,5 +8477,6 @@ return [
     'page_style' => 'Lehe stiil',
     'page_style_light' => 'Hele',
     'page_style_dark' => 'Tume',
-    'page_style_help' => 'Automaatne kasutab heledat stiili, kui taust on hele värv või üleminek, ja muidu tumedat. Või vali üks kolmest heledast või kolmest tumedast paletist.',
+    'page_style_help' => 'Automaatne kasutab heledat stiili, kui taust on hele värv või gradient, ja muidu tumedat. Või vali üks kolmest heledast või kolmest tumedast paletist.',
+    'day_event_count' => '{1} :count sündmus|[2,*] :count sündmust',
 ];

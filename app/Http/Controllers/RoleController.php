@@ -7132,15 +7132,15 @@ class RoleController extends Controller
         // Never inside this request: on the sync driver the job would run right here, and the
         // every-minute app:place-venues does the same work four addresses at a time.
         //
-        // The two switches are stored here and not by the fill above: the map's settings have a
-        // table of their own, because `roles` cannot take another column. Only on a save that
-        // carries the switch, so a save from anywhere else leaves the map as it was.
         // The page style (Style > Background), in a table of its own as the map's switches are:
         // only on a save that carries it.
         if (in_array($request->input('page_mode'), GuestPageSetting::MODES, true)) {
             GuestPageSetting::store($role, ['page_mode' => $request->input('page_mode')]);
         }
 
+        // The two switches are stored here and not by the fill above: the map's settings have a
+        // table of their own, because `roles` cannot take another column. Only on a save that
+        // carries the switch, so a save from anywhere else leaves the map as it was.
         $venueMapWasOn = VenueMap::enabledFor($role);
 
         if ($request->has('show_venues_map') && VenueMap::offeredTo($role)) {

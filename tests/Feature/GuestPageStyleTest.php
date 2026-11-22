@@ -96,7 +96,7 @@ class GuestPageStyleTest extends TestCase
 
         $this->assertStringContainsString('es_gp_mode=', $html);
         $this->assertStringContainsString('forced = carried;', $html);
-        $this->assertStringContainsString('html.dark body { --gk-stage: #000000;', $html, 'the palette only in its own brightness');
+        $this->assertStringContainsString(':where(html.dark) body { --gk-stage: #000000;', $html, 'the palette only in its own brightness');
         $this->assertStringNotContainsString(':where(.dark) body { --gk-stage: #000000;', $html);
 
         $embed = $this->get('/'.$role->subdomain.'?embed=true')->assertOk()->getContent();

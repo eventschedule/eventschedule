@@ -2419,7 +2419,7 @@
                                 <legend class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.page_style') }}</legend>
                                 @foreach ($pageModeGroups as $groupName => $modes)
                                 <div class="mt-2 flex flex-wrap items-center gap-2">
-                                    @if ($groupName)<span class="w-12 text-sm text-gray-500 dark:text-gray-400">{{ $groupName }}</span>@endif
+                                    @if ($groupName)<span class="text-sm text-gray-500 dark:text-gray-400" style="min-inline-size: 3rem; padding-inline-end: .25rem">{{ $groupName }}</span>@endif
                                     <div class="event-pills flex-wrap">
                                     @foreach ($modes as $modeKey)
                                     <label class="event-pill" for="page_mode_{{ $modeKey }}">

@@ -79,7 +79,9 @@ class GuestListRowsTest extends TestCase
         $row = file_get_contents(resource_path('views/role/partials/guest-row.blade.php'));
         // The event's name is a real link inside a heading, as it is on a card: a reader can
         // move by heading, a crawler has an address to follow.
-        $this->assertSame(1, preg_match('/<h3[^>]*>.*<a :href="getEventUrl\(event\)" :target="eventLinkTarget\(\)" @click="onEventLinkClick\(event, \$event\)" v-text="event\.name"><\/a>\s*<\/h3>/s', $row));
+        $this->assertSame(1, preg_match('/<h3[^>]*>.*<a :href="getEventUrl\(event\)" :target="eventLinkTarget\(\)" @click="onEventLinkClick\(event, \$event\)" v-text="event\.name"><\/a>(@if \(\$rowFeature \?\? false\)<span class="sr-only"[^\n]*@endif)?\s*<\/h3>/s', $row));
+        // A large card says its day and time inside its heading, for a reader moving by heading.
+        $this->assertStringContainsString('<span class="sr-only" v-text="\', \' + formatDateHeader(group.date) + \', \' + getEventTime(event)"></span>', $row);
         // The day above it is a heading too.
         $this->assertSame(1, preg_match('/<h2 class="gk-dayhead-title" v-text="formatDateHeader\(group\.date\)"/', $html));
         // The picture's link repeats the name's, so it is out of the tab order and unannounced.
@@ -114,6 +116,19 @@ class GuestListRowsTest extends TestCase
 
         $embed = $this->get('/'.$this->role->subdomain.'?embed=true')->getContent();
         $this->assertStringContainsString('if (true || this.hasMoreListRows', $embed, 'an embed keeps the list');
+    }
+
+    public function test_the_first_large_cards_flyer_is_asked_for_in_the_head(): void
+    {
+        $this->event(['name' => 'Lantern Night', 'flyer_image_url' => 'lantern.jpg']);
+        $html = $this->get('/'.$this->role->subdomain)->assertOk()->getContent();
+        $this->assertMatchesRegularExpression('/<link rel="preload" as="image" href="[^"]*lantern\.jpg"[^>]*fetchpriority="high">/', $html, 'one coming event: its flyer is the LCP');
+
+        // Three are the list, whose pictures are small: nothing is preloaded for them.
+        $this->event(['name' => 'Second', 'flyer_image_url' => 'second.jpg']);
+        $this->event(['name' => 'Third', 'flyer_image_url' => 'third.jpg']);
+        $html = $this->get('/'.$this->role->subdomain)->assertOk()->getContent();
+        $this->assertDoesNotMatchRegularExpression('/<link rel="preload" as="image" href="[^"]*(lantern|second|third)\.jpg"/', $html);
     }
 
     public function test_the_wide_list_is_the_rows_and_a_row_says_what_tickets_cost(): void

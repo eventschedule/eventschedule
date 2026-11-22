@@ -8476,4 +8476,5 @@ return [
     'page_style_light' => 'Chiaro',
     'page_style_dark' => 'Scuro',
     'page_style_help' => 'Automatico usa uno stile chiaro quando lo sfondo è un colore o una sfumatura chiara, altrimenti uno scuro. Oppure scegli una delle tre tavolozze chiare o delle tre scure.',
+    'day_event_count' => '{1} :count evento|[2,*] :count eventi',
 ];

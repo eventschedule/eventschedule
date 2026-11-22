@@ -1906,7 +1906,7 @@
                  the list (his call, 2026-11-22). --}}
             <ul v-if="fewCount" class="gk-few" :class="'gk-few-' + fewCount" :style="{ '--gk-box': fewBox }">
                 <template v-for="group in allListGroups" :key="'few-' + group.date">
-                    <template v-for="event in group.events" :key="'few-' + event.uniqueKey">
+                    <template v-for="event in group.events.filter(e => !(e._multiDayNum > 1))" :key="'few-' + event.uniqueKey">
                         @include('role/partials/guest-row', ['rowFeature' => true])
                     </template>
                 </template>
@@ -1933,7 +1933,7 @@
                                  (partials/guest-stage-styles): the heading above is what is read. --}}
                             <span class="gk-dayhead-big" aria-hidden="true"><span class="gk-dh-week" v-text="formatDayName(group.date)"></span><span class="gk-dh-num" v-text="getDayNum(group.date)"></span><span class="gk-dh-month" v-text="getMonthLong(group.date)"></span></span>
                             {{-- How many that day, as the wide list's date line said. --}}
-                            <span class="gk-dh-count"><span v-text="group.events.filter(e => isEventVisible(e)).length"></span>&nbsp;<span v-if="group.events.filter(e => isEventVisible(e)).length === 1">{{ __('messages.event') }}</span><span v-else>{{ __('messages.events') }}</span></span>
+                            <span class="gk-dh-count" v-text="dayEventCount(group.events.filter(e => isEventVisible(e)).length)"></span>
                         </div>
                         <ul class="gk-rows">
                             <template v-for="event in group.events" :key="'list-mob-' + event.uniqueKey">
@@ -2630,6 +2630,8 @@ const calendarApp = createApp({
                  date, so a viewer-anchored today hides an event that is still running. --}}
             userTimezone: '{{ $calendarTimezone }}',
             dayWords: { today: @json(__('messages.today')), tomorrow: @json(__('messages.tomorrow')) },
+            {{-- How many on a day, in each language's own plural (messages.day_event_count): "5 событий", never "5 События". --}}
+            dayEventCounts: @json(collect(range(1, 60))->mapWithKeys(fn ($n) => [$n => trans_choice('messages.day_event_count', $n, ['count' => $n])])),
             leadFilterKeyAtLoad: null,
             // The phone's month: the day that was picked (the month is folded to a line while
             // one is), and whether the days of this month that are over are shown.
@@ -3342,28 +3344,30 @@ const calendarApp = createApp({
         firstPastGroupIndex() {
             return this.allListGroups.findIndex(group => group.events.every(e => e._isPast));
         },
-        // A guest list of one or two coming events, and nothing else (no past rows, no
-        // "Show more", no rows cut by the server): drawn as large cards (.gk-few), so the flyers
-        // fill the page instead of standing small in a list built for dozens. 0 otherwise.
+        {{-- A guest list of one or two coming events, and nothing else (no past rows, no
+             "Show more", no rows cut by the server): drawn as large cards (.gk-few), so the flyers
+             fill the page instead of standing small in a list built for dozens. 0 otherwise. --}}
         fewCount() {
             if ({{ $guestRows && ! $guestEmbed ? 'false' : 'true' }} || this.hasMoreListRows || this.listTruncated) return 0;
             let n = 0;
             for (const group of this.allListGroups) {
                 for (const e of group.events) {
                     if (e._isPast) return 0;
+                    {{-- An event over several days is one card, on its first day. --}}
+                    if (e._multiDayNum > 1) continue;
                     if (this.isEventVisible(e) && ++n > 2) return 0;
                 }
             }
             return n;
         },
-        // Two large cards share one picture box, so their feet line up: the shape of
-        // the tallest picture among them (a poster when any is a flyer, wider when all are photos).
+        {{-- Two large cards share one picture box, so their feet line up: the shape of
+             the tallest picture among them (a poster when any is a flyer, wider when all are photos). --}}
         fewBox() {
             if (!this.fewCount) return null;
             let r = 4 / 3;
             for (const group of this.allListGroups) {
                 for (const e of group.events) {
-                    if (this.isEventVisible(e) && (e.image_url || e.flyer_url) && !e.is_password_protected) r = Math.min(r, Number(this.rowRatio(e)));
+                    if (!(e._multiDayNum > 1) && this.isEventVisible(e) && (e.image_url || e.flyer_url) && !e.is_password_protected) r = Math.min(r, Number(this.rowRatio(e)));
                 }
             }
             return Math.max(0.8, r).toFixed(3);
@@ -4270,6 +4274,9 @@ const calendarApp = createApp({
             there.setDate(there.getDate() + offset);
             return there.getFullYear() + '-' + String(there.getMonth() + 1).padStart(2, '0') + '-' + String(there.getDate()).padStart(2, '0');
         },
+        dayEventCount(n) {
+            return this.dayEventCounts[n] || this.dayEventCounts[60].replace('60', n);
+        },
         dayWord(dateStr) {
             if (dateStr === this.scheduleDay(0)) return this.dayWords.today;
             if (dateStr === this.scheduleDay(1)) return this.dayWords.tomorrow;
@@ -4837,8 +4844,8 @@ const calendarApp = createApp({
             const [year, month, day] = dateStr.split('-').map(Number);
             return new Date(year, month - 1, day).toLocaleDateString(this.languageCode, { month: 'long' });
         },
-        // The shape of a large card's picture box: the flyer's own, held between a tall poster
-        // (0.7) and a square, so a landscape flyer is not a strip and a tall one not a column.
+        {{-- The shape of a large card's picture box: the flyer's own, held between a tall poster
+             (0.7) and a square, so a landscape flyer is not a strip and a tall one not a column. --}}
         rowRatio(event) {
             const w = Number(event.flyer_url && event.flyer_width), h = Number(event.flyer_url && event.flyer_height);
             const r = w > 0 && h > 0 ? w / h : 0.8;

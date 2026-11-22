@@ -10,6 +10,8 @@ use App\Models\FederationClicksDaily;
 use App\Models\PageView;
 use App\Models\Role;
 use App\Services\AuditService;
+use App\Services\OneSignalService;
+use App\Services\Stay22Service;
 use App\Services\Wallet\AppleWalletService;
 use App\Services\Wallet\GoogleWalletService;
 use App\Utils\AdminReauthUtils;
@@ -9192,7 +9194,8 @@ class MarketingController extends Controller
             ['page' => 'Schedule Styling', 'section' => 'Header Style', 'description' => 'Choose the Banner or Compact header style for your public schedule page.', 'url' => $r['schedule_styling'].'#header-style', 'category' => 'User Guide', 'keywords' => 'header style banner compact slim full-width bar'],
             ['page' => 'Schedule Styling', 'section' => 'Profile Image', 'description' => 'Upload and set your profile or logo image, which also becomes your favicon on Pro.', 'url' => $r['schedule_styling'].'#profile-image', 'category' => 'User Guide', 'keywords' => 'logo avatar photo favicon browser tab icon apple touch home screen'],
             ['page' => 'Schedule Styling', 'section' => 'Header Image', 'description' => 'Pick a header picture from a wall of presets, upload your own, or show a venue logo wall.', 'url' => $r['schedule_styling'].'#header-images', 'category' => 'User Guide', 'keywords' => 'banner cover header logo wall venue logos pictures thumbnails upload accent gradient'],
-            ['page' => 'Schedule Styling', 'section' => 'Background', 'description' => 'Choose Aurora, a gradient by its swatch, a solid color, or an image background that fills the window.', 'url' => $r['schedule_styling'].'#backgrounds', 'category' => 'User Guide', 'keywords' => 'background color gradient image swatch rotation hex upload sharp blurry resolution'],
+            ['page' => 'Schedule Styling', 'section' => 'Background', 'description' => 'Choose Aurora, a gradient by its swatch, a solid color, or an image background shown across the top of your pages.', 'url' => $r['schedule_styling'].'#backgrounds', 'category' => 'User Guide', 'keywords' => 'background color gradient image swatch rotation hex upload sharp blurry resolution'],
+            ['page' => 'Schedule Styling', 'section' => 'Page Style', 'description' => 'Make your public pages light or dark: Automatic, or one of six palettes.', 'url' => $r['schedule_styling'].'#backgrounds', 'category' => 'User Guide', 'keywords' => 'page style light dark mode palette sand mist paper espresso midnight carbon automatic'],
             ['page' => 'Schedule Styling', 'section' => 'Aurora', 'description' => 'Soft drifting lights drawn from your colors, sharp at any size, following light and dark mode.', 'url' => $r['schedule_styling'].'#aurora', 'category' => 'User Guide', 'keywords' => 'aurora background palette shuffle motion drift match header accent animated'],
             ['page' => 'Schedule Styling', 'section' => 'Accent Color', 'description' => 'Set the accent color for buttons and highlights, with a picker, a hex code or a preset.', 'url' => $r['schedule_styling'].'#color-scheme', 'category' => 'User Guide', 'keywords' => 'color accent theme palette scheme hex'],
             ['page' => 'Schedule Styling', 'section' => 'Font Family', 'description' => 'Choose a Google Font from a list that shows your schedule\'s name in each one.', 'url' => $r['schedule_styling'].'#typography', 'category' => 'User Guide', 'keywords' => 'font text typeface google fonts typography search'],
@@ -9896,11 +9899,11 @@ class MarketingController extends Controller
         return [
             'outlook' => outlook_sync_offered(),
             'facebook' => facebook_login_enabled() || $selfhost,
-            'push' => \App\Services\OneSignalService::isConfigured() || $selfhost,
-            'stay22' => \App\Services\Stay22Service::isEnabled() || $selfhost,
+            'push' => OneSignalService::isConfigured() || $selfhost,
+            'stay22' => Stay22Service::isEnabled() || $selfhost,
             'promotions' => (bool) config('ads.enabled') || $selfhost,
-            'google_wallet' => \App\Services\Wallet\GoogleWalletService::isConfigured() || $selfhost,
-            'apple_wallet' => \App\Services\Wallet\AppleWalletService::isConfigured() || $selfhost,
+            'google_wallet' => GoogleWalletService::isConfigured() || $selfhost,
+            'apple_wallet' => AppleWalletService::isConfigured() || $selfhost,
         ];
     }
 }

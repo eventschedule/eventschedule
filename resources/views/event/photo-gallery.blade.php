@@ -250,10 +250,10 @@
 document.addEventListener('DOMContentLoaded', function () {
     if (typeof Vue === 'undefined') return;
 
-    // The upload form's open state, shared by the page's app and the phone's bar.
+    {{-- The upload form's open state, shared by the page's app and the phone's bar. --}}
     var store = Vue.reactive({ showUpload: false });
 
-    // Shares the page, or copies its address where the browser cannot share.
+    {{-- Shares the page, or copies its address where the browser cannot share. --}}
     function share(vm, e) {
         if (vm.shareState !== 'idle') return;
         var title = e.currentTarget.dataset.shareTitle;
@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
             methods: {
                 share: function (e) { share(this, e); },
                 toggleUpload: function () { store.showUpload = ! store.showUpload; },
-                // The file the visitor dropped goes on the real input, so the form posts it.
+                {{-- The file the visitor dropped goes on the real input, so the form posts it. --}}
                 onDrop: function (e) {
                     this.dragging = false;
                     var f = e.dataTransfer && e.dataTransfer.files[0];

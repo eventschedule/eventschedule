@@ -77,17 +77,17 @@
             var darkParam = new URLSearchParams(window.location.search).get('dark');
             forced = darkParam === 'true' ? 'dark' : (darkParam === 'false' ? 'light' : null);
         } catch (e) {}
-        // The guest pages are in the mode their schedule's look asks for, whatever the visitor's
-        // setting ($forceMode, from the guest layout); a pin above still wins.
+        {{-- The guest pages are in the mode their schedule's look asks for, whatever the visitor's
+             setting ($forceMode, from the guest layout); a pin above still wins. --}}
         var FORCE_MODE = @json(in_array($forceMode ?? null, ['dark', 'light'], true) ? $forceMode : null);
-        // The first guest page a visitor opens decides light or dark for the rest of the visit, so
-        // moving between schedules (each with its own palette) never flips the page between the
-        // two (es_gp_mode, a cookie that lasts until the browser closes; on the platform's own
-        // domain it is set there, so it carries across schedules' subdomains). A schedule then
-        // shows its own palette when it is of that brightness, and its automatic one otherwise.
-        // A cookie cannot cross to another domain (a schedule's own, or the platform's from one),
-        // so a link that leaves for one carries the mode in its fragment (#es_mode=dark), which
-        // the page it opens takes, stores and removes from the address (never sent to a server).
+        {{-- The first guest page a visitor opens decides light or dark for the rest of the visit, so
+             moving between schedules (each with its own palette) never flips the page between the
+             two (es_gp_mode, a cookie that lasts until the browser closes; on the platform's own
+             domain it is set there, so it carries across schedules' subdomains). A schedule then
+             shows its own palette when it is of that brightness, and its automatic one otherwise.
+             A cookie cannot cross to another domain (a schedule's own, or the platform's from one),
+             so a link that leaves for one carries the mode in its fragment (#es_mode=dark), which
+             the page it opens takes, stores and removes from the address (never sent to a server). --}}
         if (!forced && FORCE_MODE) {
             var carryDomain = @json($carryDomain ?? null);
             var carryHosts = @json(array_values($carryHosts ?? []));
@@ -103,7 +103,7 @@
                     writeMode(carried);
                     history.replaceState(history.state, '', window.location.pathname + window.location.search + (hm[2] ? '#' + hm[2] : ''));
                     if (hm[2]) {
-                        document.addEventListener('DOMContentLoaded', function () { var t = document.getElementById(decodeURIComponent(hm[2])); if (t) { t.scrollIntoView(); } });
+                        document.addEventListener('DOMContentLoaded', function () { try { var t = document.getElementById(decodeURIComponent(hm[2])); if (t) { t.scrollIntoView(); } } catch (e) {} });
                     }
                 }
             } catch (e) {}
@@ -115,8 +115,8 @@
                 writeMode(carried);
             }
             forced = carried;
-            // Only a link to another of this platform's guest pages, and only when it leaves
-            // the domain the cookie covers.
+            {{-- Only a link to another of this platform's guest pages, and only when it leaves
+                 the domain the cookie covers. --}}
             var decorate = function (e) {
                 var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
                 if (!a) { return; }

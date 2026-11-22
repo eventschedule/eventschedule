@@ -1360,57 +1360,6 @@
 
         </div>
 
-        {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile).
-             $phoneCalendar is the same flag the bar's button reads: they come together or not at all. --}}
-        @if ($phoneCalendar && ! $embedEvent)
-        <div id="calendar-mobile-sheet" class="hidden fixed inset-0 z-50 sm:hidden">
-          <div class="fixed inset-0 bg-black/60" id="calendar-mobile-overlay"></div>
-          <div class="gp-bottom-sheet fixed inset-x-0 bottom-0 rounded-t-2xl shadow-xl">
-            <div class="flex justify-center py-3">
-              <div class="gp-bottom-sheet-handle w-12 h-1.5 rounded-full"></div>
-            </div>
-            <div class="px-6 pb-6 space-y-1 {{ $role->isRtl() ? 'rtl' : '' }}">
-              <a data-funnel="calendar_add" href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
-                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
-                </svg>
-                Google Calendar
-              </a>
-              <a data-funnel="calendar_add" href="{{ $event->getAppleCalendarUrl($date, $role->subdomain) }}{{ $role->langQuerySuffix($displayLang) }}" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
-                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
-                </svg>
-                Apple Calendar
-              </a>
-              <a data-funnel="calendar_add" href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
-                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
-                </svg>
-                Microsoft Outlook
-              </a>
-              {{-- The same two rows as the desktop dropdown. This sheet only renders when the
-                   event sells nothing, which is exactly where most of the platform's guest traffic
-                   lands and where the page is otherwise a dead end. --}}
-              <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
-              @if ($showInterestCapture)
-              <a href="#gp-event-interest" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
-                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                {{ __('messages.event_interest_cta') }}
-              </a>
-              @endif
-              <a href="{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
-                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                {{-- v-pre for the same reason as the desktop row above. --}}
-                <span v-pre>{{ __('messages.event_interest_subscribe_feed', ['schedule' => $role->translatedName()]) }}</span>
-              </a>
-            </div>
-          </div>
-        </div>
-        @endif
 
         {{-- Interest capture. Placed ABOVE #gp-event-form deliberately: hidePanelsBelow()
              display:none's every sibling AFTER that element while the buy/RSVP form is open, which
@@ -1480,10 +1429,10 @@
             var paramKey = form.querySelector('#ticket-selector') ? 'tickets' : 'rsvp';
             var desktopCta = document.getElementById('gp-event-cta');
 
-            // Looked up when it is needed, not once up here: the phone's bar is printed AFTER this
-            // script, at the foot of the document, so a lookup made now always found nothing and
-            // the bar was never hidden. It stayed on screen under the open form, offering Buy
-            // tickets beside the form's own Checkout.
+            {{-- Looked up when it is needed, not once up here: the phone's bar is printed AFTER this
+                 script, at the foot of the document, so a lookup made now always found nothing and
+                 the bar was never hidden. It stayed on screen under the open form, offering Buy
+                 tickets beside the form's own Checkout. --}}
             function mobileCta() { return document.getElementById('gp-mobile-cta'); }
 
             function hideCta() {
@@ -1539,9 +1488,9 @@
                 setTimeout(function() {
                     form.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     window.dispatchEvent(new CustomEvent('event-form-shown'));
-                    // The sign-up form opens on its name field, so that takes the keyboard. The
-                    // ticket form opens on the tickets: nothing is focused that would raise a
-                    // keyboard over them.
+                    {{-- The sign-up form opens on its name field, so that takes the keyboard. The
+                         ticket form opens on the tickets: nothing is focused that would raise a
+                         keyboard over them. --}}
                     var nameInput = paramKey === 'rsvp' ? document.getElementById('name') : null;
                     if (nameInput && !nameInput.value.trim()) { nameInput.focus(); }
                 }, 50);
@@ -1560,8 +1509,8 @@
                 }, 200);
             }
 
-            // The form's bar is square while it floats over the form and takes the panel's
-            // rounded corners where it comes to rest ([data-buybar-floating] in the kit).
+            {{-- The form's bar is square while it floats over the form and takes the panel's
+                 rounded corners where it comes to rest ([data-buybar-floating] in the kit). --}}
             var barEnd = form.querySelector('[data-buybar-end]');
             if (barEnd && window.IntersectionObserver) {
                 new IntersectionObserver(function (entries) {
@@ -1579,9 +1528,9 @@
                 form.style.display = '';
                 hideCta();
                 hidePanelsBelow();
-                // Again once the whole page has been read. A form that opens WITH the page runs
-                // this before anything below it exists: the panels after it and the phone's bar
-                // were both left on screen, where a form opened by its button hid them.
+                {{-- Again once the whole page has been read. A form that opens WITH the page runs
+                     this before anything below it exists: the panels after it and the phone's bar
+                     were both left on screen, where a form opened by its button hid them. --}}
                 document.addEventListener('DOMContentLoaded', function () {
                     if (form.style.display !== 'none') { hideCta(); hidePanelsBelow(); }
                 });
@@ -1716,8 +1665,9 @@
                       $talentUrl .= '?' . http_build_query($tQueryParams);
                     }
                   @endphp
-                  <a href="{{ $talentUrl }}">
-                    <img src="{{ $each->getProfileImageUrl(960) }}" @if ($eachSrcset = $each->imageVariantSrcset()) srcset="{{ $eachSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="{{ $each->nameInLanguage($displayLang) }}" class="gk-card-avatar"/>
+                  {{-- The name beside it is the link a reader and a keyboard meet. --}}
+                  <a href="{{ $talentUrl }}" tabindex="-1" aria-hidden="true">
+                    <img src="{{ $each->getProfileImageUrl(960) }}" @if ($eachSrcset = $each->imageVariantSrcset()) srcset="{{ $eachSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="" class="gk-card-avatar"/>
                   </a>
                 @else
                   <img src="{{ $each->getProfileImageUrl(960) }}" @if ($eachSrcset = $each->imageVariantSrcset()) srcset="{{ $eachSrcset }}" sizes="(min-width: 1024px) 340px, (min-width: 640px) calc(100vw - 80px), calc(100vw - 40px)" @endif alt="{{ $each->nameInLanguage($displayLang) }}" class="gk-card-avatar"/>
@@ -2787,6 +2737,59 @@
 
   </main>
 
+        {{-- Mobile calendar bottom sheet. $phoneCalendar is the same flag the bar's button reads:
+             they come together or not at all. Outside the stage, beside the bar: .gk-stage is a
+             stacking context (isolation), so a z-50 inside it painted under the bar's z-40. --}}
+        @if ($phoneCalendar && ! $embedEvent)
+        <div id="calendar-mobile-sheet" class="hidden fixed inset-0 z-50 sm:hidden">
+          <div class="fixed inset-0 bg-black/60" id="calendar-mobile-overlay"></div>
+          <div class="gp-bottom-sheet fixed inset-x-0 bottom-0 rounded-t-2xl shadow-xl">
+            <div class="flex justify-center py-3">
+              <div class="gp-bottom-sheet-handle w-12 h-1.5 rounded-full"></div>
+            </div>
+            <div class="px-6 pb-6 space-y-1 {{ $role->isRtl() ? 'rtl' : '' }}">
+              <a data-funnel="calendar_add" href="{{ $event->getGoogleCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
+                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
+                </svg>
+                Google Calendar
+              </a>
+              <a data-funnel="calendar_add" href="{{ $event->getAppleCalendarUrl($date, $role->subdomain) }}{{ $role->langQuerySuffix($displayLang) }}" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
+                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z" />
+                </svg>
+                Apple Calendar
+              </a>
+              <a data-funnel="calendar_add" href="{{ $event->getMicrosoftCalendarUrl($date) }}" target="_blank" rel="noopener noreferrer" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
+                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M2,3H11V12H2V3M11,22H2V13H11V22M21,3V12H12V3H21M21,22H12V13H21V22Z" />
+                </svg>
+                Microsoft Outlook
+              </a>
+              {{-- The same two rows as the desktop dropdown. This sheet only renders when the
+                   event sells nothing, which is exactly where most of the platform's guest traffic
+                   lands and where the page is otherwise a dead end. --}}
+              <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+              @if ($showInterestCapture)
+              <a href="#gp-event-interest" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
+                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                {{ __('messages.event_interest_cta') }}
+              </a>
+              @endif
+              <a href="{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}" class="gp-bottom-sheet-item flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 transition-all duration-200">
+                <svg class="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                {{-- v-pre for the same reason as the desktop row above. --}}
+                <span v-pre>{{ __('messages.event_interest_subscribe_feed', ['schedule' => $role->translatedName()]) }}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        @endif
+
   {{-- Sticky mobile CTA. Not in a frame, whose one row of buttons is drawn at every width. --}}
   @unless ($embedEvent)
   <div id="gp-mobile-cta" x-data="{ shareState: 'idle' }"
@@ -2796,6 +2799,7 @@
       @if (!$event->is_draft)
       <button type="button"
               data-share-title="{{ $eventName }}"
+              aria-label="{{ __('messages.share') }}"
               @click="
                 if (shareState !== 'idle') return;
                 if (navigator.share) {
@@ -3167,12 +3171,14 @@
       });
     }
 
-    // Close calendar pop-up menu on document click
+    {{-- Close either calendar menu on a click anywhere else (the card's own used to stay open). --}}
     document.addEventListener('click', function() {
-      var m = document.getElementById('calendar-pop-up-menu');
-      if (m && !m.classList.contains('hidden')) {
-        m.classList.add('hidden');
-      }
+      ['calendar-pop-up-menu', 'calendar-card-dropdown'].forEach(function(id) {
+        var m = document.getElementById(id);
+        if (m && !m.classList.contains('hidden')) {
+          m.classList.add('hidden');
+        }
+      });
     });
 
     if (window.location.hash === '#gp-agenda') {

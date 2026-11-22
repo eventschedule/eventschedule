@@ -18,10 +18,12 @@
 <li v-if="isEventVisible(event)" v-list-reveal:m="event.uniqueKey" class="gk-row-item" :class="{ 'gk-row-editable': event.can_edit }" @click="navigateToEvent(event, $event)">
     <div class="gk-row gk-row-press" :class="{ 'gk-row-bare': !(event.image_url || event.flyer_url) || event.is_password_protected }">
         @if ($rowFeature ?? false)
-        {{-- A large card (.gk-few) stands under no day heading, so it says its own day. --}}
-        <div class="gk-row-day"><b v-if="dayWord(group.date)" v-text="dayWord(group.date)"></b><span v-text="formatDateHeader(group.date)"></span></div>
+        {{-- A large card (.gk-few) stands under no day heading, so it says its own day. A reader
+             hears the day and the time inside the card's heading instead (they come before it
+             here, where heading navigation would skip them). --}}
+        <div class="gk-row-day" aria-hidden="true"><b v-if="dayWord(group.date)" v-text="dayWord(group.date)"></b><span v-text="formatDateHeader(group.date)"></span></div>
         @endif
-        <div class="gk-row-time">
+        <div class="gk-row-time" @if ($rowFeature ?? false) aria-hidden="true" @endif>
             <i v-if="getEventDotColor(event)" class="gk-row-dot" :style="{ backgroundColor: getEventDotColor(event) }"></i><bdi v-text="getEventTime(event)"></bdi><span v-if="event._multiDayNum > 1" v-text="event._multiDayNum + ' / ' + event._multiDayTotal"></span>
         </div>
         <div class="gk-row-body" data-reveal-body>
@@ -32,9 +34,9 @@
             <div class="gk-row-title" data-reveal-title>
                 <h3 v-if="event.wording" class="gk-w-title" :dir="event.wording.dir"><template v-for="(part, pi) in event.wording.name" :key="pi">
                     @include('role/partials/wording-part')
-                </template></h3>
+                </template>@if ($rowFeature ?? false)<span class="sr-only" v-text="', ' + formatDateHeader(group.date) + ', ' + getEventTime(event)"></span>@endif</h3>
                 <h3 v-else :dir="event.dir || 'auto'">
-                    <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gk-row-lock" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg><a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-text="event.name"></a>
+                    <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="gk-row-lock" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg><a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" v-text="event.name"></a>@if ($rowFeature ?? false)<span class="sr-only" v-text="', ' + formatDateHeader(group.date) + ', ' + getEventTime(event)"></span>@endif
                 </h3>
             </div>
             <template v-if="event.wording">
@@ -50,7 +52,7 @@
             {{-- Who is on, as the wide cards said it: their pictures small, their names as links to
                  their own pages. Names are the owners' text, so v-text inside <bdi>. --}}
             <p v-if="event.talent && event.talent.length && !event.is_password_protected" class="gk-row-who">
-                <span class="gk-row-who-faces" aria-hidden="true"><template v-for="(t, ti) in event.talent.slice(0, 3)" :key="'tf' + ti"><img v-if="t.profile_image" :src="t.profile_image" alt="" loading="lazy" decoding="async"><i v-else v-text="t.name.charAt(0)"></i></template></span>
+                <span class="gk-row-who-faces" aria-hidden="true"><template v-for="(t, ti) in event.talent.slice(0, 3)" :key="'tf' + ti"><img v-if="t.profile_image" :src="t.profile_image" alt="" loading="lazy" decoding="async"><i v-else v-text="(t.name || '').charAt(0)"></i></template></span>
                 <span class="gk-row-who-names"><template v-for="(t, ti) in event.talent" :key="'tn' + ti"><template v-if="ti > 0">, </template><a v-if="t.guest_url" :href="t.guest_url" :target="eventLinkTarget()" @click.stop><bdi v-text="t.name"></bdi></a><bdi v-else v-text="t.name"></bdi></template></span>
             </p>
             {{-- What it costs and whether there is any left, said before anybody has to open the
@@ -88,10 +90,14 @@
         {{-- A large card's picture is shown whole (a flyer's words are at its edges), in a box of
              about its own shape; the same picture, blurred, fills what is left of the box. With no
              picture, the day itself fills the box, so the cards beside it stay one size. --}}
-        <div v-if="(event.image_url || event.flyer_url) && !event.is_password_protected" class="gk-row-media" :style="{ '--gk-ratio': rowRatio(event) }" data-reveal-media>
+        <div v-if="(event.image_url || event.flyer_url) && !event.is_password_protected" class="gk-row-media" :class="{ 'gk-row-media-sized': !!(event.flyer_url && event.flyer_width && event.flyer_height) }" :style="{ '--gk-ratio': rowRatio(event) }" data-reveal-media>
             <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" tabindex="-1" aria-hidden="true">
-                <img class="gk-row-img-fill" :src="event.image_thumb_url || event.image_url || event.flyer_url" alt="" loading="lazy" decoding="async">
-                <img class="gk-row-img" :src="event.image_url || event.flyer_url" :srcset="event.image_srcset || null" sizes="(min-width: 48rem) 28rem, 100vw" :width="event.flyer_url && event.flyer_width ? event.flyer_width : 160" :height="event.flyer_url && event.flyer_height ? event.flyer_height : 160" loading="lazy" decoding="async" alt="">
+                {{-- Both from one request (the same srcset and sizes), and not lazy: with one or two
+                     events this picture is the page's largest, its LCP, unless the header has a
+                     picture of its own (role/show-guest's $hasHeaderImage), which then keeps the
+                     page's one high priority. --}}
+                <img class="gk-row-img-fill" :src="event.image_url || event.flyer_url" :srcset="event.image_srcset || null" sizes="(min-width: 48rem) 28rem, 100vw" alt="" decoding="async">
+                <img class="gk-row-img" :src="event.image_url || event.flyer_url" :srcset="event.image_srcset || null" sizes="(min-width: 48rem) 28rem, 100vw" :width="event.flyer_url && event.flyer_width ? event.flyer_width : 160" :height="event.flyer_url && event.flyer_height ? event.flyer_height : 160" @unless ($hasHeaderImage ?? false) fetchpriority="high" @endunless decoding="async" alt="">
             </a>
         </div>
         <div v-else class="gk-row-media gk-row-media-day" aria-hidden="true">

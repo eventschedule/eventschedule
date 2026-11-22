@@ -433,7 +433,8 @@
         .gk-factrow > .gk-fact-cell:not(.gk-fact-cell-wide) { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); column-gap: .75rem; row-gap: .125rem; align-items: start; padding-block: .875rem; }
         .gk-factrow > .gk-fact-cell:not(.gk-fact-cell-wide)::before { grid-row: 1 / span 6; padding-top: .1875rem; }
         .gk-factrow > .gk-fact-cell:not(.gk-fact-cell-wide) > * { grid-column: 2; }
-        .gk-factrow > .gk-fact-cell + .gk-fact-cell:not(.gk-fact-cell-wide) { border-top: 1px solid var(--gk-line); }
+        {{-- ~, not +: the "More dates" block between two cells is not a cell, and hid the line. --}}
+        .gk-factrow > .gk-fact-cell ~ .gk-fact-cell:not(.gk-fact-cell-wide) { border-top: 1px solid var(--gk-line); }
     }
 
     {{-- The schedule's rows on a phone: tighter, so a screen holds as many days as before. --}}
@@ -465,6 +466,8 @@
     @media (max-width: 39.99rem) { .gk-factrow { border-bottom: 0; } }
     {{-- A link that wraps keeps its chevron on its last line. --}}
     .gk-fact-cell a.group { display: inline; }
+    {{-- Tailwind's base makes an svg a block, which broke the line after the venue's name. --}}
+    .gk-fact-cell a.group svg { display: inline-block; vertical-align: middle; }
     {{-- The phone's buy bar: the page's own type and ground. --}}
     .gk-phonebar { background: var(--gk-stage-raised); border-color: color-mix(in srgb, var(--gk-stage-ink) 14%, transparent); color: var(--gk-stage-ink); font-family: inherit; }
     {{-- The row of things a visitor can do (Gift cards, Submit event): compact, the size of their
@@ -528,6 +531,7 @@
         .gk-stage .gk-head-facts { align-self: start; margin-top: .25rem; gap: .125rem .875rem; font-size: .875rem; }
         .gk-stage .gk-head-tagline { margin-top: .875rem; }
         .gk-stage .gk-head-actions { display: flex; gap: .625rem; margin: 1.25rem 0 0; }
+        .gk-stage .gk-head:not(.gk-head-logoed) .gk-head-actions { margin-inline-start: 0; }
         .gk-stage .gk-head-acts-rest { display: none; }
         .gk-stage .gk-head-actions > .gk-btn:not(.gk-btn-icon), .gk-stage .gk-head-actions > a.gk-btn:not(.gk-btn-icon) { flex: 1 1 auto; min-height: 3rem; border-radius: .875rem; font-size: 1rem; }
         {{-- Share in words beside the full-width main button (his ask: wider, with a label). --}}
@@ -582,7 +586,7 @@
         .gk-few-2 .gk-row-title { font-size: 1.75rem; }
         .gk-few-1 .gk-row, .gk-few-1 .gk-row:not(.gk-row-bare) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, min(27rem, 45%)); grid-template-areas: ". i" "d i" "t i" "b i" ". i"; grid-template-rows: 1fr auto auto auto 1fr; }
         .gk-few-1 .gk-row-media { grid-area: i; align-self: stretch; height: auto; max-height: none; }
-        .gk-few-1 .gk-row-media-day { aspect-ratio: 4 / 5; }
+        .gk-few-1 .gk-row-media-day { aspect-ratio: 4 / 3; }
         .gk-few-1 .gk-row-media-day b { font-size: 6rem; }
         .gk-few-1 .gk-row-day { grid-area: d; padding: 2.5rem 2.5rem 0; font-size: 1.25rem; }
         .gk-few-1 .gk-row-time { grid-area: t; padding: .25rem 2.5rem 0; font-size: 1.125rem; }
@@ -606,7 +610,8 @@
     .gk-btn-primary:active, .gk-sub-btn:active, .gk-fill-btn:active, .gk-btn-secondary:active, .gk-head-tool:active, .gk-cta-alt:active, .gk-cta-icon:active, .accent-hover-btn:active { transform: scale(.985); }
     {{-- The well alone moved a dark sheet's button by some seven shades, which nobody sees, so
          an outlined button's hover mixes in a tenth of the ink and firms its edge. --}}
-    .gk-btn-secondary:hover, .gk-head-tool:hover, .gk-cta-alt:hover, .gk-cta-icon:hover, .accent-hover-btn:hover, .gk-card-btn:hover, .gk-few .gk-row-item:hover .gk-row-more { background: color-mix(in srgb, var(--gk-ink) 10%, var(--gk-solid)); border-color: color-mix(in srgb, var(--gk-ink) 30%, transparent); }
+    .gk-btn-secondary:hover, .gk-head-tool:hover, .gk-cta-alt:hover, .gk-cta-icon:hover, .accent-hover-btn:hover, .gk-card-btn:hover { background: color-mix(in srgb, var(--gk-ink) 10%, var(--gk-solid)); border-color: color-mix(in srgb, var(--gk-ink) 30%, transparent); }
+    {{-- A large card's button answers with its edge alone: a tint under accent text fell below 4.5:1. --}}
     .gk-few .gk-row-item:hover .gk-row-more { border-color: var(--es-accent-readable); }
     .gk-head-seg-btn:not([aria-pressed="true"]):hover { background: color-mix(in srgb, var(--gk-ink) 10%, transparent); color: var(--gk-ink); }
     .es-foot-link { display: inline-flex; align-items: center; gap: .375rem; transition: color var(--gk-swap, 120ms); }
@@ -616,4 +621,23 @@
     {{-- The privacy link's mark, in colour beside the credit's: the same 1rem tile, a shield. --}}
     .es-foot-mark { display: inline-grid; flex: none; place-items: center; width: 1rem; height: 1rem; border-radius: 5px; background: linear-gradient(135deg, #059669, #34d399); color: #ffffff; }
     .es-foot-mark svg { width: .6875rem; height: .6875rem; }
+    {{-- A picture whose size was never recorded keeps its own shape on a phone, where a stacked
+         card has no neighbour to match (a landscape photo stood in a poster's box between two
+         blurred bands). --}}
+    @media (max-width: 47.99rem) {
+        .gk-few .gk-row-media:not(.gk-row-media-sized):not(.gk-row-media-day) { aspect-ratio: auto; }
+        .gk-few .gk-row-media:not(.gk-row-media-sized) .gk-row-img { height: auto; max-height: 36rem; }
+    }
+    {{-- Review fixes (2026-11-22). The checkout's bar bleeds by the band's own padding, which is a
+         clamp; a fixed -2rem covered the band's edge between a tablet and a laptop. --}}
+    @media (min-width: 40rem) { .gk-band .gk-buybar { margin-inline: calc(-1 * clamp(1.25rem, 3vw, 2rem)); margin-bottom: calc(-1 * clamp(1.25rem, 3vw, 2rem)); } }
+    {{-- The List / Calendar switch says which is on in a way that can be seen (the pressed fill was
+         1.1:1 against its track). --}}
+    .gk-head-seg-btn[aria-pressed="true"], .gk-stage .gk-head-seg-btn[aria-pressed="true"] { background: var(--gk-ink); color: var(--gk-stage); box-shadow: none; }
+    {{-- A text field's edge holds 3:1 on the stage (ink at 14% was 1.3 to 1.5:1). --}}
+    .gk-stage :is(.gk-input, .gk-pg-input) { border-color: color-mix(in srgb, var(--gk-ink) 50%, transparent); }
+    {{-- The event page's own controls draw the kit's ring, not the browser's blue, which was under
+         3:1 on the dark stage; and a dark page tells the browser so, for its own controls. --}}
+    :is(.gk-cta-main, .gk-cta-alt, .gk-cta-icon, .gk-card-btn, .gk-chip-link, .gk-crumbs a, .gk-up-all):focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    :where(.dark) .gk-stage { color-scheme: dark; }
 </style>

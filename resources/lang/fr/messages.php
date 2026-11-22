@@ -8482,4 +8482,5 @@ return [
     'page_style_light' => 'Clair',
     'page_style_dark' => 'Sombre',
     'page_style_help' => 'Automatique utilise un style clair lorsque l\'arrière-plan est une couleur ou un dégradé clair, et un style sombre sinon. Ou choisissez l\'une des trois palettes claires ou des trois palettes sombres.',
+    'day_event_count' => '{1} :count événement|[2,*] :count événements',
 ];

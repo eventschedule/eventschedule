@@ -124,6 +124,16 @@
         if ($bgGlow) {
             $showMobileBackground = true;
         }
+        // A photo as the glow is the page's LCP element on a phone, so it is preloaded there, by
+        // the URL partials/guest-background-css paints at that width (the schedule page used to
+        // pass it for its own banner; without it a phone waited some 2.5s longer for it).
+        // The schedule page only (an event page's own flyer is its LCP, and already asked for
+        // first), and only under a header with no picture of its own, which is then the LCP
+        // (role/show-guest's $hasHeaderImage, logo walls aside).
+        $headerPictured = ! in_array($role->header_image, \App\Models\Role::HEADER_IMAGE_KEYWORDS, true) && ($role->header_image || $role->header_image_url);
+        if ($bgGlow && ! $bgGlowColor && $bg->background === 'image' && ! request()->graphic && ! ($event && $event->exists) && ! $headerPictured) {
+            $mobileBannerImage ??= $bg->backgroundImageUrl(960, pageWidth: true);
+        }
         if ($stageGround && ! $auroraGlow && ! ($bgGlow && ! $bgGlowColor)) {
             $bgLayer = false;
             $bgAurora = null;
@@ -146,6 +156,22 @@
              desktop from fetching a phone's image it will never paint. --}}
         @if ($mobileBannerImage)
         <link rel="preload" as="image" href="{{ $mobileBannerImage }}" media="(max-width: 767px)" fetchpriority="high">
+        @endif
+        @php
+            // With one or two coming events the list draws them as large cards (role/partials/
+            // calendar, .gk-few), and the first card's flyer is the page's LCP: asked for here, by
+            // the srcset and sizes the card uses, so it does not wait for the list's script and
+            // its fetch. $upcoming is looked up for the schedule page only.
+            $fewLead = null;
+            if ($upcoming && ! $headerPictured && ! request()->embed && ! request()->graphic && $upcoming->count() >= 1 && $upcoming->count() <= 2) {
+                $fewLead = $upcoming->first()['event'] ?? null;
+                if ($fewLead && ! $fewLead->getImageUrl()) {
+                    $fewLead = null;
+                }
+            }
+        @endphp
+        @if ($fewLead)
+        <link rel="preload" as="image" href="{{ $fewLead->getImageUrl() }}" @if ($fewLead->imageSrcset()) imagesrcset="{{ $fewLead->imageSrcset() }}" imagesizes="(min-width: 48rem) 28rem, 100vw" @endif fetchpriority="high">
         @endif
 
         {{-- The schedule half is Role::isIndexableHost(), the same rule both sitemaps apply, so
@@ -398,7 +424,9 @@
         .gp-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgb(255 255 255 / .66), rgb(255 255 255 / .86) 16rem); }
         {{-- Dark: a deep scrim of the page's own ground, so a light photo never turns into a grey
              wash under white words. --}}
-        :where(.dark) .gp-bg::after { background: linear-gradient(to bottom, color-mix(in srgb, var(--gk-stage) 55%, transparent), color-mix(in srgb, var(--gk-stage) 86%, transparent) 18rem); }
+        {{-- The rgb() first for a browser without color-mix(), which would otherwise drop the rule
+             and keep the light wash over a dark page. --}}
+        :where(.dark) .gp-bg::after { background: linear-gradient(to bottom, rgb(13 26 34 / .55), rgb(13 26 34 / .86) 18rem); background: linear-gradient(to bottom, color-mix(in srgb, var(--gk-stage) 55%, transparent), color-mix(in srgb, var(--gk-stage) 86%, transparent) 18rem); }
         @media (max-width: 767.98px) { .gp-bg { display: block; } }
         {{-- The page under the glow is the ink, never the background's own base colour (a
              gradient sets one on body), which flooded the page below the glow. --}}

@@ -77,17 +77,23 @@ class GuestImagePerformanceTest extends TestCase
     // ------------------------------------------------------------ schedule page
 
     /**
-     * Since the 2026-11 redesign no page paints its background as a phone banner: it is the glow
-     * across the top of the page, never the largest paint, so nothing preloads it. The glow
-     * still uses the derivatives, never the original.
+     * Since the 2026-11 redesign the background is the glow across the top of the page, and a
+     * photo there is still the schedule page's largest paint on a phone (measured: some 2.5s later
+     * without the preload), so the schedule page preloads the phone's derivative. An event page's
+     * flyer is its LCP, and an embed draws no glow. The glow uses the derivatives, never the
+     * original.
      */
-    public function test_no_page_preloads_its_background_and_the_glow_uses_the_derivatives(): void
+    public function test_the_schedule_page_preloads_its_glow_photo_for_a_phone(): void
     {
         $role = $this->scheduleWithUploadedBackground();
         $this->recordBackgroundVariants($role);
         $event = $this->createEvent($role, ['name' => 'Autumn Session', 'creator_role_id' => $role->id]);
 
-        foreach (['/'.$role->subdomain, $this->guestEventUrl($role, $event), '/'.$role->subdomain.'?embed=true'] as $path) {
+        $this->assertStringContainsString(
+            '<link rel="preload" as="image" href="'.url('/storage/background_abc_w960.webp').'" media="(max-width: 767px)" fetchpriority="high">',
+            $this->page('/'.$role->subdomain)
+        );
+        foreach ([$this->guestEventUrl($role, $event), '/'.$role->subdomain.'?embed=true'] as $path) {
             $this->assertStringNotContainsString('rel="preload" as="image"', $this->page($path), $path);
         }
 
@@ -565,9 +571,9 @@ class GuestImagePerformanceTest extends TestCase
             $this->assertStringNotContainsString('background_anim_w', $html, $label);
         }
 
-        // No phone banner and no preload since the 2026-11 redesign (the background is the glow).
+        // The schedule page preloads its glow for a phone, and an animated upload is its original.
         $html = $this->page('/'.$act->subdomain);
-        $this->assertStringNotContainsString('rel="preload" as="image"', $html);
+        $this->assertStringContainsString('<link rel="preload" as="image" href="'.$original.'" media="(max-width: 767px)"', $html);
 
         // The layout's last rule, another schedule's background for a page with no phone banner.
         // No page hands the layout another schedule without one today, so it is rendered directly.

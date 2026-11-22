@@ -190,17 +190,17 @@
                 @if ($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
                 <div class="gk-head-social">
                     @if ($hasEmail)
-                    <a href="mailto:{{ $role->email }}" class="gk-head-social-link social-tooltip" data-tooltip="Email: {{ $role->email }}" aria-label="Email: {{ $role->email }}"><span class="gk-head-social-word">{{ __('messages.email') }}</span>
+                    <a href="mailto:{{ $role->email }}" class="gk-head-social-link social-tooltip" data-tooltip="{{ __('messages.email') }}: {{ $role->email }}" aria-label="{{ __('messages.email') }}: {{ $role->email }}"><span class="gk-head-social-word">{{ __('messages.email') }}</span>
                         <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.17157 5.17157C2 6.34315 2 8.22876 2 12C2 15.7712 2 17.6569 3.17157 18.8284C4.34315 20 6.22876 20 10 20H14C17.7712 20 19.6569 20 20.8284 18.8284C22 17.6569 22 15.7712 22 12C22 8.22876 22 6.34315 20.8284 5.17157C19.6569 4 17.7712 4 14 4H10C6.22876 4 4.34315 4 3.17157 5.17157ZM18.5762 7.51986C18.8413 7.83807 18.7983 8.31099 18.4801 8.57617L16.2837 10.4066C15.3973 11.1452 14.6789 11.7439 14.0448 12.1517C13.3843 12.5765 12.7411 12.8449 12 12.8449C11.2589 12.8449 10.6157 12.5765 9.95518 12.1517C9.32112 11.7439 8.60271 11.1452 7.71636 10.4066L5.51986 8.57617C5.20165 8.31099 5.15866 7.83807 5.42383 7.51986C5.68901 7.20165 6.16193 7.15866 6.48014 7.42383L8.63903 9.22291C9.57199 10.0004 10.2197 10.5384 10.7666 10.8901C11.2959 11.2306 11.6549 11.3449 12 11.3449C12.3451 11.3449 12.7041 11.2306 13.2334 10.8901C13.7803 10.5384 14.428 10.0004 15.361 9.22291L17.5199 7.42383C17.8381 7.15866 18.311 7.20165 18.5762 7.51986Z"/></svg>
                     </a>
                     @endif
                     @if ($hasPhone)
-                    <a href="tel:{{ $role->phone }}" class="gk-head-social-link social-tooltip" data-tooltip="Phone: {{ $role->phone }}" aria-label="Phone: {{ $role->phone }}"><span class="gk-head-social-word">{{ __('messages.phone') }}</span>
+                    <a href="tel:{{ $role->phone }}" class="gk-head-social-link social-tooltip" data-tooltip="{{ __('messages.phone') }}: {{ $role->phone }}" aria-label="{{ __('messages.phone') }}: {{ $role->phone }}"><span class="gk-head-social-word">{{ __('messages.phone') }}</span>
                         <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                     </a>
                     @endif
                     @if ($hasWebsite)
-                    <a href="{{ $websiteHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="Website: {{ App\Utils\UrlUtils::clean($role->website) }}" aria-label="Website: {{ App\Utils\UrlUtils::clean($role->website) }}"><span class="gk-head-social-word">{{ __('messages.website') }}</span>
+                    <a href="{{ $websiteHref }}" target="_blank" rel="noopener noreferrer nofollow" class="gk-head-social-link social-tooltip" data-tooltip="{{ __('messages.website') }}: {{ App\Utils\UrlUtils::clean($role->website) }}" aria-label="{{ __('messages.website') }}: {{ App\Utils\UrlUtils::clean($role->website) }}"><span class="gk-head-social-word">{{ __('messages.website') }}</span>
                         <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C17.52 2 22 6.48 22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z"/></svg>
                     </a>
                     @endif

@@ -2,11 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Models\CustomDomainSetting;
+use App\Models\GuestPageSetting;
 use App\Models\Role;
+use App\Models\TicketPreset;
+use App\Models\TicketReminderSetting;
 use App\Rules\NoFakeEmail;
 use App\Rules\SquareImage;
 use App\Rules\UsableTimezone;
 use App\Services\TicketPresets;
+use App\Services\TranslationGlossary;
+use App\Utils\Aurora;
+use App\Utils\CustomFieldUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\TimezoneUtils;
 use App\Utils\UrlUtils;
@@ -201,13 +208,13 @@ class RoleUpdateRequest extends FormRequest
             ],
             // Which address a directly served domain's schedule calls its main one
             // (custom_domain_settings, saved by RoleController::update()).
-            'custom_domain_main_address' => ['nullable', 'string', 'in:'.implode(',', \App\Models\CustomDomainSetting::VALUES)],
+            'custom_domain_main_address' => ['nullable', 'string', 'in:'.implode(',', CustomDomainSetting::VALUES)],
             'profile_image' => ['image', 'max:2500', new SquareImage],
             'background_image_url' => ['image', 'max:2500'],
             // What `roles.background` can hold: anything else used to reach the ENUM and fail the
             // save there. Aurora's own fields go to aurora_settings (App\Utils\Aurora).
-            'background' => ['sometimes', 'string', Rule::in(\App\Models\Role::BACKGROUNDS)],
-            'aurora_palette' => ['nullable', 'string', Rule::in(array_merge(array_keys(\App\Utils\Aurora::PALETTES), \App\Utils\Aurora::SPECIAL_PALETTES))],
+            'background' => ['sometimes', 'string', Rule::in(Role::BACKGROUNDS)],
+            'aurora_palette' => ['nullable', 'string', Rule::in(array_merge(array_keys(Aurora::PALETTES), Aurora::SPECIAL_PALETTES))],
             'aurora_seed' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'aurora_color1' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'aurora_color2' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
@@ -273,11 +280,12 @@ class RoleUpdateRequest extends FormRequest
             // 1. An empty value used to pass as null and 500 on the UPDATE.
             'show_subscribe_panel' => ['sometimes', 'boolean'],
             'show_sponsors' => ['sometimes', 'boolean'],
+            'page_mode' => ['nullable', Rule::in(GuestPageSetting::MODES)],
             'show_venues_map' => ['sometimes', 'boolean'],
             'show_next_event' => ['sometimes', 'boolean'],
             'ticket_reminders_enabled' => ['sometimes', 'boolean'],
             'ticket_reminders_shown' => ['sometimes', 'boolean'],
-            'ticket_reminders_hours' => ['sometimes', 'integer', 'in:'.implode(',', \App\Models\TicketReminderSetting::HOURS_OPTIONS)],
+            'ticket_reminders_hours' => ['sometimes', 'integer', 'in:'.implode(',', TicketReminderSetting::HOURS_OPTIONS)],
             'venues_map_open' => ['sometimes', 'boolean'],
             'show_event_interest' => ['sometimes', 'boolean'],
             'default_category_id' => ['nullable', 'integer', $allowedDefaultIds ? 'in:'.implode(',', $allowedDefaultIds) : 'in:'.implode(',', array_keys(config('app.event_categories', [])))],
@@ -301,11 +309,11 @@ class RoleUpdateRequest extends FormRequest
             'gift_cards_enabled' => ['nullable', 'boolean'],
             // Details > Translation glossary (App\Services\TranslationGlossary::save(), which drops
             // empty rows and repeats).
-            'glossary' => ['nullable', 'array', 'max:'.\App\Services\TranslationGlossary::MAX_ENTRIES],
-            'glossary.*.term' => ['nullable', 'string', 'max:'.\App\Services\TranslationGlossary::MAX_LENGTH],
-            'glossary.*.translation' => ['nullable', 'string', 'max:'.\App\Services\TranslationGlossary::MAX_LENGTH],
-            'glossary_seen' => ['nullable', 'array', 'max:'.\App\Services\TranslationGlossary::MAX_ENTRIES],
-            'glossary_seen.*' => ['nullable', 'string', 'max:'.\App\Services\TranslationGlossary::MAX_LENGTH],
+            'glossary' => ['nullable', 'array', 'max:'.TranslationGlossary::MAX_ENTRIES],
+            'glossary.*.term' => ['nullable', 'string', 'max:'.TranslationGlossary::MAX_LENGTH],
+            'glossary.*.translation' => ['nullable', 'string', 'max:'.TranslationGlossary::MAX_LENGTH],
+            'glossary_seen' => ['nullable', 'array', 'max:'.TranslationGlossary::MAX_ENTRIES],
+            'glossary_seen.*' => ['nullable', 'string', 'max:'.TranslationGlossary::MAX_LENGTH],
             'gift_card_amounts' => ['nullable', 'array', 'max:12'],
             'gift_card_amounts.*' => ['nullable', 'numeric', 'gt:0', 'max:99999'],
             'gift_card_currency_code' => ['nullable', 'string', 'size:3'],
@@ -375,7 +383,7 @@ class RoleUpdateRequest extends FormRequest
                 return;
             }
 
-            foreach (\App\Services\TranslationGlossary::duplicates($this->input('glossary')) as $index => $earlier) {
+            foreach (TranslationGlossary::duplicates($this->input('glossary')) as $index => $earlier) {
                 $validator->errors()->add('glossary.'.$index.'.term', __('messages.glossary_duplicate', ['term' => $earlier]));
             }
         });
@@ -403,7 +411,7 @@ class RoleUpdateRequest extends FormRequest
             foreach ($rows as $i => $row) {
                 $raw = ! empty($row['id']) ? UrlUtils::decodeId((string) $row['id']) : null;
                 $kind = $row['kind'] ?? ($raw ? $stored->get($raw)?->kind : null);
-                if (! in_array($kind, \App\Models\TicketPreset::KINDS, true)) {
+                if (! in_array($kind, TicketPreset::KINDS, true)) {
                     $name = trim((string) ($row['name'] ?? '')) ?: ($raw ? $stored->get($raw)?->label() : '');
                     $validator->errors()->add("ticket_presets.{$i}.kind", __('messages.ticket_preset_needs_kind', ['preset' => $name]));
                 }
@@ -419,7 +427,7 @@ class RoleUpdateRequest extends FormRequest
                     continue;
                 }
 
-                if (! \App\Utils\CustomFieldUtils::isValidPattern($field['regex'])) {
+                if (! CustomFieldUtils::isValidPattern($field['regex'])) {
                     $validator->errors()->add(
                         "event_custom_fields.{$fieldKey}.regex",
                         __('messages.field_regex_invalid')
