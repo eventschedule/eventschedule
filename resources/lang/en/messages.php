@@ -8551,4 +8551,9 @@ return [
     'page_style_help' => 'Automatic uses a light style when your background is a light color or gradient, and a dark one otherwise. Or pick one of the three light or three dark palettes.',
     'day_event_count' => '{1} :count event|[2,*] :count events',
     'page_footer' => 'Footer',
+    'list_image_size' => 'Event pictures in the list',
+    'list_image_size_help' => 'How large each event’s flyer is drawn in the list. With one or two coming events the list shows large cards whatever you pick.',
+    'list_image_small' => 'Small',
+    'list_image_medium' => 'Medium',
+    'list_image_large' => 'Large',
 ];

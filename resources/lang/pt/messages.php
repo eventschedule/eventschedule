@@ -8480,4 +8480,9 @@ return [
     'page_style_help' => 'Automático usa um estilo claro quando o fundo é uma cor ou gradiente claro, e um escuro nos outros casos. Ou escolha uma das três paletas claras ou três escuras.',
     'day_event_count' => '{1} :count evento|[2,*] :count eventos',
     'page_footer' => 'Rodapé',
+    'list_image_size' => 'Imagens dos eventos na lista',
+    'list_image_size_help' => 'O tamanho com que o flyer de cada evento aparece na lista. Com um ou dois eventos futuros, a lista mostra cartões grandes seja qual for a sua escolha.',
+    'list_image_small' => 'Pequenas',
+    'list_image_medium' => 'Médias',
+    'list_image_large' => 'Grandes',
 ];

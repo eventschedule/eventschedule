@@ -232,6 +232,7 @@ class BackupService
         $roleData['guest_page_settings'] = [
             'show_next_event' => (bool) $role->guestPageSetting->show_next_event,
             'page_mode' => $role->guestPageSetting->page_mode ?? 'auto',
+            'list_image_size' => $role->guestPageSetting->list_image_size ?? 'small',
         ];
 
         // When ticket holders are reminded lives beside the schedule too (ticket_reminder_settings).
@@ -2016,6 +2017,9 @@ class BackupService
         }
         if (in_array($data['guest_page_settings']['page_mode'] ?? null, GuestPageSetting::MODES, true)) {
             GuestPageSetting::store($role, ['page_mode' => $data['guest_page_settings']['page_mode']]);
+        }
+        if (in_array($data['guest_page_settings']['list_image_size'] ?? null, GuestPageSetting::LIST_IMAGE_SIZES, true)) {
+            GuestPageSetting::store($role, ['list_image_size' => $data['guest_page_settings']['list_image_size']]);
         }
 
         if (is_array($data['ticket_reminder_settings'] ?? null)) {

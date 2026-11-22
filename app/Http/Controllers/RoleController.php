@@ -7152,6 +7152,9 @@ class RoleController extends Controller
         if (in_array($request->input('page_mode'), GuestPageSetting::MODES, true)) {
             GuestPageSetting::store($role, ['page_mode' => $request->input('page_mode')]);
         }
+        if (in_array($request->input('list_image_size'), GuestPageSetting::LIST_IMAGE_SIZES, true)) {
+            GuestPageSetting::store($role, ['list_image_size' => $request->input('list_image_size')]);
+        }
 
         // The two switches are stored here and not by the fill above: the map's settings have a
         // table of their own, because `roles` cannot take another column. Only on a save that

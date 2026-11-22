@@ -8479,4 +8479,9 @@ return [
     'page_style_help' => 'Automático usa un estilo claro cuando el fondo es un color o degradado claro, y uno oscuro en los demás casos. O elige una de las tres paletas claras o tres oscuras.',
     'day_event_count' => '{1} :count evento|[2,*] :count eventos',
     'page_footer' => 'Pie de página',
+    'list_image_size' => 'Imágenes de eventos en la lista',
+    'list_image_size_help' => 'El tamaño con el que se muestra el flyer de cada evento en la lista. Con uno o dos eventos próximos, la lista muestra tarjetas grandes sea cual sea tu elección.',
+    'list_image_small' => 'Pequeñas',
+    'list_image_medium' => 'Medianas',
+    'list_image_large' => 'Grandes',
 ];

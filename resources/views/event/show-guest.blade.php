@@ -414,7 +414,7 @@
               @if ($event->venue->name)
                 @if ($event->venue->isClaimed())
                   @php
-                    $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
+                    $venuePanelUrl = $event->venue->getGuestUrl(true);
                   @endphp
                   <a href="{{ $venuePanelUrl }}" class="group inline-flex items-center gap-2 w-fit hover:opacity-80 transition-opacity duration-200 {{ $role->isRtl() ? 'rtl' : '' }}">
                     <span class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
@@ -864,7 +864,7 @@
                 @if ($event->venue && $event->venue->nameInLanguage($displayLang))
                   @if ($event->venue->isClaimed())
                     @php
-                      $venueUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
+                      $venueUrl = $event->venue->getGuestUrl(true);
                       $queryParams = [];
                       if (request('category')) $queryParams['category'] = request('category');
                       if (request('schedule')) $queryParams['schedule'] = request('schedule');
@@ -1612,7 +1612,7 @@
                 <div class="rounded-xl w-[100px] h-[100px] -mt-[60px] gk-avatar-frame p-[5px] mb-3">
                   @if ($each->isClaimed())
                     @php
-                      $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
+                      $talentUrl = $each->getGuestUrl(true);
                       $tQueryParams = [];
                       if (request('category')) $tQueryParams['category'] = request('category');
                       if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
@@ -1647,7 +1647,7 @@
               @if ($each->profile_image_url)
                 @if ($each->isClaimed())
                   @php
-                    $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
+                    $talentUrl = $each->getGuestUrl(true);
                     $tQueryParams = [];
                     if (request('category')) $tQueryParams['category'] = request('category');
                     if (request('schedule')) $tQueryParams['schedule'] = request('schedule');
@@ -1683,7 +1683,7 @@
                     @if ($each->isClaimed())
                       @if (!isset($talentUrl))
                         @php
-                          $talentUrl = route('role.view_guest', ['subdomain' => $each->subdomain]);
+                          $talentUrl = $each->getGuestUrl(true);
                           $tQueryParams = [];
                           if (request('category')) $tQueryParams['category'] = request('category');
                           if (request('schedule')) $tQueryParams['schedule'] = request('schedule');

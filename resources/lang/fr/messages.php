@@ -8484,4 +8484,9 @@ return [
     'page_style_help' => 'Automatique utilise un style clair lorsque l\'arrière-plan est une couleur ou un dégradé clair, et un style sombre sinon. Ou choisissez l\'une des trois palettes claires ou des trois palettes sombres.',
     'day_event_count' => '{1} :count événement|[2,*] :count événements',
     'page_footer' => 'Pied de page',
+    'list_image_size' => 'Images des événements dans la liste',
+    'list_image_size_help' => 'La taille à laquelle l’affiche de chaque événement est montrée dans la liste. Avec un ou deux événements à venir, la liste affiche de grandes cartes quel que soit votre choix.',
+    'list_image_small' => 'Petites',
+    'list_image_medium' => 'Moyennes',
+    'list_image_large' => 'Grandes',
 ];

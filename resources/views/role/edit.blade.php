@@ -2698,6 +2698,23 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('show_next_event')" />
                             </div>
 
+                            {{-- How large each event's picture is in the list (GuestPageSetting::LIST_IMAGE_SIZES,
+                                 the stage's .gk-img-m / .gk-img-l). Stored in guest_page_settings. --}}
+                            @php $listImageSize = old('list_image_size', $role->guestPageSetting->list_image_size ?? 'small'); @endphp
+                            <fieldset class="mb-6">
+                                <legend class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.list_image_size') }}</legend>
+                                <div class="event-pills flex-wrap mt-2">
+                                    @foreach (\App\Models\GuestPageSetting::LIST_IMAGE_SIZES as $sizeKey)
+                                    <label class="event-pill" for="list_image_size_{{ $sizeKey }}">
+                                        <input type="radio" id="list_image_size_{{ $sizeKey }}" name="list_image_size" value="{{ $sizeKey }}" {{ $listImageSize === $sizeKey ? 'checked' : '' }} class="sr-only">
+                                        <span>{{ __('messages.list_image_'.$sizeKey) }}</span>
+                                    </label>
+                                    @endforeach
+                                </div>
+                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.list_image_size_help') }}</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('list_image_size')" />
+                            </fieldset>
+
                         {{-- Event animation: how event cards arrive as visitors scroll the schedule
                              (resources/css/list-reveal.css). The radios are plain Blade so the form
                              posts without JS; the island above them plays the chosen design on the

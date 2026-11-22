@@ -236,6 +236,12 @@
          beside the name, the way to follow and share at the end of that row; then what it is,
          the facts and the links as chips. --}}
     .gk-stage .gk-head { --gk-head-pad: 0; --gk-head-logo: 4.75rem; --gk-head-name: clamp(2.25rem, 1.5rem + 3vw, 3.75rem); border-radius: 0; }
+    {{-- A washed header draws a tinted panel, so its content keeps off the panel's edges (with no
+         gutter the logo and the share button touched them). --}}
+    .gk-stage .gk-head-washed { --gk-head-pad: clamp(1.25rem, 3vw, 2.25rem); }
+    {{-- The language switch, in the page's own column (layouts/app-guest sets --gk-col): its end
+         is the header panel's end. --}}
+    .gk-langbar { box-sizing: border-box; display: flex; justify-content: flex-end; width: 100%; padding: 1rem max(clamp(1rem, 4vw, 3.5rem), calc((100% - var(--gk-col, 70rem)) / 2)) 0; }
     .gk-stage .gk-head-stage { border-radius: 1.5rem; }
     .gk-stage :where(.gk-head-pictured) .gk-head-stage { height: clamp(10rem, 24vw, 15rem); }
     .gk-stage .gk-head-body { padding: 1.75rem 0 0; }
@@ -641,4 +647,16 @@
          3:1 on the dark stage; and a dark page tells the browser so, for its own controls. --}}
     :is(.gk-cta-main, .gk-cta-alt, .gk-cta-icon, .gk-card-btn, .gk-chip-link, .gk-crumbs a, .gk-up-all):focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
     :where(.dark) .gk-stage { color-scheme: dark; }
+    {{-- Event pictures in the list (Style > Events, GuestPageSetting::LIST_IMAGE_SIZES): Medium and
+         Large widen the picture's column, and the flyer keeps its own shape at that width. One or
+         two coming events are the large cards (.gk-few) whatever is chosen. --}}
+    @media (min-width: 48rem) {
+        .gk-stage .gk-days.gk-img-m .gk-row:not(.gk-row-bare) { grid-template-columns: 5rem 14rem minmax(0, 1fr); }
+        .gk-stage .gk-days.gk-img-l .gk-row:not(.gk-row-bare) { grid-template-columns: 5rem 18rem minmax(0, 1fr); }
+        .gk-stage .gk-days.gk-img-l .gk-row-title { font-size: 1.625rem; }
+    }
+    @media (max-width: 47.99rem) {
+        .gk-stage .gk-days.gk-img-m .gk-row:not(.gk-row-bare) { grid-template-columns: minmax(0, 1fr) min(10rem, 42%); }
+        .gk-stage .gk-days.gk-img-l .gk-row:not(.gk-row-bare) { grid-template-columns: minmax(0, 1fr) min(13rem, 50%); }
+    }
 </style>

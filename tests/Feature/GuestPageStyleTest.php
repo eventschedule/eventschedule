@@ -63,6 +63,33 @@ class GuestPageStyleTest extends TestCase
         $this->assertSame('midnight', $role->fresh()->guestPageSetting->page_mode);
     }
 
+    /** Style > Events > Event pictures in the list: Small by default, Medium and Large widen the list's picture column. */
+    public function test_the_list_picture_size_is_saved_and_drawn(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $this->createEvent($role, ['name' => 'One', 'creator_role_id' => $role->id]);
+
+        $form = $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
+        $this->assertStringContainsString('name="list_image_size" value="small" checked', $form);
+        $this->assertMatchesRegularExpression('/class="gk-days\s*"/', $this->get('/'.$role->subdomain)->getContent(), 'Small is the list as it was');
+
+        $save = fn (array $extra) => $this->actingAs($owner)->put(route('role.update', ['subdomain' => $role->subdomain]), [
+            'name' => $role->name, 'email' => $role->email, 'timezone' => $role->timezone, 'language_code' => 'en', 'new_subdomain' => $role->subdomain,
+        ] + $extra);
+
+        $save(['list_image_size' => 'large'])->assertRedirect();
+        $this->assertSame('large', $role->fresh()->guestPageSetting->list_image_size);
+        $this->assertStringContainsString('class="gk-days gk-img-l"', $this->get('/'.$role->subdomain)->getContent());
+
+        // A value the form does not offer is refused, and a save without the field keeps it.
+        $save(['list_image_size' => 'huge'])->assertSessionHasErrors('list_image_size');
+        $save([])->assertRedirect();
+        $this->assertSame('large', $role->fresh()->guestPageSetting->list_image_size);
+        $save(['list_image_size' => 'medium']);
+        $this->assertStringContainsString('class="gk-days gk-img-m"', $this->get('/'.$role->subdomain)->getContent());
+    }
+
     /** Every palette's inks, and the accent as text, read on its three grounds whatever the accent. */
     public function test_every_palette_reads_whatever_the_accent(): void
     {

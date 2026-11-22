@@ -8480,4 +8480,9 @@ return [
     'page_style_help' => 'Automaatne kasutab heledat stiili, kui taust on hele värv või gradient, ja muidu tumedat. Või vali üks kolmest heledast või kolmest tumedast paletist.',
     'day_event_count' => '{1} :count sündmus|[2,*] :count sündmust',
     'page_footer' => 'Jalus',
+    'list_image_size' => 'Sündmuste pildid loendis',
+    'list_image_size_help' => 'Kui suurelt iga sündmuse plakatit loendis näidatakse. Kui tulemas on üks või kaks sündmust, näitab loend suuri kaarte olenemata valikust.',
+    'list_image_small' => 'Väikesed',
+    'list_image_medium' => 'Keskmised',
+    'list_image_large' => 'Suured',
 ];

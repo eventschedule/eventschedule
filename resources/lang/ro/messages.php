@@ -8499,4 +8499,9 @@ return [
     'page_style_help' => 'Automat folosește un stil luminos când fundalul este o culoare sau un gradient deschis, iar altfel unul întunecat. Sau alege una dintre cele trei palete luminoase sau trei întunecate.',
     'day_event_count' => ':count eveniment|:count evenimente|:count de evenimente',
     'page_footer' => 'Subsolul paginii',
+    'list_image_size' => 'Imaginile evenimentelor în listă',
+    'list_image_size_help' => 'Cât de mare apare afișul fiecărui eveniment în listă. Cu unul sau două evenimente viitoare, lista arată carduri mari indiferent de alegere.',
+    'list_image_small' => 'Mici',
+    'list_image_medium' => 'Medii',
+    'list_image_large' => 'Mari',
 ];

@@ -106,7 +106,7 @@
         @else
         <div v-if="(event.image_url || event.flyer_url) && !event.is_password_protected" class="gk-row-media" data-reveal-media>
             <a :href="getEventUrl(event)" :target="eventLinkTarget()" @click="onEventLinkClick(event, $event)" tabindex="-1" aria-hidden="true">
-                <img class="gk-row-img" :class="{ 'gk-row-img-square': !event.flyer_url }" :src="event.image_thumb_url || event.image_url || event.flyer_url" :srcset="event.image_srcset || null" sizes="15rem" :width="event.flyer_url && event.flyer_width ? event.flyer_width : 160" :height="event.flyer_url && event.flyer_height ? event.flyer_height : 160" loading="lazy" decoding="async" alt="">
+                <img class="gk-row-img" :class="{ 'gk-row-img-square': !event.flyer_url }" :src="event.image_thumb_url || event.image_url || event.flyer_url" :srcset="event.image_srcset || null" sizes="{{ ($listImageClass ?? '') === 'gk-img-l' ? '18rem' : '15rem' }}" :width="event.flyer_url && event.flyer_width ? event.flyer_width : 160" :height="event.flyer_url && event.flyer_height ? event.flyer_height : 160" loading="lazy" decoding="async" alt="">
             </a>
         </div>
         @endif

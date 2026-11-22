@@ -281,6 +281,7 @@ class RoleUpdateRequest extends FormRequest
             'show_subscribe_panel' => ['sometimes', 'boolean'],
             'show_sponsors' => ['sometimes', 'boolean'],
             'page_mode' => ['nullable', Rule::in(GuestPageSetting::MODES)],
+            'list_image_size' => ['nullable', Rule::in(GuestPageSetting::LIST_IMAGE_SIZES)],
             'show_venues_map' => ['sometimes', 'boolean'],
             'show_next_event' => ['sometimes', 'boolean'],
             'ticket_reminders_enabled' => ['sometimes', 'boolean'],

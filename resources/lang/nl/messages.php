@@ -8481,4 +8481,9 @@ return [
     'page_style_help' => 'Automatisch gebruikt een lichte stijl als de achtergrond een lichte kleur of verloop is, en anders een donkere. Of kies een van de drie lichte of drie donkere paletten.',
     'day_event_count' => '{1} :count evenement|[2,*] :count evenementen',
     'page_footer' => 'Voettekst',
+    'list_image_size' => 'Afbeeldingen van evenementen in de lijst',
+    'list_image_size_help' => 'Hoe groot de flyer van elk evenement in de lijst wordt getoond. Met een of twee komende evenementen toont de lijst grote kaarten, wat je ook kiest.',
+    'list_image_small' => 'Klein',
+    'list_image_medium' => 'Middel',
+    'list_image_large' => 'Groot',
 ];

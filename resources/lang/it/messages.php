@@ -8478,4 +8478,9 @@ return [
     'page_style_help' => 'Automatico usa uno stile chiaro quando lo sfondo è un colore o una sfumatura chiara, altrimenti uno scuro. Oppure scegli una delle tre tavolozze chiare o delle tre scure.',
     'day_event_count' => '{1} :count evento|[2,*] :count eventi',
     'page_footer' => 'Piè di pagina',
+    'list_image_size' => 'Immagini degli eventi nell’elenco',
+    'list_image_size_help' => 'Quanto è grande la locandina di ogni evento nell’elenco. Con uno o due eventi in arrivo, l’elenco mostra schede grandi qualunque sia la tua scelta.',
+    'list_image_small' => 'Piccole',
+    'list_image_medium' => 'Medie',
+    'list_image_large' => 'Grandi',
 ];

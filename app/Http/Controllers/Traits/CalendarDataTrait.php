@@ -10,6 +10,7 @@ use App\Utils\ListWording;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 trait CalendarDataTrait
@@ -139,14 +140,14 @@ trait CalendarDataTrait
             'video_count' => $event->approved_videos_count ?? 0,
             'comment_count' => $event->approved_comments_count ?? 0,
             'photo_count' => $event->approved_photos_count ?? 0,
-            'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
+            'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl(true) ?: null),
             'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent' && (! $guestView || $r->isClaimed()))->map(fn ($r) => [
                 'name' => $r->name,
                 'dir' => content_dir_for_language($r->name, $r->language_code ?: $dirLang),
                 // A 32px avatar and a card-width banner: the card sizes, never the originals.
                 'profile_image' => $r->getProfileImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
                 'header_image' => $r->headerImageUrl(960),
-                'guest_url' => (isset($role) && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
+                'guest_url' => (isset($role) && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl(true) ?: null),
             ])->values()->toArray(),
             'videos' => $event->relationLoaded('approvedVideos') ? $event->approvedVideos->take(3)->map(fn ($v) => [
                 'youtube_url' => $v->youtube_url,
@@ -269,7 +270,7 @@ trait CalendarDataTrait
      * Cut a list that was fetched with one row to spare back to its cap, and say whether it was
      * cut. The row cap used to be silent: the list simply ended, as though the schedule did.
      *
-     * @return array{0: \Illuminate\Support\Collection, 1: bool}
+     * @return array{0: Collection, 1: bool}
      */
     protected function capListEvents($events, int $cap): array
     {

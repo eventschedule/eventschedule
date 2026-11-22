@@ -660,7 +660,9 @@
             $switcherAuthoredName = isset($switcherLanguages[$role->language_code]) ? __('messages.' . $switcherLanguages[$role->language_code]) : strtoupper($role->language_code);
         @endphp
         @if (! request()->embed && $role->offersTranslation() && ! $hasInlineLangToggle)
-            <div id="gp-language-switcher" class="container mx-auto flex justify-end {{ $isRtl ? 'pl-5' : 'pr-5' }} pt-4">
+            {{-- On the stage the switch keeps to the page's own column (.gk-langbar), so it lines up
+                 with the header panel's edge rather than standing out at the window's. --}}
+            <div id="gp-language-switcher" class="{{ $stageGround ? 'gk-langbar' : 'container mx-auto flex justify-end '.($isRtl ? 'pl-5' : 'pr-5').' pt-4' }}" @if ($stageGround) style="--gk-col: {{ $upcoming !== null ? '60rem' : '70rem' }}" @endif>
                 <div class="gp-lang-switcher flex items-center rounded-full p-1 text-sm shadow-md z-50 {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
                     @if(session()->has('translate') || request()->lang == $switcherTarget)
                         <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium" title="{{ $switcherTargetName }}" aria-label="{{ $switcherTargetName }}">{{ language_badge($switcherTarget, $role->language_code) }}</span>

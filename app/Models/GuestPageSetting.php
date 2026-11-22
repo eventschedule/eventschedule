@@ -13,7 +13,13 @@ use Illuminate\Database\QueryException;
  */
 class GuestPageSetting extends Model
 {
-    public const DEFAULTS = ['show_next_event' => true, 'page_mode' => 'auto'];
+    public const DEFAULTS = ['show_next_event' => true, 'page_mode' => 'auto', 'list_image_size' => 'small'];
+
+    /**
+     * list_image_size: how large each event's picture is drawn in the list (Style > Events), the
+     * stage's .gk-img-m and .gk-img-l. One or two coming events are large cards whatever it says.
+     */
+    public const LIST_IMAGE_SIZES = ['small', 'medium', 'large'];
 
     /**
      * page_mode: how the guest pages are drawn (Style > Background > Page style): 'auto' (light or

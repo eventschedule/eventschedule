@@ -8479,4 +8479,9 @@ return [
     'page_style_help' => 'Automatisch verwendet einen hellen Stil, wenn der Hintergrund eine helle Farbe oder ein heller Verlauf ist, sonst einen dunklen. Oder wählen Sie eine der drei hellen oder drei dunklen Paletten.',
     'day_event_count' => '{1} :count Veranstaltung|[2,*] :count Veranstaltungen',
     'page_footer' => 'Fußzeile',
+    'list_image_size' => 'Veranstaltungsbilder in der Liste',
+    'list_image_size_help' => 'Wie groß der Flyer jeder Veranstaltung in der Liste angezeigt wird. Bei einer oder zwei bevorstehenden Veranstaltungen zeigt die Liste unabhängig von Ihrer Wahl große Karten.',
+    'list_image_small' => 'Klein',
+    'list_image_medium' => 'Mittel',
+    'list_image_large' => 'Groß',
 ];

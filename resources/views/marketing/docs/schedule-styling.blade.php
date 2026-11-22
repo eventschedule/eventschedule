@@ -16,6 +16,7 @@
         <x-doc-nav-link href="#event-layout">Default Layout</x-doc-nav-link>
         <x-doc-nav-link href="#hide-past-events">Hide Past Events</x-doc-nav-link>
         <x-doc-nav-link href="#next-event">Show Next Event</x-doc-nav-link>
+        <x-doc-nav-link href="#list-pictures">Event Pictures in the List</x-doc-nav-link>
         <x-doc-nav-link href="#list-animation">Event Animation</x-doc-nav-link>
         <x-doc-nav-link href="#list-wording">Event List Wording</x-doc-nav-link>
         <x-doc-nav-link href="#custom-css">Custom CSS</x-doc-nav-link>
@@ -69,7 +70,7 @@
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Events</span></td>
-                        <td><a href="#event-layout" class="doc-link">Default Layout</a>, <a href="#hide-past-events" class="doc-link">Hide Past Events</a>, <a href="#next-event" class="doc-link">Show Next Event</a>, <a href="#list-animation" class="doc-link">how event cards arrive</a> as visitors scroll your schedule, and <a href="#list-wording" class="doc-link">how each event is worded</a> on your list</td>
+                        <td><a href="#event-layout" class="doc-link">Default Layout</a>, <a href="#hide-past-events" class="doc-link">Hide Past Events</a>, <a href="#next-event" class="doc-link">Show Next Event</a>, <a href="#list-pictures" class="doc-link">Event Pictures in the List</a>, <a href="#list-animation" class="doc-link">how event cards arrive</a> as visitors scroll your schedule, and <a href="#list-wording" class="doc-link">how each event is worded</a> on your list</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Custom CSS</span></td>
@@ -343,6 +344,17 @@
             Show Next Event
         </h2>
         <p class="text-gray-600 dark:text-gray-300">In the calendar layout, a card above the month names your next event: its picture, its name, when and where, and its tickets, with <strong class="text-gray-900 dark:text-white">Today</strong> or <strong class="text-gray-900 dark:text-white">Tomorrow</strong> beside the date when it is that close. It is always the next event to start, inside the sub-schedule or category the visitor is looking at, and it changes by itself as your events go by; to change what it says, edit that event. The list layout never shows it, because the list opens on your next event itself. To take the card off your page, turn off <strong class="text-gray-900 dark:text-white">Show Next Event</strong> under Hide Past Events in the same <strong class="text-gray-900 dark:text-white">Events</strong> row. It is on until you turn it off, it is free on every plan, and while it is off the closed row says so.</p>
+    </section>
+
+    <!-- Event Pictures in the List -->
+    <section id="list-pictures" class="doc-section">
+        <h2 class="doc-heading">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v13.5a1.5 1.5 0 001.5 1.5z" />
+            </svg>
+            Event Pictures in the List
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300">How large each event's flyer is drawn in the list: <strong class="text-gray-900 dark:text-white">Small</strong> (the default), <strong class="text-gray-900 dark:text-white">Medium</strong> or <strong class="text-gray-900 dark:text-white">Large</strong>. A flyer keeps its own shape at every size, so nothing on it is cut off. When your schedule has only one or two coming events, the list shows them as large cards whatever you pick, so the page never looks empty.</p>
     </section>
 
     <!-- Event Animation -->
