@@ -77,6 +77,34 @@ class CuratorSourcesUiTest extends TestCase
             ->assertDontSee('name="source_schedules_submitted"', false);
     }
 
+    /**
+     * The suggestions are the schedules a curator shares the most events with, and never one with
+     * no name: ordered by name, nameless placeholders came first and drew empty buttons.
+     */
+    public function test_suggested_sources_skip_nameless_schedules_and_lead_with_the_most_shared(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner);
+        $busy = $this->createRole($owner, 'venue', ['name' => 'Zebra Hall']);
+        $quiet = $this->createRole($owner, 'venue', ['name' => 'Alpha Room']);
+        $nameless = $this->createRole($owner, 'venue', ['name' => 'Placeholder']);
+        DB::table('roles')->where('id', $nameless->id)->update(['name' => null]);
+
+        foreach ([$busy, $busy, $busy, $quiet, $nameless] as $venue) {
+            $event = $this->createEvent($venue, ['creator_role_id' => $venue->id]);
+            $event->roles()->syncWithoutDetaching([$curator->id => ['is_accepted' => true]]);
+        }
+
+        $html = $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $curator->subdomain]))->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('data-subdomain="'.$nameless->subdomain.'"', $html, 'a nameless schedule is no suggestion');
+        $busyAt = strpos($html, 'data-subdomain="'.$busy->subdomain.'"');
+        $quietAt = strpos($html, 'data-subdomain="'.$quiet->subdomain.'"');
+        $this->assertNotFalse($busyAt);
+        $this->assertNotFalse($quietAt);
+        $this->assertLessThan($quietAt, $busyAt, 'three shared events come before one, whatever the alphabet says');
+    }
+
     public function test_saving_a_source_links_the_events_and_removing_it_unlinks_them(): void
     {
         $owner = $this->createOwner();

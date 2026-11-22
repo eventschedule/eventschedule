@@ -178,7 +178,8 @@
     .gk-stage .gk-days .gk-row-more { display: inline-flex; gap: .375rem; align-self: flex-end; margin-top: .5rem; font-size: .9375rem; font-weight: 650; color: var(--es-accent-readable); }
     @media (min-width: 48rem) {
         .gk-stage .gk-days .gk-day { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); column-gap: 2rem; align-items: start; }
-        .gk-stage .gk-days .gk-dayhead { position: sticky; top: 1.25rem; flex-direction: column; align-items: flex-start; gap: .25rem; margin: 0; }
+        {{-- Stuck below the slim bar that follows the page down (.gk-headbar, 54px), not under it. --}}
+        .gk-stage .gk-days .gk-dayhead { position: sticky; top: calc(3.375rem + 1.25rem); flex-direction: column; align-items: flex-start; gap: .25rem; margin: 0; }
         .gk-stage .gk-days .gk-dayhead-title { font-size: 1.25rem; font-weight: 750; line-height: 1.2; }
         .gk-stage .gk-days .gk-row:not(.gk-row-bare) { grid-template-columns: 12.5rem minmax(0, 1fr); grid-template-areas: "i t" "i b"; grid-template-rows: auto 1fr; column-gap: 1.5rem; padding-block: 1.25rem; padding-inline: 0 1.5rem; }
         .gk-stage .gk-days .gk-row:not(.gk-row-bare) .gk-row-media { min-height: 11rem; max-height: none; margin: -1.25rem 0; }
@@ -467,7 +468,7 @@
     {{-- A link that wraps keeps its chevron on its last line. --}}
     .gk-fact-cell a.group { display: inline; }
     {{-- Tailwind's base makes an svg a block, which broke the line after the venue's name. --}}
-    .gk-fact-cell a.group svg { display: inline-block; vertical-align: middle; }
+    .gk-fact-cell a.group svg { display: inline-block; vertical-align: middle; margin-inline-start: .25rem; }
     {{-- The phone's buy bar: the page's own type and ground. --}}
     .gk-phonebar { background: var(--gk-stage-raised); border-color: color-mix(in srgb, var(--gk-stage-ink) 14%, transparent); color: var(--gk-stage-ink); font-family: inherit; }
     {{-- The row of things a visitor can do (Gift cards, Submit event): compact, the size of their

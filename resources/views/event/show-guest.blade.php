@@ -885,8 +885,9 @@
                       }
                     @endphp
                     <a href="{{ $venueUrl }}" class="group inline-flex items-center gap-1 w-fit">
-                      <span dir="{{ content_dir_for_language($event->venue->nameInLanguage($displayLang), $displayLang) }}" class="gk-fact-main group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->nameInLanguage($displayLang))) !!}</span>
-                      <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
+                      {{-- No space between the name and the chevron: a line break there let the chevron
+                           drop to a line of its own when the name just filled the column. --}}
+                      <span dir="{{ content_dir_for_language($event->venue->nameInLanguage($displayLang), $displayLang) }}" class="gk-fact-main group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->nameInLanguage($displayLang))) !!}</span><svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                       </svg>
                     </a>

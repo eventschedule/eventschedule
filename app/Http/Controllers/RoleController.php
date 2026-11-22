@@ -5642,11 +5642,26 @@ class RoleController extends Controller
                 ->merge($role->connectedRoleIds('talent'))
                 ->reject(fn ($id) => in_array($id, $alreadySourced));
 
+            // The twelve it shares the most events with, and never one with no name: ordered by
+            // name, the nameless placeholders a calendar import leaves (a random subdomain and a
+            // null name) sorted first and filled every slot with an empty "+" (a curator with 410
+            // connected schedules, 19 of them nameless, 2026-11-22).
             if ($connectedIds->isNotEmpty()) {
+                $shared = DB::table('event_role as mine')
+                    ->join('event_role as theirs', 'theirs.event_id', '=', 'mine.event_id')
+                    ->where('mine.role_id', $role->id)
+                    ->whereIn('theirs.role_id', $connectedIds)
+                    ->groupBy('theirs.role_id')
+                    ->selectRaw('theirs.role_id, COUNT(DISTINCT mine.event_id) AS n')
+                    ->pluck('n', 'theirs.role_id');
+
                 $suggestedSources = Role::whereIn('id', $connectedIds)
-                    ->orderBy('name')
-                    ->limit(12)
-                    ->get(['id', 'subdomain', 'name']);
+                    ->whereNotNull('name')
+                    ->where('name', '!=', '')
+                    ->get(['id', 'subdomain', 'name'])
+                    ->sortBy([fn ($a, $b) => ($shared[$b->id] ?? 0) <=> ($shared[$a->id] ?? 0), fn ($a, $b) => strcmp($a->name, $b->name)])
+                    ->take(12)
+                    ->values();
             }
         }
 
