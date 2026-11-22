@@ -36,6 +36,11 @@ class AppLayout extends Component
          * embed's own ?dark= still wins: its owner knows the colours of the site it sits on.
          */
         public ?string $forceMode = null,
+        /**
+         * The owner picked a palette (not Automatic), so $forceMode is their choice and wins over
+         * the light or dark a visitor carries from the first page of the visit (theme-script).
+         */
+        public bool $modeChosen = false,
         /** Hosts of their own that this guest page links to (GuestTheme::carryHosts()). */
         public array $carryHosts = [],
     ) {}

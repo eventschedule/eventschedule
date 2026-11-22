@@ -70,7 +70,7 @@
                     <template v-if="rowSoldElsewhere(event)">
                         <span v-if="event.ticket_price == 0" class="gk-chip gk-chip-free">{{ $label('free_entry') }}</span>
                         <span v-else class="gk-chip"><bdi v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></bdi></span>
-                        <span v-if="event.ticket_price != 0 && event.coupon_code" class="gk-chip gk-chip-accent">{{ __('messages.coupon_code') }}: <bdi v-text="event.coupon_code"></bdi><template v-if="event.coupon_discount_label"> (<bdi v-text="event.coupon_discount_label"></bdi>)</template></span>
+                        <span v-if="event.ticket_price != 0 && event.coupon_code" class="gk-chip gk-chip-accent"><span class="whitespace-nowrap">{{ __('messages.coupon_code') }}:</span> <bdi v-text="event.coupon_code"></bdi><template v-if="event.coupon_discount_label"> <span class="whitespace-nowrap">(<bdi v-text="event.coupon_discount_label"></bdi>)</span></template></span>
                     </template>
                 </template>
                 <span v-if="event.is_internal" class="gk-chip gk-chip-few">{{ __('messages.internal') }}</span>

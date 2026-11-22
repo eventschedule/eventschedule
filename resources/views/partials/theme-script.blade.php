@@ -107,6 +107,13 @@
                     }
                 }
             } catch (e) {}
+            {{-- A palette the owner picked is their page's mode whatever the visit carried (an owner
+                 who looked at their page in dark, then picked a light palette, kept seeing dark until
+                 the browser closed), and it is what the rest of the visit carries from here. --}}
+            if (@json((bool) ($modeChosen ?? false))) {
+                carried = FORCE_MODE;
+                writeMode(carried);
+            }
             if (!carried) {
                 try { var cm = document.cookie.match(/(?:^|;\s*)es_gp_mode=(light|dark)(?:;|$)/); carried = cm ? cm[1] : null; } catch (e) {}
             }

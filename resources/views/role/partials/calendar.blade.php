@@ -866,7 +866,7 @@
             </div>
             <button v-if="phoneHasEarlierDays && !phoneShowPast" type="button" class="gk-month-earlier" @click="phoneShowPast = true">{{ $label('show_past_events') }}</button>
             @endif
-            <div v-if="phoneGroups.length" class="gk-days {{ $listImageClass }}" :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}">
+            <div v-if="phoneGroups.length" class="gk-days{{ $listImageClass ? ' '.$listImageClass : '' }}" :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}">
                 <section v-for="group in phoneGroups" :key="'pm-' + group.date" :id="'gk-day-' + group.date" class="gk-day" :class="{ 'gk-day-past': group.past }">
                     <div class="gk-panel gk-dayhead">
                         <span v-if="dayWord(group.date)" class="gk-dayhead-word" v-text="dayWord(group.date)"></span>
@@ -1915,7 +1915,7 @@
                     </template>
                 </template>
             </ul>
-            <div v-else-if="allListGroups.length > 0" class="gk-days {{ $listImageClass }}">
+            <div v-else-if="allListGroups.length > 0" class="gk-days{{ $listImageClass ? ' '.$listImageClass : '' }}">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-m-' + group.date">
                     {{-- The end of the upcoming rows, which is above the past ones. --}}
                     <template v-if="groupIndex === firstPastGroupIndex">

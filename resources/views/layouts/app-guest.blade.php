@@ -1,4 +1,4 @@
-<x-app-layout :title="$guestTitle()" realtime-surface="gp" :realtime-role="$role" :realtime-event="$event" :force-mode="request()->embed ? null : \App\Utils\GuestTheme::pageMode($role, $otherRole ?? null, $event ?? null)" :carry-hosts="request()->embed ? [] : \App\Utils\GuestTheme::carryHosts($role, $otherRole ?? null, $event ?? null)">
+<x-app-layout :title="$guestTitle()" realtime-surface="gp" :realtime-role="$role" :realtime-event="$event" :force-mode="request()->embed ? null : \App\Utils\GuestTheme::pageMode($role, $otherRole ?? null, $event ?? null)" :mode-chosen="! request()->embed && \App\Utils\GuestTheme::pagePalette($role, $otherRole ?? null, $event ?? null) !== null" :carry-hosts="request()->embed ? [] : \App\Utils\GuestTheme::carryHosts($role, $otherRole ?? null, $event ?? null)">
 
     <noscript>
       <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-4 text-center text-base">

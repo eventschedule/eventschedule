@@ -63,6 +63,21 @@ class GuestPageStyleTest extends TestCase
         $this->assertSame('midnight', $role->fresh()->guestPageSetting->page_mode);
     }
 
+    /**
+     * A palette the owner picked is their pages' mode whatever the visit carries: an owner who saw
+     * their page in dark and then picked a light palette kept seeing dark until the browser closed.
+     */
+    public function test_a_chosen_palette_beats_the_mode_the_visit_carries(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $this->assertStringContainsString('if (false) {', $this->get('/'.$role->subdomain)->getContent(), 'Automatic follows the visit');
+
+        GuestPageSetting::store($role, ['page_mode' => 'paper']);
+        $html = $this->get('/'.$role->subdomain)->getContent();
+        $this->assertStringContainsString('var FORCE_MODE = "light";', $html);
+        $this->assertStringContainsString('if (true) {', $html, 'a picked palette wins');
+    }
+
     /** Style > Events > Event pictures in the list: Small by default, Medium and Large widen the list's picture column. */
     public function test_the_list_picture_size_is_saved_and_drawn(): void
     {

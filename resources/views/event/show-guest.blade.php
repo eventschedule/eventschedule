@@ -473,7 +473,8 @@
                   <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
                   </svg>
-                  <a href="tel:{{ $event->venue->phone }}" class="text-sm hover:underline">{{ $event->venue->phone }}</a>
+                  {{-- A number reads left to right in every language: in a Hebrew card the + moved to its end. --}}
+                  <a href="tel:{{ $event->venue->phone }}" class="text-sm hover:underline"><bdi dir="ltr">{{ $event->venue->phone }}</bdi></a>
                 </div>
                 @endif
                 @if ($event->venue->website)
@@ -489,10 +490,10 @@
                        value would run on this page. Without a safe link it reads as text. --}}
                   @if ($venueWebsiteHref = \App\Utils\UrlUtils::safeHref($event->venue->website))
                   <x-link href="{{ $venueWebsiteHref }}" target="_blank" :nofollow="true" class="text-sm text-gray-700 dark:text-gray-300 min-w-0 break-all">
-                    {{ App\Utils\UrlUtils::clean($event->venue->website) }}
+                    {{ App\Utils\UrlUtils::shown($event->venue->website) }}
                   </x-link>
                   @else
-                  <span class="text-sm text-gray-700 dark:text-gray-300 min-w-0 break-all">{{ App\Utils\UrlUtils::clean($event->venue->website) }}</span>
+                  <span class="text-sm text-gray-700 dark:text-gray-300 min-w-0 break-all">{{ App\Utils\UrlUtils::shown($event->venue->website) }}</span>
                   @endif
                 </div>
                 @endif
@@ -1588,7 +1589,10 @@
           $canRemoveVideos = auth()->check() && ! is_demo_mode() && auth()->user()->isEditor($role->subdomain);
         @endphp
         @if ($talentMembers->isNotEmpty() || $bareTalent->isNotEmpty())
-        <section class="gk-lineup gk-o6 gk-sec gk-sec-rule" aria-labelledby="es-lineup-title">
+        {{-- With only acts listed by name, the whole section is #gp-talent-list (a published id
+             owners hide in their custom CSS), so hiding it takes the heading too: the heading
+             stood alone over the venue's card, which then read as the act. --}}
+        <section @if ($talentMembers->isEmpty()) id="gp-talent-list" @endif class="gk-lineup gk-o6 gk-sec gk-sec-rule" aria-labelledby="es-lineup-title">
           <h2 id="es-lineup-title" class="gk-label">{{ __('messages.talent') }}</h2>
         {{-- class="contents" so each card stays a direct flex item of the column above and the
              gap-4 spacing is unchanged; the wrapper exists only to give the whole set one id.
@@ -1832,7 +1836,7 @@
              its own claim page where it has one, which is how an act finds out a page exists for
              them without an invitation in hand. --}}
         @if ($bareTalent->isNotEmpty())
-        <div id="gp-talent-list" class="gk-o6 gk-card p-5">
+        <div @if ($talentMembers->isNotEmpty()) id="gp-talent-list" @endif class="gk-o6 gk-card p-5">
           <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
             {{ __('messages.talent') }}
           </h2>

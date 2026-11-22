@@ -531,7 +531,7 @@
         .gk-stage .gk-head-seg-btn[aria-pressed="true"] { color: var(--gk-ink); }
     }
     @media (max-width: 39.99rem) {
-        .gk-stage .gk-head-wrap .gk-head-wrap { grid-template-columns: 4rem minmax(0, 1fr); grid-template-areas: "logo name" "logo facts" "tag tag" "actions actions" "about about" "social social" "tools tools"; column-gap: .875rem; align-items: center; }
+        .gk-stage .gk-head-wrap .gk-head-wrap { grid-template-columns: 4rem minmax(0, 1fr); grid-template-areas: "logo name" "logo facts" "tag tag" "actions actions" "about about" "social social" "more more" "tools tools"; column-gap: .875rem; align-items: center; }
         .gk-stage .gk-head:not(.gk-head-logoed) .gk-head-wrap .gk-head-wrap { grid-template-columns: 0 minmax(0, 1fr); column-gap: 0; }
         .gk-stage .gk-head-logo { width: 4rem; height: 4rem; border-radius: 1rem; }
         .gk-stage .gk-head-name { align-self: end; font-size: 1.875rem; line-height: 1.05; }
@@ -549,6 +549,9 @@
         .gk-stage .gk-head-social-link { width: 2.75rem; height: 2.75rem; border-radius: .75rem; }
         {{-- Gift cards and Submit event share the links' line, at its end. --}}
         .gk-stage .gk-head:has(.gk-head-social) .gk-head-more-actions { grid-area: social; justify-self: end; margin-top: 1rem; }
+        {{-- Four links or more fill the line, and the buttons sat on top of them (six on one
+             schedule's page): then they take a line of their own, at its end. --}}
+        .gk-stage .gk-head:has(.gk-head-social-link:nth-child(4)) .gk-head-more-actions { grid-area: more; justify-self: end; margin-top: .75rem; }
         {{-- With no links on the line, they still keep to its end edge. --}}
         .gk-stage .gk-head:not(:has(.gk-head-social)) .gk-head-more-actions { grid-area: social; justify-self: end; margin-top: 1rem; }
         .gk-stage .gk-head-tools { margin-top: 1.25rem; padding-top: 1rem; }
@@ -659,4 +662,19 @@
         .gk-stage .gk-days.gk-img-m .gk-row:not(.gk-row-bare) { grid-template-columns: minmax(0, 1fr) min(10rem, 42%); }
         .gk-stage .gk-days.gk-img-l .gk-row:not(.gk-row-bare) { grid-template-columns: minmax(0, 1fr) min(13rem, 50%); }
     }
+    {{-- The slim bar that follows the schedule page down keeps to the page's column, as the
+         language switch does (it spread to a 96rem container, wider than everything under it). --}}
+    .gk-headbar > .container { max-width: none; padding-inline: max(clamp(1rem, 4vw, 3.5rem), calc((100% - 60rem) / 2)); }
+    {{-- Between a tablet and a laptop the list's text had some 180px beside the time and the
+         picture: there the way in sits under the text instead of in a column of its own. --}}
+    @media (min-width: 48rem) and (max-width: 63.99rem) {
+        .gk-stage .gk-days .gk-row-body { padding-inline-end: 1.25rem; }
+        .gk-stage .gk-days .gk-row-more { position: static; align-self: flex-start; margin-top: .625rem; transform: none; }
+        .gk-stage .gk-days .gk-row:not(.gk-row-bare) { grid-template-columns: 4.5rem 10rem minmax(0, 1fr); }
+    }
+    {{-- The month runs the page's column, as the list does (the panel kept 4rem of its own each
+         side from a laptop up), and its quick filters take a row of their own under the month's
+         name and arrows instead of squeezing between them. --}}
+    .gk-stage.gk-sched .calendar-panel-border { padding-inline: 0; }
+    .gk-stage .gk-pills-head { order: 10; flex-basis: 100%; }
 </style>

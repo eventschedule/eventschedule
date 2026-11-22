@@ -875,7 +875,7 @@
 
     </script>
 
-    @include('partials.theme-script', ['variants' => $themeVariants ?? false, 'forceMode' => $forceMode ?? null, 'carryDomain' => config('app.hosted') ? _base_domain() : null, 'carryHosts' => $carryHosts ?? []])
+    @include('partials.theme-script', ['variants' => $themeVariants ?? false, 'forceMode' => $forceMode ?? null, 'modeChosen' => $modeChosen ?? false, 'carryDomain' => config('app.hosted') ? _base_domain() : null, 'carryHosts' => $carryHosts ?? []])
 
     {{ isset($head) ? $head : '' }}
 
