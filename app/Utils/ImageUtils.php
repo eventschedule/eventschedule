@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use Aws\Exception\AwsException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use League\Flysystem\UnableToReadFile;
@@ -92,7 +93,7 @@ class ImageUtils
      * Note: The caller is responsible for cleaning up the temporary file after use.
      * Use cleanupUploadedFile() method after the file has been processed.
      */
-    public static function createUploadedFileFromImageData(string $imageData, string $imageUrl, string $tempPrefix = 'event_image_'): \Illuminate\Http\UploadedFile
+    public static function createUploadedFileFromImageData(string $imageData, string $imageUrl, string $tempPrefix = 'event_image_'): UploadedFile
     {
         // Create a temporary file with the image data
         $tempFile = tempnam(sys_get_temp_dir(), $tempPrefix);
@@ -105,7 +106,7 @@ class ImageUtils
         $filename = 'event_image.'.$extension;
 
         // Create UploadedFile object
-        return new \Illuminate\Http\UploadedFile(
+        return new UploadedFile(
             $tempFile,
             $filename,
             $mimeType,
@@ -367,7 +368,8 @@ class ImageUtils
     public static function canDecodePixels(
         int|float $pixels,
         int $ceilingBytes = self::IMAGE_MEMORY_CEILING_BYTES,
-        int $floorPixels = self::VARIANT_MAX_PIXELS
+        int $floorPixels = self::VARIANT_MAX_PIXELS,
+        int $bytesPerPixel = 4
     ): bool {
         // Before any arithmetic, and while $pixels may still be a float: everything below this
         // point is safely inside the integer range.
@@ -381,9 +383,10 @@ class ImageUtils
             return true;
         }
 
-        // 4 bytes per pixel for the truecolor canvas, x2 for allocator overhead and the temp
-        // image created during resampling, plus a fixed slice for the framework itself.
-        $needed = memory_get_usage(true) + ($pixels * 4 * 2) + (16 * 1024 * 1024);
+        // $bytesPerPixel for the decode (4, the truecolor canvas, unless the format holds more:
+        // decodeBytesPerPixel()), x2 for allocator overhead and the temp image created during
+        // resampling, plus a fixed slice for the framework itself.
+        $needed = memory_get_usage(true) + ($pixels * $bytesPerPixel * 2) + (16 * 1024 * 1024);
 
         // The ceiling caps the DECODE, not merely how far we are willing to raise. Checking it
         // after the "already fits" test below would mean a host with memory_limit=-1 (the default
@@ -402,6 +405,25 @@ class ImageUtils
         @ini_set('memory_limit', ((int) ceil($needed / (1024 * 1024))).'M');
 
         return self::parseMemoryLimit((string) ini_get('memory_limit')) >= $needed;
+    }
+
+    /**
+     * What one pixel of $mimeType costs while GD decodes it, for canDecodePixels().
+     *
+     * 4 is the truecolor canvas, and is what a JPEG costs: libjpeg hands GD one scanline at a
+     * time. A PNG costs twice that, because PHP's bundled libgd reads the WHOLE image into a row
+     * buffer (png_read_image()) and only then copies it into the canvas, so both are held at
+     * once. Measured with PHP's bundled GD on a 6250x6250 RGBA PNG: 319MB at the peak of the
+     * decode alone, 8.2 bytes a pixel, against 170MB (4.4) for the same picture as a JPEG.
+     * Budgeted at 4, the x2 that is meant to cover the resample was spent before the resample
+     * began, and a 39MP logo PNG uploaded as a profile photo was admitted at ~370MB inside the
+     * 512MB scheduler container, which the kernel then killed each time the queue picked it up
+     * (Sentry EVENTSCHEDULE-PHP-51, 2026-11-22). libgd strips 16-bit channels and expands to at
+     * most RGBA before it reads, so 4 bytes of row buffer is the most a PNG can add.
+     */
+    public static function decodeBytesPerPixel(?string $mimeType): int
+    {
+        return $mimeType === 'image/png' ? 8 : 4;
     }
 
     /**
@@ -996,7 +1018,7 @@ class ImageUtils
             // Measured, not assumed: canDecodePixels() raises memory_limit where that is all
             // this needs and the platform is willing, so a 20MP flyer gets its derivatives in a
             // console session even though it stays refused inside a pinned 128MB worker.
-            if (! self::canDecodePixels($srcWidth * $srcHeight, $ceilingBytes)) {
+            if (! self::canDecodePixels($srcWidth * $srcHeight, $ceilingBytes, bytesPerPixel: self::decodeBytesPerPixel($mimeType))) {
                 // The header's size, as displayed: too large to decode is not the same as unknown,
                 // and a page can still declare the original's dimensions from it.
                 return $skipAll(
@@ -1214,9 +1236,9 @@ class ImageUtils
             // Determine file extension based on detected format
             $format = self::detectImageFormat($imageData, $imageUrl);
             $extension = self::getImageExtension($format);
-            $filename = strtolower($filenamePrefix.\Illuminate\Support\Str::random(32).'.'.$extension);
+            $filename = strtolower($filenamePrefix.Str::random(32).'.'.$extension);
 
-            $file = new \Illuminate\Http\UploadedFile($tempFile, $filenamePrefix.'.'.$extension);
+            $file = new UploadedFile($tempFile, $filenamePrefix.'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
             return $filename;
@@ -1616,9 +1638,9 @@ class ImageUtils
     /**
      * Clean up temporary file from an UploadedFile object
      *
-     * @param  \Illuminate\Http\UploadedFile  $file  The uploaded file to clean up
+     * @param  UploadedFile  $file  The uploaded file to clean up
      */
-    public static function cleanupUploadedFile(\Illuminate\Http\UploadedFile $file): void
+    public static function cleanupUploadedFile(UploadedFile $file): void
     {
         $path = $file->getRealPath();
         if ($path && file_exists($path)) {

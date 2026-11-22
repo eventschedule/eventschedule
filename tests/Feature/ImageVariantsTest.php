@@ -258,9 +258,9 @@ class ImageVariantsTest extends TestCase
      * file. Three tests here were originally pinned to a flat '512M', passed under --filter, and
      * failed in `php artisan test`.
      */
-    private function budgetFor(int $pixels, int $slackMb = 64): int
+    private function budgetFor(int $pixels, int $slackMb = 64, int $bytesPerPixel = 4): int
     {
-        return memory_get_usage(true) + ($pixels * 4 * 2) + (16 * 1024 * 1024) + ($slackMb * 1024 * 1024);
+        return memory_get_usage(true) + ($pixels * $bytesPerPixel * 2) + (16 * 1024 * 1024) + ($slackMb * 1024 * 1024);
     }
 
     private function pinMemoryLimit(int $bytes): string
@@ -457,7 +457,7 @@ class ImageVariantsTest extends TestCase
 
     public function test_only_the_background_asks_for_the_widest_width(): void
     {
-        $role = new \App\Models\Role;
+        $role = new Role;
 
         $this->assertSame([960, 1920, 3840], $role->imageVariantWidths('background'));
         $this->assertSame([960, 1920], $role->imageVariantWidths('header'));
@@ -523,7 +523,8 @@ class ImageVariantsTest extends TestCase
         // header-only fixtures have no pixel data behind them.
         $this->storeOversizedHeader('flyer_big.png', 5000, 4000);
 
-        $budget = $this->budgetFor(20_000_000);
+        // At a PNG's own cost per pixel (ImageUtils::decodeBytesPerPixel()).
+        $budget = $this->budgetFor(20_000_000, bytesPerPixel: 8);
         $previous = ini_get('memory_limit');
         $this->pinMemoryLimit($budget);
 
@@ -535,6 +536,37 @@ class ImageVariantsTest extends TestCase
 
         $this->assertFalse($result['ok']);
         $this->assertSame('unreadable', $result['reason']);
+    }
+
+    public function test_a_png_is_budgeted_at_what_gd_holds_while_it_decodes_one(): void
+    {
+        // PHP's bundled libgd reads a whole PNG into a row buffer before it fills the canvas, so a
+        // PNG holds twice what a JPEG of the same size does (measured: 8.2 bytes a pixel against
+        // 4.4). Budgeted like a JPEG, a 6250x6250 logo PNG was admitted at ~370MB in the 512MB
+        // scheduler container, which the kernel killed every time the queue picked the job up
+        // (Sentry EVENTSCHEDULE-PHP-51). The same budget and the same size, in both formats:
+        // the JPEG is admitted (and fails on its missing pixel data), the PNG is refused.
+        $this->assertSame(8, ImageUtils::decodeBytesPerPixel('image/png'));
+        $this->assertSame(4, ImageUtils::decodeBytesPerPixel('image/jpeg'));
+
+        $this->storeOversizedHeader('profile_logo.png', 5000, 4000);
+        Storage::put(ImageUtils::storagePathFor('profile_photo.jpg'), $this->jpegHeaderBytes(1, 5000, 4000));
+
+        $budget = $this->budgetFor(20_000_000);
+        $previous = ini_get('memory_limit');
+        $this->pinMemoryLimit($budget);
+
+        try {
+            $png = ImageUtils::generateStoredVariants('profile_logo.png', [480], $budget)[480];
+            $jpeg = ImageUtils::generateStoredVariants('profile_photo.jpg', [480], $budget)[480];
+        } finally {
+            ini_set('memory_limit', $previous);
+        }
+
+        $this->assertSame('too_large', $png['reason']);
+        $this->assertSame(['w' => 5000, 'h' => 4000], $png['src']);
+        $this->assertSame('unreadable', $jpeg['reason']);
+        Storage::assertMissing('public/profile_logo_w480.webp');
     }
 
     public function test_a_header_claiming_more_pixels_than_php_can_count_is_refused_not_fatal(): void
