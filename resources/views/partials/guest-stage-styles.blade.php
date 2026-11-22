@@ -624,13 +624,34 @@
     {{-- A large card's button answers with its edge alone: a tint under accent text fell below 4.5:1. --}}
     .gk-few .gk-row-item:hover .gk-row-more { border-color: var(--es-accent-readable); }
     .gk-head-seg-btn:not([aria-pressed="true"]):hover { background: color-mix(in srgb, var(--gk-ink) 10%, transparent); color: var(--gk-ink); }
-    .es-foot-link { display: inline-flex; align-items: center; gap: .375rem; transition: color var(--gk-swap, 120ms); }
-    .es-foot-link:hover { color: #111827; }
-    :where(.dark) .es-foot-link:hover { color: #ffffff; }
+    {{-- The foot of every guest page (layouts/app-guest, data-privacy-pill): one pill on the
+         stage's raised ground, the privacy link marked by a green dot, the cookie choice, and the
+         credit, where it is owed, as a filled light-blue pill with the ES mark and an arrow. The
+         links share one hover: the words darken and underline, never the marks. --}}
+    .es-foot { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .375rem 1.75rem; max-width: 100%; margin: 0; padding: .375rem .375rem .375rem 1.25rem; border: 1px solid var(--gk-line); border-radius: 999px; background: var(--gk-stage-raised); color: var(--gk-ink-2); font-size: .9375rem; line-height: 1.3; }
+    [dir="rtl"] .es-foot { padding: .375rem 1.25rem .375rem .375rem; }
+    .es-foot:not(:has(.es-foot-credit)) { padding-inline-end: 1.25rem; padding-block: .625rem; }
+    .es-foot-link { display: inline-flex; align-items: center; gap: .5rem; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: none; transition: color var(--gk-swap, 120ms); }
+    .es-foot-link:hover { color: var(--gk-ink); }
     .es-foot-link:hover .es-foot-word { text-decoration: underline; text-underline-offset: 3px; }
-    {{-- The privacy link's mark, in colour beside the credit's: the same 1rem tile, a shield. --}}
-    .es-foot-mark { display: inline-grid; flex: none; place-items: center; width: 1rem; height: 1rem; border-radius: 5px; background: linear-gradient(135deg, #059669, #34d399); color: #ffffff; }
-    .es-foot-mark svg { width: .6875rem; height: .6875rem; }
+    .es-foot-link:focus-visible, .es-foot-credit:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 3px; border-radius: 999px; }
+    .es-foot-dot { flex: none; width: .5rem; height: .5rem; border-radius: 999px; background: #22c55e; }
+    .es-foot-sep { width: 1px; height: 1.5rem; background: var(--gk-line); }
+    .es-foot-credit { display: inline-flex; align-items: center; gap: .625rem; padding: .375rem 1.125rem .375rem .375rem; border-radius: 999px; background: #38bdf8; color: #0b1220; font-weight: 650; text-decoration: none; transition: filter var(--gk-swap, 120ms); }
+    [dir="rtl"] .es-foot-credit { padding: .375rem .375rem .375rem 1.125rem; }
+    .es-foot-credit:hover { filter: brightness(1.08); }
+    .es-foot-es { display: inline-grid; flex: none; place-items: center; width: 2rem; height: 2rem; border-radius: 999px; background: #0b1220; color: #7dd3fc; font-size: .6875rem; font-weight: 800; letter-spacing: .02em; }
+    .es-foot-arrow { width: 1.125rem; height: 1.125rem; }
+    [dir="rtl"] .es-foot-arrow { transform: scaleX(-1); }
+    {{-- A phone: tighter, and without the divider and the arrow, so the pill stays one line. --}}
+    @media (max-width: 30rem) {
+        .es-foot { gap: .375rem .75rem; padding-inline-start: .875rem; font-size: .875rem; }
+        [dir="rtl"] .es-foot { padding-inline-start: .375rem; padding-inline-end: .875rem; }
+        .es-foot-sep, .es-foot-arrow { display: none; }
+        .es-foot-credit { gap: .5rem; padding-inline-end: .875rem; }
+        [dir="rtl"] .es-foot-credit { padding-inline-start: .875rem; padding-inline-end: .375rem; }
+        .es-foot-es { width: 1.75rem; height: 1.75rem; }
+    }
     {{-- A picture whose size was never recorded keeps its own shape on a phone, where a stacked
          card has no neighbour to match (a landscape photo stood in a poster's box between two
          blurred bands). --}}

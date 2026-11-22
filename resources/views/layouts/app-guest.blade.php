@@ -760,21 +760,21 @@
          links share one hover (partials/guest-stage-styles, .es-foot-link). It is the last thing on the page, so it
          keeps room under it (and es-credit-chip's lift clear of the phone's bar). --}}
     <nav aria-label="{{ __('messages.page_footer') }}" data-privacy-pill class="es-credit-chip flex justify-center px-4 pt-8 pb-8 {{ $creditReason && $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
-        <p class="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-full bg-white/80 px-3.5 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur dark:bg-gray-900/80 dark:text-gray-300 dark:ring-white/10">
+        <p class="es-foot">
             <a href="{{ policy_url('privacy') }}" class="es-foot-link">
-                <span aria-hidden="true" class="es-foot-mark"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5 4.5 5.6v5.3c0 4.7 3.2 8.9 7.5 10.6 4.3-1.7 7.5-5.9 7.5-10.6V5.6L12 2.5zm-1.2 13.2-3.3-3.3 1.4-1.4 1.9 1.9 4.4-4.4 1.4 1.4-5.8 5.8z"/></svg></span>
+                <i class="es-foot-dot" aria-hidden="true"></i>
                 <span class="es-foot-word">{{ __('messages.privacy_policy') }}</span>
             </a>
             @if (cookie_banner_visible())
-                <span aria-hidden="true">&middot;</span>
                 <button type="button" data-cookie-consent-reopen class="es-foot-link"><span class="es-foot-word">{{ __('messages.cookie_consent_manage') }}</span></button>
             @endif
             @if ($creditReason)
-                <span aria-hidden="true" class="h-3.5 w-px bg-gray-300 dark:bg-gray-600"></span>
+                <span aria-hidden="true" class="es-foot-sep"></span>
                 {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
-                <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ \App\Models\Role::creditChipTitle() }}" class="es-foot-link">
-                    <span aria-hidden="true" class="flex h-4 w-4 items-center justify-center rounded-[5px] bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-[8px] font-black leading-none text-white">ES</span>
-                    <span class="es-foot-word">Event Schedule</span>
+                <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ \App\Models\Role::creditChipTitle() }}" class="es-foot-credit">
+                    <span aria-hidden="true" class="es-foot-es">ES</span>
+                    <span>Event Schedule</span>
+                    <svg class="es-foot-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </a>
             @endif
         </p>
