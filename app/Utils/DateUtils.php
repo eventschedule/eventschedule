@@ -2,6 +2,9 @@
 
 namespace App\Utils;
 
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
+
 class DateUtils
 {
     /**
@@ -36,10 +39,35 @@ class DateUtils
      * the same three parts). ICU knows the order; where the intl extension is missing, a
      * selfhost server that never needed it, this falls back to the translated English order.
      */
-    public static function dayLabel(\Carbon\CarbonInterface $day, ?string $locale = null): string
+    /**
+     * A short date in the language's own order, from an ICU skeleton: 'MMMEd' is "Sun, Nov 29" in
+     * English and "יום א׳, 29 בנוב׳" in Hebrew (a fixed 'D, M j' put the month first in every
+     * language), 'MMMd' the same without the day of the week, 'd' the day alone. $fallback is
+     * the PHP format used where Intl is missing.
+     */
+    public static function short(CarbonInterface $day, string $skeleton, string $fallback, ?string $locale = null): string
     {
         $locale = $locale ?: app()->getLocale();
-        $withYear = ! $day->isSameYear(\Carbon\Carbon::now($day->getTimezone()));
+
+        if (class_exists(\IntlDatePatternGenerator::class)) {
+            try {
+                $pattern = (new \IntlDatePatternGenerator($locale))->getBestPattern($skeleton);
+                $text = $pattern ? (new \IntlDateFormatter($locale, \IntlDateFormatter::NONE, \IntlDateFormatter::NONE, $day->getTimezone()->getName(), null, $pattern))->format($day) : false;
+                if (is_string($text) && $text !== '') {
+                    return $text;
+                }
+            } catch (\Throwable $e) {
+                // An unknown locale or zone name: the plain form below.
+            }
+        }
+
+        return $day->translatedFormat($fallback);
+    }
+
+    public static function dayLabel(CarbonInterface $day, ?string $locale = null): string
+    {
+        $locale = $locale ?: app()->getLocale();
+        $withYear = ! $day->isSameYear(Carbon::now($day->getTimezone()));
 
         if (class_exists(\IntlDatePatternGenerator::class)) {
             try {

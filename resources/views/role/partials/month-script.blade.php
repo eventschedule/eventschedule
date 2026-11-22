@@ -464,7 +464,9 @@ return {
             const root = this.$refs.monthRoot;
             if (!root || !root.offsetParent) return;
             this.monthFill(root);
-            const parts = Array.from(root.querySelectorAll('.gk-cal-list-wrap .gk-cal-ev'))
+            {{-- One-line lists too (.gk-cal-list-1): their names were left to CSS, which clips by
+                 screen position (step 4). --}}
+            const parts = Array.from(root.querySelectorAll('.gk-cal-list .gk-cal-ev'))
                 .map((a) => ({ a, name: a.querySelector('.gk-cal-name'), nm: a.querySelector('.gk-cal-nm') }))
                 .filter((p) => p.name && p.nm);
             parts.forEach((p) => {
@@ -501,14 +503,18 @@ return {
                 }
                 p.name.style.maxHeight = kept ? (kept * lh + 0.5) + 'px' : '';
             });
-            seen.filter((p) => p.name.scrollHeight > p.name.clientHeight + 1).forEach((p) => {
+            // Too tall, or on a one-line day too wide: cut by the script in reading order, never
+            // by CSS. text-overflow clips by screen position, and in a Hebrew line an English run
+            // sits to the left, so "מחווה ל- Tears For Fears" lost "Tears" and kept "For Fears".
+            const over = (p) => p.name.scrollHeight > p.name.clientHeight + 1 || p.nm.scrollWidth > p.nm.clientWidth + 1;
+            seen.filter(over).forEach((p) => {
                 const chars = Array.from(p.nm.dataset.full || '');
                 const put = (k) => { p.nm.textContent = chars.slice(0, k).join('').replace(/[\s\u00A0.,:;(\[\-\u2013]+$/u, '') + '\u2026'; };
                 let lo = 0, hi = chars.length - 1;
                 while (lo < hi) {
                     const mid = Math.ceil((lo + hi) / 2);
                     put(mid);
-                    if (p.name.scrollHeight > p.name.clientHeight + 1) hi = mid - 1; else lo = mid;
+                    if (over(p)) hi = mid - 1; else lo = mid;
                 }
                 put(lo);
                 p.nm.dataset.shown = lo;

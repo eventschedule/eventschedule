@@ -795,9 +795,9 @@
               @endphp
               <span class="gk-fact-sub">
                 @if ($startDt->format('m') === $endDt->format('m'))
-                  {{ $startDt->translatedFormat('M j') }}, <bdi dir="ltr">{{ $multiStartTime }}</bdi> - {{ $endDt->format('j') }}, <bdi dir="ltr">{{ $multiEndTime }}</bdi>
+                  {{ \App\Utils\DateUtils::short($startDt, 'MMMd', 'M j') }}, <bdi dir="ltr">{{ $multiStartTime }}</bdi> - {{ $endDt->format('j') }}, <bdi dir="ltr">{{ $multiEndTime }}</bdi>
                 @else
-                  {{ $startDt->translatedFormat('M j') }}, <bdi dir="ltr">{{ $multiStartTime }}</bdi> - {{ $endDt->translatedFormat('M j') }}, <bdi dir="ltr">{{ $multiEndTime }}</bdi>
+                  {{ \App\Utils\DateUtils::short($startDt, 'MMMd', 'M j') }}, <bdi dir="ltr">{{ $multiStartTime }}</bdi> - {{ \App\Utils\DateUtils::short($endDt, 'MMMd', 'M j') }}, <bdi dir="ltr">{{ $multiEndTime }}</bdi>
                 @endif
                 @if ($zone) <bdi dir="ltr" data-event-zone>{{ $zone }}</bdi>@endif
               </span>
@@ -805,7 +805,8 @@
               <span class="gk-fact-main">
                 <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">
                   {{-- The tile has no room for a year, and next October is not this October. --}}
-                  {{ $startDt->translatedFormat($otherYear ? 'D, M j, Y' : 'D, M j') }}
+                  {{-- In the language's own order: Hebrew put the month first ("ב׳, נוב׳ 23"). --}}
+                  {{ \App\Utils\DateUtils::short($startDt, $otherYear ? 'yMMMEd' : 'MMMEd', $otherYear ? 'D, M j, Y' : 'D, M j') }}
                 </time>
               </span>
               <span class="gk-fact-sub">
