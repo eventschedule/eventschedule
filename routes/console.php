@@ -399,6 +399,21 @@ Schedule::call(function () {
     Artisan::call('app:place-venues');
 })->everyMinute()->name('app-place-venues')->withoutOverlapping(2)->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// The vendor map's mail (VendorClaimNotifier): new claims and "not coming" to the market's
+// editors, at most once a quarter of an hour per map, and the organizer's answers to vendors,
+// two minutes after they were given so Undo is real. Ungated, on both rails; the notifier's
+// per-map lock keeps the two rails from mailing a row twice. Keep in sync with
+// AppController::translateData().
+Schedule::call(function () {
+    Artisan::call('app:send-vendor-map-notices');
+})->everyFiveMinutes()->name('app-send-vendor-map-notices')->withoutOverlapping(10)->appendOutputTo(storage_path('logs/scheduler.log'));
+
+// The vendor map's private pictures: AI photos after a day (the privacy policy's promise) and a
+// declined vendor's photo after a month. Ungated. Keep in sync with AppController::translateData().
+Schedule::call(function () {
+    Artisan::call('app:prune-vendor-map-drafts');
+})->hourly()->name('app-prune-vendor-map-drafts')->withoutOverlapping(30)->appendOutputTo(storage_path('logs/scheduler.log'));
+
 // Nexus only: the blog is the marketing site's. Keep in sync with AppController::translateData().
 Schedule::call(function () {
     if (config('app.is_nexus')) {

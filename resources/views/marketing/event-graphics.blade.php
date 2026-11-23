@@ -102,7 +102,7 @@
             ],
             [
                 'q' => 'Which of my events end up on the graphic?',
-                'a' => 'Events that start from now on and have their own flyer image, earliest first, up to twenty, and you can lower that number. You can also cap how many events any one talent or venue contributes, so a busy act or room does not take the whole poster. A multi-day event still running counts as upcoming. Drafts, private, unlisted and password protected events, and cancelled events are never included, and recurring events can be excluded with one setting. Events without a flyer still appear in the text, because the text does not need artwork.',
+                'a' => 'Events that start from now on and have their own flyer image, earliest first, up to twenty, and you can lower that number. You can also cap how many events any one performer or venue contributes, so a busy act or room does not take the whole poster. A multi-day event still running counts as upcoming. Drafts, private, unlisted and password protected events, and cancelled events are never included, and recurring events can be excluded with one setting. Events without a flyer still appear in the text, because the text does not need artwork.',
             ],
             [
                 'q' => 'What sizes can the image be?',
@@ -989,7 +989,7 @@
                             </tr>
                             <tr>
                                 <th scope="row" class="es-gal-ink font-semibold">How many from one act or room</th>
-                                <td class="es-gal-muted">Uncapped, or set 1 to 10 and the freed slots go to other talents and venues, so the poster can be shorter if there are not many.</td>
+                                <td class="es-gal-muted">Uncapped, or set 1 to 10 and the freed slots go to other performers and venues, so the poster can be shorter if there are not many.</td>
                                 <td class="es-gal-muted">The same cap, so the caption matches the picture.</td>
                             </tr>
                         </tbody>

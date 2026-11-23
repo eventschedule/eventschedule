@@ -11,6 +11,10 @@ use App\Models\Newsletter;
 use App\Models\PromoterLink;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\VendorMap;
+use App\Models\VendorMapArea;
+use App\Models\VendorMapOccupant;
+use App\Models\VendorMapSpot;
 use App\Utils\RealtimeTracker;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -101,6 +105,9 @@ class PageQueryScalingTest extends TestCase
         'api events' => 16, // 13
         'api schedules' => 12, // 9
         'api categories' => 6, // 3
+        'guest vendor map' => 24, // 21
+        'guest vendor map band' => 31, // 28
+        'guest vendor map event' => 40, // 37
     ];
 
     /** Pages whose count may grow with the data, and by how much, with the reason. */
@@ -127,6 +134,15 @@ class PageQueryScalingTest extends TestCase
 
     /** @var list<Event> */
     private array $events = [];
+
+    /** A market of its own (another owner, so no list of "your schedules" grows by it). */
+    private Role $market;
+
+    private Event $marketDay;
+
+    private VendorMap $vendorMap;
+
+    private VendorMapArea $hangar;
 
     protected function setUp(): void
     {
@@ -156,6 +172,17 @@ class PageQueryScalingTest extends TestCase
         $this->owner->api_key_hash = Hash::make($raw);
         $this->owner->save();
         $this->apiKey = $raw;
+
+        // A weekly market on today's weekday, with its vendor map.
+        $this->market = $this->createRole($this->createOwner(), 'venue', ['name' => 'Riverside Market', 'timezone' => 'UTC']);
+        $this->marketDay = $this->createRecurringEvent($this->market, [
+            'name' => 'Monday market',
+            'starts_at' => now()->subWeeks(2)->setTime(18, 0)->format('Y-m-d H:i:s'),
+            'days_of_week' => '0100000',
+            'creator_role_id' => $this->market->id,
+        ]);
+        $this->vendorMap = VendorMap::create(['role_id' => $this->market->id, 'enabled' => true, 'kind' => 'market', 'event_id' => $this->marketDay->id]);
+        $this->hangar = VendorMapArea::create(['vendor_map_id' => $this->vendorMap->id, 'name' => 'Hangar', 'color' => '#16a34a']);
     }
 
     /** Bring every list the pages read up to $n rows. */
@@ -215,6 +242,21 @@ class PageQueryScalingTest extends TestCase
 
             $this->createAppointmentType($this->venue, ['name' => 'Studio session '.$i]);
 
+            // Three stalls a round on the vendor map: a vendor with a page, one with a page who
+            // is not coming today, and a name only (/map, the band, the market's event page).
+            $today = now()->format('Y-m-d');
+            foreach (['page', 'away', 'name'] as $j => $what) {
+                $spot = VendorMapSpot::create(['vendor_map_id' => $this->vendorMap->id, 'label' => (string) ($i * 10 + $j), 'area_id' => $this->hangar->id,
+                    'x' => 60 * $i, 'y' => 60 * $j, 'w' => 50, 'h' => 40]);
+                $page = $what === 'name' ? null : $this->createRole($this->createOwner(), 'talent', ['name' => 'Stall keeper '.$i.$what]);
+                VendorMapOccupant::create(['vendor_map_id' => $this->vendorMap->id, 'spot_id' => $spot->id, 'event_date' => '*', 'kind' => 'present',
+                    'status' => 'approved', 'vendor_role_id' => $page?->id, 'placeholder_name' => $page ? null : 'Stand '.$i, 'categories' => ['produce']]);
+                if ($what === 'away') {
+                    VendorMapOccupant::create(['vendor_map_id' => $this->vendorMap->id, 'spot_id' => $spot->id, 'event_date' => $today, 'kind' => 'absent',
+                        'status' => 'approved', 'vendor_role_id' => $page->id]);
+                }
+            }
+
             // An event another site shares here, on a schedule of its own (/browse).
             $site = FederatedInstance::firstOrCreate(['instance_id' => 'scaling-site'], [
                 'site_url' => 'https://other-site.test',
@@ -265,6 +307,7 @@ class PageQueryScalingTest extends TestCase
             'guest schedule page', 'guest schedule list layout', 'guest embed', 'guest event page',
             'guest calendar events api', 'guest past events api', 'guest curator page',
             'guest rss feed', 'guest ical feed', 'guest schedule sitemap', 'guest request form', 'guest booking page',
+            'guest vendor map', 'guest vendor map band', 'guest vendor map event',
             // The admin portal
             'dashboard', 'following', 'schedule tab', 'requests tab', 'followers tab', 'team tab', 'promoters tab', 'plan tab',
             'availability tab', 'appointments tab', 'schedule settings', 'event form', 'sales', 'analytics',
@@ -333,6 +376,9 @@ class PageQueryScalingTest extends TestCase
             'guest schedule sitemap' => $this->get('/'.$sub.'/sitemap.xml'),
             'guest request form' => $this->followingRedirects()->get('/'.$sub.'/request'),
             'guest booking page' => $this->get('/'.$sub.'/book'),
+            'guest vendor map' => $this->get('/'.$this->market->subdomain.'/map'),
+            'guest vendor map band' => $this->get('/'.$this->market->subdomain),
+            'guest vendor map event' => $this->get($this->guestEventUrl($this->market, $this->marketDay)),
 
             'browse' => $this->get('/browse'),
             'browse other sites' => $this->get('/browse?show=network'),
@@ -370,6 +416,12 @@ class PageQueryScalingTest extends TestCase
             'api schedules' => $api()->getJson('/api/schedules'),
             'api categories' => $api()->getJson('/api/categories'),
         };
+
+        // The vendor map's pages are measured with the map ON them, not a page that left it out.
+        $marker = ['guest vendor map' => 'vm-row is-absent', 'guest vendor map band' => 'gk-vm-band', 'guest vendor map event' => 'gk-vm-grid'][$page] ?? null;
+        if ($marker) {
+            $response->assertSee($marker, false);
+        }
 
         return $response->assertOk();
     }

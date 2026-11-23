@@ -165,7 +165,7 @@
                     <dl class="page-kv">
                         @foreach ($placements['by_type'] as $row)
                         <div>
-                            <dt>{{ __('messages.'.$row['type']) }}</dt>
+                            <dt>{{ \App\Utils\ScheduleTypeLabel::for($row['type']) }}</dt>
                             <dd>{{ number_format($row['impressions']) }}</dd>
                         </div>
                         @endforeach

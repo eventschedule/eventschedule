@@ -192,7 +192,7 @@
 
         @if ($guestHasAltLang)
             @php
-                $hreflangBase = $galleryCanonicalUrl ?? $eventCanonicalUrl ?? $role->getCanonicalUrl();
+                $hreflangBase = $pageMeta['canonical'] ?? $galleryCanonicalUrl ?? $eventCanonicalUrl ?? $role->getCanonicalUrl();
             @endphp
             <link rel="alternate" hreflang="{{ $guestTargetLang }}" href="{{ $hreflangBase }}?lang={{ $guestTargetLang }}">
             <link rel="alternate" hreflang="{{ $guestPrimaryLang }}" href="{{ $hreflangBase }}">
@@ -205,7 +205,28 @@
         @endphp
         <meta property="og:locale" content="{{ $ogLocale }}">
 
-        @if ($event && $event->exists && ($passwordGate ?? false))
+        @if ($pageMeta)
+            {{-- A page that stands on its own (AppGuestLayout::$pageMeta: the vendor map). --}}
+            <link rel="canonical" href="{{ $pageMeta['canonical'] }}">
+            <meta name="description" content="{{ $pageMeta['description'] }}">
+            <meta property="og:type" content="website">
+            <meta property="og:title" content="{{ $pageMeta['title'] }}">
+            <meta property="og:description" content="{{ $pageMeta['description'] }}">
+            @if (! empty($pageMeta['image']))
+            <meta property="og:image" content="{{ $pageMeta['image'] }}">
+            @if (! empty($pageMeta['image_width']) && ! empty($pageMeta['image_height']))
+            <meta property="og:image:width" content="{{ $pageMeta['image_width'] }}">
+            <meta property="og:image:height" content="{{ $pageMeta['image_height'] }}">
+            @endif
+            <meta property="og:image:alt" content="{{ $pageMeta['title'] }}">
+            <meta name="twitter:image" content="{{ $pageMeta['image'] }}">
+            @endif
+            <meta property="og:url" content="{{ $pageMeta['canonical'] }}">
+            <meta property="og:site_name" content="{{ $role->translatedName() ?: config('app.name') }}">
+            <meta name="twitter:title" content="{{ $pageMeta['title'] }}">
+            <meta name="twitter:description" content="{{ $pageMeta['description'] }}">
+            <meta name="twitter:card" content="{{ ! empty($pageMeta['image']) ? 'summary_large_image' : 'summary' }}">
+        @elseif ($event && $event->exists && ($passwordGate ?? false))
             @php
                 // The schedule's own logo, never the event's flyer: this page is password gated,
                 // so its imagery is precisely what the owner chose not to make public. And never

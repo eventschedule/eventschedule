@@ -116,7 +116,7 @@
                     </tr>
                     <tr>
                         <td><a href="#event-sources" class="doc-link">Event Sources</a></td>
-                        <td>Talent and venue schedules whose events appear on yours automatically</td>
+                        <td>Event and venue schedules whose events appear on yours automatically</td>
                         <td>Curator schedules</td>
                     </tr>
                     <tr>
@@ -209,8 +209,8 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Talent</span></td>
-                        <td>Musicians, DJs, performers, speakers</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Event schedule</span></td>
+                        <td>Performers, teachers, vendors, organizers</td>
                         <td>A shorter <a href="#engagement-requests" class="doc-link">Requests</a> row, because a request to book a performer is always read by hand. <strong class="text-gray-900 dark:text-white">Country</strong> in <a href="#contact-info" class="doc-link">Contact info</a>. No <strong class="text-gray-900 dark:text-white">Hide Performers' Videos</strong> switch in the <a href="#videos" class="doc-link">Videos</a> row.</td>
                     </tr>
                     <tr>
@@ -227,7 +227,7 @@
             </table>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mt-6">The type also decides which tabs a schedule's own page has (Availability for a Talent, Seating plans for a Venue, Videos for a Curator): see <a href="{{ route('marketing.docs.getting_started') }}#schedule-types" class="doc-link">choosing a type</a> and <a href="{{ route('marketing.docs.managing_schedules') }}" class="doc-link">Managing Schedules</a>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mt-6">The type also decides which tabs a schedule's own page has (Availability for an event schedule, Seating plans for a Venue, Videos for a Curator): see <a href="{{ route('marketing.docs.getting_started') }}#schedule-types" class="doc-link">choosing a type</a> and <a href="{{ route('marketing.docs.managing_schedules') }}" class="doc-link">Managing Schedules</a>.</p>
     </section>
 
     <!-- Details -->
@@ -372,7 +372,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">City and Country</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A way to say roughly where you are without a street address. <strong class="text-gray-900 dark:text-white">Curator</strong> schedules get both City and Country; <strong class="text-gray-900 dark:text-white">Talent</strong> schedules get Country only. Venue schedules use the <a href="#address" class="doc-link">Address</a> section instead, so neither field appears here for them.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A way to say roughly where you are without a street address. <strong class="text-gray-900 dark:text-white">Curator</strong> schedules get both City and Country; <strong class="text-gray-900 dark:text-white">Event schedules</strong> get Country only. Venue schedules use the <a href="#address" class="doc-link">Address</a> section instead, so neither field appears here for them.</p>
             </div>
         </div>
 
@@ -403,14 +403,14 @@
             </svg>
             Event Sources <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-2">Curator</span>
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">On a <strong class="text-gray-900 dark:text-white">Curator</strong> schedule, Event Sources is the second section of the form. List the talent and venue schedules you want to follow and everything they publish shows up on your calendar on its own. It covers what they have already run as well as what is coming, and each new event appears within a few minutes of going live. This is the fastest way to stand up a city guide or a festival hub: pick your rooms and your acts once, and stop copying listings by hand. It is free on every plan.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">On a <strong class="text-gray-900 dark:text-white">Curator</strong> schedule, Event Sources is the second section of the form. List the event and venue schedules you want to follow and everything they publish shows up on your calendar on its own. It covers what they have already run as well as what is coming, and each new event appears within a few minutes of going live. This is the fastest way to stand up a city guide or a festival hub: pick your rooms and your acts once, and stop copying listings by hand. It is free on every plan.</p>
 
         <x-doc-screenshot id="creating-schedules--section-sources" alt="The Event Sources section of a curator's schedule form: Add a source schedule, and under Suggested a button for each schedule it already shares events with" />
 
         <div class="doc-fields">
             <div class="doc-field">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Schedules</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Search by name or subdomain and pick the talent or venue schedule you want. Only talent and venue schedules can be a source, so one curator never chains onto another. A curator can have up to {{ (int) config('usage.curator_source_limit', 100) }} sources.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Search by name or subdomain and pick the event or venue schedule you want. Only event and venue schedules can be a source, so one curator never chains onto another. A curator can have up to {{ (int) config('usage.curator_source_limit', 100) }} sources.</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Anything the schedule has chosen not to publish stays private: drafts, internal events, unlisted events and anything it has not accepted are all left out.</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Each saved source shows how many of its events are on your calendar right now, past and upcoming, so you can tell at a glance whether it is feeding your schedule. An event you removed by hand is left out of that number, and an event two sources share counts under both, so the numbers need not add up to your total.</p>
             </div>
@@ -427,7 +427,7 @@
         <h3 class="doc-subheading">Setting up event sources</h3>
         <ol class="doc-list doc-list-numbered mb-6">
             <li>Open <strong class="text-gray-900 dark:text-white">Edit Schedule</strong> on a curator schedule and choose <strong class="text-gray-900 dark:text-white">Event Sources</strong>.</li>
-            <li>Click <strong class="text-gray-900 dark:text-white">+ Add a source schedule</strong> and search for the talent or venue you want to follow, or click one of the names under <strong class="text-gray-900 dark:text-white">Suggested</strong>.</li>
+            <li>Click <strong class="text-gray-900 dark:text-white">+ Add a source schedule</strong> and search for the event schedule or venue you want to follow, or click one of the names under <strong class="text-gray-900 dark:text-white">Suggested</strong>.</li>
             <li>Optionally choose a sub-schedule to file that source's events under. The choice is offered once the schedule has sub-schedules.</li>
             <li>Save. Their events, past and upcoming, appear on your calendar right away.</li>
         </ol>
@@ -454,7 +454,7 @@
             @else
             Your schedule page shows it as a link that opens Google Maps, and your event pages show it on the venue card, with a map where the site has a Google Maps key.
             @endif
-            Talent and Curator schedules say where they are in the <a href="#contact-info" class="doc-link">Contact info</a> row instead.</p>
+            Event schedules and Curator schedules say where they are in the <a href="#contact-info" class="doc-link">Contact info</a> row instead.</p>
 
         <x-doc-screenshot id="creating-schedules--section-address" alt="The Address section of a venue's schedule form: Street Address, City, State / Province, Postal Code and Country, with View Map and Validate Address under them" />
 
@@ -497,7 +497,7 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">A <strong class="text-gray-900 dark:text-white">Merge Venue</strong> section appears on the schedule form of an unclaimed Venue schedule when you manage at least one other venue. It sits after Address in the list. The <strong class="text-gray-900 dark:text-white">Merge into</strong> dropdown lists the other venues you manage; pick one and click the red <strong class="text-gray-900 dark:text-white">Merge Venue</strong> button, which asks you to confirm and says how many events will move. All of this schedule's events move to the target and this one is removed. The merge happens when you confirm: it does not wait for the form's Save. If Event Schedule spots a likely match by name, city and country, it names it for you above the dropdown, so usually you only have to confirm.</p>
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Only unclaimed schedules can be merged</div>
-            <p>Merging is offered for schedules nobody has claimed yet, which is exactly the kind an import creates - the pages described under <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>. Once someone claims a schedule it has a real operator behind it, so it can no longer be absorbed into another. Both schedules must also be the same type, so a venue merges into a venue and never into a talent.</p>
+            <p>Merging is offered for schedules nobody has claimed yet, which is exactly the kind an import creates - the pages described under <a href="{{ route('marketing.docs.creating_events') }}#claim" class="doc-link">Pages Created for Others</a>. Once someone claims a schedule it has a real operator behind it, so it can no longer be absorbed into another. Both schedules must also be the same type, so a venue merges into a venue and never into an event schedule.</p>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-6">If some events already exist on the target, you are told how many before you commit. Those are not duplicated: where the same event sits on both schedules, the two entries are combined and any detail the target is missing is filled in from the schedule you are merging away.</p>
 
@@ -516,7 +516,7 @@
         <p class="text-gray-600 dark:text-gray-300">Duplicates are also collapsed in the venue picker when you add an event, so you only see one option per place. That is only done where it is safe: two venues that share a name but each carry their own contact details or address both stay on the list.</p>
 
         <h3 id="merge-participants" class="doc-subheading">Merge Duplicate Participants</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The same page exists for participants (Talent schedules), and a notice on <strong class="text-gray-900 dark:text-white">Following</strong> opens it. It groups the participants you are connected to that share a name and a country, such as a team that was added as <strong class="text-gray-900 dark:text-white">Someone New</strong> for every game, and merges each group with the same <strong class="text-gray-900 dark:text-white">Merge</strong> and <strong class="text-gray-900 dark:text-white">Not duplicates</strong> buttons. Each group lists only what can be merged: the pages created for others that you follow or run, and the schedule they go into, which can also be one you run. Someone else's own page that you follow is left out of the group.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same page exists for participants (event schedules), and a notice on <strong class="text-gray-900 dark:text-white">Following</strong> opens it. It groups the participants you are connected to that share a name and a country, such as a team that was added as <strong class="text-gray-900 dark:text-white">Someone New</strong> for every game, and merges each group with the same <strong class="text-gray-900 dark:text-white">Merge</strong> and <strong class="text-gray-900 dark:text-white">Not duplicates</strong> buttons. Each group lists only what can be merged: the pages created for others that you follow or run, and the schedule they go into, which can also be one you run. Someone else's own page that you follow is left out of the group.</p>
         <p class="text-gray-600 dark:text-gray-300">New copies are not made in the first place: when you add a participant with <strong class="text-gray-900 dark:text-white">Someone New</strong> and give only a name, and one of those schedules already has that name in the same country, the event goes on that schedule. A participant added with an email, a phone number or a video still gets a schedule of their own, and so does a name whose group you marked <strong class="text-gray-900 dark:text-white">Not duplicates</strong>.</p>
     </section>
 
@@ -569,7 +569,7 @@
         <span id="videos-links"></span>
         <h3 id="videos" class="doc-subheading">Videos</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Click <strong class="text-gray-900 dark:text-white">+ Add Video</strong>, paste a YouTube link, and it is added with its thumbnail and title. Your videos appear in a panel on your schedule page, and the closed row names the first few.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">A Venue or Curator schedule's page also shows a strip of videos from the performers of its upcoming events. <strong class="text-gray-900 dark:text-white">Hide Performers' Videos</strong>, in this row, takes that strip off and leaves your own videos where they are. A Talent schedule has no such strip, so it has no switch.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">A Venue or Curator schedule's page also shows a strip of videos from the performers of its upcoming events. <strong class="text-gray-900 dark:text-white">Hide Performers' Videos</strong>, in this row, takes that strip off and leaves your own videos where they are. An event schedule has no such strip, so it has no switch.</p>
 
         <!-- Gallery -->
         <h3 id="gallery" class="doc-subheading">Gallery <x-doc-badge plan="pro" /></h3>
@@ -804,7 +804,7 @@
         </div>
         <div class="doc-callout doc-callout-info mt-4">
             <div class="doc-callout-title">Cross-schedule viewing</div>
-            <p>When a curator schedule shares an event from a talent schedule, the event's category badge shows the original name chosen by the talent. The curator's filter dropdown dynamically includes any categories present in visible events, so foreign categories remain filterable.</p>
+            <p>When a curator schedule shares an event from an event schedule, the event's category badge shows the original name chosen by that schedule. The curator's filter dropdown dynamically includes any categories present in visible events, so foreign categories remain filterable.</p>
         </div>
 
         <!-- Custom Labels -->
@@ -843,24 +843,24 @@
         <!-- Requests Tab -->
         <h3 id="engagement-requests" class="doc-subheading">Requests</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Let other people put events on your schedule. The row opens on one switch, <strong class="text-gray-900 dark:text-white">Accept requests</strong>, and the rest appears once that is on. What visitors send waits on the schedule's <strong class="text-gray-900 dark:text-white">Requests</strong> tab, which appears beside the Schedule tab while something is waiting.</p>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A <strong class="text-gray-900 dark:text-white">Talent</strong> schedule gets a shorter version of this row, with only <strong class="text-gray-900 dark:text-white">Accept requests</strong>, the Booking Form options, <strong class="text-gray-900 dark:text-white">Request Terms</strong> and your own questions, because a request to book a performer is always read by hand. The same goes for events other schedules add you to: once your talent schedule has an owner, a venue or curator that lists you sends a request you accept under the schedule's <strong class="text-gray-900 dark:text-white">Requests</strong> tab, unless it had already listed you before you claimed your page. Requests to a talent always come in through the Booking Form, where creating an account is left to the visitor. Whoever sends a request through the Booking Form gives their name and email, and those are shown with the request under the schedule's <strong class="text-gray-900 dark:text-white">Requests</strong> tab so you can reply to them.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">An <strong class="text-gray-900 dark:text-white">Event schedule</strong> gets a shorter version of this row, with only <strong class="text-gray-900 dark:text-white">Accept requests</strong>, the Booking Form options, <strong class="text-gray-900 dark:text-white">Request Terms</strong> and your own questions, because a request to book a performer is always read by hand. The same goes for events other schedules add you to: once your event schedule has an owner, a venue or curator that lists you sends a request you accept under the schedule's <strong class="text-gray-900 dark:text-white">Requests</strong> tab, unless it had already listed you before you claimed your page. Requests to an event schedule always come in through the Booking Form, where creating an account is left to the visitor. Whoever sends a request through the Booking Form gives their name and email, and those are shown with the request under the schedule's <strong class="text-gray-900 dark:text-white">Requests</strong> tab so you can reply to them.</p>
         <div class="doc-fields doc-fields--grouped">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Accept requests</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Turn on the public request form. What lands there is reviewed in the <a href="{{ route('marketing.docs.creating_events') }}#manual" class="doc-link">pending queue</a>. Typical uses:</p>
                 <ul class="text-sm text-gray-500 dark:text-gray-400 list-disc list-inside space-y-1">
-                    <li><strong class="text-gray-900 dark:text-white">Talent:</strong> let promoters ask to book you</li>
+                    <li><strong class="text-gray-900 dark:text-white">Event schedule:</strong> let promoters ask to book you</li>
                     <li><strong class="text-gray-900 dark:text-white">Venue:</strong> take booking requests from bands and performers</li>
                     <li><strong class="text-gray-900 dark:text-white">Curator:</strong> let the community submit local events</li>
                 </ul>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Account</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Make submitters sign in first, so every request has a name behind it. On by default for Curator schedules, off for Venue schedules. With the AI Import form, a first-time submitter completes everything on one page - their account, their own schedule, and the event - with their email confirmed by a code after they press Submit. They can add a flyer and have the form filled in from it. With it off, visitors can send a request as a guest, and on the Booking Form they can also choose to create an account, wherever the site accepts new accounts. Not offered on Talent schedules, whose Booking Form always leaves the account up to the visitor.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Make submitters sign in first, so every request has a name behind it. On by default for Curator schedules, off for Venue schedules. With the AI Import form, a first-time submitter completes everything on one page - their account, their own schedule, and the event - with their email confirmed by a code after they press Submit. They can add a flyer and have the form filled in from it. With it off, visitors can send a request as a guest, and on the Booking Form they can also choose to create an account, wherever the site accepts new accounts. Not offered on event schedules, whose Booking Form always leaves the account up to the visitor.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event submission form</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Which form visitors see: <strong class="text-gray-900 dark:text-white">AI Import</strong>, where they paste the event text or upload a flyer and the details are read out of it, or <strong class="text-gray-900 dark:text-white">Booking Form</strong>, a plain form with set fields. AI Import unless you change it. Offered on Venue and Curator schedules while <strong class="text-gray-900 dark:text-white">Require Account</strong> is off; a Talent schedule always uses the Booking Form.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Which form visitors see: <strong class="text-gray-900 dark:text-white">AI Import</strong>, where they paste the event text or upload a flyer and the details are read out of it, or <strong class="text-gray-900 dark:text-white">Booking Form</strong>, a plain form with set fields. AI Import unless you change it. Offered on Venue and Curator schedules while <strong class="text-gray-900 dark:text-white">Require Account</strong> is off; an event schedule always uses the Booking Form.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Required fields</h4>
@@ -876,11 +876,11 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Approval</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">On by default. Submitted events wait in the <a href="{{ route('marketing.docs.creating_events') }}#manual" class="doc-link">pending queue</a> until you accept them; turn it off and they go straight onto your public schedule. With it off, the Booking Form asks every visitor for an event name, a date and a start time, whatever you left optional: the event is public the moment it is sent. A request from someone on the schedule's own team skips the queue either way. Review them under the schedule's <strong class="text-gray-900 dark:text-white">Requests</strong> tab. Not offered on Talent schedules.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">On by default. Submitted events wait in the <a href="{{ route('marketing.docs.creating_events') }}#manual" class="doc-link">pending queue</a> until you accept them; turn it off and they go straight onto your public schedule. With it off, the Booking Form asks every visitor for an event name, a date and a start time, whatever you left optional: the event is public the moment it is sent. A request from someone on the schedule's own team skips the queue either way. Review them under the schedule's <strong class="text-gray-900 dark:text-white">Requests</strong> tab. Not offered on event schedules.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Approved Schedules</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Name schedules you already trust and what they send from their own schedule skips the queue: an event of theirs that they add you to, or a submission they make signed in while <strong class="text-gray-900 dark:text-white">Require Account</strong> is on. A Booking Form request, or a submission sent without an account, waits for approval like everyone else's. Click <strong class="text-gray-900 dark:text-white">+ Add Schedule</strong>, start typing to search, and pick a schedule. Shown while <strong class="text-gray-900 dark:text-white">Require Approval</strong> is on, and not offered on Talent schedules.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Name schedules you already trust and what they send from their own schedule skips the queue: an event of theirs that they add you to, or a submission they make signed in while <strong class="text-gray-900 dark:text-white">Require Account</strong> is on. A Booking Form request, or a submission sent without an account, waits for approval like everyone else's. Click <strong class="text-gray-900 dark:text-white">+ Add Schedule</strong>, start typing to search, and pick a schedule. Shown while <strong class="text-gray-900 dark:text-white">Require Approval</strong> is on, and not offered on event schedules.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Request Terms</h4>
@@ -1105,7 +1105,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default curator schedules</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">If you also run Curator schedules, or follow ones that accept requests, tick the ones new events should be shared to automatically, instead of choosing them on every event. Shown on Talent and Venue schedules that have at least one Curator schedule to offer.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">If you also run Curator schedules, or follow ones that accept requests, tick the ones new events should be shared to automatically, instead of choosing them on every event. Shown on event schedules and Venue schedules that have at least one Curator schedule to offer.</p>
             </div>
         </div>
         <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4 mt-6">AI Import</h4>
@@ -2051,7 +2051,7 @@ example.eventschedule.com/summer-concert</code></pre>
                 {
                     "@type": "HowToStep",
                     "name": "Choose Your Schedule Type",
-                    "text": "Select the appropriate schedule type: Talent for performers, Venue for event spaces, or Curator for promoters.",
+                    "text": "Select the appropriate schedule type: Event schedule, the standard kind, for your own events wherever they happen, Venue for event spaces, or Curator for promoters.",
                     "url": "{{ url(route('marketing.docs.creating_schedules')) }}#schedule-types"
                 },
                 {

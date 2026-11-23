@@ -50,6 +50,8 @@ use App\Models\Sale;
 use App\Models\SeatingPlan;
 use App\Models\TicketReminderSetting;
 use App\Models\User;
+use App\Models\VendorMap;
+use App\Models\VendorMapOccupant;
 use App\Notifications\AddedMemberNotification;
 use App\Notifications\DeletedRoleNotification;
 use App\Repos\EventRepo;
@@ -79,6 +81,7 @@ use App\Services\Stay22Service;
 use App\Services\TicketPresets;
 use App\Services\TranslationGlossary;
 use App\Services\UsageTrackingService;
+use App\Services\VendorMaps\VendorMapKinds;
 use App\Services\VenueMap;
 use App\Support\EmbedEventView;
 use App\Utils\AiImageIssuance;
@@ -689,6 +692,17 @@ class RoleController extends Controller
      */
     private function performMerge(Role $source, Role $target): int
     {
+        // A vendor page that stood on a market's map stands there as the page it is merged into.
+        // One at a time: the same stall on the same day for both would break the one-vendor rule,
+        // and that row is left with the source (which the merge then retires).
+        foreach (VendorMapOccupant::where('vendor_role_id', $source->id)->get() as $vendorRow) {
+            try {
+                $vendorRow->forceFill(['vendor_role_id' => $target->id])->save();
+            } catch (QueryException $e) {
+                // A duplicate approved spot for that day: keep the target's.
+            }
+        }
+
         // (Re-)read existing target event ids inside the helper so when this
         // is called repeatedly in a loop (group merge), each call sees the
         // state left by the previous call and respects the (event_id, role_id)
@@ -3978,6 +3992,19 @@ class RoleController extends Controller
             // A seating plan is a drawing of a ROOM, so only a venue owns one. Above the plan
             // load below, so a talent or curator schedule never runs the query either.
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
+        } elseif ($tab == 'vendor-map' && ! $role->isVenue() && ! $role->isCurator()) {
+            // A vendor map is a market's, a fair's or an expo's: a place or an organizer.
+            return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
+        }
+
+        // The Vendor map tab is listed once a schedule has a map (or while it is open, which is
+        // how the first one is made), with the vendors waiting for an answer as its count.
+        $vendorMapWaiting = null;
+        if ($role->isVenue() || $role->isCurator()) {
+            $vendorMapId = VendorMap::where('role_id', $role->id)->value('id');
+            if ($vendorMapId) {
+                $vendorMapWaiting = VendorMapOccupant::where('vendor_map_id', $vendorMapId)->where('status', 'pending')->count();
+            }
         }
 
         if ($tab == 'schedule' || $tab == 'availability') {
@@ -4283,6 +4310,7 @@ class RoleController extends Controller
             'currencies',
             'openTransfer',
             'showImportOptions',
+            'vendorMapWaiting',
         ));
     }
 
@@ -5480,6 +5508,14 @@ class RoleController extends Controller
         }
 
         $message = __('messages.created_schedule');
+
+        // "Running a market, fair or expo?": the map is made now and the schedule opens on its
+        // Vendor map tab, where "When is the market?" makes the market's event.
+        $vendorMapKind = $request->input('vendor_map');
+        if (in_array($vendorMapKind, VendorMapKinds::KINDS, true) && ($role->isVenue() || $role->isCurator())) {
+            return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'vendor-map']).'?kind='.$vendorMapKind)
+                ->with('message', $message);
+        }
 
         // On to the event form: for a pending request as before, and now also for a first
         // schedule. A schedule with nothing in it is not what anybody came for, and 91% of the

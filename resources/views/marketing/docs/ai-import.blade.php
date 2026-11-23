@@ -142,7 +142,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Time zone</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A line above the results reads <em>Times shown in</em> followed by your schedule's time zone, with a link to change it. On a talent or curator schedule, an event that states its own time zone keeps its local clock time, so an 8 PM show in another city stays 8 PM, and its row says so.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A line above the results reads <em>Times shown in</em> followed by your schedule's time zone, with a link to change it. On an event schedule or curator schedule, an event that states its own time zone keeps its local clock time, so an 8 PM show in another city stays 8 PM, and its row says so.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">All-day entries</h4>
@@ -235,7 +235,7 @@ Tickets: $20</code></pre>
                     </tr>
                     <tr>
                         <td>Participants</td>
-                        <td>Performer name, email and website. The name is matched first against talent schedules in your schedule's country, then against talent already connected to your schedule. On a talent schedule every imported event is pinned to that talent instead</td>
+                        <td>Performer name, email and website. The name is matched first against event schedules in your schedule's country, then against performers already connected to your schedule. On an event schedule every imported event is pinned to that schedule instead</td>
                         <td>John Smith Trio</td>
                     </tr>
                     <tr>
@@ -403,7 +403,7 @@ Tickets: $20</code></pre>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Every event a read finds becomes a card: on its own when there is one event, or opened from its row when there is a <a href="#choosing-events" class="doc-link">list</a>. The card holds the event as it will be saved, and every field on it can be corrected first. What follows is the same whatever the event was read from.</p>
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Which fields appear</strong> - Name, date and time, and venue are always on the card. The extra fields (short description, description, price, coupon code and its discount, registration URL, category and sub-schedule) are switched on per schedule under <a href="#custom-prompts" class="doc-link">Import Form Fields</a> on eventschedule.com, and can be marked required. The sub-schedule field only appears once the schedule has sub-schedules. A selfhosted install has no such setting, so its cards show only the name, date and venue; an installation admin can tick <strong class="text-gray-900 dark:text-white">Show all fields</strong> above the results to see every field. What is read into a field the card does not show is still saved with the event</li>
-            <li><strong class="text-gray-900 dark:text-white">Performer videos</strong> - On a curator schedule, when a parsed performer does not match a talent schedule you already have, the card searches YouTube for that name and offers up to six clips. Pick one and it becomes the new talent schedule's video</li>
+            <li><strong class="text-gray-900 dark:text-white">Performer videos</strong> - On a curator schedule, when a parsed performer does not match an event schedule you already have, the card searches YouTube for that name and offers up to six clips. Pick one and it becomes the new event schedule's video</li>
         </ul>
 
         <h3 class="doc-subheading">Venue Matching</h3>

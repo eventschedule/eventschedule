@@ -1,0 +1,165 @@
+/*
+ * The vendor map's drawing (MapCanvas.vue), and the same map as the visitors' page prints it
+ * before its script starts (vendor-map/public-svg): one stylesheet for both, so the drawing does
+ * not change when Vue takes over. MapCanvas.vue imports it; the page inlines it in its head.
+ *
+ * Colours are tokens on .vmc. They read the page's own where it has them (the guest kit's
+ * --gk-*, the admin portal's --ap-*) and fall back to fixed values, so the map themes itself on
+ * either side and in both modes. An area's colour arrives as --area on each spot and is only
+ * ever a tint and an edge: text is always the ink, never the area colour, so a pale yellow area
+ * cannot make a number unreadable.
+ *
+ * Strokes are vector-effect: non-scaling-stroke, so an edge is the same hairline at any zoom.
+ */
+.vmc {
+    --vm-ink: var(--gk-ink, rgb(var(--ap-ink, 17 24 39)));
+    --vm-ink-2: var(--gk-ink-2, rgb(var(--ap-ink-2, 55 65 81)));
+    --vm-ink-3: var(--gk-ink-3, rgb(var(--ap-ink-3, 107 114 128)));
+    --vm-canvas: var(--gk-map-ground, #eef1f4);
+    --vm-ground: #ffffff;
+    --vm-line: rgb(17 24 39 / .22);
+    --vm-free: rgb(17 24 39 / .28);
+    --vm-absent: #e5e7eb;
+    --vm-hatch: rgb(75 85 99 / .55);
+    --vm-landmark: rgb(17 24 39 / .05);
+    --vm-landmark-line: rgb(17 24 39 / .3);
+    --vm-tint: 20%;
+    --vm-edge: 70%;
+    --vm-here: #2563eb;
+    --vm-here-ring: #ffffff;
+    --vm-focus: var(--gk-ink, #111827);
+    --vm-pill: rgb(255 255 255 / .94);
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 12rem;
+    overflow: hidden;
+    background: var(--vm-canvas);
+    -webkit-tap-highlight-color: transparent;
+}
+:where(.dark) .vmc {
+    --vm-canvas: var(--gk-map-ground, #1b2026);
+    --vm-ground: #262c33;
+    --vm-line: rgb(255 255 255 / .22);
+    --vm-free: rgb(255 255 255 / .26);
+    --vm-absent: #374151;
+    --vm-hatch: rgb(209 213 219 / .45);
+    --vm-landmark: rgb(255 255 255 / .05);
+    --vm-landmark-line: rgb(255 255 255 / .3);
+    --vm-tint: 30%;
+    --vm-edge: 80%;
+    --vm-here: #60a5fa;
+    --vm-here-ring: #111827;
+    --vm-focus: var(--gk-ink, #f9fafb);
+    --vm-pill: rgb(17 24 39 / .92);
+}
+.vmc-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    direction: ltr;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+    font-family: inherit;
+}
+.vmc-svg:active { cursor: grabbing; }
+.vmc-svg:focus { outline: none; }
+.vmc-svg text { unicode-bidi: plaintext; }
+.vmc-measure { font-weight: 600; visibility: hidden; }
+.vmc-frame { fill: var(--vm-ground); stroke: var(--vm-line); vector-effect: non-scaling-stroke; }
+
+.vmc-area-name { fill: var(--vm-ink-2); font-weight: 650; paint-order: stroke; stroke: var(--vm-ground); stroke-linejoin: round; pointer-events: none; }
+
+.vmc-lm-box { fill: var(--vm-landmark); stroke: var(--vm-landmark-line); stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
+.vmc-lm-icon { fill: none; stroke: var(--vm-ink-2); stroke-linecap: round; stroke-linejoin: round; }
+.vmc-lm-label { fill: var(--vm-ink-2); font-weight: 600; pointer-events: none; }
+.vmc-lm-text { fill: var(--vm-ink-2); font-weight: 650; pointer-events: none; }
+
+.vmc-spot { outline: none; }
+.vmc-box {
+    fill: color-mix(in srgb, var(--area, #4E81FA) var(--vm-tint), var(--vm-ground));
+    stroke: color-mix(in srgb, var(--area, #4E81FA) var(--vm-edge), var(--vm-ink));
+    stroke-width: 1.25;
+    vector-effect: non-scaling-stroke;
+    transition: opacity .2s ease, stroke-width .15s ease;
+}
+.vmc-spot.is-free .vmc-box { fill: var(--vm-ground); stroke: var(--vm-free); stroke-width: 1; }
+.vmc-spot.is-absent .vmc-box { fill: var(--vm-absent); stroke: var(--vm-free); }
+.vmc-spot.is-pending .vmc-box { stroke-dasharray: 4 3; }
+.vmc-hatch { pointer-events: none; }
+.vmc-hatch-line { stroke: var(--vm-hatch); stroke-width: 1.5; }
+.vmc-num { fill: var(--vm-ink); font-weight: 700; font-variant-numeric: tabular-nums; pointer-events: none; }
+.vmc-name { fill: var(--vm-ink); font-weight: 600; pointer-events: none; }
+.vmc-icon { fill: none; stroke: var(--vm-ink-2); stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.vmc-spot.is-free .vmc-num { fill: var(--vm-ink-3); font-weight: 500; }
+.vmc-spot.is-absent .vmc-num, .vmc-spot.is-absent .vmc-name { fill: var(--vm-ink-3); }
+.vmc-spot.is-dim { opacity: .28; }
+.vmc-spot.is-button { cursor: pointer; }
+.vmc-spot.is-button:hover .vmc-box { stroke-width: 2; }
+.vmc-spot.is-selected .vmc-box { stroke: var(--vm-focus); stroke-width: 2.5; }
+.vmc-spot:focus-visible .vmc-box { stroke: var(--vm-focus); stroke-width: 3; }
+
+.vmc-pulse {
+    fill: none;
+    stroke: var(--vm-focus);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+    transform-box: fill-box;
+    transform-origin: center;
+    pointer-events: none;
+    opacity: 0;
+    animation: vmc-pulse 900ms cubic-bezier(.2, .7, .3, 1) 1 both;
+}
+@keyframes vmc-pulse {
+    0% { opacity: .9; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.7); }
+}
+
+.vmc-here-halo { fill: var(--vm-here); opacity: .18; transform-box: fill-box; transform-origin: center; animation: vmc-here 2.4s ease-out infinite; pointer-events: none; }
+.vmc-here-dot { fill: var(--vm-here); stroke: var(--vm-here-ring); vector-effect: non-scaling-stroke; stroke-width: 2.5; pointer-events: none; }
+.vmc-here-pill { fill: var(--vm-pill); stroke: var(--vm-line); vector-effect: non-scaling-stroke; pointer-events: none; }
+.vmc-here-text { fill: var(--vm-ink); font-weight: 650; pointer-events: none; }
+@keyframes vmc-here {
+    0% { transform: scale(.6); opacity: .35; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+
+.vmc-tools {
+    position: absolute;
+    inset-inline-end: .75rem;
+    top: .75rem;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: .75rem;
+    background: var(--vm-pill);
+    box-shadow: 0 1px 2px rgb(0 0 0 / .12), 0 0 0 1px var(--vm-line);
+}
+.vmc-tool {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--vm-ink);
+    font: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color .2s ease;
+}
+.vmc-tool + .vmc-tool { border-top: 1px solid var(--vm-line); }
+.vmc-tool:hover { background: color-mix(in srgb, var(--vm-ink) 8%, transparent); }
+.vmc-tool:focus-visible { outline: 2px solid var(--vm-focus); outline-offset: -2px; }
+.vmc-tool svg { width: 1.125rem; height: 1.125rem; }
+
+@media (prefers-reduced-motion: reduce) {
+    .vmc-pulse { animation: none; opacity: 0; }
+    .vmc-here-halo { animation: none; opacity: .18; }
+    .vmc-box { transition: none; }
+}

@@ -783,7 +783,7 @@
                 ['POST', '/api/register', 'Create the account and return a key. Three per IP per hour.'],
                 ['POST', '/api/login', 'Mint a key for an account that has none. A live key returns 409 instead.'],
             ]],
-            ['Schedules', 'A schedule is the tenant: a venue, a talent or a curator.', [
+            ['Schedules', 'A schedule is the tenant: an event schedule (the standard kind), a venue or a curator.', [
                 ['GET', '/api/schedules', 'List the schedules you own or administer. Filter by name and by type.'],
                 ['GET', '/api/schedules/{subdomain}', 'One schedule, with its sub-schedules inlined.'],
                 ['POST', '/api/schedules', 'Create one. name and type are required; the subdomain is generated from the name.'],

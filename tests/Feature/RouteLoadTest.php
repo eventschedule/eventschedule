@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Process;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Feature\Concerns\ForcesEnvironment;
@@ -151,6 +153,7 @@ class RouteLoadTest extends TestCase
             '/features/registration',
             '/features/booking-requests',
             '/features/lineup',
+            '/features/vendor-map',
 
             // Integration pages
             '/google-calendar',
@@ -186,6 +189,9 @@ class RouteLoadTest extends TestCase
             '/for-workshop-instructors',
             '/for-visual-artists',
             '/for-farmers-markets',
+            '/for-craft-fairs',
+            '/for-flea-markets',
+            '/for-conferences-and-expos',
             '/for-hotels-and-resorts',
             '/for-libraries',
             '/for-churches',
@@ -336,9 +342,9 @@ class RouteLoadTest extends TestCase
     {
         [$user] = $this->createUserWithSchedule();
 
-        \Illuminate\Support\Facades\Cache::flush();
-        \App\Models\Setting::set('realtime_enabled', '1');
-        \App\Models\Setting::set('realtime_owner_view', '1');
+        Cache::flush();
+        Setting::set('realtime_enabled', '1');
+        Setting::set('realtime_owner_view', '1');
 
         foreach (['/analytics?tab=realtime', '/analytics/realtime/data', '/analytics/realtime/summary'] as $url) {
             $this->actingAs($user)->get($url)->assertOk();

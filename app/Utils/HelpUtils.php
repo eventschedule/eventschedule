@@ -232,6 +232,9 @@ class HelpUtils
         // with these: the plan picker lives on the Tickets tab itself, which already maps to
         // #ticketing, and there is no seating tab in that strip to key on.
         '{subdomain}/seating' => '/docs/allocated-seating#plans-tab',
+        // The vendor map: its tab (role.view_admin, tab vendor-map) and the designer page.
+        '{subdomain}/vendor-map' => '/docs/vendor-maps#the-tab',
+        '{subdomain}/vendor-map/design' => '/docs/vendor-maps#drawing',
         // Ahead of the two below, whose wildcards cross slashes: the one-date designer
         // (seating/occurrence/{hash}/design) matched "seating/*/design", and the report
         // (seating/box-office/{event}/report) matched "seating/box-office/*".

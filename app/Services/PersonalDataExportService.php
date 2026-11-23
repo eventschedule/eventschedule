@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Everything held about one account holder, as a portable document: the "Download my data" file
@@ -31,6 +32,7 @@ class PersonalDataExportService
         'event_videos', 'event_poll_votes', 'carpool_offers', 'carpool_requests', 'carpool_reviews',
         'carpool_reports', 'support_conversations', 'referrals', 'boost_campaigns', 'webhooks',
         'audit_logs', 'sessions', 'realtime_hits', 'user_active_days', 'event_feeds', 'boost_partners',
+        'vendor_map_occupants',
     ];
 
     /**
@@ -49,6 +51,7 @@ class PersonalDataExportService
         'calendar_import_holds' => 'Which synced events wait for the owner and why (CalendarArrival): bookkeeping about the schedule\'s own events, whose content is exported with them. Deleted with the event.',
         'calendar_sync_settings' => 'How a schedule\'s calendar syncs publish what they read in, and counts of each read; settings of the schedule, not something the person gave. Deleted with the schedule.',
         'dismissed_next_steps' => 'Interface state.',
+        'vendor_map_drafts' => 'Photos an organizer uploaded so the AI could draw a vendor map, and its answer. Kept privately and deleted within a day (app:prune-vendor-map-drafts).',
         'dismissed_timezone_warnings' => 'Interface state.',
         'dismissed_venue_merge_suggestions' => 'Interface state.',
         'event_templates' => 'Event drafts the user saved, part of their schedules.',
@@ -134,6 +137,10 @@ class PersonalDataExportService
             // days, so this row is the lasting record of who did. Its name, the site it reads
             // and when: not the address, which is a credential and is stored encrypted.
             'feeds_added' => $this->rows('event_feeds', fn ($q) => $q->where('added_by', $user->id), ['role_id', 'name', 'host', 'kind', 'created_at']),
+            // A spot asked for on a market's vendor map: the name, what is sold and the phone the
+            // person typed for the organizer, and the answer.
+            'vendor_map_spots' => $this->rows('vendor_map_occupants', fn ($q) => $q->where('user_id', $user->id),
+                ['vendor_map_id', 'spot_id', 'event_date', 'kind', 'status', 'placeholder_name', 'sells', 'categories', 'phone', 'note', 'decided_at', 'created_at']),
             'calendar_connections' => [
                 'google' => (bool) $user->google_token,
                 'microsoft' => (bool) $user->microsoft_token,
@@ -165,7 +172,7 @@ class PersonalDataExportService
         ]);
 
         foreach (['hero_variant', 'signup_intent', 'arrival_intent', 'push_settings', 'signup_ip', 'blocked_at'] as $optional) {
-            if (\Illuminate\Support\Facades\Schema::hasColumn('users', $optional)) {
+            if (Schema::hasColumn('users', $optional)) {
                 $row[$optional] = DB::table('users')->where('id', $user->id)->value($optional);
             }
         }
@@ -255,7 +262,7 @@ class PersonalDataExportService
      */
     private function rows(string $table, \Closure $where, array $columns): array
     {
-        if (! \Illuminate\Support\Facades\Schema::hasTable($table)) {
+        if (! Schema::hasTable($table)) {
             return [];
         }
 

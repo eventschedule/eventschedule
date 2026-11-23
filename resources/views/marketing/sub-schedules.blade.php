@@ -595,7 +595,7 @@
             ],
             [
                 'q' => 'Can events from other schedules be filed into a sub-schedule automatically?',
-                'a' => 'Yes, on a curator schedule. List the talent and venue schedules you follow as event sources and choose one of your sub-schedules for each: everything a source publishes lands behind that divider as it arrives, and changing the sub-schedule later moves the events already filed from that source too. Event sources are free on every plan.',
+                'a' => 'Yes, on a curator schedule. List the event and venue schedules you follow as event sources and choose one of your sub-schedules for each: everything a source publishes lands behind that divider as it arrives, and changing the sub-schedule later moves the events already filed from that source too. Event sources are free on every plan.',
             ],
             [
                 'q' => 'Can I nest sub-schedules?',

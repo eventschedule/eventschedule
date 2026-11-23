@@ -42,6 +42,10 @@ class MarkdownUtils
         'support-chat-widget', 'support-presence-app', 'translations-app', 'videos-app',
         // Mounted by getElementById from a module (ticket-presets-editor-boot.js), not .mount('#x').
         'ticket-preset-items',
+        // The vendor map's owner screens (mounted on [data-vue-root]).
+        'vendor-map-admin', 'vendor-map-designer',
+        // The visitors' map (vendor-map-public.js, on [data-vue-root]).
+        'vendor-map-public',
     ];
 
     public static function convertToHtml($markdown, bool $tables = false)

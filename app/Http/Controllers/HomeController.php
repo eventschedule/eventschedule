@@ -12,13 +12,19 @@ use App\Models\EventPoll;
 use App\Models\EventVideo;
 use App\Models\Newsletter;
 use App\Models\Role;
+use App\Models\RoleTransfer;
 use App\Models\Sale;
+use App\Models\SaleInstallmentPlan;
+use App\Models\User;
 use App\Services\AnalyticsService;
+use App\Services\CalendarArrival;
 use App\Services\FederationService;
 use App\Services\HomeDashboard;
 use App\Services\ScheduleRealtime;
+use App\Support\HomeSchedule;
 use App\Utils\DateUtils;
 use App\Utils\LegacyRedirects;
+use App\Utils\MoneyUtils;
 use App\Utils\SetupGuide;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -26,6 +32,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class HomeController extends Controller
@@ -136,6 +144,14 @@ class HomeController extends Controller
             return redirect()->route('role.claim.start', ['subdomain' => $pendingClaim]);
         }
 
+        // A vendor back from "Continue with Google" on a vendor map's link. The stall they asked
+        // for was held in the session by the POST that sent them to Google; it is asked for here,
+        // and the browser is sent back to the link, which shows what happened. Beside the claim
+        // above for the same reason: their only tie to the app may be the page made for them.
+        if (session()->has('pending_vendor_claim')) {
+            return app(VendorSpotController::class)->completePending($request);
+        }
+
         $subdomain = session('pending_follow');
 
         if (! $subdomain) {
@@ -147,7 +163,7 @@ class HomeController extends Controller
 
             // Done here, not by sending the browser to the follow address: that address no longer
             // follows when it is merely opened.
-            return app(\App\Http\Controllers\RoleController::class)->follow($request, $subdomain);
+            return app(RoleController::class)->follow($request, $subdomain);
         }
 
         $user = $request->user();
@@ -296,7 +312,7 @@ class HomeController extends Controller
 
         // Default currency for empty-state revenue display (no sales yet): use the first
         // role's country to guess. Falls back to USD if no roles have a country set.
-        $defaultCurrency = \App\Utils\MoneyUtils::getCurrencyForCountry(
+        $defaultCurrency = MoneyUtils::getCurrencyForCountry(
             $allRoles->firstWhere(fn ($r) => ! empty($r->country_code))->country_code ?? null
         );
 
@@ -345,7 +361,7 @@ class HomeController extends Controller
             : $federation->listingPromptSchedules($user);
 
         // A selfhost install with one schedule can show it at the site's own address.
-        $homeSchedulePrompt = $federationInvite ? null : \App\Support\HomeSchedule::promptFor($user);
+        $homeSchedulePrompt = $federationInvite ? null : HomeSchedule::promptFor($user);
 
         // One ask per visit: while the invitation is open, the suggestions wait for the next one.
         if ($federationInvite) {
@@ -385,9 +401,9 @@ class HomeController extends Controller
      * Shared by the onboarding bounce in home() and the "Needs attention" row, so the two
      * can never disagree about whether there is an offer to answer.
      */
-    private function incomingTransfers(\App\Models\User $user)
+    private function incomingTransfers(User $user)
     {
-        return \App\Models\RoleTransfer::open()
+        return RoleTransfer::open()
             ->where('to_email', strtolower($user->email))
             ->with('role')
             ->get()
@@ -435,7 +451,7 @@ class HomeController extends Controller
         // Counts only genuinely overdue plans, never the whole live book: the panel's header
         // badge is a plain sum, so a count that never drains reads as a permanent to-do. That is
         // exactly why schedules_unverified was removed from the admin panel.
-        $overduePlans = \App\Models\SaleInstallmentPlan::query()
+        $overduePlans = SaleInstallmentPlan::query()
             ->where('status', 'delinquent')
             ->whereHas('sale', function ($q) {
                 $q->where('is_deleted', false)
@@ -481,7 +497,7 @@ class HomeController extends Controller
 
         // 1a) Events a calendar sync is keeping off a schedule's public page, waiting for a look
         // (CalendarArrival). Drains as the owner publishes them or keeps them hidden.
-        if (\App\Services\CalendarArrival::tablesReady()) {
+        if (CalendarArrival::tablesReady()) {
             $heldCounts = DB::table('calendar_import_holds')
                 ->join('events', 'events.id', '=', 'calendar_import_holds.event_id')
                 ->whereIn('calendar_import_holds.role_id', $roleIds)
@@ -527,7 +543,7 @@ class HomeController extends Controller
 
                 // Upcoming, non-draft, non-cancelled events this schedule created that carry a
                 // priced row and were not grandfathered by the 2026_09_20 migration.
-                $blocked = \App\Models\Event::where('creator_role_id', $role->id)
+                $blocked = Event::where('creator_role_id', $role->id)
                     ->where('is_draft', false)
                     ->where('is_cancelled', false)
                     ->where('tickets_enabled', true)
@@ -539,7 +555,7 @@ class HomeController extends Controller
                     // exists for. Event::constrainToOccurrencesSince() also drops a series whose
                     // end date has passed, which a bare days_of_week test kept forever.
                     ->where(fn ($q) => $q->whereNull('starts_at')
-                        ->orWhere(fn ($w) => \App\Models\Event::constrainToOccurrencesSince($w, now('UTC')->subDay())))
+                        ->orWhere(fn ($w) => Event::constrainToOccurrencesSince($w, now('UTC')->subDay())))
                     // whereExists on the bare table rather than whereHas('tickets'): that relation
                     // carries an orderBy('price'), which Laravel emits inside the EXISTS subquery.
                     ->whereExists(fn ($q) => $q->selectRaw('1')
@@ -780,7 +796,7 @@ class HomeController extends Controller
             ->where('events.is_internal', false)
             // Not a draft a calendar sync is holding back: "Publish your draft event" would open
             // somebody's meeting with its passcode, or an email thread (CalendarArrival).
-            ->when(\App\Services\CalendarArrival::tablesReady(), fn ($q) => $q->whereNotExists(fn ($held) => $held
+            ->when(CalendarArrival::tablesReady(), fn ($q) => $q->whereNotExists(fn ($held) => $held
                 ->selectRaw('1')->from('calendar_import_holds')->whereColumn('calendar_import_holds.event_id', 'events.id')))
             ->where(fn ($q) => Event::constrainToOccurrencesSince($q, now('UTC'))))
             ->orderBy('events.starts_at')
@@ -1327,7 +1343,7 @@ class HomeController extends Controller
             if ($role && ! $role->canUploadPhoto()) {
                 $tempFilename = $pending['temp_filename'] ?? '';
                 if ($tempFilename) {
-                    \Illuminate\Support\Facades\Storage::delete('temp/'.$tempFilename);
+                    Storage::delete('temp/'.$tempFilename);
                 }
                 session()->flash('error', __('messages.photo_limit_reached'));
 
@@ -1338,21 +1354,21 @@ class HomeController extends Controller
             $extension = $pending['extension'] ?? '';
             if (! $tempFilename || ! $extension) {
                 if ($tempFilename) {
-                    \Illuminate\Support\Facades\Storage::delete('temp/'.$tempFilename);
+                    Storage::delete('temp/'.$tempFilename);
                 }
 
                 return $returnUrl;
             }
 
-            if (! \Illuminate\Support\Facades\Storage::exists('temp/'.$tempFilename)) {
+            if (! Storage::exists('temp/'.$tempFilename)) {
                 return $returnUrl;
             }
 
-            $filename = 'photo_'.\Illuminate\Support\Str::random(32).'.'.$extension;
+            $filename = 'photo_'.Str::random(32).'.'.$extension;
             if (config('filesystems.default') == 'local') {
-                \Illuminate\Support\Facades\Storage::move('temp/'.$tempFilename, 'public/'.$filename);
+                Storage::move('temp/'.$tempFilename, 'public/'.$filename);
             } else {
-                \Illuminate\Support\Facades\Storage::move('temp/'.$tempFilename, $filename);
+                Storage::move('temp/'.$tempFilename, $filename);
             }
 
             $photo = EventPhoto::create([
@@ -1388,7 +1404,7 @@ class HomeController extends Controller
             return redirect()->back();
         }
 
-        $role = \App\Support\HomeSchedule::promptFor($request->user());
+        $role = HomeSchedule::promptFor($request->user());
 
         if ($role) {
             DB::table('dismissed_next_steps')->insertOrIgnore([

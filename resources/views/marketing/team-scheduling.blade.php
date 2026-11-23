@@ -599,7 +599,7 @@
             ['Accept or decline event requests', true, true, false],
             ['Open the settings page, and change branding', true, true, false],
             ['Scan tickets at the door', true, true, true],
-            ['Mark their own unavailable days, on a talent schedule', true, true, true],
+            ['Mark their own unavailable days, on an event schedule', true, true, true],
             ['See ticket sales, the waitlist and the check-in dashboard', true, true, false],
             ['Refund a sale', true, true, false],
             ['Read the audit log', true, true, false],
@@ -629,7 +629,7 @@
             ],
             [
                 'q' => 'What are the access levels?',
-                'a' => 'Three: owner, admin and viewer. The owner is whoever created the schedule. An admin can create and edit events, change settings, invite other members, and see the schedule\'s ticket sales, waitlist and check-in dashboard, including refunding a sale. A viewer sees the Schedule tab\'s calendar, marks their own unavailable days on a talent schedule, and can scan tickets at the door, but cannot open any other tab (requests, bookings, followers, the team), sees none of the sales and cannot open the settings page at all. Billing, deleting the schedule, and changing or removing another member are controls the app shows to the owner only.',
+                'a' => 'Three: owner, admin and viewer. The owner is whoever created the schedule. An admin can create and edit events, change settings, invite other members, and see the schedule\'s ticket sales, waitlist and check-in dashboard, including refunding a sale. A viewer sees the Schedule tab\'s calendar, marks their own unavailable days on an event schedule, and can scan tickets at the door, but cannot open any other tab (requests, bookings, followers, the team), sees none of the sales and cannot open the settings page at all. Billing, deleting the schedule, and changing or removing another member are controls the app shows to the owner only.',
             ],
             [
                 'q' => 'How do I invite somebody?',
@@ -645,7 +645,7 @@
             ],
             [
                 'q' => 'Does each member get their own settings?',
-                'a' => 'Yes, on the same schedule. Notification preferences are stored per member, so one person can take the event-request emails while another takes none. An admin can also send the schedule\'s events to a Google Calendar of their own with Sync to My Calendar, in the schedule\'s Google Calendar settings, while the schedule-wide sync stays the owner\'s. On a talent schedule, which is the type that carries an Availability tab, each member keeps their own unavailable dates on the Enterprise plan, and the whole team sees those days marked on the Schedule tab.',
+                'a' => 'Yes, on the same schedule. Notification preferences are stored per member, so one person can take the event-request emails while another takes none. An admin can also send the schedule\'s events to a Google Calendar of their own with Sync to My Calendar, in the schedule\'s Google Calendar settings, while the schedule-wide sync stays the owner\'s. On an event schedule, which is the type that carries an Availability tab, each member keeps their own unavailable dates on the Enterprise plan, and the whole team sees those days marked on the Schedule tab.',
             ],
             [
                 'q' => 'Can somebody leave the team?',
@@ -653,7 +653,7 @@
             ],
             [
                 'q' => 'Can a viewer check people in at the door?',
-                'a' => 'Yes. Beyond reading the calendar (and marking their own days on a talent schedule), scanning tickets is what a viewer is there for, and they do it signed in as themselves on their own phone, without seeing the schedule\'s sales. Every phone that scans needs somebody signed in as a member, so count your door staff when you count seats. The owner and admins can scan as well.',
+                'a' => 'Yes. Beyond reading the calendar (and marking their own days on an event schedule), scanning tickets is what a viewer is there for, and they do it signed in as themselves on their own phone, without seeing the schedule\'s sales. Every phone that scans needs somebody signed in as a member, so count your door staff when you count seats. The owner and admins can scan as well.',
             ],
             [
                 'q' => 'Who gets paid when a team member creates an event?',
@@ -661,7 +661,7 @@
             ],
             [
                 'q' => 'How do team members mark the days they are not available?',
-                'a' => 'On a talent schedule there is an Availability tab, on the Enterprise plan. Each member, viewers included, presses the days they cannot do on a calendar. Those days are tinted amber on the shared Schedule tab, with a mark that names who is out when you point at it. It is a note to the team: it is never shown on the public schedule, and it does not stop an event being added on that day, although it does block bookings of any appointment type that member hosts. Venue and curator schedules do not have the tab.',
+                'a' => 'On an event schedule there is an Availability tab, on the Enterprise plan. Each member, viewers included, presses the days they cannot do on a calendar. Those days are tinted amber on the shared Schedule tab, with a mark that names who is out when you point at it. It is a note to the team: it is never shown on the public schedule, and it does not stop an event being added on that day, although it does block bookings of any appointment type that member hosts. Venue and curator schedules do not have the tab.',
             ],
             [
                 'q' => 'Can I hand the whole schedule to somebody else?',
@@ -687,7 +687,7 @@
             ],
             [
                 'title' => 'A band with a manager',
-                'type' => 'Talent schedule',
+                'type' => 'Event schedule',
                 'count' => '5 of 5',
                 'slots' => [
                     ['The manager', 'owner, takes the bookings', 'OW', ''],
@@ -882,7 +882,7 @@
                         </div>
                         <p class="es-line-ink mb-2 text-4xl font-black" aria-hidden="true">5</p>
                         <h3 class="es-line-ink mb-2 text-lg font-bold">Up to five, in total</h3>
-                        <p class="es-line-muted text-sm">{{ plan_price($entMonthly) }} a month, or {{ plan_price($entYearly) }} a year. Five is the whole card, owner included, so it is four other people rather than five. Per-member availability arrives with it, on talent schedules.</p>
+                        <p class="es-line-muted text-sm">{{ plan_price($entMonthly) }} a month, or {{ plan_price($entYearly) }} a year. Five is the whole card, owner included, so it is four other people rather than five. Per-member availability arrives with it, on event schedules.</p>
                     </div>
                     <div class="es-line-card p-7" data-reveal="panel">
                         <div class="mb-3 flex flex-wrap items-center gap-2">
@@ -962,7 +962,7 @@
                     <p class="es-line-muted mb-4 text-sm">Read-only across the tabs it can reach, with two deliberate exceptions: their own days away, and the door.</p>
                     <ul class="es-line-muted space-y-2 text-sm">
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Sees the Schedule tab's calendar</span></li>
-                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Marks their own unavailable days, on a talent schedule</span></li>
+                        <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Marks their own unavailable days, on an event schedule</span></li>
                         <li class="flex gap-2"><span class="es-line-accent flex-none font-bold" aria-hidden="true">+</span><span>Scans tickets and checks people in</span></li>
                         <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Sees none of the schedule's ticket sales</span></li>
                         <li class="flex gap-2"><span class="es-line-muted flex-none font-bold" aria-hidden="true">&minus;</span><span>Cannot add or change an event</span></li>
@@ -1227,7 +1227,7 @@
                                 <span class="es-line-plan es-line-plan-ent">Enterprise</span>
                             </div>
                             <p class="es-line-muted">
-                                A talent schedule carries an Availability tab, where each member marks their own unavailable dates. Those days are tinted amber on the shared Schedule tab, with a mark that names who is out when you point at it, so nobody pencils in a date the sound engineer already blocked.
+                                An event schedule carries an Availability tab, where each member marks their own unavailable dates. Those days are tinted amber on the shared Schedule tab, with a mark that names who is out when you point at it, so nobody pencils in a date the sound engineer already blocked.
                             </p>
                         </div>
                         <p class="es-line-muted relative z-10 mt-auto pt-4 text-sm">

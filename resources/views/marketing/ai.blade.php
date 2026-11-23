@@ -696,7 +696,7 @@
             ],
             [
                 'q' => 'Will it create a duplicate venue?',
-                'a' => 'It tries hard not to. Before making anything, it looks for a venue you already own with that name, then for a venue in the same city with the same name or street, then among the venues this schedule already shares an event with. When you press save the normalised name, city and country are looked up one more time, whatever screen the event came from. Only when all of that misses is a venue created, from the address you checked in the preview. Performers get a shorter version of the same treatment: the parsed name plus your country first, then the talent this schedule already works with.',
+                'a' => 'It tries hard not to. Before making anything, it looks for a venue you already own with that name, then for a venue in the same city with the same name or street, then among the venues this schedule already shares an event with. When you press save the normalised name, city and country are looked up one more time, whatever screen the event came from. Only when all of that misses is a venue created, from the address you checked in the preview. Performers get a shorter version of the same treatment: the parsed name plus your country first, then the performers this schedule already works with.',
             ],
             [
                 // EventRepo::saveEvent creates the schedule, RoleController::viewGuestUnclaimed renders
@@ -1125,14 +1125,14 @@
             <div class="mt-4 grid gap-4 md:grid-cols-3" data-reveal-group="90">
                 <div class="es-spark-card flex flex-col p-7" data-reveal="panel">
                     <h3 class="es-spark-ink mb-3 text-lg font-bold">Performers, two rungs of their own</h3>
-                    <p class="es-spark-muted text-sm">The parsed name as written, plus your schedule's country, preferring a record that already has an email. Then the talent this schedule has worked with before, on name alone. A match links the event to the performer who exists instead of making a second one. No match, and saving creates the performer: a page in their name that lists your date, credits your schedule for it and waits for them to claim it.</p>
+                    <p class="es-spark-muted text-sm">The parsed name as written, plus your schedule's country, preferring a record that already has an email. Then the performers this schedule has worked with before, on name alone. A match links the event to the performer who exists instead of making a second one. No match, and saving creates the performer: a page in their name that lists your date, credits your schedule for it and waits for them to claim it.</p>
                     <p class="mt-auto pt-4">
                         <x-link href="{{ route('marketing.docs.creating_events') }}#claim">How claiming works</x-link>
                     </p>
                 </div>
                 <div class="es-spark-card p-7" data-reveal="panel">
                     <h3 class="es-spark-ink mb-3 text-lg font-bold">Your own schedule is assumed</h3>
-                    <p class="es-spark-muted text-sm">Importing into a venue schedule pins every event to that venue and uses its address. Importing into a talent schedule pins every event to that performer. There is nothing to match, because you already told us.</p>
+                    <p class="es-spark-muted text-sm">Importing into a venue schedule pins every event to that venue and uses its address. Importing into an event schedule pins every event to that schedule. There is nothing to match, because you already told us.</p>
                 </div>
                 <div class="es-spark-card p-7" data-reveal="panel">
                     <h3 class="es-spark-ink mb-3 text-lg font-bold">Already on the schedule</h3>
@@ -1160,10 +1160,10 @@
             ['Time', 'A time nobody wrote', 'When the source gives no time, the card says 8:00 PM. That is a default, not a reading, so check the clock on every row that came from a flyer or a short message.'],
             ['End', 'An end time left blank', 'An end is filled in only when the source gives one or says how long the event runs. Otherwise it stays blank, and the event has whatever length you save.'],
             ['Date', 'A date that would be in the past', 'A date more than three days ago is left blank for you to fill in rather than guessed. A blank date is a question for you, so fill it in from the source or leave the row out.'],
-            ['Zone', 'The wrong clock for a date elsewhere', 'A line above the results says which time zone the times are shown in. On a talent or curator schedule, an event that states its own time zone keeps its local clock time, and its row says so.'],
+            ['Zone', 'The wrong clock for a date elsewhere', 'A line above the results says which time zone the times are shown in. On an event schedule or curator schedule, an event that states its own time zone keeps its local clock time, and its row says so.'],
             ['Venue', 'A venue matched to the wrong room', 'Matched venue means it found an existing venue: one you own, one in the same city with the same name or street address, or one your schedule has used before. Case, accents, punctuation and a leading "the" are ignored. Two venues at one street address are the place to look. If it picked wrong, switch to Create New.'],
             ['Price', 'Blank is not the same as free', 'A blank price means the source did not say; 0 means free. Set it before you add the event if visitors filter your schedule by free entry.'],
-            ['Name', 'A performer spelled wrong', 'Names are matched against talent schedules in your country, then against talent you already work with. A name that matches nobody gets a page of its own when you save, under that spelling, so correct it on the card first.'],
+            ['Name', 'A performer spelled wrong', 'Names are matched against event schedules in your country, then against performers you already work with. A name that matches nobody gets a page of its own when you save, under that spelling, so correct it on the card first.'],
             ['Tick', 'The rows that start unticked', 'A row that looks like an event you already have, shows a passcode or dial-in, or reads like an email starts unticked. Open it and decide; do not just press Select all.'],
         ];
     @endphp

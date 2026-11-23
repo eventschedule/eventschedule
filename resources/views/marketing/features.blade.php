@@ -89,7 +89,7 @@
             ['online', 'schedule', 'Online events', 'free', 'Tick Online and paste the link people join on: Zoom, YouTube, Teams or your own page.', null, '/features/online-events', 'virtual zoom stream webinar teams youtube', null],
             ['appointments', 'schedule', 'Appointments', 'free', 'Bookable appointment types with weekly hours. Guests pick an open time in their own timezone.', 'One free type on Free. More types and paid bookings are Pro.', '/features/appointments', 'booking calendly slots hours lessons', null],
             ['requests', 'schedule', 'Booking requests', 'free', 'Promoters ask to book an act and acts ask a venue for a date, on a form on your schedule page.', null, '/features/booking-requests', 'submit event request form gig', null],
-            ['availability', 'schedule', 'Availability', 'ent', 'Everyone on a talent schedule marks the dates they cannot play, where the whole team can see them.', null, '/features/availability', 'unavailable dates away band', null],
+            ['availability', 'schedule', 'Availability', 'ent', 'Everyone on an event schedule marks the dates they cannot play, where the whole team can see them.', null, '/features/availability', 'unavailable dates away band', null],
 
             ['newsletters', 'promote', 'Newsletters', 'free', 'Subscribers get a digest when you publish new events. Write the rest in a drag-and-drop builder.', '10 emails a month on Free, 100 on Pro, 1,000 on Enterprise.', '/features/newsletters', 'email digest campaign mailing a/b segments', null],
             ['graphics', 'promote', 'Event graphics', 'free', 'A shareable image and formatted text of your upcoming events, ready for Instagram or WhatsApp.', null, '/features/event-graphics', 'image social instagram poster share', null],
@@ -1390,6 +1390,14 @@
                         </ul>
                         <a href="{{ route('marketing.integrations') }}" class="hp-more">See all integrations <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></a>
                     </div>
+                @endif
+                @if ($fbBankId === 'schedule')
+                    {{-- Not a key: the board's banks are eight each, and a market's map is a tool of
+                         its own rather than one more thing every schedule turns on. --}}
+                    <p class="fb-ch-foot" data-reveal>
+                        <span>Running a market, a fair or an expo? The vendor map puts every stall on a plan your vendors claim from one link and shoppers open from a QR code at the gate. Drawing it is free.</span>
+                        <a href="{{ marketing_url('/features/vendor-map') }}" class="hp-more">See the vendor map <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></a>
+                    </p>
                 @endif
                 @if ($fbBankId === 'own-it')
                     <p class="fb-ch-foot" data-reveal>

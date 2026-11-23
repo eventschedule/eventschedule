@@ -265,6 +265,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/features/allocated-seating') !!}
     </url>
     <url>
+        <loc>{{ url('/features/vendor-map') }}</loc>
+        {!! $lastmodTag('/features/vendor-map') !!}
+    </url>
+    <url>
         <loc>{{ url('/features/passes') }}</loc>
         {!! $lastmodTag('/features/passes') !!}
     </url>
@@ -527,6 +531,18 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
         {!! $lastmodTag('/for-farmers-markets') !!}
     </url>
     <url>
+        <loc>{{ url('/for-craft-fairs') }}</loc>
+        {!! $lastmodTag('/for-craft-fairs') !!}
+    </url>
+    <url>
+        <loc>{{ url('/for-flea-markets') }}</loc>
+        {!! $lastmodTag('/for-flea-markets') !!}
+    </url>
+    <url>
+        <loc>{{ url('/for-conferences-and-expos') }}</loc>
+        {!! $lastmodTag('/for-conferences-and-expos') !!}
+    </url>
+    <url>
         <loc>{{ url('/for-hotels-and-resorts') }}</loc>
         {!! $lastmodTag('/for-hotels-and-resorts') !!}
     </url>
@@ -649,6 +665,10 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
     <url>
         <loc>{{ url('/docs/allocated-seating') }}</loc>
         {!! $lastmodTag('/docs/allocated-seating') !!}
+    </url>
+    <url>
+        <loc>{{ url('/docs/vendor-maps') }}</loc>
+        {!! $lastmodTag('/docs/vendor-maps') !!}
     </url>
     <url>
         <loc>{{ url('/docs/appointments') }}</loc>

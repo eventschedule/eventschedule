@@ -987,7 +987,7 @@
                 </div>
                 <div class="es-belt-card p-7" data-reveal="panel">
                     <h3 class="es-belt-ink mb-2 text-lg font-bold">Volunteer rotas and shifts</h3>
-                    <p class="es-belt-muted es-belt-small">There are no shifts to fill and no sign-up sheet for helpers. A team is an Enterprise feature, up to five people on eventschedule.com, and on a talent schedule its Availability tab lets each member mark the days they are not free, which is a note to the team rather than a rota. A crew of twenty volunteers keeps its rota tool; a zero-price ticket type can still get them scanned in at the door.</p>
+                    <p class="es-belt-muted es-belt-small">There are no shifts to fill and no sign-up sheet for helpers. A team is an Enterprise feature, up to five people on eventschedule.com, and on an event schedule its Availability tab lets each member mark the days they are not free, which is a note to the team rather than a rota. A crew of twenty volunteers keeps its rota tool; a zero-price ticket type can still get them scanned in at the door.</p>
                 </div>
                 <div class="es-belt-card p-7" data-reveal="panel">
                     <h3 class="es-belt-ink mb-2 text-lg font-bold">Text messages</h3>

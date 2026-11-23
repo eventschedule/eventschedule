@@ -1857,7 +1857,7 @@
                             <div class="lb-rule" data-reveal>
                                 <h3>A bookmobile or outreach team</h3>
                                 <span class="lb-stamp" style="--r: 2deg;">Free</span>
-                                <p>No building of its own, so no fixed address. Only a Venue schedule has an address of its own, so set this one up as a Talent or Curator schedule and let each stop name its venue: the school, the care home, the market square. A weekly stop is one recurring event at that venue.</p>
+                                <p>No building of its own, so no fixed address. Only a Venue schedule has an address of its own, so set this one up as an event schedule or a Curator schedule and let each stop name its venue: the school, the care home, the market square. A weekly stop is one recurring event at that venue.</p>
                             </div>
                         </div>
                         <p class="lb-slip-after" data-reveal>

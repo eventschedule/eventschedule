@@ -246,6 +246,22 @@ the sentence naming the service. Not in embeds, not in `?graphic=1`.
 | Venue status list | `VenueMap::status()` | In the same row: On the map, Approximate position, Placed by hand, Waiting, No street address, No country, Address not found, Off the map |
 | Fix a pin by hand | `venue_map_marks` + `VenueMapController::mark()` | In that list, saved at once: take a venue off this map and put it back, move a pin, place one the search could not find, go back to the looked-up position. For the schedule's editors, about that schedule's map only. Moving and placing need `MAP_TILE_URL` |
 
+## Vendor Map (markets, fairs, expos)
+
+A plan of a market, fair or expo whose spots (stalls, tables, booths) vendors take date by date,
+on a venue or curator schedule (`vendor_maps`, one per schedule, serving one event the schedule
+runs). Vendors are NOT event participants: they live on the map's own rows
+(`vendor_map_occupants`). Not the venue map above, which places venues on a street map.
+
+| Feature | Gate location | Notes |
+|---------|--------------|-------|
+| Vendor map, drawn by hand | `VendorMapController` (editors) | Free on all tiers. Spots, rows, areas, landmarks, "You are here" |
+| Visitors' map page and QR sign | `VendorMapPublicController`, `VendorMapController::sign()` | Free on all tiers. `/{schedule}/map`, printable A4 sign and a 300 dpi PNG |
+| Vendors on the schedule and event page | `role/partials/vendor-map-band` | Free on all tiers |
+| Adding vendors by hand, moves, "not coming", cancelling a day | `VendorMapController` | Free on all tiers |
+| Vendor link (vendors find their spot, owner reviews on the map) | `VendorMap::takesClaims()` -> `$role->isPro()` | Pro. Gated on the MAP's schedule, never the vendor. When Pro lapses, approved vendors stay and "Not coming" keeps working; the link stops taking new requests |
+| Map drafted by AI from photos | `VendorMapAi::available()` -> `isPro()` + `GeminiUtils::canReadSeveralImages()` | Pro. Gemini only (several images in one request); counted against the daily AI allowance once per photo |
+
 ## Paid Ticket Selling
 
 Selling a ticket that has a PRICE is Pro/Enterprise. The gate is `Event::canSellPaidTickets()`,

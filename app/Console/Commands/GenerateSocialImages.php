@@ -91,6 +91,7 @@ class GenerateSocialImages extends Command
         'features-registration' => '/features/registration',
         'features-booking-requests' => '/features/booking-requests',
         'features-lineup' => '/features/lineup',
+        'features-vendor-map' => '/features/vendor-map',
 
         // Integration pages
         'google-calendar' => '/google-calendar',
@@ -125,6 +126,9 @@ class GenerateSocialImages extends Command
         'for-workshop-instructors' => '/for-workshop-instructors',
         'for-visual-artists' => '/for-visual-artists',
         'for-farmers-markets' => '/for-farmers-markets',
+        'for-craft-fairs' => '/for-craft-fairs',
+        'for-flea-markets' => '/for-flea-markets',
+        'for-conferences-and-expos' => '/for-conferences-and-expos',
         'for-hotels-and-resorts' => '/for-hotels-and-resorts',
         'for-libraries' => '/for-libraries',
         'for-churches' => '/for-churches',

@@ -246,6 +246,15 @@ class AppController extends Controller
                     \Log::error('Scheduled command realtime:prune failed: '.$e->getMessage());
                     report($e);
                 }
+
+                // The vendor map's mail. Keep in sync with routes/console.php; the per-map lock
+                // the two rails share is inside VendorClaimNotifier.
+                try {
+                    \Artisan::call('app:send-vendor-map-notices');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:send-vendor-map-notices failed: '.$e->getMessage());
+                    report($e);
+                }
             }
 
             // === EVERY 15 MINUTES ===
@@ -484,6 +493,15 @@ class AppController extends Controller
                     \Artisan::call('app:prune-cache');
                 } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:prune-cache failed: '.$e->getMessage());
+                    report($e);
+                }
+
+                // The vendor map's private pictures (AI photos after a day). Keep in sync with
+                // routes/console.php.
+                try {
+                    \Artisan::call('app:prune-vendor-map-drafts');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:prune-vendor-map-drafts failed: '.$e->getMessage());
                     report($e);
                 }
 

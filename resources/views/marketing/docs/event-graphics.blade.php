@@ -89,8 +89,8 @@
                         <td>How many upcoming events to include, from 1 to 20. "All, up to 20" uses the maximum.</td>
                     </tr>
                     <tr>
-                        <td><strong class="text-gray-900 dark:text-white">Limit per talent or venue</strong></td>
-                        <td>Caps how many events any one talent or venue can contribute, from 1 to 10, so a single act or room cannot fill the graphic. It counts the talent and venue schedules attached to each event, not the schedule the graphic is for, and it fills the freed slots from further down the calendar. Because it counts venues too, the graphic can still come out shorter than Number of events when your events do not spread across enough different talents and venues: a residency at one room with a cap of 2 gives you 2 events, however many are coming up. Applies to the image and the caption alike. "No limit" is the default and changes nothing.</td>
+                        <td><strong class="text-gray-900 dark:text-white">Limit per performer or venue</strong></td>
+                        <td>Caps how many events any one performer or venue can contribute, from 1 to 10, so a single act or room cannot fill the graphic. It counts the performer and venue schedules attached to each event, not the schedule the graphic is for, and it fills the freed slots from further down the calendar. Because it counts venues too, the graphic can still come out shorter than Number of events when your events do not spread across enough different performers and venues: a residency at one room with a cap of 2 gives you 2 events, however many are coming up. Applies to the image and the caption alike. "No limit" is the default and changes nothing.</td>
                     </tr>
                     <tr>
                         <td><strong class="text-gray-900 dark:text-white">Exclude recurring events</strong></td>

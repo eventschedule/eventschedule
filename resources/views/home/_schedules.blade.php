@@ -73,11 +73,11 @@
                                  ("Место проведения") filled the line and the numbers were cut off. --}}
                             <span class="block truncate text-xs text-gray-500 dark:text-gray-400">
                                 @if ($closed)
-                                    {{ __('messages.'.$row['type']) }} &middot; {{ __('messages.dash_plan_closed') }}
+                                    @if (\App\Utils\ScheduleTypeLabel::describe($row['type']) !== ''){{ \App\Utils\ScheduleTypeLabel::describe($row['type']) }} &middot; @endif{{ __('messages.dash_plan_closed') }}
                                 @elseif ($viewer)
-                                    {{ __('messages.'.$row['type']) }}
+                                    {{ \App\Utils\ScheduleTypeLabel::for($row['type']) }}
                                 @else
-                                    <span class="hidden md:inline">{{ __('messages.'.$row['type']) }}</span>
+                                    <span class="hidden md:inline">{{ \App\Utils\ScheduleTypeLabel::for($row['type']) }}</span>
                                     <span class="md:hidden">{{ __('messages.panel_upcoming_count') }} {{ number_format($row['upcoming']) }} &middot; {{ __('messages.views') }} {{ number_format($row['views']) }}</span>
                                 @endif
                             </span>

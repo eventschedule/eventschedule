@@ -95,6 +95,13 @@ return [
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
+    'features/vendor-map' => [
+        ['title' => 'For Farmers Markets', 'path' => '/for-farmers-markets', 'blurb' => 'Market days, the stall map, and the week\'s vendors.'],
+        ['title' => 'For Craft Fairs', 'path' => '/for-craft-fairs', 'blurb' => 'Every maker on a table map that shoppers search by what they make.'],
+        ['title' => 'For Conferences & Expos', 'path' => '/for-conferences-and-expos', 'blurb' => 'A booth map exhibitors find themselves on, and visitors search by company.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
     'features/allocated-seating' => [
         ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
         ['title' => 'For Theaters', 'path' => '/for-theaters', 'blurb' => 'Run a season, a run and a house from one schedule.'],
@@ -229,7 +236,7 @@ return [
         ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Drop the guide into the site you already have.'],
         ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => "Send the week's highlights to your subscribers."],
         ['title' => 'AI Features', 'path' => '/features/ai', 'blurb' => 'Turn pasted text or a photo of a flyer into a listed event.'],
-        ['title' => 'For Talent', 'path' => '/for-talent', 'blurb' => 'A gig calendar for every performer: every show you play, on one link.'],
+        ['title' => 'For Performers & Artists', 'path' => '/for-talent', 'blurb' => 'A gig calendar for every performer: every show you play, on one link.'],
         ['title' => 'For Venues', 'path' => '/for-venues', 'blurb' => 'One calendar your audience can follow, and everything your staff needs behind it.'],
     ],
 
@@ -314,7 +321,7 @@ return [
         ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a regular pitch once, and take out the weeks you lose it.'],
         ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => "Send the week's route to the people who follow you."],
         ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Drop the route into the website you already have.'],
-        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep markets, festivals and private hire apart on one link.'],
+        ['title' => 'Vendor Map', 'path' => '/features/vendor-map', 'blurb' => 'At a market that uses one, find your own stall from the organizer\'s link.'],
     ],
 
     // The for-theater-performers page already links the neighbouring audience
@@ -651,9 +658,30 @@ return [
     ],
 
     'for-farmers-markets' => [
+        ['title' => 'Vendor Map', 'path' => '/features/vendor-map', 'blurb' => 'A map of your stalls that vendors claim from one link and shoppers open with a QR code.'],
         ['title' => 'For Food Trucks', 'path' => '/for-food-trucks-and-vendors', 'blurb' => "One link that always has today's stop."],
-        ['title' => 'For Community Centers', 'path' => '/for-community-centers', 'blurb' => 'Programs, classes, hall-hire requests and events in one place.'],
-        ['title' => 'For Festivals', 'path' => '/for-festivals', 'blurb' => 'Stages as sub-schedules, sets in the running order, and a weekend pass on one QR.'],
+        ['title' => 'For Flea Markets', 'path' => '/for-flea-markets', 'blurb' => 'Sellers who come and go, on one map that knows who is here today.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'for-craft-fairs' => [
+        ['title' => 'Vendor Map', 'path' => '/features/vendor-map', 'blurb' => 'A map of your stalls that vendors claim from one link and shoppers open with a QR code.'],
+        ['title' => 'For Visual Artists', 'path' => '/for-visual-artists', 'blurb' => 'One page for your exhibitions, open studio days and workshops.'],
+        ['title' => 'For Farmers Markets', 'path' => '/for-farmers-markets', 'blurb' => 'Market days, the stall map, and the week\'s vendors.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'for-flea-markets' => [
+        ['title' => 'Vendor Map', 'path' => '/features/vendor-map', 'blurb' => 'A map of your stalls that vendors claim from one link and shoppers open with a QR code.'],
+        ['title' => 'For Farmers Markets', 'path' => '/for-farmers-markets', 'blurb' => 'Market days, the stall map, and the week\'s vendors.'],
+        ['title' => 'For Craft Fairs', 'path' => '/for-craft-fairs', 'blurb' => 'Every maker on a table map that shoppers search by what they make.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
+    ],
+
+    'for-conferences-and-expos' => [
+        ['title' => 'Vendor Map', 'path' => '/features/vendor-map', 'blurb' => 'A map of your stalls that vendors claim from one link and shoppers open with a QR code.'],
+        ['title' => 'Selling Tickets', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in and a live door dashboard, with zero platform fees.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep each track, hall or stage apart on one link.'],
         ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'See what is included on Free, Pro, and Enterprise plans.'],
     ],
 
@@ -697,7 +725,7 @@ return [
     'for-festivals' => [
         ['title' => 'Passes & Subscriptions', 'path' => '/features/passes', 'blurb' => 'One pass, many events, counted down on a single QR code.'],
         ['title' => 'For Food Trucks', 'path' => '/for-food-trucks-and-vendors', 'blurb' => "One link that always has today's stop."],
-        ['title' => 'For Farmers Markets', 'path' => '/for-farmers-markets', 'blurb' => 'Market days, vendor lineups, and seasonal events.'],
+        ['title' => 'Vendor Map', 'path' => '/features/vendor-map', 'blurb' => 'A map of your stalls that vendors claim from one link and shoppers open with a QR code.'],
         ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Run a festival or multi-artist bill across many schedules.'],
         ['title' => 'Event Lineup', 'path' => '/features/lineup', 'blurb' => 'Every act on the bill is named on the event and linked to a page of its own.'],
         ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep each stage apart on one link.'],
@@ -1129,7 +1157,7 @@ return [
     ],
 
     'community-event-calendar' => [
-        ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Build a local events guide that fills itself from venue and talent schedules.'],
+        ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Build a local events guide that fills itself from venue and event schedules.'],
         ['title' => 'For Community Centers', 'path' => '/for-community-centers', 'blurb' => 'Programs, classes, hall-hire requests and events in one place.'],
         ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Sort what arrives into the sections of your guide.'],
         ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => "Send the week's highlights to your subscribers."],

@@ -256,7 +256,7 @@
                                 <p class="referral-none">
                                     <span>{{ __('messages.referral_no_schedule') }}</span>
                                     @foreach (['talent', 'venue', 'curator'] as $type)
-                                    <x-link href="{{ route('new', ['type' => $type]) }}" class="referral-make">{{ __('messages.' . $type) }}</x-link>
+                                    <x-link href="{{ route('new', ['type' => $type]) }}" class="referral-make">{{ \App\Utils\ScheduleTypeLabel::for($type) }}</x-link>
                                     @endforeach
                                 </p>
                                 @else

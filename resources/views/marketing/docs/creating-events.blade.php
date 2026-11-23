@@ -199,7 +199,7 @@
             <li><strong class="text-gray-900 dark:text-white">Event requests.</strong> If your schedule <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">accepts event requests</a> with <strong class="text-gray-900 dark:text-white">Require Approval</strong> enabled, events submitted by other people wait for your review. Approve or reject them on the <strong class="text-gray-900 dark:text-white">Requests</strong> tab of your schedule's admin page, which only appears while there is something waiting.</li>
             <li><strong class="text-gray-900 dark:text-white">Calendar sync.</strong> A schedule that reads a connected {{ $guideOutlook ? 'Google, Outlook or CalDAV' : 'Google or CalDAV' }} calendar adds its entries as <a href="#draft" class="doc-link">drafts</a>, unless you chose to publish them as they arrive. See <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-sync" class="doc-link">Calendar sync</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">Feeds</strong> <x-doc-badge plan="enterprise" />. Somebody else's calendar, RSS feed or events page, read about once an hour. See <a href="{{ route('marketing.docs.managing_schedules') }}#feeds" class="doc-link">Feeds</a>.</li>
-            <li><strong class="text-gray-900 dark:text-white">Event sources.</strong> A Curator schedule lists everything the talent and venue schedules it names as sources publish, as it goes live. See <a href="{{ route('marketing.docs.creating_schedules') }}#event-sources" class="doc-link">Event Sources</a>.</li>
+            <li><strong class="text-gray-900 dark:text-white">Event sources.</strong> A Curator schedule lists everything the event and venue schedules it names as sources publish, as it goes live. See <a href="{{ route('marketing.docs.creating_schedules') }}#event-sources" class="doc-link">Event Sources</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">WhatsApp</strong> <x-doc-badge plan="enterprise" />. Send the details or a photo of a flyer in a message. See <a href="#whatsapp" class="doc-link">Creating Events via WhatsApp</a>.</li>
             <li><strong class="text-gray-900 dark:text-white">The API</strong> <x-doc-badge plan="pro" />. Create and update events from another system. See the <a href="{{ route('marketing.docs.developer.api') }}" class="doc-link">API reference</a>.</li>
         </ul>
@@ -571,7 +571,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The List</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Each participant is one line with <strong class="text-gray-900 dark:text-white">Remove</strong>, and <strong class="text-gray-900 dark:text-white">Edit</strong> for anyone who has no account of their own yet. On a Talent schedule the schedule itself is on the list, marked <strong class="text-gray-900 dark:text-white">This schedule</strong>, and cannot be removed. The tab's summary in the sidebar lists the names.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Each participant is one line with <strong class="text-gray-900 dark:text-white">Remove</strong>, and <strong class="text-gray-900 dark:text-white">Edit</strong> for anyone who has no account of their own yet. On an event schedule the schedule itself is on the list, marked <strong class="text-gray-900 dark:text-white">This schedule</strong>, and cannot be removed. The tab's summary in the sidebar lists the names.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Notify Participants</h4>
@@ -579,7 +579,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When to Use</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Participants are most useful for Talent and Curator schedules, where events feature specific performers, speakers, or artists. On a Venue schedule the tab is marked <strong class="text-gray-900 dark:text-white">Optional</strong>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Participants are most useful for event schedules and Curator schedules, where events feature specific performers, speakers, or artists. On a Venue schedule the tab is marked <strong class="text-gray-900 dark:text-white">Optional</strong>.</p>
             </div>
         </div>
     </section>
@@ -613,7 +613,7 @@
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">After they claim it</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Dates you have already listed them on stay exactly where they are. If they claim by email, or by pressing Claim this page, the schedules that already had dates on their page are carried onto their approved list, so your future dates keep appearing without waiting for approval; a claim made by verifying a phone number does not carry that across. Any other schedule that lists them from then on sends a request, which they accept or decline on their <a href="{{ route('marketing.docs.managing_schedules') }}#requests" class="doc-link">Requests</a> tab. A performer cannot switch that off, because a Talent schedule always requires approval; a claimed venue decides for itself in its <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">request settings</a>.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Dates you have already listed them on stay exactly where they are. If they claim by email, or by pressing Claim this page, the schedules that already had dates on their page are carried onto their approved list, so your future dates keep appearing without waiting for approval; a claim made by verifying a phone number does not carry that across. Any other schedule that lists them from then on sends a request, which they accept or decline on their <a href="{{ route('marketing.docs.managing_schedules') }}#requests" class="doc-link">Requests</a> tab. A performer cannot switch that off, because an event schedule always requires approval; a claimed venue decides for itself in its <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">request settings</a>.</p>
             </div>
         </div>
 
@@ -915,7 +915,7 @@
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">Adding the event to a schedule you are a member of publishes it there immediately. Adding it to a schedule you only follow creates a request, which appears on that schedule's Requests tab if its owner requires approval.</p>
 
-        <p id="default-curators" class="text-gray-600 dark:text-gray-300 mb-6">A Talent or Venue schedule can also list every new event on chosen Curator schedules without anyone ticking them: pick those under <strong class="text-gray-900 dark:text-white">Default curator schedules</strong> in the schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#settings-new-events" class="doc-link">Settings &rarr; New events</a>. They are added when the event is first saved, as a request where that curator reviews what it lists, and a cloned event goes to them too, not to the curators the original was on.</p>
+        <p id="default-curators" class="text-gray-600 dark:text-gray-300 mb-6">An event schedule or Venue schedule can also list every new event on chosen Curator schedules without anyone ticking them: pick those under <strong class="text-gray-900 dark:text-white">Default curator schedules</strong> in the schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#settings-new-events" class="doc-link">Settings &rarr; New events</a>. They are added when the event is first saved, as a request where that curator reviews what it lists, and a cloned event goes to them too, not to the curators the original was on.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-6">When a ticked schedule is a Curator schedule with sub-schedules, a dropdown appears beneath it so you can choose which <strong class="text-gray-900 dark:text-white">sub-schedule</strong> the event belongs to there.</p>
 
@@ -1066,7 +1066,7 @@
 
         <h3 class="doc-subheading">Videos Tab for Curators</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Curator schedules get a separate <strong class="text-gray-900 dark:text-white">Videos</strong> tab on the schedule admin page. It is not a moderation queue: it suggests YouTube videos for talent on upcoming events that have none yet, so you can fill in their profiles. See <a href="{{ route('marketing.docs.managing_schedules') }}#videos" class="doc-link">the Videos tab</a>.
+            Curator schedules get a separate <strong class="text-gray-900 dark:text-white">Videos</strong> tab on the schedule admin page. It is not a moderation queue: it suggests YouTube videos for performers on upcoming events that have none yet, so you can fill in their profiles. See <a href="{{ route('marketing.docs.managing_schedules') }}#videos" class="doc-link">the Videos tab</a>.
         </p>
 
         <x-doc-screenshot id="fan-content--videos-tab" alt="Curator Videos tab suggesting YouTube videos for upcoming events" />

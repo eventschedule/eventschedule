@@ -11,10 +11,12 @@ use App\Services\AuditService;
 use App\Services\CalendarArrival;
 use App\Services\GoogleCalendarService;
 use App\Services\MeetingLinkVenues;
+use Carbon\Carbon;
 use Google\Service\Calendar\Event as GoogleEvent;
 use Google\Service\Calendar\EventDateTime;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -63,6 +65,9 @@ class MeetingLinkVenuesTest extends TestCase
         $venue = $this->stub($owner, self::ZOOM);
         $event->roles()->attach($venue->id, ['is_accepted' => true]);
         $this->assertTrue(MeetingLinkVenues::isMeetingStub($venue));
+        // The sweep reads a window of ids from its cursor; a rolled-back test still spends ids, so
+        // in a long run this venue's id is far past the first window. Start the window at it.
+        Cache::forever('meeting_link_venues.cursor.v1', $venue->id - 1);
 
         $this->assertSame(1, MeetingLinkVenues::sweep());
 
@@ -150,7 +155,7 @@ class MeetingLinkVenuesTest extends TestCase
         $event->roles()->attach($venue->id, ['is_accepted' => true]);
         CalendarSync::create(['user_id' => $owner->id, 'event_id' => $event->id, 'role_id' => $role->id, 'google_event_id' => 'g-1', 'google_calendar_id' => 'primary']);
 
-        $at = \Carbon\Carbon::parse($event->starts_at, 'UTC');
+        $at = Carbon::parse($event->starts_at, 'UTC');
         $start = new EventDateTime;
         $start->setDateTime($at->toRfc3339String());
         $end = new EventDateTime;
@@ -179,6 +184,8 @@ class MeetingLinkVenuesTest extends TestCase
         $this->assertSame(0, MeetingLinkVenues::sweep(), 'behind the cursor');
         $this->assertSame(0, (int) Cache::get('meeting_link_venues.cursor.v1'), 'past the last venue, back to the start');
 
+        // From the start again (a long test run spends ids, so the window is placed at the venue).
+        Cache::forever('meeting_link_venues.cursor.v1', $first->id - 1);
         $this->assertSame(1, MeetingLinkVenues::sweep());
     }
 
@@ -190,15 +197,15 @@ class MeetingLinkVenuesTest extends TestCase
 
         // Synced before 2026-10-05: no import_source, but still mapped to the calendar entry.
         $older = $this->createEvent($role, ['name' => 'Block association committee']);
-        \Illuminate\Support\Facades\DB::table('events')->where('id', $older->id)->update(['created_at' => '2026-09-20 10:00:00']);
-        \App\Models\CalendarSync::create(['user_id' => $owner->id, 'event_id' => $older->id, 'role_id' => $role->id, 'google_event_id' => 'g-old', 'google_calendar_id' => 'primary']);
+        DB::table('events')->where('id', $older->id)->update(['created_at' => '2026-09-20 10:00:00']);
+        CalendarSync::create(['user_id' => $owner->id, 'event_id' => $older->id, 'role_id' => $role->id, 'google_event_id' => 'g-old', 'google_calendar_id' => 'primary']);
         $older->roles()->attach($venue->id, ['is_accepted' => true]);
 
         $this->assertTrue(MeetingLinkVenues::isMeetingStub($venue->fresh()));
 
         // The same, made by hand at that time (no calendar entry): a person's venue.
         $handMade = $this->createEvent($role, ['name' => 'Open mic']);
-        \Illuminate\Support\Facades\DB::table('events')->where('id', $handMade->id)->update(['created_at' => '2026-09-20 10:00:00']);
+        DB::table('events')->where('id', $handMade->id)->update(['created_at' => '2026-09-20 10:00:00']);
         $handMade->roles()->attach($venue->id, ['is_accepted' => true]);
 
         $this->assertFalse(MeetingLinkVenues::isMeetingStub($venue->fresh()));

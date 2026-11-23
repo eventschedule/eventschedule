@@ -380,6 +380,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Vendor Map page (markets, fairs, expos)
+     */
+    public function vendorMap()
+    {
+        return view('marketing.vendor-map');
+    }
+
+    /**
      * Passes & Subscriptions page
      */
     public function passes()
@@ -931,6 +939,30 @@ class MarketingController extends Controller
     public function forFarmersMarkets()
     {
         return view('marketing.for-farmers-markets');
+    }
+
+    /**
+     * For Craft Fairs page
+     */
+    public function forCraftFairs()
+    {
+        return view('marketing.for-craft-fairs');
+    }
+
+    /**
+     * For Flea Markets page
+     */
+    public function forFleaMarkets()
+    {
+        return view('marketing.for-flea-markets');
+    }
+
+    /**
+     * For Conferences & Expos page
+     */
+    public function forConferencesAndExpos()
+    {
+        return view('marketing.for-conferences-and-expos');
     }
 
     /**
@@ -1652,6 +1684,11 @@ class MarketingController extends Controller
         return view('marketing.docs.allocated-seating');
     }
 
+    public function docsVendorMaps()
+    {
+        return view('marketing.docs.vendor-maps');
+    }
+
     public function docsAppointments()
     {
         return view('marketing.docs.appointments');
@@ -1921,7 +1958,7 @@ class MarketingController extends Controller
     {
         return [
             [
-                'title' => 'Talent',
+                'title' => 'Event schedule',
                 'icon' => 'microphone',
                 'description' => 'Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience.',
             ],
@@ -2718,7 +2755,7 @@ class MarketingController extends Controller
                     ],
                 ],
                 'switch_steps' => [
-                    ['title' => 'Pick the schedule type', 'description' => 'A Venue schedule if you sell for one room, a Talent schedule if the act travels. The type decides which sections the form offers, and making one is free with no card.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Pick the schedule type', 'description' => 'A Venue schedule if you sell for one room, an event schedule if the act travels. The type decides which sections the form offers, and making one is free with no card.', 'doc' => 'getting-started#schedule-types'],
                     ['title' => 'Copy your upcoming events', 'description' => 'Copy the details of each upcoming event from your Ticket Tailor box office and paste them into the import box, or upload the flyer, then check what it read before anything is saved.', 'doc' => 'ai-import#text-import'],
                     ['title' => 'Set your ticket types up once', 'description' => 'Rebuild your usual ticket types, prices and sales dates and keep them as a ticket preset, so each new event starts from it. Presets are on every plan.', 'doc' => 'tickets#ticket-presets'],
                     ['title' => 'Reconnect Stripe or PayPal', 'description' => 'Sold through Stripe or PayPal on Ticket Tailor? Connect that same account here. Square is not one of our gateways, so a Square seller opens a Stripe or PayPal account first.', 'doc' => 'account-settings#payments'],
@@ -3206,7 +3243,7 @@ class MarketingController extends Controller
                     ],
                 ],
                 'switch_steps' => [
-                    ['title' => 'Set up the room or the act', 'description' => 'A club or venue takes a Venue schedule, with its address and a map; a DJ or band takes a Talent schedule that lists shows wherever they play.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Set up the room or the act', 'description' => 'A club or venue takes a Venue schedule, with its address and a map; a DJ or band takes an event schedule that lists shows wherever they play.', 'doc' => 'getting-started#schedule-types'],
                     ['title' => 'Bring the line-up across', 'description' => 'Upload a show\'s poster or paste its listing, and the parser reads the act, date, time and venue for you to check before saving.', 'doc' => 'ai-import#image-import'],
                     ['title' => 'Price the tiers', 'description' => 'Give each ticket type its own sales dates, so an early-bird tier closes by itself on the day you choose. Taking payment for them is on Pro.', 'doc' => 'tickets#ticket-types'],
                     ['title' => 'Catch fans before the on-sale', 'description' => 'Switch on the Notify me card, and fans can leave an address on an announced show and get an email when its tickets go on sale. Collecting the addresses is free on every plan; the paid tickets themselves are Pro.', 'doc' => 'creating-schedules#engagement-mailing-list'],
@@ -5237,7 +5274,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'Venues and Artists Together',
-                        'description' => 'Venue and talent schedules link to each other, so a show you play appears on the venue\'s schedule as well as your own.',
+                        'description' => 'Venue and event schedules link to each other, so a show you play appears on the venue\'s schedule as well as your own.',
                         'icon' => 'building',
                         'gradient' => 'from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30',
                         'border' => 'border-blue-200 dark:border-blue-500/20',
@@ -5271,7 +5308,7 @@ class MarketingController extends Controller
                 'why_choose' => [
                     'summary' => 'Bandsintown is where fans hear about a date, not where they buy a ticket for it. Event Schedule gives the act a page that registers or sells for each show, and keeps those dates in step with the calendar you plan the tour in.',
                     'points' => [
-                        'A booking form on a Talent schedule, free, so promoters and venues can ask you for a date',
+                        'A booking form on an event schedule, free, so promoters and venues can ask you for a date',
                         'Sell a show yourself on Pro, or point any date at an outside seller with Tickets elsewhere on every plan',
                         'Fans can add videos and photos from the night to its event page, shown once you approve them',
                         'An email digest to everyone who signed up, sent automatically when you publish new dates',
@@ -5280,7 +5317,7 @@ class MarketingController extends Controller
                     ],
                 ],
                 'switch_steps' => [
-                    ['title' => 'Make a Talent schedule', 'description' => 'Pick Talent when you create the schedule, free. It is the act\'s own page, and the type that takes booking requests.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Make an event schedule', 'description' => 'Pick Event schedule when you create the schedule, free. It is the act\'s own page, and the type that takes booking requests.', 'doc' => 'getting-started#schedule-types'],
                     ['title' => 'Paste the tour', 'description' => 'Copy your list of dates, or a link to a page that lists them, into AI import and look over every show before saving. Name the venue on each date and the show appears on that venue\'s schedule too.', 'doc' => 'ai-import'],
                     ['title' => 'Keep or replace the ticket links', 'description' => 'A date sold elsewhere keeps its outside link under Tickets elsewhere, on any plan. Selling a date yourself is Pro, with the buyers paying your own Stripe or PayPal account.', 'doc' => 'tickets#external'],
                     ['title' => 'Swap the widget on your site', 'description' => 'Replace the tour-date widget with the schedule\'s embed, pinned to the list for a dates page. Each date links to its own event page.', 'doc' => 'sharing#embed'],
@@ -5295,7 +5332,7 @@ class MarketingController extends Controller
                     ['question' => 'How does Event Schedule pricing compare to Bandsintown?', 'answer' => 'Bandsintown is free for artists, with paid extras for email beyond 10,000 a month, promoted emails and SMS. Event Schedule is free for listing dates, registrations and newsletters, and Pro is '.plan_price($this->planPrice()).'/mo for paid tickets with zero platform fees.'],
                     ['question' => 'Can I sell tickets to my own shows?', 'answer' => 'Yes, on Pro, through your own Stripe or PayPal account, with zero platform fees. Each buyer gets a ticket with a QR code, scanned at the door on any plan.'],
                     ['question' => 'Can I put my tour dates on my website?', 'answer' => 'Yes. The embeddable calendar shows your upcoming dates on any website, free, and each date links to its own event page.'],
-                    ['question' => 'Can promoters ask to book me?', 'answer' => 'Yes. A Talent schedule has a booking form on the free plan. A promoter sends the details through it, the request waits on your Requests tab, and you can require your approval before anything appears on your schedule.'],
+                    ['question' => 'Can promoters ask to book me?', 'answer' => 'Yes. An event schedule has a booking form on the free plan. A promoter sends the details through it, the request waits on your Requests tab, and you can require your approval before anything appears on your schedule.'],
                     ['question' => 'Do fans need an account to hear about new dates?', 'answer' => 'No. A fan types an email address into the sign-up panel, confirms it, and gets a digest whenever you publish new dates. The live calendar feed needs no email address at all.'],
                 ],
             ],
@@ -5698,7 +5735,7 @@ class MarketingController extends Controller
                     ],
                 ],
                 'switch_steps' => [
-                    ['title' => 'Make a schedule for the Page', 'description' => 'A Page that runs events becomes a schedule: Venue for a place, Talent for an act, Curator for a group that lists other people\'s events. All three are free.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Make a schedule for the Page', 'description' => 'A Page that runs events becomes a schedule: Venue for a place, Event schedule for an act, Curator for a group that lists other people\'s events. All three are free.', 'doc' => 'getting-started#schedule-types'],
                     ['title' => 'Screenshot the events, not the link', 'description' => 'Facebook links cannot be read by other sites, so add a screenshot of each event, or paste its text, into AI import and check what comes back.', 'doc' => 'ai-import#image-import'],
                     ['title' => 'Replace Interested with Register', 'description' => 'Turn on free registration so each guest gets a QR ticket, with a capacity if the room has one. Priced tickets go on Pro.', 'doc' => 'tickets#registration'],
                     ['title' => 'Post links that lead home', 'description' => 'Keep posting on Facebook, but post the event page link, so the people who follow the schedule from it join a list you can email.', 'doc' => 'sharing#followers'],
@@ -5714,7 +5751,7 @@ class MarketingController extends Controller
                     ['question' => 'Can I still share my events on Facebook?', 'answer' => 'Yes. Share each event page link on Facebook as you would any other link, and the event graphic generator makes an image for the post, free. Boost can also run a paid Facebook and Instagram ad for an event, on Pro.'],
                     ['question' => 'Can I bring my Facebook events across?', 'answer' => 'Yes. Paste the event details or upload the flyer and the AI parser fills in the name, date, time and venue for you to check, fifty a day on the free and Pro plans.'],
                     ['question' => 'Will the people who said Going on Facebook come across?', 'answer' => 'There is no import of a Facebook guest list. Post the new event page on the Facebook event and ask guests to register there; each one gets a QR ticket, and every registration shows on your Sales page.'],
-                    ['question' => 'Can I run a community calendar of other people\'s events?', 'answer' => 'Yes, with a curator schedule, free. Add the venue and talent schedules you want as sources and every event they publish is listed on yours automatically. Visitors can also submit events through a request form, held for your approval if you require it.'],
+                    ['question' => 'Can I run a community calendar of other people\'s events?', 'answer' => 'Yes, with a curator schedule, free. Add the venue and event schedules you want as sources and every event they publish is listed on yours automatically. Visitors can also submit events through a request form, held for your approval if you require it.'],
                 ],
             ],
 
@@ -6515,7 +6552,7 @@ class MarketingController extends Controller
                     ],
                     [
                         'title' => 'For Venues Too',
-                        'description' => 'Venue, talent and curator schedules link to each other, so a show a venue lists can appear on the performer\'s schedule as well.',
+                        'description' => 'Venue, event and curator schedules link to each other, so a show a venue lists can appear on the performer\'s schedule as well.',
                         'icon' => 'globe',
                         'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30',
                         'border' => 'border-sky-200 dark:border-sky-500/20',
@@ -6569,14 +6606,14 @@ class MarketingController extends Controller
                     'points' => [
                         'The ticket link in Tourbox can point to your own event page, so a fan who finds you there buys from you',
                         'Free registration with a QR ticket, for guest-list nights and free shows',
-                        'A booking form on every talent schedule, which venues and promoters use to ask you for a date, free',
+                        'A booking form on every event schedule, which venues and promoters use to ask you for a date, free',
                         'Fans can post their videos and photos from a show to its page once you approve them',
                         'A digest of your new dates goes to email subscribers by itself and is not counted against your newsletter allowance',
                         'Paid tickets on Pro at '.plan_price($this->planPrice()).'/mo, with no platform fee on top of Stripe or PayPal',
                     ],
                 ],
                 'switch_steps' => [
-                    ['title' => 'Start a talent schedule', 'description' => 'Pick Talent when you create it. That type comes with the booking form, and every show on it can name the venue it is at.', 'doc' => 'getting-started#schedule-types'],
+                    ['title' => 'Start an event schedule', 'description' => 'Pick Event schedule when you create it. That type comes with the booking form, and every show on it can name the venue it is at.', 'doc' => 'getting-started#schedule-types'],
                     ['title' => 'Copy your dates over', 'description' => 'Paste your tour dates as text, or upload the tour poster, into AI import, and check each show before it is saved.', 'doc' => 'ai-import#image-import'],
                     ['title' => 'Name the venues', 'description' => 'A venue that is not on Event Schedule yet gets a schedule created for it, which the venue can claim by signing in with the address on it.', 'doc' => 'creating-events#claim'],
                     ['title' => 'Point Tourbox at your pages', 'description' => 'Add each event page as the ticket link in Tourbox, and put the embeddable calendar on your own website beside the Tourbox widget or in its place.', 'doc' => 'sharing#embed-code'],
@@ -6589,11 +6626,11 @@ class MarketingController extends Controller
                 'faq' => [
                     ['question' => 'Does Songkick sell tickets?', 'answer' => 'No. Songkick lists dates from hundreds of sources and links fans to outside ticket sellers, so orders and refunds are handled by whoever sold the ticket. Event Schedule takes free registrations with QR tickets on every plan, and paid tickets on Pro with zero platform fees.'],
                     ['question' => 'Can I use Event Schedule alongside Songkick?', 'answer' => 'Yes. Keep your Songkick listing for its fan alerts and add your Event Schedule event page as the ticket link in Tourbox, so fans who find a date there land on your own page. Paste your dates in and the AI parser fills in each show for you to check.'],
-                    ['question' => 'Can venues and promoters use Event Schedule?', 'answer' => 'Yes. Venues, talent and curators each get their own schedule, and a show a venue lists can appear on the performer\'s schedule too. Songkick\'s Tourbox is only for artist teams, and venues and promoters cannot add ticket links themselves.'],
+                    ['question' => 'Can venues and promoters use Event Schedule?', 'answer' => 'Yes. Venues, performers and curators each get their own schedule, and a show a venue lists can appear on the performer\'s schedule too. Songkick\'s Tourbox is only for artist teams, and venues and promoters cannot add ticket links themselves.'],
                     ['question' => 'How does Event Schedule pricing compare to Songkick?', 'answer' => 'Songkick is free for artists, with paid email campaigns to their fans. Event Schedule is free for listing dates, registrations and newsletters, and Pro is '.plan_price($this->planPrice()).'/mo for paid tickets with zero platform fees.'],
                     ['question' => 'Can I put my tour dates on my website?', 'answer' => 'Yes. The embeddable calendar shows your upcoming dates on any website, free, and each date links to its own event page. Fans can also subscribe to your schedule\'s live calendar feed, so a moved date updates in their own calendar.'],
                     ['question' => 'Will my fans be told when I add a date?', 'answer' => 'The ones who signed up on your schedule will. People who leave their email address get a digest of the new dates you publish, at most one every 72 hours, and fans who subscribe to the calendar feed see new dates in their own calendar. Nobody who has never visited your page is alerted.'],
-                    ['question' => 'Can a promoter or festival list several artists?', 'answer' => 'Yes. A curator schedule lists events from other schedules, and can take talent and venue schedules as sources so every date they publish appears on it automatically. It is free on every plan, which suits a promoter running a season or a festival line-up.'],
+                    ['question' => 'Can a promoter or festival list several artists?', 'answer' => 'Yes. A curator schedule lists events from other schedules, and can take event and venue schedules as sources so every date they publish appears on it automatically. It is free on every plan, which suits a promoter running a season or a festival line-up.'],
                 ],
             ],
 
@@ -7737,7 +7774,7 @@ class MarketingController extends Controller
                     ['question' => 'Can Event Schedule run a date poll like Doodle?', 'answer' => 'No, it has no availability poll where invitees mark the times that suit them. The nearest thing is an event poll, on Pro: a question with two to ten choices on an existing event\'s page, which signed-in guests answer once. That suits asking regulars which of two dates they prefer for the next session, not finding a free evening among ten busy people.'],
                     ['question' => 'So when would I use it, and can I keep Doodle alongside?', 'answer' => 'Use it when the date is already set, or was never in question. A public concert, a weekly class or a monthly meetup is announced, not voted on, and needs a page, sign-ups and reminders more than a poll. Keeping Doodle for the one decision and Event Schedule for everything after it is a sensible split.'],
                     ['question' => 'Does it replace Doodle\'s Sign-up Sheets and Booking Page?', 'answer' => 'Sign-up sheets for events, in most cases: free registration gives each date a limit, a waitlist, a QR confirmation and a reminder on the free plan. A sheet of thirty short slots on one evening maps less neatly, since each session would be its own event. For bookable time slots there is appointment booking: one appointment type on the free plan, more types, paid bookings and scheduling rules on Pro, with its emails sent through your schedule\'s own email settings on eventschedule.com.'],
-                    ['question' => 'Can my team mark when they are unavailable?', 'answer' => 'Only as whole days away. On Enterprise, each member of a talent schedule\'s team, viewers included, can mark the whole days they are not free, and everyone on the team sees those days on the schedule\'s calendar. It is a private note with no times and no voting, so it tells a band who is away in August and does not find the evening everyone is free.'],
+                    ['question' => 'Can my team mark when they are unavailable?', 'answer' => 'Only as whole days away. On Enterprise, each member of an event schedule\'s team, viewers included, can mark the whole days they are not free, and everyone on the team sees those days on the schedule\'s calendar. It is a private note with no times and no voting, so it tells a band who is away in August and does not find the evening everyone is free.'],
                     ['question' => 'What does Doodle still do better?', 'answer' => 'Finding a time. The group poll, voting without an account, scheduling that checks your calendar and invites to everyone who responded are its core, and Event Schedule does not attempt them. Keep Doodle for meetings and for any date that depends on particular people.'],
                     ['question' => 'What does Event Schedule cost for a club or a class?', 'answer' => 'A schedule, unlimited events, free registration, reminders, calendar sync and the calendar feed are on the free plan at '.plan_price(0).'. Pro at '.plan_price($this->planPrice()).' a month adds priced tickets, event polls and more appointment types. Enterprise at '.plan_price($this->planPrice(true)).' a month adds up to five team members and availability marking.'],
                     ['question' => 'How do I move my existing Doodle polls?', 'answer' => 'You move their results, not the polls. Add each booked date as an event, or import the dates from the Google Calendar they were booked into, and set each sign-up sheet\'s seat count as a Registration Limit. Old polls can stay in Doodle as a record.'],
@@ -9074,6 +9111,7 @@ class MarketingController extends Controller
             'subscriptions' => route('marketing.docs.subscriptions'),
             'gift_cards' => route('marketing.docs.gift_cards'),
             'allocated_seating' => route('marketing.docs.allocated_seating'),
+            'vendor_maps' => route('marketing.docs.vendor_maps'),
             'appointments' => route('marketing.docs.appointments'),
             'event_graphics' => route('marketing.docs.event_graphics'),
             'analytics' => route('marketing.docs.analytics'),
@@ -9113,7 +9151,7 @@ class MarketingController extends Controller
             // Getting Started
             ['page' => 'Getting Started', 'section' => 'Create Your Account', 'description' => 'Register with email or Google login to get started.', 'url' => $r['getting_started'].'#create-account', 'category' => 'User Guide', 'keywords' => 'register sign up'],
             ['page' => 'Getting Started', 'section' => 'Create Your Schedule', 'description' => 'Set up your first schedule with a unique URL.', 'url' => $r['getting_started'].'#create-schedule', 'category' => 'User Guide', 'keywords' => 'new schedule setup'],
-            ['page' => 'Getting Started', 'section' => 'Schedule Types', 'description' => 'Choose between Talent, Venue, and Curator schedule types.', 'url' => $r['getting_started'].'#schedule-types', 'category' => 'User Guide', 'keywords' => 'talent venue curator type'],
+            ['page' => 'Getting Started', 'section' => 'Schedule Types', 'description' => 'Choose between Event schedule (the standard kind), Venue, and Curator schedule types.', 'url' => $r['getting_started'].'#schedule-types', 'category' => 'User Guide', 'keywords' => 'event schedule standard talent performer venue curator type'],
             ['page' => 'Getting Started', 'section' => 'Customize Your Schedule', 'description' => 'What each section of the schedule form holds.', 'url' => $r['getting_started'].'#customize', 'category' => 'User Guide', 'keywords' => 'customize personalize configure'],
             ['page' => 'Getting Started', 'section' => 'Your Dashboard', 'description' => 'The page you land on after signing in: views, followers, revenue and live visitors, what is coming up, recent sales and followers, and the calendar.', 'url' => $r['getting_started'].'#dashboard', 'category' => 'User Guide', 'keywords' => 'dashboard home overview tiles views followers revenue realtime coming up recent activity customize add event'],
             ['page' => 'Getting Started', 'section' => 'Frequently Asked Questions', 'description' => 'Common questions about schedules, URLs, importing, getting paid, how people hear about new events, and claiming a page someone created for you.', 'url' => $r['getting_started'].'#faq', 'category' => 'User Guide', 'keywords' => 'faq help questions claim my venue page someone made a page for me get paid payment methods stripe paypal refund hear about new events subscribers'],
@@ -9123,7 +9161,7 @@ class MarketingController extends Controller
             // Creating Schedules, in the order of the schedule form
             ['page' => 'Creating Schedules', 'section' => 'The Schedule Form', 'description' => 'Where the schedule form is, its sections and rows, and how the one Save works.', 'url' => $r['creating_schedules'].'#schedule-form', 'category' => 'User Guide', 'keywords' => 'edit schedule form sections rows save'],
             ['page' => 'Creating Schedules', 'section' => 'Saving', 'description' => 'The save bar: unsaved sections, what saving removes, and what a refused save asks you to check.', 'url' => $r['creating_schedules'].'#saving', 'category' => 'User Guide', 'keywords' => 'save bar unsaved saving removes check cancel discard'],
-            ['page' => 'Creating Schedules', 'section' => 'Schedule Types', 'description' => 'Choose the right schedule type for your use case.', 'url' => $r['creating_schedules'].'#schedule-types', 'category' => 'User Guide', 'keywords' => 'talent venue curator'],
+            ['page' => 'Creating Schedules', 'section' => 'Schedule Types', 'description' => 'Choose the right schedule type for your use case.', 'url' => $r['creating_schedules'].'#schedule-types', 'category' => 'User Guide', 'keywords' => 'event schedule standard talent performer venue curator'],
             ['page' => 'Creating Schedules', 'section' => 'Details', 'description' => 'Name, short description and description, language and time, and contact info.', 'url' => $r['creating_schedules'].'#details', 'category' => 'User Guide', 'keywords' => 'name description short description ai generator'],
             ['page' => 'Creating Schedules', 'section' => 'AI Details Generator', 'description' => 'Use AI to generate schedule descriptions (Enterprise).', 'url' => $r['creating_schedules'].'#ai-details-generator', 'category' => 'User Guide', 'keywords' => 'ai generate details description automatic'],
             ['page' => 'Creating Schedules', 'section' => 'First Day of Week', 'description' => 'Choose which day your schedule\'s calendar week starts on, in the Language and time row beside the timezone.', 'url' => $r['creating_schedules'].'#details-localization', 'category' => 'User Guide', 'keywords' => 'first day of week monday sunday calendar week start language and time timezone 24-hour advanced'],
@@ -9132,7 +9170,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'Translation glossary', 'description' => 'Names automatic translation keeps exactly as written, and words with a fixed translation, matched as whole words. Changing the list translates again what uses a changed term.', 'url' => $r['creating_schedules'].'#details-glossary', 'category' => 'User Guide', 'keywords' => 'translation glossary keep name untranslated do not translate fixed translation terms whole word brand program organization weglot second language'],
             ['page' => 'Creating Schedules', 'section' => 'Contact Info', 'description' => 'Add contact methods to your schedule.', 'url' => $r['creating_schedules'].'#contact-info', 'category' => 'User Guide', 'keywords' => 'email phone website contact city country'],
             ['page' => 'Creating Schedules', 'section' => 'Announcement Bar', 'description' => 'Show an announcement banner at the top of your schedule\'s guest pages, and on its event pages too.', 'url' => $r['creating_schedules'].'#announcement-bar', 'category' => 'User Guide', 'keywords' => 'banner announcement message notice top of page'],
-            ['page' => 'Creating Schedules', 'section' => 'Event Sources', 'description' => 'Follow talent and venue schedules so all of their events appear on a curator automatically.', 'url' => $r['creating_schedules'].'#event-sources', 'category' => 'User Guide', 'keywords' => 'curator sources follow aggregate talent venue automatic city guide festival'],
+            ['page' => 'Creating Schedules', 'section' => 'Event Sources', 'description' => 'Follow event and venue schedules so all of their events appear on a curator automatically.', 'url' => $r['creating_schedules'].'#event-sources', 'category' => 'User Guide', 'keywords' => 'curator sources follow aggregate event schedule talent performer venue automatic city guide festival'],
             ['page' => 'Creating Schedules', 'section' => 'Address', 'description' => 'Configure location settings for your schedule.', 'url' => $r['creating_schedules'].'#address', 'category' => 'User Guide', 'keywords' => 'location map'],
             ['page' => 'Creating Schedules', 'section' => 'Merging Duplicates', 'description' => 'Merge a duplicate venue schedule into another, or bulk-merge look-alike venues from Following or a curator schedule, and look-alike participants from Following.', 'url' => $r['creating_schedules'].'#merge', 'category' => 'User Guide', 'keywords' => 'merge duplicate venue venues participant participants talent performer team combine consolidate merge into not duplicates unclaimed following listed twice someone new'],
             ['page' => 'Creating Schedules', 'section' => 'Style', 'description' => 'Visual styling options for your schedule.', 'url' => $r['creating_schedules'].'#style', 'category' => 'User Guide', 'keywords' => 'design theme appearance'],
@@ -9214,7 +9252,7 @@ class MarketingController extends Controller
             ['page' => 'Managing Schedules', 'section' => 'Actions Menu', 'description' => 'The Actions menu beside the schedule\'s name: import events, scan an agenda, sync calendars, graphics, embedding, the audit log and deleting.', 'url' => $r['managing_schedules'].'#actions', 'category' => 'User Guide', 'keywords' => 'actions dropdown import sync graphic embed delete'],
             ['page' => 'Managing Schedules', 'section' => 'Templates', 'description' => 'Save an event as a reusable template (preset) and create new events from it in seconds (Pro).', 'url' => $r['managing_schedules'].'#templates', 'category' => 'User Guide', 'keywords' => 'template preset reusable recurring duplicate clone save as template'],
             ['page' => 'Managing Schedules', 'section' => 'Videos', 'description' => 'Assign YouTube videos for curator schedules.', 'url' => $r['managing_schedules'].'#videos', 'category' => 'User Guide', 'keywords' => 'youtube video curator'],
-            ['page' => 'Managing Schedules', 'section' => 'Availability', 'description' => 'Set availability dates for talent schedules.', 'url' => $r['managing_schedules'].'#availability', 'category' => 'User Guide', 'keywords' => 'available dates talent booking'],
+            ['page' => 'Managing Schedules', 'section' => 'Availability', 'description' => 'Set availability dates for event schedules.', 'url' => $r['managing_schedules'].'#availability', 'category' => 'User Guide', 'keywords' => 'available dates event schedule talent booking'],
             ['page' => 'Managing Schedules', 'section' => 'Appointments', 'description' => 'The Appointments tab: set up bookable types, see your bookings, and share your booking page. One type is free; Pro adds more, paid bookings and scheduling rules.', 'url' => $r['managing_schedules'].'#appointments', 'category' => 'User Guide', 'keywords' => 'appointments tab bookings booking page tab free calendly'],
             ['page' => 'Managing Schedules', 'section' => 'Requests', 'description' => 'Manage public event request submissions and appointment bookings that need approval.', 'url' => $r['managing_schedules'].'#requests', 'category' => 'User Guide', 'keywords' => 'submissions approve reject appointment booking approval pending'],
             ['page' => 'Managing Schedules', 'section' => 'Feeds', 'description' => 'Keep a schedule up to date from a calendar address, an RSS feed or a page that lists events.', 'url' => $r['managing_schedules'].'#feeds', 'category' => 'User Guide', 'keywords' => 'feed rss atom ics ical webcal sync import subscribe standing automatic'],
@@ -9358,6 +9396,13 @@ class MarketingController extends Controller
             ['page' => 'Allocated Seating', 'section' => 'Every option and limit', 'description' => 'Reference table of every seating option, choice and size limit.', 'url' => $r['allocated_seating'].'#reference', 'category' => 'User Guide', 'keywords' => 'reference options limits seat kinds table booking row labels curve caps'],
             ['page' => 'Allocated Seating', 'section' => 'The Seating plans tab', 'description' => 'A venue schedule\'s plan cards: open the designer, duplicate a plan or delete it.', 'url' => $r['allocated_seating'].'#plans-tab', 'category' => 'User Guide', 'keywords' => 'seating plans tab new plan duplicate delete open designer'],
             ['page' => 'Allocated Seating', 'section' => 'When a date stops following the plan', 'description' => 'Each date takes its own copy of the plan the first time it is opened, and later edits to the plan do not reach it.', 'url' => $r['allocated_seating'].'#date-copy', 'category' => 'User Guide', 'keywords' => 'snapshot copy date plan changes not applied'],
+            ['page' => 'Vendor Maps', 'section' => 'Turning it on', 'description' => 'Open the Vendor map tab of a venue or curator schedule, say what kind of event it is and which event it is for.', 'url' => $r['vendor_maps'].'#turning-it-on', 'category' => 'User Guide', 'keywords' => 'vendor map stall map market fair expo booth turn on setup kind farmers market craft fair flea market food festival conference'],
+            ['page' => 'Vendor Maps', 'section' => 'Drafting the map from photos', 'description' => 'Take a few photos, or upload the map you already print, and AI draws the spots, areas and names for you to check.', 'url' => $r['vendor_maps'].'#drafting-from-photos', 'category' => 'User Guide', 'keywords' => 'ai photos draft map pdf printed map gemini stand somewhere high whole row signs readable pro'],
+            ['page' => 'Vendor Maps', 'section' => 'Drawing and editing the map', 'description' => 'Add a row or a spot, number in order, areas, landmarks, You are here and undo, on a computer or a phone.', 'url' => $r['vendor_maps'].'#drawing', 'category' => 'User Guide', 'keywords' => 'designer draw map add row add spot number in order areas landmarks entrance restrooms parking stage you are here undo'],
+            ['page' => 'Vendor Maps', 'section' => 'The Vendor map tab', 'description' => 'The two cards, the market day view, reviewing requests, moves, not coming, a vendor for one day and cancelling a day.', 'url' => $r['vendor_maps'].'#the-tab', 'category' => 'User Guide', 'keywords' => 'vendor map tab review approve decline approve all conflicts move this day only from now on not coming add vendor cancel day rain'],
+            ['page' => 'Vendor Maps', 'section' => 'Sending the vendor link', 'description' => 'Send one link on WhatsApp; vendors find their spot, say what they sell and sign in with an emailed code or Google.', 'url' => $r['vendor_maps'].'#vendor-link', 'category' => 'User Guide', 'keywords' => 'vendor link whatsapp claim spot is one of these you emailed code google not coming vendor home pro'],
+            ['page' => 'Vendor Maps', 'section' => 'What shoppers see', 'description' => 'The visitors\' map page, the printable entrance sign with its QR code, and the map on your own website.', 'url' => $r['vendor_maps'].'#shoppers', 'category' => 'User Guide', 'keywords' => 'shoppers visitors map page qr code entrance sign print embed iframe website search categories'],
+            ['page' => 'Vendor Maps', 'section' => 'Kinds and plans', 'description' => 'The five kinds of map and which parts are free and which need Pro.', 'url' => $r['vendor_maps'].'#kinds-and-plans', 'category' => 'User Guide', 'keywords' => 'kinds market craft fair flea market food festival expo plans free pro pricing'],
             ['page' => 'Selling Tickets', 'section' => 'Managing Sales', 'description' => 'View and manage ticket sale records.', 'url' => $r['tickets'].'#managing-sales', 'category' => 'User Guide', 'keywords' => 'sales orders manage view'],
             ['page' => 'Selling Tickets', 'section' => 'Refunds', 'description' => 'Refund a Stripe, PayPal or Razorpay sale in full or in part from the Sales page, or mark a sale paid another way as refunded.', 'url' => $r['tickets'].'#refunds', 'category' => 'User Guide', 'keywords' => 'refund partial refund money back return stripe paypal mark as refunded refunded so far available to refund installment plan'],
             ['page' => 'Selling Tickets', 'section' => 'Filtering Sales', 'description' => 'Search and filter sales by buyer name, email, or event name.', 'url' => $r['tickets'].'#filtering-sales', 'category' => 'User Guide', 'keywords' => 'filter search sales buyer name email'],
@@ -9426,7 +9471,7 @@ class MarketingController extends Controller
             // Event Graphics
             ['page' => 'Event Graphics', 'section' => 'Overview', 'description' => 'Generate a shareable image and ready-to-paste text from your upcoming events, free on every plan.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'graphics images social media flyer free plan credit watermark download copy'],
             ['page' => 'Event Graphics', 'section' => 'Layout and Shape', 'description' => 'Grid, Rows or List, flyers per row, and a fixed social shape: Square, Portrait, Story or Wide, or leave it on Natural.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'layout grid rows list flyers per row shape image size square portrait story wide landscape natural auto 1080 1200 630 social format instagram facebook dimensions aspect ratio'],
-            ['page' => 'Event Graphics', 'section' => 'Which Events', 'description' => 'Which upcoming events are used, how many, a limit per talent or venue, and leaving recurring events out.', 'url' => $r['event_graphics'].'#events', 'category' => 'User Guide', 'keywords' => 'events number of events limit per talent venue per schedule max cap variety diversity same band repeat dominate spread lineup unlimited recurring exclude flyer required'],
+            ['page' => 'Event Graphics', 'section' => 'Which Events', 'description' => 'Which upcoming events are used, how many, a limit per performer or venue, and leaving recurring events out.', 'url' => $r['event_graphics'].'#events', 'category' => 'User Guide', 'keywords' => 'events number of events limit per performer talent venue per schedule max cap variety diversity same band repeat dominate spread lineup unlimited recurring exclude flyer required'],
             ['page' => 'Event Graphics', 'section' => 'Dates and Numbers', 'description' => 'A date strip on or above each flyer, your own text in place of the date, and a numbered badge per flyer.', 'url' => $r['event_graphics'].'#dates-and-numbers', 'category' => 'User Guide', 'keywords' => 'date strip overlay above flyer show text number badge numbered flyers'],
             ['page' => 'Event Graphics', 'section' => 'Header & Footer Text', 'description' => 'Add a header image, your profile image, a headline above and a sign-off below the events.', 'url' => $r['event_graphics'].'#header-footer-text', 'category' => 'User Guide', 'keywords' => 'header footer text headline tagline branding signoff header image profile image logo'],
             ['page' => 'Event Graphics', 'section' => 'Text Template', 'description' => 'How each event is written in the caption that goes with the graphic.', 'url' => $r['event_graphics'].'#text-template', 'category' => 'User Guide', 'keywords' => 'template text format caption wording whatsapp bold'],
@@ -9620,7 +9665,7 @@ class MarketingController extends Controller
             ['page' => 'Web Accessibility', 'section' => 'Your declaration', 'description' => 'Publish your own accessibility statement on your domain when you serve regulated markets.', 'url' => $r['selfhost_accessibility'].'#your-declaration', 'category' => 'Selfhost', 'keywords' => 'declaration statement coordinator'],
             ['page' => 'Web Accessibility', 'section' => 'Configuration', 'description' => 'Environment variables for the contact email, SLA days, WCAG label, review date and measured pages.', 'url' => $r['selfhost_accessibility'].'#configuration', 'category' => 'Selfhost', 'keywords' => 'env accessibility contact email ACCESSIBILITY_LAST_REVIEWED ACCESSIBILITY_PUBLIC_PAGES_MEASURED ACCESSIBILITY_PUBLIC_MEASUREMENT_DATE measurement'],
 
-            ['page' => 'Installation', 'section' => 'Custom translations', 'description' => 'Rename Talent to Artist or any other UI term. Overrides live in storage/app/lang/ and survive upgrades.', 'url' => $r['selfhost_installation'].'#translations', 'category' => 'Selfhost', 'keywords' => 'translation language rename customize override messages talent artist curator event planner locale'],
+            ['page' => 'Installation', 'section' => 'Custom translations', 'description' => 'Rename Event schedule to Artist schedule, Lineup to Artists, or any other UI term. Overrides live in storage/app/lang/ and survive upgrades.', 'url' => $r['selfhost_installation'].'#translations', 'category' => 'Selfhost', 'keywords' => 'translation language rename customize override messages event schedule lineup talent artist curator event planner locale'],
             ['page' => 'SaaS Setup', 'section' => 'Scheduler and queue', 'description' => 'Drive timed tasks with a cron entry, a schedule:work process, or the /translate_data HTTP endpoint. Includes the stalled-scheduler alert.', 'url' => $r['saas_setup'].'#scheduler', 'category' => 'SaaS', 'keywords' => 'cron scheduler schedule:work schedule:run queue worker queue:work translate_data APP_CRON_SECRET heartbeat stalled timed tasks background jobs'],
             ['page' => 'SaaS Setup', 'section' => 'Backup storage', 'description' => 'Point schedule exports at object storage when the app runs on more than one server. Must be a private bucket, never the images bucket.', 'url' => $r['saas_setup'].'#backup-storage', 'category' => 'SaaS', 'keywords' => 'backup export storage bucket spaces s3 private BACKUP_SPACES_BUCKET download archive'],
             ['page' => 'Facebook Login', 'section' => 'Overview', 'description' => 'Add Continue with Facebook sign-in and a Facebook Settings section for your customers. Off by default.', 'url' => $r['saas_facebook_login'].'#overview', 'category' => 'SaaS', 'keywords' => 'facebook login sign in sign up oauth meta social login continue with facebook events import export sync'],
@@ -9633,7 +9678,7 @@ class MarketingController extends Controller
             ['page' => 'Facebook Login', 'section' => 'Test, then go Live', 'description' => 'Test with app roles and test users, then switch the app to Live.', 'url' => $r['saas_facebook_login'].'#go-live', 'category' => 'SaaS', 'keywords' => 'facebook test users app roles development live mode app not active'],
             ['page' => 'Facebook Login', 'section' => 'How accounts are matched', 'description' => 'How a Facebook sign-in links to an existing account or creates a new one.', 'url' => $r['saas_facebook_login'].'#account-matching', 'category' => 'SaaS', 'keywords' => 'facebook account linking matching existing email placeholder rotate app secret'],
             ['page' => 'Facebook Login', 'section' => 'Turning it off', 'description' => 'Unset either value to hide Facebook login. Stored links are kept.', 'url' => $r['saas_facebook_login'].'#disable', 'category' => 'SaaS', 'keywords' => 'facebook disable turn off remove login reset password'],
-            ['page' => 'SaaS Setup', 'section' => 'Custom translations', 'description' => 'Override UI strings in storage/app/lang/ across every tenant. Survives upgrades.', 'url' => $r['saas_setup'].'#translations', 'category' => 'SaaS', 'keywords' => 'translation language rename customize override messages talent artist curator event planner locale'],
+            ['page' => 'SaaS Setup', 'section' => 'Custom translations', 'description' => 'Override UI strings in storage/app/lang/ across every tenant. Survives upgrades.', 'url' => $r['saas_setup'].'#translations', 'category' => 'SaaS', 'keywords' => 'translation language rename customize override messages event schedule lineup talent artist curator event planner locale'],
             ['page' => 'Installation', 'section' => 'Custom dashboard links', 'description' => 'Add custom links to the admin sidebar via CUSTOM_LINK_* environment variables.', 'url' => $r['selfhost_installation'].'#custom-links', 'category' => 'Selfhost', 'keywords' => 'custom links sidebar dashboard navigation menu env environment'],
             ['page' => 'Installation', 'section' => 'Updating', 'description' => 'Update from the App Update page in Settings or the admin panel, or with php artisan app:update.', 'url' => $r['selfhost_installation'].'#updating', 'category' => 'Selfhost', 'keywords' => 'update upgrade app:update new version php version newer php migrate error page unfinished'],
             ['page' => 'Installation', 'section' => 'Cron URL', 'description' => 'Drive the scheduler over HTTP with APP_CRON_SECRET when the host has no crontab.', 'url' => $r['selfhost_installation'].'#cron-url', 'category' => 'Selfhost', 'keywords' => 'cron url translate_data app_cron_secret no crontab'],

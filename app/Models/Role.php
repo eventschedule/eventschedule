@@ -4,25 +4,41 @@ namespace App\Models;
 
 use App\Http\Controllers\MarketingController;
 use App\Jobs\GenerateRoleImageVariants;
+use App\Jobs\RegenerateRoleTranslations;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
+use App\Services\AdsService;
+use App\Services\AudienceMailGuard;
+use App\Services\BoostBillingService;
+use App\Services\BoostPartnerService;
+use App\Services\DemoService;
 use App\Services\GeocodingService;
+use App\Services\MetaAdsService;
+use App\Services\UsageTrackingService;
+use App\Support\HomeSchedule;
 use App\Traits\HasImageVariants;
 use App\Traits\RoleBillable;
+use App\Utils\CountryUtils;
 use App\Utils\CssUtils;
 use App\Utils\CustomFieldUtils;
 use App\Utils\GalleryUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\MarkdownUtils;
+use App\Utils\PhoneUtils;
+use App\Utils\ScheduleTypeLabel;
 use App\Utils\SeoUtils;
+use App\Utils\TextUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class Role extends Model implements MustVerifyEmail
 {
@@ -484,12 +500,15 @@ class Role extends Model implements MustVerifyEmail
         'for-comedians',
         'for-comedy-clubs',
         'for-community-centers',
+        'for-conferences-and-expos',
+        'for-craft-fairs',
         'for-curators',
         'for-dance-groups',
         'for-djs',
         'for-farmers-markets',
         'for-festivals',
         'for-fitness-and-yoga',
+        'for-flea-markets',
         'for-food-trucks-and-vendors',
         'for-hotels-and-resorts',
         'for-libraries',
@@ -634,12 +653,12 @@ class Role extends Model implements MustVerifyEmail
                 $model->email = strtolower($model->email);
             }
             if ($model->phone) {
-                $model->phone = \App\Utils\PhoneUtils::normalize($model->phone);
+                $model->phone = PhoneUtils::normalize($model->phone);
             }
             if ($model->country_code) {
                 // Normalize to lowercase ISO 3166-1 alpha-2 (e.g. "ISR" -> "il"). The country
                 // picker (intl-tel-input) only accepts alpha-2, so alpha-3 values throw.
-                $model->country_code = \App\Utils\CountryUtils::normalizeCountryCode($model->country_code);
+                $model->country_code = CountryUtils::normalizeCountryCode($model->country_code);
             }
 
             // roles.website is a varchar(255) under a strict connection, so an over-long value is
@@ -653,7 +672,7 @@ class Role extends Model implements MustVerifyEmail
             // data during an unrelated save. saveQuietly() fires no events and so skips this
             // entirely - see BackupService::importRole(), which re-applies it by hand.
             if (! $model->exists || $model->isDirty('website')) {
-                $model->website = \App\Utils\TextUtils::clamp(UrlUtils::normalizeWebsiteUrl($model->website), 255);
+                $model->website = TextUtils::clamp(UrlUtils::normalizeWebsiteUrl($model->website), 255);
             }
 
             // roles.agenda_ai_prompt is the same shape as the events column: a varchar(500) fed by
@@ -662,8 +681,8 @@ class Role extends Model implements MustVerifyEmail
             // typed; the clamp is the last resort. saveQuietly() skips this - see
             // BackupService::importRole().
             if (! $model->exists || $model->isDirty('agenda_ai_prompt')) {
-                $model->agenda_ai_prompt = \App\Utils\TextUtils::clamp(
-                    \App\Utils\TextUtils::normalizeNewlines($model->agenda_ai_prompt), 500
+                $model->agenda_ai_prompt = TextUtils::clamp(
+                    TextUtils::normalizeNewlines($model->agenda_ai_prompt), 500
                 );
             }
 
@@ -671,7 +690,7 @@ class Role extends Model implements MustVerifyEmail
             // whenever the source field changes (or on initial create).
             foreach (['name', 'name_en', 'city', 'address1', 'address1_en'] as $source) {
                 if (! $model->exists || $model->isDirty($source)) {
-                    $normalized = \App\Utils\GeminiUtils::normalizeForMatch($model->{$source});
+                    $normalized = GeminiUtils::normalizeForMatch($model->{$source});
                     $model->{$source.'_normalized'} = $normalized === '' ? null : $normalized;
                 }
             }
@@ -753,7 +772,7 @@ class Role extends Model implements MustVerifyEmail
                         // be clamped; a place ID cannot - Google sets no maximum length on one,
                         // and a truncated ID is an invalid one - so an over-long ID is dropped
                         // and the guest map falls back to the address.
-                        $model->formatted_address = \App\Utils\TextUtils::clamp($geocode['formatted_address'], 255);
+                        $model->formatted_address = TextUtils::clamp($geocode['formatted_address'], 255);
                         $model->google_place_id = mb_strlen((string) $geocode['place_id']) <= 255
                             ? $geocode['place_id']
                             : null;
@@ -787,20 +806,20 @@ class Role extends Model implements MustVerifyEmail
                 // A partner boost is stopped, never deleted at Meta and never refunded: the platform
                 // holds none of its money, and its spend must stay readable for the statement.
                 if ($campaign->isPartner()) {
-                    \App\Services\BoostPartnerService::stopInCascade($campaign);
+                    BoostPartnerService::stopInCascade($campaign);
 
                     continue;
                 }
 
                 try {
-                    if ($campaign->meta_campaign_id && \App\Services\MetaAdsService::isBoostConfigured()) {
-                        $metaService = app()->make(\App\Services\MetaAdsService::class);
+                    if ($campaign->meta_campaign_id && MetaAdsService::isBoostConfigured()) {
+                        $metaService = app()->make(MetaAdsService::class);
                         $metaService->deleteCampaign($campaign);
                     }
 
                     $campaign->update(['status' => 'cancelled', 'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null]);
 
-                    $billingService = new \App\Services\BoostBillingService;
+                    $billingService = new BoostBillingService;
 
                     // Gate the STRIPE call, not the refund. settlePayment()'s credit branch debits
                     // boost_credit regardless of mode, so gating the whole block meant deleting a
@@ -961,7 +980,7 @@ class Role extends Model implements MustVerifyEmail
             }
 
             if ($model->wasChanged('translation_language_code')) {
-                \App\Jobs\RegenerateRoleTranslations::dispatch($model);
+                RegenerateRoleTranslations::dispatch($model);
             }
 
             // A federated listing carries this schedule's name and its flattened venue
@@ -1285,7 +1304,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function subscribers()
     {
-        return $this->hasMany(\App\Models\RoleSubscriber::class);
+        return $this->hasMany(RoleSubscriber::class);
     }
 
     /**
@@ -1318,7 +1337,7 @@ class Role extends Model implements MustVerifyEmail
             ->get();
     }
 
-    public function getEditorsWantingNotification(string $type): \Illuminate\Support\Collection
+    public function getEditorsWantingNotification(string $type): Collection
     {
         return $this->belongsToMany(User::class)
             ->withPivot('level', 'notification_settings')
@@ -1477,7 +1496,7 @@ class Role extends Model implements MustVerifyEmail
      * this schedule (e.g. venues this curator has hosted events at). Includes roles
      * connected via pending/unaccepted events, matching the AI venue-matching tiers.
      */
-    public function connectedRoleIds(string $type): \Illuminate\Support\Collection
+    public function connectedRoleIds(string $type): Collection
     {
         return \DB::table('event_role as er1')
             ->join('event_role as er2', 'er1.event_id', '=', 'er2.event_id')
@@ -2077,7 +2096,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function scopeNotDemoSchedule($query)
     {
-        return $query->where('subdomain', '!=', \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN)
+        return $query->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%');
     }
 
@@ -2141,14 +2160,14 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $query->where(function ($q) {
-            $q->whereRaw('roles.email <=> ?', [\App\Services\DemoService::DEMO_EMAIL])
-                ->orWhereRaw('roles.subdomain <=> ?', [\App\Services\DemoService::DEMO_ROLE_SUBDOMAIN])
+            $q->whereRaw('roles.email <=> ?', [DemoService::DEMO_EMAIL])
+                ->orWhereRaw('roles.subdomain <=> ?', [DemoService::DEMO_ROLE_SUBDOMAIN])
                 // A correlated subquery rather than a join: these queries scan, and reading
                 // $role->user per row would be an N+1 across every schedule in the database.
                 ->orWhereExists(fn ($u) => $u->select(DB::raw(1))
                     ->from('users')
                     ->whereColumn('users.id', 'roles.user_id')
-                    ->where('users.email', \App\Services\DemoService::DEMO_EMAIL));
+                    ->where('users.email', DemoService::DEMO_EMAIL));
         });
     }
 
@@ -2167,8 +2186,8 @@ class Role extends Model implements MustVerifyEmail
             return false;
         }
 
-        if (self::equalsAsCollated($this->email, \App\Services\DemoService::DEMO_EMAIL)
-            || self::equalsAsCollated($this->subdomain, \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN)) {
+        if (self::equalsAsCollated($this->email, DemoService::DEMO_EMAIL)
+            || self::equalsAsCollated($this->subdomain, DemoService::DEMO_ROLE_SUBDOMAIN)) {
             return true;
         }
 
@@ -2178,7 +2197,7 @@ class Role extends Model implements MustVerifyEmail
 
         return $demoOwnerId !== null
             ? (int) $this->user_id === $demoOwnerId
-            : self::equalsAsCollated($this->user?->email, \App\Services\DemoService::DEMO_EMAIL);
+            : self::equalsAsCollated($this->user?->email, DemoService::DEMO_EMAIL);
     }
 
     /**
@@ -2309,7 +2328,7 @@ class Role extends Model implements MustVerifyEmail
             // this and fail the scope - rendering a page whose two buttons then bounced off
             // claimTarget() to the marketing home, which is the exact bug this predicate exists to
             // prevent, in mirror image.
-            && $this->subdomain !== \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN
+            && $this->subdomain !== DemoService::DEMO_ROLE_SUBDOMAIN
             && ! str_starts_with((string) $this->subdomain, 'demo-')
             // Last, because it is the only clause that can cost a query.
             && ! $this->hasRealOwner();
@@ -3423,7 +3442,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function guestPathBase($useCustomDomain = false): string
     {
-        if ($this->isClaimed() && \App\Support\HomeSchedule::is($this)) {
+        if ($this->isClaimed() && HomeSchedule::is($this)) {
             return route('role.view_guest', ['subdomain' => $this->subdomain]);
         }
 
@@ -3548,7 +3567,7 @@ class Role extends Model implements MustVerifyEmail
 
         // A selfhost install's home schedule is served at the site's own address, and that is the
         // address handed out. Its old path keeps answering.
-        if (\App\Support\HomeSchedule::is($this)) {
+        if (HomeSchedule::is($this)) {
             return url('/');
         }
 
@@ -3685,10 +3704,10 @@ class Role extends Model implements MustVerifyEmail
      * "performerIn" on a person - at their undated canonical URLs, dated by the occurrence the list
      * computed. Everything they read is already loaded with them, so the list adds no queries.
      *
-     * @param  \Illuminate\Support\Collection<int, array{event: Event, date: string}>  $upcoming
+     * @param  Collection<int, array{event: Event, date: string}>  $upcoming
      * @return array<string, mixed>
      */
-    public function schemaNode(string $lang, bool $isUnverified, \Illuminate\Support\Collection $upcoming): array
+    public function schemaNode(string $lang, bool $isUnverified, Collection $upcoming): array
     {
         $type = $this->isVenue() ? 'EventVenue' : ($this->isTalent() ? 'Person' : 'Organization');
         $canonical = $this->schemaCanonicalUrl();
@@ -4341,7 +4360,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function showAds(): bool
     {
-        if (! \App\Services\AdsService::isEnabled()) {
+        if (! AdsService::isEnabled()) {
             return false;
         }
 
@@ -4740,6 +4759,9 @@ class Role extends Model implements MustVerifyEmail
             // page. Not photo_gallery, which titles the page of fan photos.
             'gallery' => 'Gallery',
             'get_tickets' => 'Get Tickets',
+            // The heading over the people an event names. It was the type's name, "Talent",
+            // until the standard schedule became an "Event schedule" (ScheduleTypeLabel).
+            'lineup' => 'Lineup',
             'load_more' => 'Load More',
             'no_scheduled_events' => 'No scheduled events',
             'online' => 'Online',
@@ -4775,7 +4797,7 @@ class Role extends Model implements MustVerifyEmail
             }
         }
 
-        return __('messages.'.$key);
+        return $key === 'lineup' ? ScheduleTypeLabel::lineup() : __('messages.'.$key);
     }
 
     public function translatedSponsorSectionTitle()
@@ -4915,12 +4937,12 @@ class Role extends Model implements MustVerifyEmail
 
     public function newsletters()
     {
-        return $this->hasMany(\App\Models\Newsletter::class);
+        return $this->hasMany(Newsletter::class);
     }
 
     public function boostCampaigns()
     {
-        return $this->hasMany(\App\Models\BoostCampaign::class);
+        return $this->hasMany(BoostCampaign::class);
     }
 
     public function actualPlanTier(): string
@@ -5007,7 +5029,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function mayMailUnsolicitedAudience(): bool
     {
-        return \App\Services\AudienceMailGuard::mayMailUnsolicited($this);
+        return AudienceMailGuard::mayMailUnsolicited($this);
     }
 
     /** Newsletter emails a month on the hosted free plan, and while a paid plan is on a trial. */
@@ -5089,7 +5111,7 @@ class Role extends Model implements MustVerifyEmail
         // Every other newsletter's recipients, by each row's own status (sent, pending or failed),
         // whatever became of the newsletter: one deleted after it went out ('cancelled') still
         // spent the allowance, or deleting and sending again would refill it.
-        $otherEmails = \App\Services\AudienceMailGuard::recipientRowsSince(
+        $otherEmails = AudienceMailGuard::recipientRowsSince(
             fn ($q) => $q->where('newsletters.role_id', $this->id),
             now()->startOfMonth(),
             exceptSentNewsletters: true,
@@ -5135,11 +5157,11 @@ class Role extends Model implements MustVerifyEmail
 
     public function aiImageGenerationsToday(): int
     {
-        return (int) \App\Models\UsageDaily::where('role_id', $this->id)
+        return (int) UsageDaily::where('role_id', $this->id)
             ->where('date', now()->toDateString())
             ->whereIn('operation', [
-                \App\Services\UsageTrackingService::GEMINI_GENERATE_FLYER,
-                \App\Services\UsageTrackingService::GEMINI_GENERATE_STYLE_IMAGE,
+                UsageTrackingService::GEMINI_GENERATE_FLYER,
+                UsageTrackingService::GEMINI_GENERATE_STYLE_IMAGE,
             ])
             ->sum('count');
     }
@@ -5179,9 +5201,9 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
-        $count = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+        $count = (int) UsageDaily::where('role_id', $this->id)
             ->where('date', now()->toDateString())
-            ->where('operation', \App\Services\UsageTrackingService::GEMINI_PARSE_EVENT)
+            ->whereIn('operation', [UsageTrackingService::GEMINI_PARSE_EVENT, UsageTrackingService::GEMINI_PARSE_VENDOR_MAP])
             ->sum('count');
 
         return $count < $limit;
@@ -5248,13 +5270,13 @@ class Role extends Model implements MustVerifyEmail
     public function eventCreateAllowance(?User $actingUser = null): ?int
     {
         $today = now()->toDateString();
-        $operation = \App\Services\UsageTrackingService::EVENT_CREATE;
+        $operation = UsageTrackingService::EVENT_CREATE;
         $left = null;
 
         $scheduleLimit = $this->eventCreateDailyLimit();
 
         if (! is_null($scheduleLimit)) {
-            $scheduleCount = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+            $scheduleCount = (int) UsageDaily::where('role_id', $this->id)
                 ->where('date', $today)
                 ->where('operation', $operation)
                 ->sum('count');
@@ -5269,7 +5291,7 @@ class Role extends Model implements MustVerifyEmail
                 $roleIds = $actingUser->editor()->pluck('roles.id');
 
                 if ($roleIds->isNotEmpty()) {
-                    $userCount = (int) \App\Models\UsageDaily::whereIn('role_id', $roleIds)
+                    $userCount = (int) UsageDaily::whereIn('role_id', $roleIds)
                         ->where('date', $today)
                         ->where('operation', $operation)
                         ->sum('count');
@@ -5386,9 +5408,9 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
-        $count = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+        $count = (int) UsageDaily::where('role_id', $this->id)
             ->where('date', now()->toDateString())
-            ->where('operation', \App\Services\UsageTrackingService::GEMINI_PARSE_PARTS)
+            ->where('operation', UsageTrackingService::GEMINI_PARSE_PARTS)
             ->sum('count');
 
         return $count < $limit;
@@ -5411,12 +5433,12 @@ class Role extends Model implements MustVerifyEmail
             return true;
         }
 
-        $count = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+        $count = (int) UsageDaily::where('role_id', $this->id)
             ->where('date', now()->toDateString())
             ->whereIn('operation', [
-                \App\Services\UsageTrackingService::GEMINI_GENERATE_STYLE,
-                \App\Services\UsageTrackingService::GEMINI_GENERATE_SCHEDULE_DETAILS,
-                \App\Services\UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS,
+                UsageTrackingService::GEMINI_GENERATE_STYLE,
+                UsageTrackingService::GEMINI_GENERATE_SCHEDULE_DETAILS,
+                UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS,
             ])
             ->sum('count');
 
@@ -5438,7 +5460,7 @@ class Role extends Model implements MustVerifyEmail
 
     public function photoCount(): int
     {
-        return \App\Models\EventPhoto::whereIn('event_id',
+        return EventPhoto::whereIn('event_id',
             $this->events()->select('events.id')
         )->count();
     }
@@ -5456,24 +5478,24 @@ class Role extends Model implements MustVerifyEmail
 
     public function groups()
     {
-        return $this->hasMany(\App\Models\Group::class);
+        return $this->hasMany(Group::class);
     }
 
     /** The addresses this schedule keeps reading for events. */
     public function feeds()
     {
-        return $this->hasMany(\App\Models\EventFeed::class);
+        return $this->hasMany(EventFeed::class);
     }
 
     public function eventTemplates()
     {
-        return $this->hasMany(\App\Models\EventTemplate::class)->orderByDesc('created_at');
+        return $this->hasMany(EventTemplate::class)->orderByDesc('created_at');
     }
 
     /** Ticket presets (Tickets > Ticket presets), in the owner's order. Read through App\Services\TicketPresets. */
     public function ticketPresets()
     {
-        return $this->hasMany(\App\Models\TicketPreset::class)->orderBy('sort_order')->orderBy('id');
+        return $this->hasMany(TicketPreset::class)->orderBy('sort_order')->orderBy('id');
     }
 
     /**
@@ -5482,7 +5504,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function ticketPresetSetting()
     {
-        return $this->hasOne(\App\Models\TicketPresetSetting::class)->withDefault(['team_uses_presets' => false]);
+        return $this->hasOne(TicketPresetSetting::class)->withDefault(['team_uses_presets' => false]);
     }
 
     /**
@@ -5492,7 +5514,7 @@ class Role extends Model implements MustVerifyEmail
      */
     public function calendarSyncSetting()
     {
-        return $this->hasOne(\App\Models\CalendarSyncSetting::class)->withDefault([
+        return $this->hasOne(CalendarSyncSetting::class)->withDefault([
             'google_publishes' => false,
             'microsoft_publishes' => false,
             'caldav_publishes' => false,
@@ -5736,13 +5758,13 @@ class Role extends Model implements MustVerifyEmail
             } elseif ($type === 'dropdown') {
                 $options = self::customFieldOptions($field);
                 if (! empty($options)) {
-                    $fieldRules[] = \Illuminate\Validation\Rule::in($options);
+                    $fieldRules[] = Rule::in($options);
                 }
             } elseif ($type === 'multiselect') {
                 $fieldRules[] = 'array';
                 $options = self::customFieldOptions($field);
                 if (! empty($options)) {
-                    $rules["{$key}.*"] = ['string', \Illuminate\Validation\Rule::in($options)];
+                    $rules["{$key}.*"] = ['string', Rule::in($options)];
                 }
             }
 
@@ -6071,7 +6093,7 @@ class Role extends Model implements MustVerifyEmail
         }
 
         try {
-            $decrypted = \Illuminate\Support\Facades\Crypt::decryptString($value);
+            $decrypted = Crypt::decryptString($value);
             $decoded = json_decode($decrypted, true);
 
             return is_array($decoded) ? $decoded : null;
@@ -6104,7 +6126,7 @@ class Role extends Model implements MustVerifyEmail
             }
 
             $json = json_encode($value);
-            $this->attributes['email_settings'] = \Illuminate\Support\Facades\Crypt::encryptString($json);
+            $this->attributes['email_settings'] = Crypt::encryptString($json);
         } else {
             // If it's already a string, assume it's already encrypted JSON
             $this->attributes['email_settings'] = $value;
@@ -6133,7 +6155,7 @@ class Role extends Model implements MustVerifyEmail
         }
 
         try {
-            $decrypted = \Illuminate\Support\Facades\Crypt::decryptString($rawValue);
+            $decrypted = Crypt::decryptString($rawValue);
             $decoded = json_decode($decrypted, true);
 
             return is_array($decoded) ? $decoded : [];
@@ -6280,7 +6302,7 @@ class Role extends Model implements MustVerifyEmail
             }
 
             $json = json_encode($value);
-            $this->attributes['caldav_settings'] = \Illuminate\Support\Facades\Crypt::encryptString($json);
+            $this->attributes['caldav_settings'] = Crypt::encryptString($json);
         } else {
             // If it's already a string, assume it's already encrypted JSON
             $this->attributes['caldav_settings'] = $value;
@@ -6319,7 +6341,7 @@ class Role extends Model implements MustVerifyEmail
         }
 
         try {
-            $decrypted = \Illuminate\Support\Facades\Crypt::decryptString($encryptedValue);
+            $decrypted = Crypt::decryptString($encryptedValue);
             $decoded = json_decode($decrypted, true);
 
             return is_array($decoded) ? $decoded : [];

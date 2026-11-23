@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
+use App\Models\EventFeedItem;
 use App\Models\EventPart;
 use App\Models\PromoCode;
 use App\Models\Role;
@@ -12,6 +13,7 @@ use App\Models\Ticket;
 use App\Repos\EventRepo;
 use App\Services\AuditService;
 use App\Services\EventLifecycleService;
+use App\Services\EventTranslationEdits;
 use App\Utils\GeminiUtils;
 use App\Utils\ImportedTime;
 use App\Utils\RemoteImage;
@@ -19,9 +21,11 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -266,7 +270,7 @@ class ApiEventController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 // A correction to the automatic translation, by field (EventTranslationEdits).
-                ...\App\Services\EventTranslationEdits::rules(),
+                ...EventTranslationEdits::rules(),
                 'starts_at' => 'required|date_format:Y-m-d H:i:s',
                 'duration' => 'nullable|numeric|min:0|max:8760',
                 'ends_at' => 'nullable|date_format:Y-m-d H:i:s',
@@ -573,7 +577,7 @@ class ApiEventController extends Controller
                 'name' => 'sometimes|required|string|max:255',
                 // A correction to the automatic translation, by field (EventTranslationEdits): text
                 // marks it a person's, null or '' gives it back to app:translate, absent keeps it.
-                ...\App\Services\EventTranslationEdits::rules(),
+                ...EventTranslationEdits::rules(),
                 'starts_at' => 'sometimes|required|date_format:Y-m-d H:i:s',
                 'duration' => 'nullable|numeric|min:0|max:8760',
                 'ends_at' => 'nullable|date_format:Y-m-d H:i:s',
@@ -742,7 +746,7 @@ class ApiEventController extends Controller
         if (! $currentRole) {
             $runs = auth()->user()->manageableRoles()->pluck('id')->map(fn ($id) => (int) $id)->all();
             $owning = (int) ($event->creator_role_id
-                ?: \Illuminate\Support\Facades\DB::table('event_role')->where('event_id', $event->id)->orderBy('id')->value('role_id'));
+                ?: DB::table('event_role')->where('event_id', $event->id)->orderBy('id')->value('role_id'));
 
             foreach ($event->roles as $role) {
                 if (! in_array((int) $role->id, $runs, true)) {
@@ -1069,7 +1073,7 @@ class ApiEventController extends Controller
      * The event an action endpoint is about, or the refusal: the same three answers show(),
      * update() and destroy() give.
      *
-     * @return array{0: ?Event, 1: ?\Illuminate\Http\JsonResponse}
+     * @return array{0: ?Event, 1: ?JsonResponse}
      */
     private function eventToActOn($id): array
     {
@@ -1122,7 +1126,7 @@ class ApiEventController extends Controller
      * request, JSON bodies and query strings included. ApiEventExternalIdTest holds both, so an
      * API route taken out of either middleware fails there.
      *
-     * @return array{0: ?string, 1: ?\Illuminate\Http\JsonResponse}
+     * @return array{0: ?string, 1: ?JsonResponse}
      */
     private function externalIdFrom(Request $request): array
     {
@@ -1152,7 +1156,7 @@ class ApiEventController extends Controller
      * Asked without an id it is refused, not ignored: there is nothing to match on, so a sync
      * that believes it is upserting would add every record again on every run.
      *
-     * @return array{0: bool, 1: ?\Illuminate\Http\JsonResponse}
+     * @return array{0: bool, 1: ?JsonResponse}
      */
     private function upsertAsked(Request $request, ?string $externalId): array
     {
@@ -1356,7 +1360,7 @@ class ApiEventController extends Controller
      *
      * Only judged here. The fetch waits until nothing else can refuse the request.
      *
-     * @return array{0: ?string, 1: bool, 2: ?\Illuminate\Http\JsonResponse}
+     * @return array{0: ?string, 1: bool, 2: ?JsonResponse}
      */
     private function flyerAddressFrom(Request $request, ?Event $event): array
     {
@@ -1422,7 +1426,7 @@ class ApiEventController extends Controller
      * the guard every outbound fetch uses, and judged by its bytes, not by what its address or
      * its server call it.
      *
-     * @return array{0: ?UploadedFile, 1: ?\Illuminate\Http\JsonResponse}
+     * @return array{0: ?UploadedFile, 1: ?JsonResponse}
      */
     private function fetchFlyer(?string $url): array
     {
@@ -1528,7 +1532,7 @@ class ApiEventController extends Controller
 
         // The audit row, its boosts stopped, the webhook with what the event was, then the row.
         // Deleted on purpose: a feed that made it does not bring it back.
-        \App\Models\EventFeedItem::dismissFor($event);
+        EventFeedItem::dismissFor($event);
         app(EventLifecycleService::class)->delete($event, auth()->id());
 
         return response()->json([
@@ -1715,7 +1719,7 @@ class ApiEventController extends Controller
                     $processedMembers[UrlUtils::encodeId($talent->id)] = $memberData;
                 } else {
                     return response()->json([
-                        'error' => 'Talent member not found: '.($memberData['name'] ?? $memberData['email'] ?? 'unknown'),
+                        'error' => 'Participant not found: '.($memberData['name'] ?? $memberData['email'] ?? 'unknown'),
                     ], 422);
                 }
             }

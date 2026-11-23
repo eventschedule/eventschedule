@@ -46,7 +46,7 @@
             @if ($headWall)
             {{-- Extra bottom padding when a profile image exists: it stands on this block's
                  lower edge and must not cover the last row. --}}
-            <div id="gp-logo-wall" data-logo-wall role="group" aria-label="{{ $role->isVenue() ? __('messages.talents') : __('messages.venues') }}"
+            <div id="gp-logo-wall" data-logo-wall role="group" aria-label="{{ $role->isVenue() ? \App\Utils\ScheduleTypeLabel::lineupPlural() : __('messages.venues') }}"
                  class="px-4 pt-4 sm:px-6 sm:pt-6 {{ $role->profile_image_url ? 'pb-20' : 'pb-4 sm:pb-6' }} {{ $isRtl ? 'rtl' : '' }}">
               <div class="mx-auto max-w-5xl flex flex-wrap justify-center gap-2 sm:gap-3">
                 @foreach ($logoWallRoles as $wallRole)

@@ -51,7 +51,9 @@
                     @else
                     <bdi>{{ $role->getDisplayName(false) }}</bdi>
                     @endif
-                    <span class="c-sub">{{ __('messages.' . $role->type) }}</span>
+                    @if (($typeLine = \App\Utils\ScheduleTypeLabel::describe($role->type)) !== '')
+                    <span class="c-sub">{{ $typeLine }}</span>
+                    @endif
                 </td>
                 {{-- No space inside an empty cell: the list drops a cell from a phone's row only
                      when it is truly empty. --}}

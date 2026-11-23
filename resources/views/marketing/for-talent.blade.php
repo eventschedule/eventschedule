@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Performers & Artists | Gig Calendar</x-slot>
     <x-slot name="description">A free gig calendar for every performer: one link for every show, booking requests, calendar sync, free registration, paid tickets on Pro with zero platform fees.</x-slot>
-    <x-slot name="breadcrumbTitle">For Talent</x-slot>
+    <x-slot name="breadcrumbTitle">For Performers & Artists</x-slot>
 
     @php
         // The same twelve cards render on /use-cases. Shared so a blurb edited in
@@ -181,7 +181,7 @@
                         <h2 class="es-balance mb-3 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">
                             Shows performers are <span class="text-gradient-talent">listing today</span>
                         </h2>
-                        <p class="text-lg text-gray-600 dark:text-gray-400">Real upcoming dates from talent schedules on Event Schedule. Every one of these is somebody's page, running on the free plan or better.</p>
+                        <p class="text-lg text-gray-600 dark:text-gray-400">Real upcoming dates from performers' event schedules on Event Schedule. Every one of these is somebody's page, running on the free plan or better.</p>
                     </div>
                     <a href="{{ url('/browse') }}" class="group inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold text-blue-700 ring-1 ring-blue-200 transition-all hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-500/10">
                         Browse all events
@@ -549,7 +549,7 @@
                     <h3 class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Taking booking requests on your page</h3>
                     <p class="mb-5 text-sm text-gray-500 dark:text-gray-400">For the promoter, the wedding planner or the school that has no schedule of its own.</p>
                     <ul class="space-y-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                        <li><span class="font-semibold text-gray-900 dark:text-white">Switch it on.</span> Edit Schedule, Engagement, Requests, then Accept requests. A talent schedule always uses the Booking Form, nobody needs an account to send one, and every request comes with the sender's name and email.</li>
+                        <li><span class="font-semibold text-gray-900 dark:text-white">Switch it on.</span> Edit Schedule, Engagement, Requests, then Accept requests. An event schedule always uses the Booking Form, nobody needs an account to send one, and every request comes with the sender's name and email.</li>
                         <li><span class="font-semibold text-gray-900 dark:text-white">Require what you need to answer.</span> Tick Event Name, Date &amp; Time, Description or Location so a request cannot arrive without them. Turn on Ask for phone number if you would rather call back, and turn off Offer online events if you only play in person.</li>
                         <li><span class="font-semibold text-gray-900 dark:text-white">Write your terms where they are read first.</span> Request Terms appear at the top of the form, before anything is typed. Free on every plan.</li>
                         <li><span class="font-semibold text-gray-900 dark:text-white">Ask your own questions on Pro.</span> Custom fields put expected audience, set length or budget on the form, and the answers come with the request.</li>

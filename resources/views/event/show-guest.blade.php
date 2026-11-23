@@ -1594,7 +1594,7 @@
              owners hide in their custom CSS), so hiding it takes the heading too: the heading
              stood alone over the venue's card, which then read as the act. --}}
         <section @if ($talentMembers->isEmpty()) id="gp-talent-list" @endif class="gk-lineup gk-o6 gk-sec gk-sec-rule" aria-labelledby="es-lineup-title">
-          <h2 id="es-lineup-title" class="gk-label">{{ __('messages.talent') }}</h2>
+          <h2 id="es-lineup-title" class="gk-label">{{ $role->customLabel('lineup') }}</h2>
         {{-- class="contents" so each card stays a direct flex item of the column above and the
              gap-4 spacing is unchanged; the wrapper exists only to give the whole set one id.
              display:none on a display:contents box still removes the subtree. --}}
@@ -1839,7 +1839,7 @@
         @if ($bareTalent->isNotEmpty())
         <div @if ($talentMembers->isNotEmpty()) id="gp-talent-list" @endif class="gk-o6 gk-card p-5">
           <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            {{ __('messages.talent') }}
+            {{ $role->customLabel('lineup') }}
           </h2>
           <ul class="mt-2 flex flex-col gap-1">
             @foreach ($bareTalent as $bare)
@@ -1860,6 +1860,17 @@
         @endif
 
         </section>
+        @endif
+
+        {{-- The vendor map, on the event a map serves and no other (VendorMapBand::forEvent()):
+             its band and who is there on this date, after the Lineup, which it leaves alone. --}}
+        @php
+          $vmBand = ($embedEvent || request()->graphic) ? null : \App\Services\VendorMaps\VendorMapBand::forEvent($event, is_string($date ?? null) ? $date : null);
+        @endphp
+        @if ($vmBand)
+        <div id="gp-vendor-map" class="gk-o6 gk-sec gk-sec-rule gk-vm-people">
+          @include('role.partials.vendor-map-band', ['vmBand' => $vmBand, 'vmGrid' => true])
+        </div>
         @endif
 
         {{-- The organizer's gallery, after the description when a flyer leads the page. --}}

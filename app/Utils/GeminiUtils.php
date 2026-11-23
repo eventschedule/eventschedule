@@ -192,6 +192,13 @@ class GeminiUtils
 
         $textProvider = config('services.ai.text_provider', 'gemini');
 
+        // Several pictures in one request (the vendor map's photos) is Gemini's alone: the OpenAI
+        // fallback takes one image, so such a request is never sent there. Callers check
+        // canReadSeveralImages() before offering it.
+        if (! empty($options['images']) && ($textProvider === 'openai' || ! config('services.google.gemini_key'))) {
+            return null;
+        }
+
         // The OpenAI path takes one message, so a system instruction rides at its head there.
         $openAiPrompt = ! empty($options['system_instruction']) ? $options['system_instruction']."\n\n".$prompt : $prompt;
 
@@ -255,6 +262,20 @@ class GeminiUtils
                 'inline_data' => [
                     'mime_type' => $mimeType,
                     'data' => base64_encode($imageData),
+                ],
+            ];
+        }
+
+        // Several pictures, each with the type its caller read off it (a PDF map is sent as a
+        // PDF, which Gemini reads; detectImageFormat() knows images only).
+        foreach ((array) ($options['images'] ?? []) as $image) {
+            if (! is_array($image) || empty($image['data'])) {
+                continue;
+            }
+            $data['contents'][0]['parts'][] = [
+                'inline_data' => [
+                    'mime_type' => $image['mime'] ?? ImageUtils::getImageMimeType(ImageUtils::detectImageFormat($image['data'], 'temp_image')),
+                    'data' => base64_encode($image['data']),
                 ],
             ];
         }
@@ -1428,7 +1449,7 @@ class GeminiUtils
      */
     private static function quoted(mixed $value): string
     {
-        return addcslashes((string) $value, "\\\"");
+        return addcslashes((string) $value, '\\"');
     }
 
     /** The glossary ahead of a batch prompt (names, labels, options), where it is a block of its own. */
@@ -2732,6 +2753,15 @@ class GeminiUtils
     }
 
     /**
+     * Whether a request can carry several pictures: only Gemini takes them, and only when it is
+     * the provider text goes to (services.ai.text_provider).
+     */
+    public static function canReadSeveralImages(): bool
+    {
+        return config('services.ai.text_provider', 'gemini') !== 'openai' && (bool) config('services.google.gemini_key');
+    }
+
+    /**
      * One structured answer from the text model: a system instruction, a prompt, and the shape
      * the answer must take. Returns the decoded object, or null when the provider gave nothing
      * usable (no key, a timeout, a quota, an answer that is not the object asked for).
@@ -2745,6 +2775,7 @@ class GeminiUtils
      *   model        a model id, when this job wants another than the content model
      *   timeout      seconds
      *   stage        a name for this call, for a test's fake responder and nothing else
+     *   images       [['data' => bytes, 'mime' => type], ...] pictures sent before the prompt
      */
     public static function structured(string $prompt, array $options = []): ?array
     {
@@ -2755,6 +2786,9 @@ class GeminiUtils
 
         if (! empty($options['model'])) {
             $request['model'] = $options['model'];
+        }
+        if (! empty($options['images'])) {
+            $request['images'] = $options['images'];
         }
         if (! empty($options['thinking_level'])) {
             $request['thinking_level'] = $options['thinking_level'];

@@ -979,8 +979,8 @@
                 'a' => 'Not as a copy: a demo\'s settings, pictures and events stay its own, and a new schedule starts blank. Create a schedule of the same type, then borrow the shape the section above describes for the example closest to yours: how the events repeat, how they are split into sub-schedules and how people sign up. Inside your own schedule, Clone Event copies an event you already made, and saving events as reusable templates is a Pro feature.',
             ],
             [
-                'q' => 'Which schedule type should I choose: Talent, Venue or Curator?',
-                'a' => 'Pick by what the schedule is about, because the type cannot be changed afterwards. Talent is for a performer: a musician, a DJ or a speaker. Venue is for a place, such as a bar, a club, a theater or an event space, and adds the address. Curator is for someone who lists other people\'s events, such as a promoter, a blogger or a community guide, and adds Event Sources, which pull in what chosen talent and venue schedules publish. In the model town, Springfield Events is a Curator schedule and Moe\'s Tavern is a Venue.',
+                'q' => 'Which schedule type should I choose: Event schedule, Venue or Curator?',
+                'a' => 'Pick by what the schedule is about, because the type cannot be changed afterwards. Event schedule is the standard kind, for your own events wherever they happen: a musician, a DJ or a speaker. Venue is for a place, such as a bar, a club, a theater or an event space, and adds the address. Curator is for someone who lists other people\'s events, such as a promoter, a blogger or a community guide, and adds Event Sources, which pull in what chosen event and venue schedules publish. In the model town, Springfield Events is a Curator schedule and Moe\'s Tavern is a Venue.',
             ],
             [
                 'q' => 'Should my schedule show a calendar or a list?',
@@ -1435,7 +1435,7 @@
                 'points' => [
                     'Springfield Events is a Curator schedule, filed into Bars & Nightlife, Entertainment, Community, and Arts & Culture.',
                     'Each venue is a Venue schedule with its own sub-schedules: Live Music, DJ Nights, Comedy, Open Mic and Special Events.',
-                    'A curator\'s Event Sources pull in everything a talent or venue schedule publishes, free on every plan.',
+                    'A curator\'s Event Sources pull in everything an event or venue schedule publishes, free on every plan.',
                     'The Aztec Theater has a seating plan, which is allocated seating on a venue schedule: Enterprise.',
                 ],
                 'link' => ['Event sources in the guide', '/docs/creating-schedules#event-sources'],

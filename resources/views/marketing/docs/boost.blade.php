@@ -188,7 +188,7 @@
             Targeting is optional, and leaving it empty reaches the widest audience:
         </p>
         <ul class="doc-list mb-6">
-            <li><strong>Show on these kinds of schedules</strong> - restrict to talent, venue or curator schedules, so a gig promotion can run on venue pages and nowhere else.</li>
+            <li><strong>Show on these kinds of schedules</strong> - restrict to event, venue or curator schedules, so a gig promotion can run on venue pages and nowhere else.</li>
             <li><strong>Show to visitors in these countries</strong> - your promotion is only shown to visitors in the countries you tick. Useful for a local event on a site with international traffic.</li>
         </ul>
         <div class="doc-callout doc-callout-info">

@@ -105,7 +105,7 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">It becomes the preview image when your schedule page is shared to a chat app or social network, unless your header image is one you uploaded, which is wider and so goes first. With neither, a background image you uploaded is used, and with none of them the page offers no preview image, so most apps show the link without a picture (Facebook may pick one from the page itself). It is never an Event Schedule image.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Talent and venue logo walls</h4>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Lineup and venue logo walls</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">It is the logo other schedules show for you in their <a href="#header-images" class="doc-link">logo wall header</a>. A connected schedule with no profile image is skipped there.</p>
             </div>
         </div>
@@ -214,8 +214,8 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">No picture, but a soft wash of your <a href="#color-scheme" class="doc-link">accent color</a> across the top of the header, fading out behind your name.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue logo wall (or Talent logo wall)</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A grid of logos instead of a picture. On a talent or curator schedule the option is called <strong class="text-gray-900 dark:text-white">Venue logo wall</strong> and shows the venues hosting your approved events; on a venue schedule it is called <strong class="text-gray-900 dark:text-white">Talent logo wall</strong> and shows the talent performing at them. Each logo links to that schedule's page, and you can drag the list under the pictures to set the order. Only connected schedules that have a profile image appear, so the wall stays empty until at least one does, and the edit page warns you when that is the case.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue logo wall (or Lineup logo wall)</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A grid of logos instead of a picture. On an event schedule or curator schedule the option is called <strong class="text-gray-900 dark:text-white">Venue logo wall</strong> and shows the venues hosting your approved events; on a venue schedule it is called <strong class="text-gray-900 dark:text-white">Lineup logo wall</strong> and shows the performers at them. Each logo links to that schedule's page, and you can drag the list under the pictures to set the order. Only connected schedules that have a profile image appear, so the wall stays empty until at least one does, and the edit page warns you when that is the case.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Upload Image</h4>
@@ -487,7 +487,7 @@
         </div>
 
         <h3 class="doc-subheading">A common example</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">performer list</strong> is the compact list of names under the <em>Talent</em> heading, for acts that were typed in or picked up by AI import and have no page of their own. If the names on your events are often wrong or incomplete, hide the list and let the event description carry the lineup instead.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The <strong class="text-gray-900 dark:text-white">performer list</strong> is the compact list of names under the <em>Lineup</em> heading, for acts that were typed in or picked up by AI import and have no page of their own. If the names on your events are often wrong or incomplete, hide the list and let the event description carry the lineup instead.</p>
 
         <div class="doc-code-block">
             <div class="doc-code-header">
@@ -564,6 +564,7 @@
                     <tr><td><code class="doc-inline-code">#gp-venue</code></td><td>The venue card</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-venue-socials</code></td><td>The venue's social links</td></tr>
                     <tr><td><code class="doc-inline-code">#gp-venue-map</code></td><td>The map at the foot of the venue card</td></tr>
+                    <tr><td><code class="doc-inline-code">#gp-vendor-map</code></td><td>The vendors at a market, fair or expo and the link to its vendor map</td></tr>
                     @if (\App\Services\Stay22Service::isEnabled() || ! config('app.hosted'))
                     <tr><td><code class="doc-inline-code">#gp-accommodation</code></td><td>The places-to-stay map</td></tr>
                     @endif

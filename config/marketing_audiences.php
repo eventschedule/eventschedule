@@ -239,6 +239,27 @@ return [
             'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-5 9 5M5 9v8m4-8v8m6-8v8m4-8v8M3 21h18M4 17h16" />',
         ],
         [
+            'url' => '/for-craft-fairs',
+            'name' => 'Craft Fairs',
+            'blurb' => 'A table map your makers find themselves on, and shoppers search by what they make.',
+            'tags' => ['Craft Fairs', 'Makers Markets', 'Christmas Fairs', 'Art Fairs', 'Pop-up Markets', 'School Fairs'],
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />',
+        ],
+        [
+            'url' => '/for-flea-markets',
+            'name' => 'Flea Markets',
+            'blurb' => 'Sellers who come and go, on one stall map that knows who is here today.',
+            'tags' => ['Flea Markets', 'Car Boot Sales', 'Swap Meets', 'Vintage Markets', 'Antique Fairs', 'Night Markets'],
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z" />',
+        ],
+        [
+            'url' => '/for-conferences-and-expos',
+            'name' => 'Conferences & Expos',
+            'blurb' => 'A booth map exhibitors find themselves on, and visitors search by company.',
+            'tags' => ['Trade Shows', 'Expos', 'Conferences', 'Career Fairs', 'Wedding Fairs', 'Startup Showcases'],
+            'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />',
+        ],
+        [
             'url' => '/for-meetup-groups',
             'name' => 'Meetup Groups',
             'blurb' => 'Free RSVPs with a cap on a page the group owns, with no organizer fee to keep it.',

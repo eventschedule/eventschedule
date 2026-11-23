@@ -4,7 +4,7 @@
 
 Key facts:
 
-- **Schedule types**: three. Talent (performers and artists), Venue (places that host events) and Curator (guides that collect events from many talents and venues).
+- **Schedule types**: three. Event schedule (the standard kind: performers, teachers, vendors and organizers whose events happen in various places), Venue (places that host events) and Curator (guides that collect events from many performers and venues).
 - **Free plan**: unlimited events and schedules, unlimited free registration and RSVP, zero-price ticket types, QR ticket scanning at the door, two-way Google Calendar, Outlook and CalDAV sync, analytics, event graphics, an embeddable calendar and iCal feeds, recurring events, sub-schedules, one appointment type, email subscribers with automatic new-event digests, 10 newsletter emails a month (each recipient counts as one), and AI event parsing. One team member per schedule.
 - **Pro plan**: selling tickets that carry a price, with every payment method (Stripe, PayPal, Payfast, Razorpay, Invoice Ninja, a payment link or cash) and full or partial refunds; promo codes, add-ons, passes, gift cards, the ticket waitlist and installment payments; the live check-in dashboard and sales export; the REST API and webhooks; more appointment types and paid bookings; custom fields, custom CSS, polls, feedback and carpools; the embeddable ticket widget; no Event Schedule branding; 100 newsletter emails a month.
 - **Enterprise plan**: everything in Pro, plus custom domains, allocated (reserved) seating with a box office console, multiple team members, internal and unlisted events, AI flyer, style and description generation, agenda scanning, WhatsApp event creation, availability management, feeds that keep a schedule up to date from another site's calendar, RSS feed or events page, 1,000 newsletter emails a month and priority support.
@@ -23,6 +23,7 @@ Key facts:
 - [Newsletters](https://eventschedule.com/features/newsletters): Newsletters and automatic new-event digests for followers
 - [Appointments](https://eventschedule.com/features/appointments): Bookable appointment types on a public booking page
 - [Allocated seating](https://eventschedule.com/features/allocated-seating): Seating plans, a guest seat picker and a box office console
+- [Vendor map](https://eventschedule.com/features/vendor-map): A map of a market, fair or expo that vendors claim from one link and shoppers open with a QR code
 - [AI](https://eventschedule.com/features/ai): Event parsing from text and images, agenda scanning and translation
 - [Embed calendar](https://eventschedule.com/features/embed-calendar): The live calendar on any website with one iframe tag
 - [Integrations](https://eventschedule.com/features/integrations): Stripe, PayPal, Invoice Ninja, calendars and more
@@ -30,7 +31,7 @@ Key facts:
 ## Who it is for
 
 - [Use cases](https://eventschedule.com/use-cases): Performers, venues, curators, communities and online events
-- [For talent](https://eventschedule.com/for-talent): Musicians, DJs, comedians and every other kind of performer
+- [For performers and artists](https://eventschedule.com/for-talent): Musicians, DJs, comedians and every other kind of performer
 - [For venues](https://eventschedule.com/for-venues): Bars, clubs, theaters, restaurants and every space that hosts events
 - [For curators](https://eventschedule.com/for-curators): Local event guides that collect events from many sources
 
@@ -55,7 +56,7 @@ Key facts:
 - **Plans**: Most of the API is on the Pro plan: schedule, event, sub-schedule and sale endpoints return only Pro schedules' data, or a 403. Creating or deleting a schedule, the category list, fan content and recording a sale (`POST /api/sales`, free ticket tiers only unless the schedule is Pro) have no Pro check.
 - **Rate limits**: 300 GET requests/min, 30 POST/PUT/DELETE requests/min, counted per account (requests with no key or a wrong one are counted per IP address)
 - **Appointments**: list a schedule's bookable types (`GET /api/schedules/{subdomain}/appointment-types`), their open times with a readable label each (`GET /api/appointment-types/{id}/slots`), and book one (`POST /api/appointment-types/{id}/bookings`, with an `Idempotency-Key` header for safe retries). Written for a voice agent that books on a guest's behalf
-- **Getting started**: register (`POST /api/register`; hosted mode requires email verification via `POST /api/register/send-code` first), create a schedule (`POST /api/schedules` with a name and type: venue, talent or curator), then create events (`POST /api/events/{subdomain}`)
+- **Getting started**: register (`POST /api/register`; hosted mode requires email verification via `POST /api/register/send-code` first), create a schedule (`POST /api/schedules` with a name and type: venue, talent (the standard event schedule) or curator), then create events (`POST /api/events/{subdomain}`)
 - [llms-full.txt](https://eventschedule.com/llms-full.txt): Complete self-contained documentation for LLMs (no link-following needed)
 - [API Reference](https://eventschedule.com/docs/developer/api): Full API documentation with examples for all endpoints
 - [OpenAPI Spec](https://eventschedule.com/api/openapi.json): OpenAPI 3.0 specification for client generation and tool integration

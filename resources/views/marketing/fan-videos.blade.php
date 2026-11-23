@@ -1465,7 +1465,7 @@
                             @endforeach
                         </div>
                         <p class="es-reel-muted mt-5 es-reel-rule border-t pt-4 text-xs">
-                            Every schedule type has this tab: talent, venue and curator alike.
+                            Every schedule type has this tab: event schedule, venue and curator alike.
                         </p>
                     </div>
 

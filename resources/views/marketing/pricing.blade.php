@@ -40,6 +40,7 @@
             'Built-in analytics',
             'Generate event graphics',
             'Sub-schedules',
+            'Vendor map for markets, fairs & expos',
             '10 ' . __('messages.newsletters_per_month'),
         ];
         $proFeatures = [
@@ -59,6 +60,7 @@
             'Embed ticket widget',
             'Promo/discount codes',
             'Sales CSV export',
+            'Vendor map: vendor link & AI drafting from photos',
             '100 ' . __('messages.newsletters_per_month'),
         ];
         $enterpriseFeatures = [

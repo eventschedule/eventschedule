@@ -84,7 +84,7 @@
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">Conference organizers</strong> - Turn a printed program of sessions into a timed agenda</li>
             <li><strong class="text-gray-900 dark:text-white">Venues</strong> - Capture a lineup from a poster or door flyer</li>
-            <li><strong class="text-gray-900 dark:text-white">Talent</strong> - Photograph a handwritten setlist and publish it as a running order</li>
+            <li><strong class="text-gray-900 dark:text-white">Performers</strong> - Photograph a handwritten setlist and publish it as a running order</li>
         </ul>
 
         <h3 class="doc-subheading">What you need</h3>

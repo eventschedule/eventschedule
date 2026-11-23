@@ -99,7 +99,7 @@
             ],
             [
                 'q' => 'How does an event end up on this page?',
-                'a' => 'By being public, on a schedule whose owner has confirmed an email address or phone number, and by having a picture. That is either the event\'s own flyer, or the profile photo on a talent or venue schedule, which covers every event on it. Nothing else is required: no application and no fee. Each schedule is shown once, with its next event, and the page holds the 24 that are on soonest.',
+                'a' => 'By being public, on a schedule whose owner has confirmed an email address or phone number, and by having a picture. That is either the event\'s own flyer, or the profile photo on an event or venue schedule, which covers every event on it. Nothing else is required: no application and no fee. Each schedule is shown once, with its next event, and the page holds the 24 that are on soonest.',
             ],
         ];
     @endphp
@@ -442,7 +442,7 @@
                     {{-- "with a flyer" is deliberate: the picture is the one check an organizer can
                          fail while doing everything else right. --}}
                     <p class="bw-end-lede">
-                        Publish a public event with a flyer, or put a profile photo on your talent or venue schedule, and your next event takes its place here as its date comes up. No application and no fee.
+                        Publish a public event with a flyer, or put a profile photo on your event or venue schedule, and your next event takes its place here as its date comes up. No application and no fee.
                     </p>
 
                     <div class="bw-claim-row">

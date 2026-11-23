@@ -2,14 +2,35 @@
 
 namespace App\Providers;
 
+use App\Listeners\MarkRealtimeAdminVisits;
 use App\Listeners\VerifyApplicationHealth;
+use App\Models\CarpoolOffer;
+use App\Models\CarpoolRequest;
+use App\Models\CustomDomainSetting;
 use App\Models\Event;
+use App\Models\LegalDocument;
 use App\Models\Role;
+use App\Models\Sale;
 use App\Policies\EventPolicy;
 use App\Policies\RolePolicy;
+use App\Services\AdminAlertService;
+use App\Services\AppUpdateService;
+use App\Services\GeoIpService;
+use App\Services\Payments\PaymentGatewayManager;
 use App\Services\ScheduledTaskRecorder;
 use App\Support\BladeJson;
+use App\Support\LocalDate;
+use App\Support\PluralSelector;
+use App\Support\RetryingRateLimiter;
 use App\Support\SafeTranslationLoader;
+use App\Utils\GitHubUtils;
+use App\Utils\PlatformCurrency;
+use App\Utils\PlatformPricing;
+use App\Utils\RealtimeTracker;
+use App\Utils\ReleaseHistory;
+use App\Utils\SetupGuide;
+use Carbon\Carbon;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Console\Events\CommandFinished;
 use Illuminate\Console\Events\CommandStarting;
@@ -38,12 +59,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(\App\Services\GeoIpService::class);
+        $this->app->singleton(GeoIpService::class);
 
         // Singleton so the driver instances and the config read behind
         // PaymentGatewayManager::all() are shared across a request. The sales table asks it about
         // every row on the page.
-        $this->app->singleton(\App\Services\Payments\PaymentGatewayManager::class);
+        $this->app->singleton(PaymentGatewayManager::class);
 
         // The override directory is operator-writable and the selfhost docs invite hand-edited
         // files into it, so a typo there would otherwise throw out of the bare require inside
@@ -60,7 +81,7 @@ class AppServiceProvider extends ServiceProvider
         // class). Extended for the same reason as the loader above: RateLimiter is a deferred
         // binding of CacheServiceProvider.
         $this->app->extend(\Illuminate\Cache\RateLimiter::class, function ($limiter) {
-            return \App\Support\RetryingRateLimiter::wrap($limiter);
+            return RetryingRateLimiter::wrap($limiter);
         });
 
         $this->callAfterResolving('translator', function ($translator) {
@@ -92,14 +113,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // $date->localDate(): a date in the reader's own word order (App\Support\LocalDate).
-        \Carbon\Carbon::macro('localDate', function (bool $withYear = true, bool $withWeekday = true, bool $shortMonth = false) {
-            return \App\Support\LocalDate::format($this, $withYear, $withWeekday, $shortMonth);
+        Carbon::macro('localDate', function (bool $withYear = true, bool $withWeekday = true, bool $shortMonth = false) {
+            return LocalDate::format($this, $withYear, $withWeekday, $shortMonth);
         });
 
-        // Plural rules for a hyphenated regional locale (pt-PT); see RegionalMessageSelector.
-        $this->app->afterResolving('translator', fn ($translator) => $translator->setSelector(new \App\Support\RegionalMessageSelector));
+        // Plural rules for a hyphenated regional locale (pt-PT), and exact forms beside a
+        // language's own (Russian, Romanian); see RegionalMessageSelector and PluralSelector.
+        $this->app->afterResolving('translator', fn ($translator) => $translator->setSelector(new PluralSelector));
         if ($this->app->resolved('translator')) {
-            $this->app['translator']->setSelector(new \App\Support\RegionalMessageSelector);
+            $this->app['translator']->setSelector(new PluralSelector);
         }
 
         if (! config('app.hosted') && empty(config('app.key'))) {
@@ -125,7 +147,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Role::class, RolePolicy::class);
 
         // Configure Cashier to use Role model for subscriptions
-        Cashier::useCustomerModel(\App\Models\Role::class);
+        Cashier::useCustomerModel(Role::class);
 
         $this->app->singleton('userRoles', function () {
             if ($user = auth()->user()) {
@@ -180,7 +202,7 @@ class AppServiceProvider extends ServiceProvider
                     if (session()->has('has_tickets')) {
                         return session('has_tickets');
                     }
-                    $has = \App\Models\Sale::where('user_id', auth()->id())->where('is_deleted', false)->exists();
+                    $has = Sale::where('user_id', auth()->id())->where('is_deleted', false)->exists();
                     // Remembered only once true: a first ticket bought later must show the entry.
                     if ($has) {
                         session(['has_tickets' => true]);
@@ -192,8 +214,8 @@ class AppServiceProvider extends ServiceProvider
                     if (session()->has('has_carpool_activity')) {
                         return session('has_carpool_activity');
                     }
-                    $has = \App\Models\CarpoolOffer::where('user_id', auth()->id())->exists()
-                        || \App\Models\CarpoolRequest::where('user_id', auth()->id())->exists();
+                    $has = CarpoolOffer::where('user_id', auth()->id())->exists()
+                        || CarpoolRequest::where('user_id', auth()->id())->exists();
                     session(['has_carpool_activity' => $has]);
 
                     return $has;
@@ -208,7 +230,7 @@ class AppServiceProvider extends ServiceProvider
                 ->first(fn ($role) => $role->actualPlanTier() === 'free');
             $view->with([
                 'upgradeSubdomain' => $upgradeRole?->subdomain,
-                'githubStars' => \App\Utils\GitHubUtils::getStars(),
+                'githubStars' => GitHubUtils::getStars(),
             ]);
 
             // Where the setup guide is about to say "that worked" itself (arriving at the first
@@ -216,7 +238,7 @@ class AppServiceProvider extends ServiceProvider
             // toast would say it a second time, in the opposite corner. The flash is dropped
             // here, after the controller and the page body have run and before the shell that
             // renders toasts does, so anything asserting on the redirect still sees it.
-            if (session()->has('message') && \App\Utils\SetupGuide::speaksForToast()) {
+            if (session()->has('message') && SetupGuide::speaksForToast()) {
                 session()->forget('message');
             }
         });
@@ -226,7 +248,7 @@ class AppServiceProvider extends ServiceProvider
         // the nav and the admin dashboard share one pass.
         View::composer('admin.partials._navigation', function ($view) {
             if (auth()->check() && auth()->user()->isAdmin()) {
-                $view->with('adminAlertBadges', \App\Services\AdminAlertService::badges());
+                $view->with('adminAlertBadges', AdminAlertService::badges());
             }
         });
 
@@ -235,10 +257,10 @@ class AppServiceProvider extends ServiceProvider
         // set when it booted, long after an admin changed it. Setting::set() clears the shared
         // cache across processes; only this static needs help.
         Queue::looping(function () {
-            \App\Utils\PlatformCurrency::flush();
-            \App\Utils\PlatformPricing::flush();
-            \App\Models\LegalDocument::flush();
-            \App\Models\CustomDomainSetting::flush();
+            PlatformCurrency::flush();
+            PlatformPricing::flush();
+            LegalDocument::flush();
+            CustomDomainSetting::flush();
         });
 
         // Unsubscribe limiters keyed on the TOKEN, not the IP.
@@ -293,7 +315,7 @@ class AppServiceProvider extends ServiceProvider
         // and the file store never clears expired entries - a raw IP there would sit on disk,
         // reversible, which the privacy policy says never happens.
         RateLimiter::for('realtime', function ($request) {
-            $ip = \App\Utils\RealtimeTracker::clientIp($request);
+            $ip = RealtimeTracker::clientIp($request);
 
             // Dated, so the key rotates daily like the visitor key the privacy policy describes.
             return Limit::perMinute(600)->by('realtime|'.hash_hmac('sha256', $ip.'|'.gmdate('Y-m-d'), (string) config('app.key')));
@@ -304,7 +326,7 @@ class AppServiceProvider extends ServiceProvider
         // would pool it with every unprefixed route and, on hosted, with every visitor. A page
         // sends three posts at most, so this is room for a household and no more.
         RateLimiter::for('guest_count', function ($request) {
-            $ip = \App\Utils\RealtimeTracker::clientIp($request);
+            $ip = RealtimeTracker::clientIp($request);
 
             return Limit::perMinute(30)->by('guest-count|'.hash_hmac('sha256', $ip.'|'.gmdate('Y-m-d'), (string) config('app.key')));
         });
@@ -313,7 +335,7 @@ class AppServiceProvider extends ServiceProvider
         // Its own budget per real visitor address, for the same reasons. A page sends three posts
         // at most, and a visitor reading fast opens a few pages a minute.
         RateLimiter::for('marketing_page', function ($request) {
-            $ip = \App\Utils\RealtimeTracker::clientIp($request);
+            $ip = RealtimeTracker::clientIp($request);
 
             return Limit::perMinute(60)->by('marketing-page|'.hash_hmac('sha256', $ip.'|'.gmdate('Y-m-d'), (string) config('app.key')));
         });
@@ -321,7 +343,7 @@ class AppServiceProvider extends ServiceProvider
         // GET /ticket/status (a ticket waiting on its payment confirmation asks about eight times
         // in a minute and a half). Per visitor AND per ticket, for the same reasons as above.
         RateLimiter::for('ticket_status', function ($request) {
-            $ip = \App\Utils\RealtimeTracker::clientIp($request);
+            $ip = RealtimeTracker::clientIp($request);
 
             return Limit::perMinute(30)->by('ticket-status|'.hash_hmac('sha256', $ip.'|'.$request->route('secret'), (string) config('app.key')));
         });
@@ -333,7 +355,7 @@ class AppServiceProvider extends ServiceProvider
         // so that is a real lockout, not a theoretical one. Tight, because each pull is a full
         // build; GrowthDataController also refuses to run two builds at once.
         RateLimiter::for('growth_data', function ($request) {
-            $ip = \App\Utils\RealtimeTracker::clientIp($request);
+            $ip = RealtimeTracker::clientIp($request);
 
             return Limit::perMinute(10)->by('growth_data|'.hash_hmac('sha256', $ip, (string) config('app.key')));
         });
@@ -343,7 +365,7 @@ class AppServiceProvider extends ServiceProvider
         // once per version; self-guarded, it never fails the tick).
         EventFacade::listen(CommandStarting::class, function (CommandStarting $event) {
             if ($event->command === 'schedule:run') {
-                \App\Services\AppUpdateService::finishUpdate();
+                AppUpdateService::finishUpdate();
             }
         });
 
@@ -384,12 +406,12 @@ class AppServiceProvider extends ServiceProvider
 
             // Which PHP the scheduler runs on, so a self-update never installs a release that
             // this PHP could not boot (AppUpdateService::PHP_SEEN_KEY).
-            \App\Services\AppUpdateService::recordPhp('scheduler');
+            AppUpdateService::recordPhp('scheduler');
 
             // The first tick after a deploy dates the release (growth payload meta.releases).
             // Guarded: a heartbeat must never fail because a stamp could not be written.
             try {
-                \App\Utils\ReleaseHistory::touch();
+                ReleaseHistory::touch();
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -409,10 +431,10 @@ class AppServiceProvider extends ServiceProvider
         EventFacade::listen(DiagnosingHealth::class, [VerifyApplicationHealth::class, 'handle']);
 
         // Hide a site admin's own sign-in page views from /admin/realtime. See the listener.
-        EventFacade::listen(\Illuminate\Auth\Events\Login::class, [\App\Listeners\MarkRealtimeAdminVisits::class, 'handle']);
+        EventFacade::listen(Login::class, [MarkRealtimeAdminVisits::class, 'handle']);
 
         View::composer('marketing.partials.header', function ($view) {
-            $view->with('githubStars', \App\Utils\GitHubUtils::getStars());
+            $view->with('githubStars', GitHubUtils::getStars());
         });
 
         // Single source for every plan price the marketing site quotes. These used to be
@@ -424,7 +446,7 @@ class AppServiceProvider extends ServiceProvider
         // referral.index is here for the same reason: it is the one AP view that hardcoded
         // the credit values rather than reading config.
         View::composer(['marketing.*', 'referral.index'], function ($view) {
-            $view->with(\App\Utils\PlatformPricing::all());
+            $view->with(PlatformPricing::all());
         });
 
     }

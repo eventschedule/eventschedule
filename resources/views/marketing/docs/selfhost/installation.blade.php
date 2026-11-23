@@ -646,7 +646,7 @@ MAPS_API_KEY=your-browser-key</code></pre>
             </svg>
             Custom translations
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Rename built-in UI terms (for example "Talent" to "Artist", or "Curator" to "Event Planner") without your changes being wiped out by <code class="doc-inline-code">php artisan app:update</code>.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Rename built-in UI terms (for example "Event schedule" to "Artist schedule", "Lineup" to "Artists", or "Curator" to "Event Planner") without your changes being wiped out by <code class="doc-inline-code">php artisan app:update</code>.</p>
 
         <div class="doc-callout doc-callout-info mb-6">
             <div class="doc-callout-title">Prefer the admin panel</div>
@@ -670,8 +670,8 @@ MAPS_API_KEY=your-browser-key</code></pre>
             <pre><code>&lt;?php
 // storage/app/lang/en/messages.php
 return [
-'talent' =&gt; 'Artist',
-'talents' =&gt; 'Artists',
+'schedule_type_talent' =&gt; 'Artist schedule',
+'lineup' =&gt; 'Artists',
 'curator' =&gt; 'Event Planner',
 'curators' =&gt; 'Event Planners',
 ];</code></pre>

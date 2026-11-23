@@ -309,6 +309,42 @@ return [
             ],
         ],
     ],
+    '/for-craft-fairs' => [
+        'type' => 'venue',
+        'find' => ['craft fair', 'makers market', 'artisan market', 'christmas fair', 'art fair', 'table map', 'makers'],
+        'sample' => [
+            'name' => 'Harbor Makers Fair', 'tagline' => 'Sixty makers, one hall, twice a year', 'slug' => 'harbor-makers',
+            'rows' => [
+                [5, 'Makers\' fair, day one', '10:00 AM to 5:00 PM · 60 tables', 'Free', 'free'],
+                [6, 'Makers\' fair, day two', '10:00 AM to 4:00 PM · 60 tables', 'Free', 'free'],
+                [6, 'Wreath workshop', '2:00 PM · 12 spots', '$18', 'few'],
+            ],
+        ],
+    ],
+    '/for-flea-markets' => [
+        'type' => 'venue',
+        'find' => ['flea market', 'car boot', 'swap meet', 'vintage market', 'antiques', 'stall map', 'sellers'],
+        'sample' => [
+            'name' => 'Old Station Flea', 'tagline' => 'Every Sunday in the station yard', 'slug' => 'old-station-flea',
+            'rows' => [
+                [3, 'Night flea', '6:00 PM to 10:00 PM · 30 stalls', '', ''],
+                [6, 'Vintage clothing swap', '11:00 AM', 'Free', 'free'],
+                [7, 'Sunday flea', '7:00 AM to 1:00 PM · 85 stalls', '', ''],
+            ],
+        ],
+    ],
+    '/for-conferences-and-expos' => [
+        'type' => 'venue',
+        'find' => ['conference', 'expo', 'trade show', 'exhibition', 'exhibitors', 'booth map', 'floor plan', 'career fair'],
+        'sample' => [
+            'name' => 'Northside Expo Hall', 'tagline' => 'Trade shows and fairs, all year', 'slug' => 'northside-expo',
+            'rows' => [
+                [2, 'Career fair', '9:00 AM · 48 booths', 'Free', 'rsvp'],
+                [4, 'Home & garden show', '10:00 AM · 120 booths', '$12', 'tickets'],
+                [5, 'Home & garden show', '10:00 AM · day two', '$12', 'tickets'],
+            ],
+        ],
+    ],
     '/for-hotels-and-resorts' => [
         'type' => 'venue',
         'find' => ['hotel', 'resort', 'inn', 'lodge', 'guest activities', 'spa', 'bed and breakfast', 'retreat'],

@@ -264,11 +264,11 @@
         @php
             $askers = [
                 [
-                    'Talent',
+                    'Event schedule',
                     'Promoters and venues ask to book you',
                     'Your schedule page carries a Request to Book button. The form never makes anyone create an account, and every request sent through it waits for you to accept it.',
                     '/for-talent',
-                    'Event Schedule for talent',
+                    'Event Schedule for performers',
                 ],
                 [
                     'Venue',
@@ -294,7 +294,7 @@
                         One form, <span class="text-gradient-hold">three kinds of request</span>
                     </h2>
                     <p class="mt-5 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
-                        Every schedule on Event Schedule is talent, a venue or a curator, and each takes requests from the people who would naturally ask it.
+                        Every schedule on Event Schedule is an event schedule, a venue or a curator, and each takes requests from the people who would naturally ask it.
                     </p>
                 </div>
 
@@ -444,7 +444,7 @@
                     'No location question: on a venue\'s form the venue is the place.',
                 ],
                 [
-                    'Talent',
+                    'Event schedule',
                     'Promoters asking to book you',
                     [
                         ['Name of the event', 'Event name', 'Built in'],

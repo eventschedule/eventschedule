@@ -126,6 +126,15 @@ class AppGuestLayout extends Component
          * on the event's own page, where every other embed leaves it to the copied code.
          */
         public bool $embedEvent = false,
+        /**
+         * A page that is neither the schedule's home nor an event, but stands on its own in
+         * search and in a share (the vendor map, /{schedule}/map): its own title, description,
+         * canonical and image, in place of the schedule's. Keys: title, description, canonical,
+         * image (nullable), image_width, image_height.
+         *
+         * @var array{title: string, description: string, canonical: string, image: ?string, image_width: ?int, image_height: ?int}|null
+         */
+        public ?array $pageMeta = null,
     ) {}
 
     /**
@@ -145,6 +154,10 @@ class AppGuestLayout extends Component
     public function guestTitle(): string
     {
         $name = $this->role->translatedName() ?: config('app.name');
+
+        if (! empty($this->pageMeta['title'])) {
+            return $this->pageMeta['title'];
+        }
 
         if ($this->pageTitle) {
             return $this->pageTitle.' | '.$name;

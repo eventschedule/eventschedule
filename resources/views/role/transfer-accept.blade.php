@@ -46,7 +46,7 @@
 
         <div class="mt-6 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
             <p class="text-base font-semibold text-gray-900 dark:text-gray-100" dir="auto">{{ $role?->name }}</p>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.' . $role?->type) }}</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ \App\Utils\ScheduleTypeLabel::for($role?->type) }}</p>
 
             <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
                 <div>

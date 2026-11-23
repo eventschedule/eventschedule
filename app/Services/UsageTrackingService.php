@@ -22,6 +22,10 @@ class UsageTrackingService
 
     const GEMINI_PARSE_PARTS = 'gemini_parse_parts';
 
+    // A vendor map drafted from photos. Counted against the same daily AI allowance as an import
+    // (Role::canMakeAiParseRequest()), once per photo, since a photo is what costs.
+    const GEMINI_PARSE_VENDOR_MAP = 'gemini_parse_vendor_map';
+
     const GEMINI_BLOG = 'gemini_blog';
 
     const GEMINI_BLOG_TOPIC = 'gemini_blog_topic';

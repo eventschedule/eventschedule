@@ -109,7 +109,7 @@
             <x-user-text>{{ $role->translatedName() }}</x-user-text>
         </h1>
         <p class="gk-subtitle">
-            {{ __('messages.' . $role->type) }}@if ($role->city), <x-user-text dir="{{ content_dir_for_language($role->city, $lang) }}">{{ $role->city }}</x-user-text>@endif
+            {{ $unclaimedTypeLine = \App\Utils\ScheduleTypeLabel::describe($role->type) }}@if ($role->city){{ $unclaimedTypeLine !== '' ? ', ' : '' }}<x-user-text dir="{{ content_dir_for_language($role->city, $lang) }}">{{ $role->city }}</x-user-text>@endif
         </p>
     </div>
 

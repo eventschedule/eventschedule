@@ -548,7 +548,7 @@
             </div>
             <div class="doc-field">
                 <h4>Not the same as Availability</h4>
-                <p><a href="{{ route('marketing.docs.managing_schedules') }}#availability" class="doc-link">Availability</a> <x-doc-badge plan="enterprise" /> is a tab on talent schedules that marks whole days your team members are unavailable to be booked for events. Appointments offer specific time slots on any schedule type, on any plan.</p>
+                <p><a href="{{ route('marketing.docs.managing_schedules') }}#availability" class="doc-link">Availability</a> <x-doc-badge plan="enterprise" /> is a tab on event schedules that marks whole days your team members are unavailable to be booked for events. Appointments offer specific time slots on any schedule type, on any plan.</p>
             </div>
             <div class="doc-field">
                 <h4>Not the same as a request to put an event on your schedule</h4>

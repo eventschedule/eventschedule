@@ -1637,7 +1637,7 @@
                         ],
                         [
                             'q' => 'Can my whole troupe manage one schedule?',
-                            'a' => 'On Enterprise, yes. A free schedule is a single account. Enterprise adds team members, up to five on the hosted plans, so your rigger, stage manager, and performers can all update the calendar. Enterprise also turns on availability for talent schedules, where each member marks the days they cannot work and you see it against the calendar.',
+                            'a' => 'On Enterprise, yes. A free schedule is a single account. Enterprise adds team members, up to five on the hosted plans, so your rigger, stage manager, and performers can all update the calendar. Enterprise also turns on availability for event schedules, where each member marks the days they cannot work and you see it against the calendar.',
                         ],
                         [
                             'q' => 'A festival listed my act before I joined. Is there already a page for me?',

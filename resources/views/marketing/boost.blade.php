@@ -817,7 +817,7 @@
                             </div>
                             <div class="es-launch-spec">
                                 <dt>Audience</dt>
-                                <dd>Optional filters only: visitor country, and the type of schedule it runs on (talent, venue or curator). Leaving both empty reaches the most pages.</dd>
+                                <dd>Optional filters only: visitor country, and the type of schedule it runs on (event schedule, venue or curator). Leaving both empty reaches the most pages.</dd>
                             </div>
                             <div class="es-launch-spec">
                                 <dt>Price</dt>

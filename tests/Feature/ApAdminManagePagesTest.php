@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -36,7 +37,7 @@ class ApAdminManagePagesTest extends TestCase
         // No page here may reach the network: the suite loads the developer's .env, where real
         // tokens live, and a page that asks an outside service (the Domains page asked
         // DigitalOcean) would do it for real on every run. A request nothing faked throws.
-        \Illuminate\Support\Facades\Http::preventStrayRequests();
+        Http::preventStrayRequests();
 
         config(['app.hosted' => true]);
         $this->admin = $this->createOwner(true);
@@ -153,7 +154,7 @@ class ApAdminManagePagesTest extends TestCase
         $this->assertStringContainsString(trans_choice('messages.days_left_choice', 1, [], 'de'), $html);
         $this->assertStringContainsString(__('messages.monthly', [], 'de'), $html);
         $this->assertStringContainsString('>'.__('messages.trial', [], 'de').'</span>', $html);
-        $this->assertStringContainsString(__('messages.talent', [], 'de'), $html);
+        $this->assertStringContainsString(__('messages.schedule_type_talent', [], 'de'), $html);
         $this->assertStringNotContainsString('>Month<', $html);
 
         $this->assertSame('1 day left', trans_choice('messages.days_left_choice', 1, [], 'en'));

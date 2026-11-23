@@ -1,24 +1,24 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Availability Calendar: Cross Out the Dates You Cannot Work</x-slot>
-    <x-slot name="description">On a talent schedule, mark whole dates as unavailable and your team sees who is out on the shared calendar. Private to signed-in members, never published.</x-slot>
+    <x-slot name="description">On an event schedule, mark whole dates as unavailable and your team sees who is out on the shared calendar. Private to signed-in members, never published.</x-slot>
     <x-slot name="breadcrumbTitle">Availability</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule Availability Management"
-        description="Mark whole dates as unavailable on a talent schedule. Each team member keeps their own dates, and the shared Schedule tab shows who is out on which day. Availability is never shown publicly." />
+        description="Mark whole dates as unavailable on an event schedule. Each team member keeps their own dates, and the shared Schedule tab shows who is out on which day. Availability is never shown publicly." />
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "How to mark the dates you cannot be booked",
-        "description": "Cross out the days you are gone on a talent schedule so the rest of your team can see them.",
+        "description": "Cross out the days you are gone on an event schedule so the rest of your team can see them.",
         "step": [
             {
                 "@type": "HowToStep",
                 "position": 1,
                 "name": "Open the Availability tab",
-                "text": "On a talent schedule with the Enterprise plan, open the Availability tab. It is a month calendar, and every date on it starts available."
+                "text": "On an event schedule with the Enterprise plan, open the Availability tab. It is a month calendar, and every date on it starts available."
             },
             {
                 "@type": "HowToStep",
@@ -584,17 +584,17 @@
             ['Who can read it', 'Signed-in members of the schedule', 'Anyone with your booking page'],
             ['What a guest can do with it', 'Nothing. It is never published', 'Pick an open time and book it'],
             ['Where it lives', 'The Availability tab', 'The Appointments tab, plus a public booking page'],
-            ['Plan and schedule type', 'Enterprise, talent schedules', 'One type free on any schedule, unlimited on Pro'],
+            ['Plan and schedule type', 'Enterprise, event schedules', 'One type free on any schedule, unlimited on Pro'],
         ];
 
         $faqs = [
             [
                 'q' => 'What is an availability calendar?',
-                'a' => 'A calendar that records when somebody cannot be booked, so the people who take the bookings can see it before they say yes. For a performer the useful version runs the other way from a shop\'s opening hours: every date starts available and you mark only the days you are out, because most dates are possible and the short list is the one nobody can guess. In Event Schedule it is the Availability tab of a talent schedule, on the Enterprise plan.',
+                'a' => 'A calendar that records when somebody cannot be booked, so the people who take the bookings can see it before they say yes. For a performer the useful version runs the other way from a shop\'s opening hours: every date starts available and you mark only the days you are out, because most dates are possible and the short list is the one nobody can guess. In Event Schedule it is the Availability tab of an event schedule, on the Enterprise plan.',
             ],
             [
                 'q' => 'How does availability management work?',
-                'a' => 'The Availability tab on a talent schedule is a month calendar. Every date on it starts available. Click a date to mark it unavailable, click it again to clear it, then press Save. Your dates are stored against your own membership of that schedule, and they appear for the rest of your team on the Schedule tab.',
+                'a' => 'The Availability tab on an event schedule is a month calendar. Every date on it starts available. Click a date to mark it unavailable, click it again to clear it, then press Save. Your dates are stored against your own membership of that schedule, and they appear for the rest of your team on the Schedule tab.',
             ],
             [
                 'q' => 'Who can set availability?',
@@ -606,7 +606,7 @@
             ],
             [
                 'q' => 'What is the difference between availability and appointment booking?',
-                'a' => 'Availability is a private diary: whole dates your team reads on the shared calendar, never published, on talent schedules with the Enterprise plan. Appointment booking is the public side: you publish open times on a booking page, and a guest picks one and books it. The free plan includes one appointment type on any schedule type, and Pro removes the limit. Plenty of performers use both.',
+                'a' => 'Availability is a private diary: whole dates your team reads on the shared calendar, never published, on event schedules with the Enterprise plan. Appointment booking is the public side: you publish open times on a booking page, and a guest picks one and books it. The free plan includes one appointment type on any schedule type, and Pro removes the limit. Plenty of performers use both.',
             ],
             [
                 'q' => 'Can guests see the dates I have crossed out?',
@@ -618,7 +618,7 @@
             ],
             [
                 'q' => 'Why are the dates on my calendar not clickable?',
-                'a' => 'The Availability calendar becomes clickable once the schedule email address has been verified, and the Save button appears at the same time. The tab itself is only offered on talent schedules: curator schedules are sent back to the Schedule tab, and a venue schedule is never given the tab in its navigation.',
+                'a' => 'The Availability calendar becomes clickable once the schedule email address has been verified, and the Save button appears at the same time. The tab itself is only offered on event schedules: curator schedules are sent back to the Schedule tab, and a venue schedule is never given the tab in its navigation.',
             ],
             [
                 'q' => 'Can my booking agent see my availability?',
@@ -676,7 +676,7 @@
                             <svg aria-hidden="true" class="h-5 w-5 es-hours-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            <span class="es-hours-muted text-sm font-medium tracking-wide">Availability calendar &middot; talent schedules &middot; Enterprise</span>
+                            <span class="es-hours-muted text-sm font-medium tracking-wide">Availability calendar &middot; event schedules &middot; Enterprise</span>
                         </x-marketing.hero-eyebrow>
                         <span class="es-mask"><span class="es-mask-line">Do not list the days you are free.</span></span>
                         <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-hours-accent">Cross out</span> the days you are gone.</span></span>
@@ -851,7 +851,7 @@
                                 <span>Field</span>
                                 <span>Value</span>
                             </div>
-                            @foreach ([['member', 'you'], ['schedule', 'your talent schedule'], ['dates', count($cardOut) . ' of them'], ['times', 'none'], ['reasons', 'none'], ['public', 'no']] as [$slipKey, $slipValue])
+                            @foreach ([['member', 'you'], ['schedule', 'your event schedule'], ['dates', count($cardOut) . ' of them'], ['times', 'none'], ['reasons', 'none'], ['public', 'no']] as [$slipKey, $slipValue])
                                 <div class="es-hours-slip-row es-hours-rule py-1.5 text-xs">
                                     <span class="es-hours-muted">{{ $slipKey }}</span>
                                     <span class="es-hours-ink font-semibold">{{ $slipValue }}</span>
@@ -1036,10 +1036,10 @@
                         <p class="es-hours-plate">Lock one</p>
                         <span class="es-hours-plan">Required</span>
                     </div>
-                    <h3 class="es-hours-ink mb-2 text-xl font-bold">A talent schedule</h3>
-                    <p class="es-hours-muted text-sm leading-relaxed">The Availability tab is offered on talent schedules only. Curator schedules are sent back to the Schedule tab if they try the address, and a venue schedule is never given the tab in its navigation: a venue's opening pattern is a different problem, and the product does not pretend this tab solves it.</p>
+                    <h3 class="es-hours-ink mb-2 text-xl font-bold">An event schedule</h3>
+                    <p class="es-hours-muted text-sm leading-relaxed">The Availability tab is offered on event schedules only. Curator schedules are sent back to the Schedule tab if they try the address, and a venue schedule is never given the tab in its navigation: a venue's opening pattern is a different problem, and the product does not pretend this tab solves it.</p>
                     <p class="es-hours-muted mt-auto pt-4 text-sm">
-                        <a href="{{ marketing_url('/for-musicians') }}" class="es-hours-link font-medium hover:underline">What a talent schedule is</a>
+                        <a href="{{ marketing_url('/for-musicians') }}" class="es-hours-link font-medium hover:underline">What an event schedule is</a>
                     </p>
                 </div>
                 <div class="es-hours-card flex flex-col p-7" data-reveal="panel">
@@ -1128,7 +1128,7 @@
                 $shareSetups = [
                     [
                         'The band',
-                        'Every player is a member of the band\'s talent schedule and marks their own days: the drummer\'s cousin\'s wedding, the bassist\'s teaching week. On the Schedule tab a Friday with two people out names both, so whoever answers the venue can decide whether a stand-in covers it or the answer is no. A schedule on eventschedule.com holds up to five members, which fits a four-piece and the person who books it.',
+                        'Every player is a member of the band\'s event schedule and marks their own days: the drummer\'s cousin\'s wedding, the bassist\'s teaching week. On the Schedule tab a Friday with two people out names both, so whoever answers the venue can decide whether a stand-in covers it or the answer is no. A schedule on eventschedule.com holds up to five members, which fits a four-piece and the person who books it.',
                         'Everyone',
                         'The one who books',
                     ],
@@ -1427,7 +1427,7 @@
             </div>
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
-                @foreach ([['01', 'Open the tab', 'On a talent schedule with the Enterprise plan, the Availability tab sits beside Schedule. It opens on the current month with nothing marked.'], ['02', 'Click the days you are gone', 'One click marks a date, a second click clears it. Use the arrows to reach the months you already know about.'], ['03', 'Save', 'Your dates are stored against your name and appear on the shared Schedule tab. Save puts you back on the month you were working in.']] as [$stepNum, $stepTitle, $stepBody])
+                @foreach ([['01', 'Open the tab', 'On an event schedule with the Enterprise plan, the Availability tab sits beside Schedule. It opens on the current month with nothing marked.'], ['02', 'Click the days you are gone', 'One click marks a date, a second click clears it. Use the arrows to reach the months you already know about.'], ['03', 'Save', 'Your dates are stored against your name and appear on the shared Schedule tab. Save puts you back on the month you were working in.']] as [$stepNum, $stepTitle, $stepBody])
                     <div class="es-hours-card p-7" data-reveal="panel">
                         <div class="es-hours-accent mb-3 font-mono text-2xl font-black">{{ $stepNum }}</div>
                         <h3 class="es-hours-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>

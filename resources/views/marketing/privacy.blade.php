@@ -1089,7 +1089,7 @@
 
                                             @case('ai-features')
                                                 <p>
-                                                    Some features send content to an AI provider to do their job: reading an event from text or a flyer image that someone pastes or uploads, including events visitors submit to a schedule that accepts submissions, or from the text of a web page whose link a schedule's editor pastes; translating a schedule's and its events' text into other languages; writing event descriptions and email text when asked to; and generating images.
+                                                    Some features send content to an AI provider to do their job: reading an event from text or a flyer image that someone pastes or uploads, including events visitors submit to a schedule that accepts submissions, or from the text of a web page whose link a schedule's editor pastes; translating a schedule's and its events' text into other languages; writing event descriptions and email text when asked to; generating images; and drawing a market's or fair's vendor map from photos its organizer uploads. Those photos can show people at the market: they are kept privately, seen only by the schedule's editors, and deleted within a day, except one photo the organizer chooses to keep as the picture to draw the map over, which is kept until they remove it and is shown to visitors of the map only if the organizer turns that on.
                                                     @if ($aiProviders)
                                                         On this service the provider is {{ implode(' or ', $aiProviders) }}, depending on the feature.
                                                     @endif

@@ -1371,7 +1371,7 @@
         "switch_steps": [
             {
                 "title": "Pick the schedule type",
-                "description": "A Venue schedule if you sell for one room, a Talent schedule if the act travels. The type decides which sections the form offers, and making one is free with no card.",
+                "description": "A Venue schedule if you sell for one room, an event schedule if the act travels. The type decides which sections the form offers, and making one is free with no card.",
                 "doc": "getting-started#schedule-types"
             },
             {
@@ -2647,7 +2647,7 @@
         "switch_steps": [
             {
                 "title": "Set up the room or the act",
-                "description": "A club or venue takes a Venue schedule, with its address and a map; a DJ or band takes a Talent schedule that lists shows wherever they play.",
+                "description": "A club or venue takes a Venue schedule, with its address and a map; a DJ or band takes an event schedule that lists shows wherever they play.",
                 "doc": "getting-started#schedule-types"
             },
             {
@@ -7874,7 +7874,7 @@
             },
             {
                 "title": "Venues and Artists Together",
-                "description": "Venue and talent schedules link to each other, so a show you play appears on the venue's schedule as well as your own.",
+                "description": "Venue and event schedules link to each other, so a show you play appears on the venue's schedule as well as your own.",
                 "icon": "building",
                 "gradient": "from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30",
                 "border": "border-blue-200 dark:border-blue-500/20",
@@ -7917,7 +7917,7 @@
         "why_choose": {
             "summary": "Bandsintown is where fans hear about a date, not where they buy a ticket for it. Event Schedule gives the act a page that registers or sells for each show, and keeps those dates in step with the calendar you plan the tour in.",
             "points": [
-                "A booking form on a Talent schedule, free, so promoters and venues can ask you for a date",
+                "A booking form on an event schedule, free, so promoters and venues can ask you for a date",
                 "Sell a show yourself on Pro, or point any date at an outside seller with Tickets elsewhere on every plan",
                 "Fans can add videos and photos from the night to its event page, shown once you approve them",
                 "An email digest to everyone who signed up, sent automatically when you publish new dates",
@@ -7927,8 +7927,8 @@
         },
         "switch_steps": [
             {
-                "title": "Make a Talent schedule",
-                "description": "Pick Talent when you create the schedule, free. It is the act's own page, and the type that takes booking requests.",
+                "title": "Make an event schedule",
+                "description": "Pick Event schedule when you create the schedule, free. It is the act's own page, and the type that takes booking requests.",
                 "doc": "getting-started#schedule-types"
             },
             {
@@ -7983,7 +7983,7 @@
             },
             {
                 "question": "Can promoters ask to book me?",
-                "answer": "Yes. A Talent schedule has a booking form on the free plan. A promoter sends the details through it, the request waits on your Requests tab, and you can require your approval before anything appears on your schedule."
+                "answer": "Yes. An event schedule has a booking form on the free plan. A promoter sends the details through it, the request waits on your Requests tab, and you can require your approval before anything appears on your schedule."
             },
             {
                 "question": "Do fans need an account to hear about new dates?",
@@ -8740,7 +8740,7 @@
         "switch_steps": [
             {
                 "title": "Make a schedule for the Page",
-                "description": "A Page that runs events becomes a schedule: Venue for a place, Talent for an act, Curator for a group that lists other people's events. All three are free.",
+                "description": "A Page that runs events becomes a schedule: Venue for a place, Event schedule for an act, Curator for a group that lists other people's events. All three are free.",
                 "doc": "getting-started#schedule-types"
             },
             {
@@ -8799,7 +8799,7 @@
             },
             {
                 "question": "Can I run a community calendar of other people's events?",
-                "answer": "Yes, with a curator schedule, free. Add the venue and talent schedules you want as sources and every event they publish is listed on yours automatically. Visitors can also submit events through a request form, held for your approval if you require it."
+                "answer": "Yes, with a curator schedule, free. Add the venue and event schedules you want as sources and every event they publish is listed on yours automatically. Visitors can also submit events through a request form, held for your approval if you require it."
             }
         ]
     },
@@ -10429,7 +10429,7 @@
             },
             {
                 "title": "For Venues Too",
-                "description": "Venue, talent and curator schedules link to each other, so a show a venue lists can appear on the performer's schedule as well.",
+                "description": "Venue, event and curator schedules link to each other, so a show a venue lists can appear on the performer's schedule as well.",
                 "icon": "globe",
                 "gradient": "from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30",
                 "border": "border-sky-200 dark:border-sky-500/20",
@@ -10492,7 +10492,7 @@
             "points": [
                 "The ticket link in Tourbox can point to your own event page, so a fan who finds you there buys from you",
                 "Free registration with a QR ticket, for guest-list nights and free shows",
-                "A booking form on every talent schedule, which venues and promoters use to ask you for a date, free",
+                "A booking form on every event schedule, which venues and promoters use to ask you for a date, free",
                 "Fans can post their videos and photos from a show to its page once you approve them",
                 "A digest of your new dates goes to email subscribers by itself and is not counted against your newsletter allowance",
                 "Paid tickets on Pro at $5/mo, with no platform fee on top of Stripe or PayPal"
@@ -10500,8 +10500,8 @@
         },
         "switch_steps": [
             {
-                "title": "Start a talent schedule",
-                "description": "Pick Talent when you create it. That type comes with the booking form, and every show on it can name the venue it is at.",
+                "title": "Start an event schedule",
+                "description": "Pick Event schedule when you create it. That type comes with the booking form, and every show on it can name the venue it is at.",
                 "doc": "getting-started#schedule-types"
             },
             {
@@ -10548,7 +10548,7 @@
             },
             {
                 "question": "Can venues and promoters use Event Schedule?",
-                "answer": "Yes. Venues, talent and curators each get their own schedule, and a show a venue lists can appear on the performer's schedule too. Songkick's Tourbox is only for artist teams, and venues and promoters cannot add ticket links themselves."
+                "answer": "Yes. Venues, performers and curators each get their own schedule, and a show a venue lists can appear on the performer's schedule too. Songkick's Tourbox is only for artist teams, and venues and promoters cannot add ticket links themselves."
             },
             {
                 "question": "How does Event Schedule pricing compare to Songkick?",
@@ -10564,7 +10564,7 @@
             },
             {
                 "question": "Can a promoter or festival list several artists?",
-                "answer": "Yes. A curator schedule lists events from other schedules, and can take talent and venue schedules as sources so every date they publish appears on it automatically. It is free on every plan, which suits a promoter running a season or a festival line-up."
+                "answer": "Yes. A curator schedule lists events from other schedules, and can take event and venue schedules as sources so every date they publish appears on it automatically. It is free on every plan, which suits a promoter running a season or a festival line-up."
             }
         ]
     },

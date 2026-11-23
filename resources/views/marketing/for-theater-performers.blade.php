@@ -1510,7 +1510,7 @@
                         <h3>When an agent shares the diary</h3>
                         <p>
                             On the Enterprise plan your agent or manager can join the schedule as a team member
-                            and see the Drafts beside the public dates. Its Availability tab, on Talent schedules
+                            and see the Drafts beside the public dates. Its Availability tab, on event schedules
                             only, lets you cross off the days you are not free, so whoever answers the offers knows
                             not to say yes to the night of a family wedding. It is a note to your team: never shown
                             publicly, and it does not stop anyone adding you to an event that day.

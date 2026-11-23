@@ -539,7 +539,7 @@
             ],
             [
                 'q' => 'Can I look at one schedule, or one event, on its own?',
-                'a' => 'Yes. Pick a schedule to see just its numbers, or leave it on all of them for a combined view with a per-schedule split. With a schedule selected you can narrow further to a single event and read that event\'s views on their own. Talent and venue schedules also get appearance views: the traffic your events pulled while listed on somebody else\'s schedule.',
+                'a' => 'Yes. Pick a schedule to see just its numbers, or leave it on all of them for a combined view with a per-schedule split. With a schedule selected you can narrow further to a single event and read that event\'s views on their own. Event and venue schedules also get appearance views: the traffic your events pulled while listed on somebody else\'s schedule.',
             ],
             [
                 'q' => 'Which event metrics should I track?',
@@ -1364,7 +1364,7 @@
                                 <h3 class="es-dash-ink text-xl font-bold">Views you earned elsewhere</h3>
                                 <span class="es-dash-plan">Free</span>
                             </div>
-                            <p class="es-dash-muted">Talent and venue schedules get appearance views: the traffic your events pulled while listed on somebody else's schedule, plus which of those schedules sent the most.</p>
+                            <p class="es-dash-muted">Event and venue schedules get appearance views: the traffic your events pulled while listed on somebody else's schedule, plus which of those schedules sent the most.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

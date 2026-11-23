@@ -32,6 +32,7 @@ class BlogLinks
         'gift-cards' => 'guide: gift cards',
         'appointments' => 'guide: appointment booking',
         'allocated-seating' => 'guide: reserved seating and the box office',
+        'vendor-maps' => 'guide: a vendor map for a market, fair or expo',
         'event-graphics' => 'guide: event graphics for social media',
         'analytics' => 'guide: analytics',
         'ai-import' => 'guide: importing events from text, links and flyers',

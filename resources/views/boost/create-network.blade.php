@@ -133,7 +133,7 @@
                             <label class="boost-check">
                                 <input type="checkbox" name="schedule_types[]" value="{{ $type }}"
                                     class="rounded text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
-                                <span v-pre>{{ __('messages.'.$type) }}</span>
+                                <span v-pre>{{ \App\Utils\ScheduleTypeLabel::for($type) }}</span>
                             </label>
                             @endforeach
                         </div>

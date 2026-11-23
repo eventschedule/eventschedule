@@ -17,7 +17,7 @@
         <div id="{{ $menuId }}" class="ap-dropdown pop-up-menu hidden absolute end-0 z-10 mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-md ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none">
             <div class="py-1" data-popup-target="{{ $menuId }}">
                 @foreach (['talent', 'venue', 'curator'] as $type)
-                    <a href="{{ route('new', ['type' => $type]) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-black/10">{{ __('messages.'.$type) }}</a>
+                    <a href="{{ route('new', ['type' => $type]) }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-black/10">{{ \App\Utils\ScheduleTypeLabel::for($type) }}</a>
                 @endforeach
             </div>
         </div>

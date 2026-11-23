@@ -165,6 +165,9 @@ return [
     'shot_frames' => [
         'sharing--guest-portal' => 'page',
         'allocated-seating--picker' => 'page',
+        'vendor-maps--map-page' => 'page',
+        'vendor-maps--vendor-link' => 'page',
+        'vendor-maps--sign' => 'page',
         'appointments--booking-page' => 'page',
         'sharing--embed-dialog' => 'dialog',
     ],
@@ -422,6 +425,21 @@ return [
             'shot_alt' => 'The Requests tab, with an event waiting for an answer',
             'published' => '2024-01-01',
             'modified' => '2026-10-23',
+        ],
+
+        'vendor-maps' => [
+            'group' => 'user-guide',
+            'cluster' => 'manage',
+            'route' => 'marketing.docs.vendor_maps',
+            'path' => '/docs/vendor-maps',
+            'feature' => 'marketing.vendor_map',
+            'title' => 'Vendor Maps',
+            'blurb' => 'A map of a market, fair or expo that vendors claim and shoppers open.',
+            'icon' => 'map',
+            'shot' => 'vendor-maps--tab',
+            'shot_alt' => 'The Vendor map tab of a farmers market, with requests waiting',
+            'published' => '2026-11-23',
+            'modified' => '2026-11-23',
         ],
 
         'analytics' => [

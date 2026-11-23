@@ -347,6 +347,10 @@
                 'a' => 'Yes, and for nothing. Make the event free and give it a capacity. People register instead of paying, each gets a QR code to show at the gate, the count is kept separately for each date, and registration closes when the places are gone. Free registration has no monthly ceiling on any plan.',
             ],
             [
+                'q' => 'Can visitors see where each food stand is?',
+                'a' => 'Yes, with a vendor map. Draw the field once, with the stands, the stages and the way in, and print the entrance sign: visitors scan its code and see who is serving today, searchable by name or by what they serve. Drawing the map, adding traders yourself and the visitors\' map are free; the link where traders claim their own stand, and a map drafted from your photos, are part of Pro.',
+            ],
+            [
                 'q' => 'How do acts and traders apply?',
                 'a' => 'Through the festival page. The default form takes a pasted pitch or an uploaded flyer and reads it into a request for you to review; switch to the booking form and every application arrives with a date, a time and a description. Nothing appears publicly until you accept it. On Pro you can add your own questions to either form, such as a pitch size, a power requirement or a link to a set.',
             ],
@@ -956,6 +960,40 @@
                             </li>
                         @endforeach
                     </ul>
+                </div>
+            </div>
+
+            {{-- The traders' side of the field: the vendor map, as a food festival (VendorMapKinds
+                 'food_festival', stands). A curator schedule can hold one, which is what this page
+                 signs up. The phone is the app's real shoppers' map. --}}
+            <div class="es-fest-card mt-4 grid items-center gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" data-reveal="panel">
+                <div>
+                    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-fest-ink text-lg font-bold">Every food stand on one map</h3>
+                        <span class="es-fest-plan es-fest-plan-free">Free plan</span>
+                    </div>
+                    <p class="es-fest-muted mb-5 text-sm">The vendor map, set to a food festival.</p>
+                    <ul class="space-y-3">
+                        @foreach ([
+                            'Draw the field once: rows of stands, single ones where they stand, the stages, the toilets and the way in.',
+                            'Send the traders one link and each claims their own stand and says what they serve (the link and a map drafted from your photos are Pro).',
+                            'Print the entrance sign. Visitors scan it and search the field for coffee, tacos or the vegan stand.',
+                            'A trader who cannot make Sunday taps Not coming, and their stand reads "Not here today" on that day only.',
+                        ] as $point)
+                            <li class="flex items-start gap-3">
+                                <svg aria-hidden="true" class="es-fest-accent mt-0.5 h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span class="es-fest-muted text-sm">{{ $point }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <a href="{{ app_url('/sign_up?type=curator&vendor_map=food_festival') }}" class="es-fest-btn inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold">Map your festival's stands</a>
+                        <a href="{{ marketing_url('/features/vendor-map') }}" class="es-fest-ink inline-flex items-center gap-1 px-2 py-3 text-sm font-semibold underline underline-offset-4">How the vendor map works</a>
+                    </div>
+                </div>
+                <div class="mx-auto w-full max-w-[15rem] overflow-hidden rounded-[1.75rem] border border-[rgba(27,21,16,0.15)] bg-[#0b1220] shadow-xl dark:border-[rgba(241,235,229,0.15)]">
+                    <img src="{{ asset('images/marketing/vendor-map/map-phone.webp') }}" width="780" height="1688" loading="lazy" decoding="async" class="block h-auto w-full"
+                         alt="The visitors' map on a phone: numbered stands in named areas, a search box for a name or what they serve, and the list of who is here that day">
                 </div>
             </div>
         </div>

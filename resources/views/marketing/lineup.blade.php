@@ -67,8 +67,8 @@
             ['q' => 'Do the acts I list need an account?', 'a' => 'No. Naming somebody who is not on Event Schedule creates a page for them there and then, in the name you typed, with every date you list them on. They can claim it later by signing in with the email address or phone number you entered for them, and from then on it is an ordinary schedule they run themselves.'],
             ['q' => 'What does a page show before it is claimed?', 'a' => 'It opens by saying which schedule created it and that the act has not claimed it yet, so nobody mistakes it for a page they built. Under that it lists up to twenty upcoming public dates, each credited to the schedule that added it. It carries no contact details, no follow button and no tickets, and search engines are kept away from it until it is claimed.'],
             ['q' => 'What if the page is not theirs, or they do not want it?', 'a' => 'The page has a This is not me button beside Claim this page. Somebody who holds the email address or phone number on the page can take it down straight away. Anybody else is asked to sign in and their request is recorded for review, so the button cannot be aimed at a competitor.'],
-            ['q' => 'How do other schedules\' events get onto a curator\'s guide?', 'a' => 'By naming them as event sources. On a curator schedule you list the talent and venue schedules you cover, and everything they publish, past and upcoming, appears on your calendar on its own, each new event within a few minutes of going live. What a source keeps private stays off your guide, and it is free on every plan.'],
-            ['q' => 'What is the venue logo wall?', 'a' => 'A header for your schedule page made of logos instead of a picture. On a talent or curator schedule it shows the venues hosting your public events, and on a venue schedule it shows the acts playing there. Each logo links to that schedule\'s own page, you set the order by dragging, and it is free on every plan.'],
+            ['q' => 'How do other schedules\' events get onto a curator\'s guide?', 'a' => 'By naming them as event sources. On a curator schedule you list the event and venue schedules you cover, and everything they publish, past and upcoming, appears on your calendar on its own, each new event within a few minutes of going live. What a source keeps private stays off your guide, and it is free on every plan.'],
+            ['q' => 'What is the venue logo wall?', 'a' => 'A header for your schedule page made of logos instead of a picture. On an event schedule or curator schedule it shows the venues hosting your public events, and on a venue schedule it shows the acts playing there. Each logo links to that schedule\'s own page, you set the order by dragging, and it is free on every plan.'],
             ['q' => 'Are sponsor logos free?', 'a' => 'Sponsor and partner logos are a Pro feature. The lineup, the pages made for the acts you list and the logo wall are free on every plan, and a selfhosted install includes all four. The switch that hides your sponsors stays available on every plan, so logos added on Pro can always be taken off the page.'],
             ['q' => 'Can one event show different sponsors?', 'a' => 'Yes. An event shows its schedule\'s sponsors unless you choose otherwise in the Sponsors row of the event\'s Page content tab: no sponsors at all, or a list that belongs to that event alone. An event\'s own list changes nothing on the schedule.'],
         ];
@@ -625,10 +625,10 @@
         $sourceRows = [
             ['RH', 'Riverside Hall', 'Venue', '42 events', '#1d4ed8'],
             ['CE', 'The Corn Exchange', 'Venue', '18 events', '#0e7490'],
-            ['PL', 'The Paper Lanterns', 'Talent', '9 events', '#047857'],
+            ['PL', 'The Paper Lanterns', 'Event schedule', '9 events', '#047857'],
         ];
         $sourceFacts = [
-            ['Venues and acts, not other guides', 'Search by name and pick a talent or a venue schedule. Only those two kinds can be a source, so one guide never chains onto another.'],
+            ['Venues and acts, not other guides', 'Search by name and pick an event schedule or a venue schedule. Only those two kinds can be a source, so one guide never chains onto another.'],
             ['Only what they made public', 'Drafts, internal events, unlisted events and anything a schedule has not accepted are left out. What stays private there stays private on yours.'],
             ['Filed where you want it', 'Send everything from one source to a sub-schedule, so visitors can filter the club from the theatre. Change it later and that source\'s events move with it.'],
             ['You can see it working', 'Each source shows how many of its events are on your calendar right now, past and upcoming, so you can tell at a glance whether it is feeding your guide.'],
@@ -642,7 +642,7 @@
                         <span class="hp-kicker" data-reveal>Event sources</span>
                         <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">Run a guide? <span class="hp-ink-grad">Let it fill itself.</span></h2>
                         <p class="hp-lead" data-reveal style="--reveal-delay: 0.16s;">
-                            A curator schedule is the page for a town, a scene or a festival. List the venue and talent schedules you cover as its sources and everything they publish shows up on your calendar on its own: what they have already run as well as what is coming, each new event within a few minutes of going live.
+                            A curator schedule is the page for a town, a scene or a festival. List the venue and event schedules you cover as its sources and everything they publish shows up on your calendar on its own: what they have already run as well as what is coming, each new event within a few minutes of going live.
                         </p>
                     </div>
                     <p class="mt-8 flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400" data-reveal>
@@ -697,7 +697,7 @@
                 <span class="hp-kicker" data-reveal>Logo wall</span>
                 <h2 class="hp-h2" data-reveal style="--reveal-delay: 0.08s;">The rooms you play, <span class="hp-ink-grad">across the top of your page.</span></h2>
                 <p class="hp-lead" data-reveal style="--reveal-delay: 0.16s;">
-                    Choose Venue logo wall as your header and the top of your schedule page becomes the venues hosting your events, each one a link. On a venue's schedule it runs the other way and is called Talent logo wall: the acts that play there.
+                    Choose Venue logo wall as your header and the top of your schedule page becomes the venues hosting your events, each one a link. On a venue's schedule it runs the other way and is called Lineup logo wall: the acts that play there.
                 </p>
             </div>
 

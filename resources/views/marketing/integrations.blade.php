@@ -773,7 +773,7 @@
             ],
             [
                 'q' => 'Can Event Schedule import events from another website automatically?',
-                'a' => 'Yes, in three ways. A Feed reads a calendar address (.ics or webcal), an RSS, Atom or JSON feed, or a page that lists events, about once an hour, and publishes new events or holds them as drafts for you; it is Enterprise on eventschedule.com and included when you selfhost. Import from a link reads the same kinds of address once, when you ask, on every plan, and publishes what it adds. A curator schedule can also name talent and venue schedules on Event Schedule as event sources, and everything they publish is listed on it automatically, free.',
+                'a' => 'Yes, in three ways. A Feed reads a calendar address (.ics or webcal), an RSS, Atom or JSON feed, or a page that lists events, about once an hour, and publishes new events or holds them as drafts for you; it is Enterprise on eventschedule.com and included when you selfhost. Import from a link reads the same kinds of address once, when you ask, on every plan, and publishes what it adds. A curator schedule can also name event and venue schedules on Event Schedule as event sources, and everything they publish is listed on it automatically, free.',
             ],
             [
                 'q' => 'Can people subscribe to my schedule in their own calendar app?',
@@ -808,7 +808,7 @@
             [
                 'You curate', 'A community or city calendar',
                 [
-                    ['First', 'Event sources: name the talent and venue schedules you list, and everything they publish lands on yours automatically. Free.'],
+                    ['First', 'Event sources: name the event and venue schedules you list, and everything they publish lands on yours automatically. Free.'],
                     ['Then', 'Import from a link for a calendar file or an events page you only need once. Free, and what you tick is published.'],
                     ['Later', 'Feeds, for somebody else\'s list read about once an hour, with new events published or held as drafts. Enterprise on eventschedule.com.'],
                 ],

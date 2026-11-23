@@ -469,7 +469,7 @@
             ['The event image', 12],
             ['Venue name', 8],
             ['Venue images', 13],
-            ['Talent on the bill', 11],
+            ['Performers on the bill', 11],
             ['The agenda', 7],
             ['Fan videos', 9],
             ['Recent comments', 10],

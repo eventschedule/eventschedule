@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ContentModerationException;
+use App\Exceptions\EventCreationLimitException;
 use App\Exceptions\LinkImportException;
 use App\Http\Controllers\Traits\RendersGuestNotFound;
+use App\Http\Middleware\CaptureUtmParameters;
 use App\Http\Requests\Concerns\ValidatesCouponDiscount;
 use App\Http\Requests\EventCommentSubmitRequest;
 use App\Http\Requests\EventCreateRequest;
@@ -19,9 +22,12 @@ use App\Mail\EventAccepted;
 use App\Mail\EventChanged;
 use App\Mail\EventDeclined;
 use App\Models\AnalyticsEventsDaily;
+use App\Models\AppointmentType;
 use App\Models\DismissedVenueMergeSuggestion;
 use App\Models\Event;
 use App\Models\EventComment;
+use App\Models\EventFeedItem;
+use App\Models\EventInterest;
 use App\Models\EventPart;
 use App\Models\EventPhoto;
 use App\Models\EventPoll;
@@ -39,11 +45,14 @@ use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
 use App\Rules\NotBlocklisted;
 use App\Rules\ValidTurnstile;
+use App\Services\AppointmentService;
 use App\Services\AuditService;
 use App\Services\Blocklist;
 use App\Services\DemoService;
+use App\Services\EmailService;
 use App\Services\EventChangeNotifier;
 use App\Services\EventLifecycleService;
+use App\Services\GuestAccountService;
 use App\Services\LinkImportService;
 use App\Services\OneSignalService;
 use App\Services\RequestNotifier;
@@ -59,12 +68,16 @@ use App\Utils\ImportOptions;
 use App\Utils\ImportRun;
 use App\Utils\MoneyUtils;
 use App\Utils\SetupGuide;
+use App\Utils\SlugUtils;
 use App\Utils\UrlUtils;
 use App\Utils\VenueUtils;
 use Carbon\Carbon;
-use Illuminate\Auth\Events\Lockout;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -190,7 +203,7 @@ class EventController extends Controller
         }
 
         // Deleted on purpose: a feed that made it does not bring it back.
-        \App\Models\EventFeedItem::dismissFor($event);
+        EventFeedItem::dismissFor($event);
         $this->deleteEventRecord($event, $user);
 
         /*
@@ -905,7 +918,7 @@ class EventController extends Controller
         // Distinct on email, so somebody who asked about three occurrences of a recurring event
         // counts once.
         $interestCount = $event->exists
-            ? \App\Models\EventInterest::where('event_id', $event->id)->confirmed()->distinct()->count('email')
+            ? EventInterest::where('event_id', $event->id)->confirmed()->distinct()->count('email')
             : 0;
 
         // Once the event has taken money its currency is locked (see update()). Both Currency
@@ -1159,7 +1172,7 @@ class EventController extends Controller
      * comes back to it (SubscriptionController::returnEvent()). Null, and the usual redirect, for
      * anyone who cannot check out there (only its owner can) or a schedule that already sells.
      */
-    private function subscribeAfterSave(Request $request, Event $event): ?\Illuminate\Http\RedirectResponse
+    private function subscribeAfterSave(Request $request, Event $event): ?RedirectResponse
     {
         if (! $request->boolean('then_subscribe') || ! config('app.hosted') || ! config('cashier.key')) {
             return null;
@@ -1269,8 +1282,8 @@ class EventController extends Controller
             $sale = Sale::where('event_id', $event->id)
                 ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
                 ->first();
-            if ($sale && ($sale->status === 'paid' || ! \App\Models\AppointmentType::paysOnline($sale->payment_method))) {
-                app(\App\Services\AppointmentService::class)->confirm($sale);
+            if ($sale && ($sale->status === 'paid' || ! AppointmentType::paysOnline($sale->payment_method))) {
+                app(AppointmentService::class)->confirm($sale);
             }
         }
 
@@ -1356,10 +1369,10 @@ class EventController extends Controller
                 if ($wasPaid) {
                     AnalyticsEventsDaily::decrementSale($event->id, (float) $sale->payment_amount, $sale->created_at->toDateString());
                 }
-                app(\App\Services\EmailService::class)->sendAppointmentDeclinedEmail($sale);
+                app(EmailService::class)->sendAppointmentDeclinedEmail($sale);
                 if ($wasPaidMoney) {
                     // Remind the owner to refund the paid booking (manual refund via Sales/Stripe).
-                    app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale, true);
+                    app(EmailService::class)->sendAppointmentOwnerCancellation($sale, true);
                 }
             }
         }
@@ -1568,8 +1581,8 @@ class EventController extends Controller
                         ->where('is_deleted', false)
                         ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
                         ->first();
-                    if ($sale && ($sale->status === 'paid' || ! \App\Models\AppointmentType::paysOnline($sale->payment_method))) {
-                        app(\App\Services\AppointmentService::class)->confirm($sale);
+                    if ($sale && ($sale->status === 'paid' || ! AppointmentType::paysOnline($sale->payment_method))) {
+                        app(AppointmentService::class)->confirm($sale);
                     }
 
                     continue; // the generic submitter email below never applies to bookings
@@ -1839,7 +1852,7 @@ class EventController extends Controller
             // findOrFail() above throws for an id that matches nothing, so the JSON the import page
             // reads is that one's too, where abort(404) sent a different body.
             if ($event->isMembersOnly() && ! $isEventMemberOrAdmin) {
-                throw (new \Illuminate\Database\Eloquent\ModelNotFoundException)->setModel(Event::class, [$event->id]);
+                throw (new ModelNotFoundException)->setModel(Event::class, [$event->id]);
             }
 
             // An unlisted event only by its own people, and never onto another schedule.
@@ -2661,7 +2674,7 @@ class EventController extends Controller
                 $result['flyer_image_filename'] = $filename;
 
                 Cache::put("ai_flyer_{$requestId}", $result, 300);
-            } catch (\App\Exceptions\ContentModerationException $e) {
+            } catch (ContentModerationException $e) {
                 Cache::put("ai_flyer_{$requestId}", ['status' => 'failed', 'error' => __('messages.ai_content_moderation_blocked')], 300);
             } catch (\Exception $e) {
                 \Log::error('AI flyer generation failed: '.$e->getMessage(), [
@@ -2812,7 +2825,7 @@ class EventController extends Controller
             $results['success'] = true;
 
             return response()->json($results);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             report($e);
 
             return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
@@ -2898,7 +2911,7 @@ class EventController extends Controller
             $imagePath = $tempDir.'/'.basename($request->social_image);
             $realPath = realpath($imagePath);
             if ($realPath && str_starts_with($realPath, $tempDir.DIRECTORY_SEPARATOR) && file_exists($realPath)) {
-                $file = new \Illuminate\Http\UploadedFile($realPath, basename($realPath));
+                $file = new UploadedFile($realPath, basename($realPath));
                 $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
                 $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
@@ -3075,7 +3088,7 @@ class EventController extends Controller
         // Asked before the account is made, as the booking form asks it: saveEvent() refuses the
         // same thing a moment later, by which time the visitor had an account and no event.
         if (! $role->canCreateEvent($request->user())) {
-            throw new \App\Exceptions\EventCreationLimitException;
+            throw new EventCreationLimitException;
         }
 
         // Handle user creation if requested (optional account; event owned by the curator)
@@ -3176,65 +3189,11 @@ class EventController extends Controller
         $user = auth()->user();
 
         if (! $user) {
+            // The account step lives in GuestAccountService, which the vendor map's link shares.
             if ($request->input('account_mode') === 'login') {
-                $request->validate([
-                    'account_email' => ['required', 'string', 'email'],
-                    'account_password' => ['required', 'string'],
-                ]);
-
-                // Mirror the canonical login form's protections: a shared per-email|ip lockout (same
-                // throttle key as LoginRequest, so guesses here and on /login draw from one 5-try
-                // budget) plus failed-login audit logging. The route's per-IP throttle alone never
-                // locks the targeted account.
-                $email = strtolower((string) $request->input('account_email'));
-                $throttleKey = Str::transliterate(Str::lower((string) $request->input('account_email')).'|'.$request->ip());
-
-                if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
-                    event(new Lockout($request));
-                    $seconds = RateLimiter::availableIn($throttleKey);
-                    throw ValidationException::withMessages([
-                        'account_password' => [trans('auth.throttle', [
-                            'seconds' => $seconds,
-                            'minutes' => ceil($seconds / 60),
-                        ])],
-                    ]);
-                }
-
-                if (! Auth::attempt([
-                    'email' => $email,
-                    'password' => (string) $request->input('account_password'),
-                ])) {
-                    RateLimiter::hit($throttleKey);
-                    AuditService::log(AuditService::AUTH_LOGIN_FAILED, null, null, null, null, null, $email);
-                    throw ValidationException::withMessages([
-                        'account_password' => [__('messages.incorrect_password')],
-                    ]);
-                }
-
-                // An account an operator has shut out submits nothing: said here, before the
-                // event is made. EnsureAccountNotBlocked would only sign it out afterwards.
-                if (auth()->user()->isBlocked()) {
-                    Auth::guard('web')->logout();
-                    throw ValidationException::withMessages([
-                        'account_password' => [__('messages.account_blocked')],
-                    ]);
-                }
-
-                // An account with two-factor signs in on the sign-in page, which asks for its code.
-                // Signed in here, the password alone was enough for a full session.
-                if (auth()->user()->hasTwoFactorEnabled()) {
-                    Auth::guard('web')->logout();
-                    throw ValidationException::withMessages([
-                        'account_password' => [__('messages.two_factor_sign_in_first')],
-                    ]);
-                }
-
-                RateLimiter::clear($throttleKey);
-
-                $user = auth()->user();
-                AuditService::log(AuditService::AUTH_LOGIN, $user->id);
+                $user = app(GuestAccountService::class)->loginWithPassword($request);
             } else {
-                $user = $this->createAccountWithCode($request, $role);
+                $user = app(GuestAccountService::class)->createWithCode($request, $role, 'request');
             }
         }
 
@@ -3264,7 +3223,7 @@ class EventController extends Controller
             // talent's own guest page renders them in its own timezone (Event::getStartDateTime()
             // resolves creatorRole->timezone for every viewer). The form warns the guest
             // when their device timezone differs. The user *account* still keeps the browser value.
-            $talent = $this->createTalentSchedule($user, $name, $role->timezone, $contentLang ?: $user->language_code);
+            $talent = app(GuestAccountService::class)->createTalentSchedule($user, $name, $role->timezone, $contentLang ?: $user->language_code);
         }
 
         // Auto-follow the curator (the form discloses this). Demo users never follow.
@@ -3371,175 +3330,6 @@ class EventController extends Controller
     }
 
     /**
-     * Validate the 6-digit code (hosted), then create or update (stub) the submitter and log them
-     * in. Throws ValidationException (422 JSON) on any failure.
-     */
-    private function createAccountWithCode(Request $request, Role $role)
-    {
-        // Turnstile is enforced earlier, at the code-send step (sendVerificationCode), so it is
-        // not re-checked here (the emailed code is the proof, and the token is single-use).
-
-        // Selfhost does not allow public self-registration after the first user unless the
-        // operator sets ALLOW_REGISTRATION (mirrors RegisteredUserController::store). Block
-        // account creation/claim here too so this guest flow can't be used to mint accounts
-        // or take over an invited stub without verification.
-        if (! public_registration_enabled() && ! config('app.is_testing') && User::count() > 0) {
-            throw ValidationException::withMessages([
-                'account_email' => [__('messages.account_creation_disabled')],
-            ]);
-        }
-
-        $email = strtolower((string) $request->input('account_email'));
-        $existingUser = User::where('email', $email)->first();
-        $isStub = $existingUser ? $existingUser->isStub() : false;
-
-        $request->validate([
-            'account_name' => ['required', 'string', 'max:255'],
-            'account_email' => array_merge(
-                ['required', 'string', 'email', 'max:255', new NotBlocklisted],
-                $isStub ? [] : ['unique:users,email'],
-                config('app.hosted') ? [new NoFakeEmail] : []
-            ),
-            'account_password' => ['required', 'string', 'min:8'],
-        ] + (config('app.hosted') ? ['terms' => ['accepted']] : []), [], [
-            // As RegisteredUserController::store() requires it: hosted only, where the box is
-            // shown with the privacy policy. The page ticked it and never sent it.
-            'terms' => __('messages.terms_of_service'),
-        ]);
-
-        // Off hosted there is no code step, so nothing here has shown that this person reads the
-        // address. An account that is waiting for its owner (an invited team member, somebody who
-        // bought a ticket) is not handed to whoever types its address: the address is mailed its
-        // set-password link, as sign-up and the login page do for it.
-        if ($isStub && ! config('app.hosted')) {
-            throw ValidationException::withMessages([
-                'account_email' => [match (\App\Utils\StubAccountUtils::send($existingUser)) {
-                    \App\Utils\StubAccountUtils::THROTTLED => __('messages.login_password_link_already_sent'),
-                    default => __('messages.login_no_password_yet'),
-                }],
-            ]);
-        }
-
-        // Verify the emailed 6-digit code (hosted only, matching registration).
-        if (config('app.hosted') && ! config('app.is_testing')) {
-            $request->validate(['verification_code' => ['required', 'string', 'size:6']]);
-
-            $originalEmail = Cache::pull('signup_code_email_'.$request->verification_code);
-            if (! $originalEmail || strtolower($originalEmail) !== $email) {
-                throw ValidationException::withMessages([
-                    'verification_code' => [__('messages.code_invalid')],
-                ]);
-            }
-        }
-
-        $utmParams = session('utm_params', []);
-        if (empty($utmParams) && $request->cookie('utm_params')) {
-            $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
-        }
-
-        // Last fallback: the browser-written es_attribution cookie, for a guest who arrived
-        // through an edge-cached marketing page and so never got a server session.
-        $clientAttribution = \App\Http\Middleware\CaptureUtmParameters::clientAttribution($request);
-
-        if (empty($utmParams)) {
-            $utmParams = $clientAttribution['utm_params'];
-        }
-
-        $languageCode = (session()->has('guest_language') && is_valid_language_code(session('guest_language')))
-            ? session('guest_language')
-            : 'en';
-
-        $attributes = [
-            'name' => $request->input('account_name'),
-            'password' => Hash::make($request->input('account_password')),
-            // The browser may report an alias (Asia/Calcutta) the schedule form's select lacks.
-            'timezone' => \App\Utils\TimezoneUtils::canonicalize(is_string($request->input('timezone')) ? $request->input('timezone') : null)
-                ?: ($role->timezone ?: 'UTC'),
-            'language_code' => $languageCode,
-            'utm_source' => $utmParams['utm_source'] ?? null,
-            'utm_medium' => $utmParams['utm_medium'] ?? null,
-            'utm_campaign' => $utmParams['utm_campaign'] ?? null,
-            'utm_content' => $utmParams['utm_content'] ?? null,
-            'utm_term' => $utmParams['utm_term'] ?? null,
-            'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url') ?? $clientAttribution['utm_referrer_url'],
-            'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page') ?? $clientAttribution['utm_landing_page'],
-        ];
-
-        // The guest-submit flow is an event request on someone else's schedule;
-        // stubs keep their original acquisition context (team invite, subscriber)
-        if ($isStub) {
-            $attributes['signup_intent'] = $existingUser->signup_intent ?? 'request';
-            $existingUser->update($attributes);
-            $user = $existingUser;
-        } else {
-            $attributes['signup_intent'] = 'request';
-            $user = User::create(array_merge($attributes, ['email' => $email]));
-        }
-
-        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
-
-        $user->email_verified_at = now();
-        $user->signup_ip = Blocklist::address($request);
-        // The form's terms checkbox, recorded as RegisteredUserController does (hosted only, where
-        // the box is shown with the privacy policy).
-        if (config('app.hosted') && $request->boolean('terms')) {
-            $user->terms_accepted_at = now();
-        }
-        $user->save();
-
-        Auth::login($user);
-
-        return $user;
-    }
-
-    /**
-     * Create a minimal talent schedule owned by the user. Contact fields are intentionally left
-     * null so the auto-created page stays noindex until the owner adds details.
-     */
-    private function createTalentSchedule(User $user, string $name, $timezone = null, $languageCode = null): Role
-    {
-        $talent = new Role;
-        $talent->type = 'talent';
-        $talent->user_id = $user->id;
-        $talent->name = $name;
-
-        // generateSubdomain already handles uniqueness, but retry on the off chance two
-        // same-named talents are created at once (mirrors the venue auto-create in
-        // ConvertsLocationToVenue) so a race can't surface as a raw UNIQUE-index 500.
-        $subdomain = Role::generateSubdomain($name);
-        $attempts = 0;
-        while (Role::where('subdomain', $subdomain)->exists() && $attempts < 10) {
-            $subdomain = Role::generateSubdomain($name.'-'.++$attempts);
-        }
-        $talent->subdomain = $subdomain;
-
-        $talent->timezone = $timezone ?: 'UTC';
-        $talent->language_code = is_valid_language_code($languageCode) ? $languageCode : 'en';
-
-        // Mark verified (without an email/phone) so the page is "claimed" and public:
-        // RoleController::viewGuest() answers an unpublished schedule as an unknown address,
-        // and sends its own members into the app. Leaving email/phone null keeps the
-        // auto-created page noindex and out of the sitemap.
-        $talent->email_verified_at = now();
-
-        if (config('app.is_testing')) {
-            $talent->plan_type = 'enterprise';
-            $talent->plan_expires = '2099-01-01';
-        }
-
-        $talent->save();
-
-        $user->roles()->attach($talent->id, [
-            'level' => 'owner',
-            'created_at' => now(),
-        ]);
-
-        AuditService::log(AuditService::SCHEDULE_CREATE, $user->id, 'Role', $talent->id, null, null, $talent->name);
-
-        return $talent;
-    }
-
-    /**
      * Count one stage of a public request form's funnel: the "Submit your event" page or the
      * booking request page (MarketingDailyStat::COLUMNS).
      *
@@ -3629,7 +3419,7 @@ class EventController extends Controller
         $imagePath = $tempDir.'/'.basename($request->social_image);
         $realPath = realpath($imagePath);
         if ($realPath && str_starts_with($realPath, $tempDir.DIRECTORY_SEPARATOR) && file_exists($realPath)) {
-            $file = new \Illuminate\Http\UploadedFile($realPath, basename($realPath));
+            $file = new UploadedFile($realPath, basename($realPath));
             $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
             $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
 
@@ -3669,7 +3459,7 @@ class EventController extends Controller
 
         // Selfhost does not allow public self-registration after the first user unless the operator
         // sets ALLOW_REGISTRATION - the same gate as RegisteredUserController::store() and
-        // createAccountWithCode(). This one used to test config('app.hosted') alone, so an install
+        // GuestAccountService::createWithCode(). This one used to test config('app.hosted') alone, so an install
         // that had opened registration still refused every booking-form account.
         if (! public_registration_enabled() && ! config('app.is_testing') && User::count() > 0) {
             throw ValidationException::withMessages([
@@ -3693,7 +3483,7 @@ class EventController extends Controller
 
         // Last fallback: the browser-written es_attribution cookie, for a guest who arrived
         // through an edge-cached marketing page and so never got a server session.
-        $clientAttribution = \App\Http\Middleware\CaptureUtmParameters::clientAttribution($request);
+        $clientAttribution = CaptureUtmParameters::clientAttribution($request);
 
         if (empty($utmParams)) {
             $utmParams = $clientAttribution['utm_params'];
@@ -3729,7 +3519,7 @@ class EventController extends Controller
 
         // Nothing on these forms proves the address, so on hosted it stays unverified until the
         // emailed link is clicked - the same bar as registration, whose emailed code is its proof
-        // (createAccountWithCode() asks for that code too). Marking it verified here minted a
+        // (GuestAccountService::createWithCode() asks for that code too). Marking it verified here minted a
         // verified account for any address that had none yet, which is what every
         // hasVerifiedEmail() gate trusts: claiming schedules registered to it, and the ticket
         // link on an event page. Selfhost has no code step anywhere, as in registration.
@@ -3848,7 +3638,7 @@ class EventController extends Controller
         // Anti-abuse: this guest vector writes an event directly (bypassing EventRepo::saveEvent),
         // so it enforces the daily creation cap itself. Guests key on the target schedule's cap.
         if (! $role->canCreateEvent(auth()->user())) {
-            throw new \App\Exceptions\EventCreationLimitException;
+            throw new EventCreationLimitException;
         }
 
         $isGuest = ! auth()->check();
@@ -3976,7 +3766,7 @@ class EventController extends Controller
 
             if (config('app.hosted')) {
                 // Where sign-up and the submit page ask for the emailed code, so does this form
-                // (createAccountWithCode() checks it, hosted and not under test, exactly as the
+                // (GuestAccountService::createWithCode() checks it, hosted and not under test, exactly as the
                 // submit page's account does). It used to make the account on the spot and mail a
                 // link afterwards: anyone could register an address that was not theirs, and the
                 // person signed in "unverified" was sent to the verify-your-email wall instead of
@@ -3986,7 +3776,7 @@ class EventController extends Controller
                     'account_email' => $request->input('email'),
                     'account_password' => $request->input('password'),
                 ]);
-                $this->createAccountWithCode($request, $role);
+                app(GuestAccountService::class)->createWithCode($request, $role, 'request');
             } else {
                 $this->createAndLoginUser($request);
             }
@@ -4112,11 +3902,11 @@ class EventController extends Controller
         $eventName = $request->event_name ?: __('messages.booking_request');
         // Both inputs can collapse under Str::slug alone: a non-Latin event_name, and the
         // translated fallback above when the locale is Hebrew or similar.
-        $event->slug = \App\Utils\SlugUtils::slugOrRomanize($eventName, 'booking').'-'.strtolower(Str::random(6));
+        $event->slug = SlugUtils::slugOrRomanize($eventName, 'booking').'-'.strtolower(Str::random(6));
         $event->save();
 
         // Anti-abuse: count this booking-request event toward the schedule's daily cap.
-        \App\Services\UsageTrackingService::track(\App\Services\UsageTrackingService::EVENT_CREATE, $role->id);
+        UsageTrackingService::track(UsageTrackingService::EVENT_CREATE, $role->id);
 
         // The one acceptance rule (Role::autoAcceptsEventFrom()), with the person who is really
         // signed in. The line that was here read require_approval and nothing else, so the owner's
@@ -4813,7 +4603,7 @@ class EventController extends Controller
         }
 
         // Romanized so a non-Latin event name does not download as "photos--2026-08-07.zip".
-        $zipFilename = 'photos-'.\App\Utils\SlugUtils::slugOrRomanize($event->name, 'event').'-'.now()->format('Y-m-d').'.zip';
+        $zipFilename = 'photos-'.SlugUtils::slugOrRomanize($event->name, 'event').'-'.now()->format('Y-m-d').'.zip';
         $zipPath = storage_path('app/temp/'.$zipFilename);
 
         if (! is_dir(storage_path('app/temp'))) {
@@ -4837,7 +4627,7 @@ class EventController extends Controller
                 $contents = Storage::get($storagePath);
                 if ($contents) {
                     $extension = pathinfo($rawPath, PATHINFO_EXTENSION) ?: 'jpg';
-                    $zip->addFromString(($index + 1).'-'.\App\Utils\SlugUtils::slugOrRomanize($event->name, 'event').'.'.$extension, $contents);
+                    $zip->addFromString(($index + 1).'-'.SlugUtils::slugOrRomanize($event->name, 'event').'.'.$extension, $contents);
                 }
             } catch (\Exception $e) {
                 report($e);
@@ -5500,7 +5290,7 @@ class EventController extends Controller
      * Membership is checked the way photoGallery() and the guest page check it: a member of the
      * schedule in the URL, or a site admin.
      */
-    private function pollParticipationRefusal(Role $role, Event $event, string $subdomain): ?\Illuminate\Http\JsonResponse
+    private function pollParticipationRefusal(Role $role, Event $event, string $subdomain): ?JsonResponse
     {
         if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
             return response()->json(['error' => __('messages.not_authorized')], 404);
@@ -5510,7 +5300,7 @@ class EventController extends Controller
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
         if ($event->isMembersOnly() && ! $isMemberOrAdmin) {
-            throw (new \Illuminate\Database\Eloquent\ModelNotFoundException)->setModel(Event::class, [$event->id]);
+            throw (new ModelNotFoundException)->setModel(Event::class, [$event->id]);
         }
 
         if ($event->isPasswordProtected() && ! $isMemberOrAdmin
@@ -5569,7 +5359,7 @@ class EventController extends Controller
                     'option_index' => $optionIndex,
                     'event_date' => $eventDate,
                 ]);
-            } catch (\Illuminate\Database\QueryException $e) {
+            } catch (QueryException $e) {
                 if ($e->errorInfo[1] !== 1062) {
                     throw $e;
                 }
@@ -5672,7 +5462,7 @@ class EventController extends Controller
                         'option_index' => $optionIndex,
                         'event_date' => $eventDate,
                     ]);
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
                     if ($e->errorInfo[1] !== 1062) {
                         throw $e;
                     }
@@ -5758,7 +5548,7 @@ class EventController extends Controller
                         'option_index' => $newOptionIndex,
                         'event_date' => $approvedEventDate,
                     ]);
-                } catch (\Illuminate\Database\QueryException $e) {
+                } catch (QueryException $e) {
                     if ($e->errorInfo[1] !== 1062) {
                         throw $e;
                     }

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Curators | Local Events Guide</x-slot>
-    <x-slot name="description">Build a local events guide that fills itself. Follow venue and talent schedules as sources, take submissions, and import flyers with AI. Free forever.</x-slot>
+    <x-slot name="description">Build a local events guide that fills itself. Follow venue and event schedules as sources, take submissions, and import flyers with AI. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Curators</x-slot>
 
     <x-slot name="structuredData">
@@ -457,7 +457,7 @@
 
         $curFaqs = [
             ['q' => 'Is Event Schedule free for event curators?', 'a' => 'Yes. Following venues and acts as event sources, running the approval inbox, building a following and syncing with '.(outlook_sync_enabled() ? 'Google, Outlook or CalDAV' : 'Google or CalDAV').' are all free forever. Schedule graphics are free too. Removing our branding is on the Pro plan, and your own domain is on Enterprise.'],
-            ['q' => 'How do events get onto my guide?', 'a' => 'Four ways. List the talent and venue schedules you cover as event sources, and everything they publish, past and upcoming, appears on your guide automatically. A venue or performer who follows your guide can name it a default curator, and everything they schedule then lands in your queue. Visitors can submit an event through the form on your page, signed in by default. And you can add events yourself, by hand or by pasting in text or a photo of a flyer.'],
+            ['q' => 'How do events get onto my guide?', 'a' => 'Four ways. List the event and venue schedules you cover as event sources, and everything they publish, past and upcoming, appears on your guide automatically. A venue or performer who follows your guide can name it a default curator, and everything they schedule then lands in your queue. Visitors can submit an event through the form on your page, signed in by default. And you can add events yourself, by hand or by pasting in text or a photo of a flyer.'],
             ['q' => 'Can I control which events appear on my schedule?', 'a' => 'Yes. Submitted events wait in your inbox until you accept or decline them, so nothing reaches the public page without your say-so. A signed-in submitter hears by email which way you decided. If you trust a schedule, add it to your approved list and its events publish straight through, as long as you ask submitters for an account, which a curator schedule does by default. The event sources you picked yourself skip the queue too.'],
             ['q' => 'What happens when an event is already on Event Schedule?', 'a' => 'You are offered the existing one. Paste in something the site already knows about and the importer flags the match, so a single click lists that event on your guide instead of creating a second copy, and the listing keeps pointing back at the schedule that owns it. Draft and private events are never offered, so nothing unpublished can end up on your page.'],
             ['q' => 'What happens when I list an act or venue that is not on Event Schedule?', 'a' => 'They get a page of their own the moment you save the event. It says who created it and that they have not claimed it, credits each date to the schedule that added it, and stays out of search engines until it is claimed. On eventschedule.com you can tick a box to email them an invitation. When they claim it by signing in with the email address you entered, your guide goes on their approved list, so the events you list them on keep appearing without waiting for their approval.'],
@@ -613,7 +613,7 @@
                         somebody's Friday.
                     </p>
                     <p class="es-cur-serif text-lg leading-relaxed" data-reveal style="color: var(--esc-muted);">
-                        Event Schedule is built that way on purpose. Events arrive from the talent and venue
+                        Event Schedule is built that way on purpose. Events arrive from the event and venue
                         schedules you follow as sources, from the ones that name your guide as their curator,
                         from the submission form on your page, and from whatever you paste in yourself. You
                         accept, you file, you publish. After that the guide keeps filling itself while you get
@@ -977,8 +977,8 @@
             // checked against docs/FEATURES.md (Curator event sources, Event
             // requests, Import from a link, AI event parsing, Feeds).
             $curWire = [
-                ['Venue and act schedules you follow', 'Free', 'The best source there is, because the people running the event keep it right. Add up to 100 talent and venue schedules under Event Sources and what they publish appears on your guide within minutes. Their drafts, internal and unlisted events stay theirs.'],
-                ['Schedules that name your guide', 'Free', 'A talent or venue schedule that follows your guide can pick it under Default curator schedules while your guide takes requests. Each new event it saves then arrives as a request for you to review, unless you have switched Require Approval off or added that schedule to Approved Schedules.'],
+                ['Venue and act schedules you follow', 'Free', 'The best source there is, because the people running the event keep it right. Add up to 100 event and venue schedules under Event Sources and what they publish appears on your guide within minutes. Their drafts, internal and unlisted events stay theirs.'],
+                ['Schedules that name your guide', 'Free', 'An event or venue schedule that follows your guide can pick it under Default curator schedules while your guide takes requests. Each new event it saves then arrives as a request for you to review, unless you have switched Require Approval off or added that schedule to Approved Schedules.'],
                 ['Submissions from organisers and readers', 'Free', 'Switch on Accept requests. People paste their announcement or upload a flyer on the AI Import form, or on the plain Booking Form if you choose that instead, and it waits in your queue.'],
                 ['Calendars and pages you copy from', 'Free', 'Paste a venue\'s .ics link, a public Google Calendar or a page that carries event data on the import page. Up to 100 events come back as a list to tick, and an import can be undone for 24 hours.'],
                 ['Posters, flyers and group-chat posts', 'Free', 'Photograph the poster or paste the message and the details are read out for you: 50 reads a day on Free and Pro, 100 on Enterprise.'],

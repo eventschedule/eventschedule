@@ -202,7 +202,7 @@
         $facts = [
             ['Bookings stay out of the shop window', 'Every booking is created as a private event, so it never shows on your public schedule, the calendar feed guests can subscribe to, your RSS feed or your event graphics. It still holds the time.'],
             ['Email has to be working', 'On the hosted platform appointment mail goes out through your own email settings, so confirmations come from your address. Until those are set up nothing is sent, and the Appointments tab says so.'],
-            ['Not the same as Availability', 'Availability is a separate tab, on Enterprise talent schedules, where members cross out whole dates they cannot be booked for events. Appointments hand out one specific slot at a time, free with one type on any schedule type, with more types, payment and advanced scheduling on Pro.'],
+            ['Not the same as Availability', 'Availability is a separate tab, on Enterprise event schedules, where members cross out whole dates they cannot be booked for events. Appointments hand out one specific slot at a time, free with one type on any schedule type, with more types, payment and advanced scheduling on Pro.'],
             ['Turn a type off, do not delete it', 'Untick Active and the type leaves your booking page. Bookings already on it keep their time, their emails and their reminders, though nothing can be moved onto a type that is switched off.'],
             ['One guest, one time', 'The same email address cannot hold two bookings at the same moment on your schedule.'],
             ['Reminders chase confirmed bookings only', 'A request still waiting on you, or a booking still waiting on an online payment, does not get one.'],
@@ -1884,7 +1884,7 @@
             <p class="es-book-eyebrow mb-5" data-reveal>Nearby in the book</p>
             <div class="space-y-3" data-reveal-group="80">
                 <div data-reveal>
-                    <x-feature-link-card name="Availability" description="Whole dates a talent-schedule member crosses out, on the Enterprise plan." :url="route('marketing.availability')" iconColor="sky">
+                    <x-feature-link-card name="Availability" description="Whole dates a member of an event schedule crosses out, on the Enterprise plan." :url="route('marketing.availability')" iconColor="sky">
                         <x-slot:icon>
                             <svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" /></svg>
                         </x-slot:icon>

@@ -28,7 +28,7 @@
 return [
     // What it is
     'what' => ['tier' => 'about', 'says' => 'Event Schedule is an open-source event calendar and ticketing platform. An organizer makes a "schedule": a public page of their events at its own address (name.eventschedule.com). Events and schedules are unlimited on every plan.', 'url' => '/features'],
-    'types' => ['tier' => 'about', 'says' => 'There are three kinds of schedule: Talent (a performer or teacher), Venue (a place) and Curator (a listing of other people\'s events).'],
+    'types' => ['tier' => 'about', 'says' => 'There are three kinds of schedule: Event schedule (the standard kind: a performer, teacher, vendor or organizer whose events happen in various places), Venue (a place) and Curator (a listing of other people\'s events).'],
     'plans' => ['tier' => 'about', 'says' => 'Plans: Free (:free). Pro (:pro_monthly a month or :pro_yearly a year). Enterprise (:enterprise_monthly a month or :enterprise_yearly a year). Selfhosted installs have every feature.', 'url' => '/pricing'],
     'fees' => ['tier' => 'about', 'says' => 'Event Schedule takes no platform fee or per-ticket fee on any plan. The payment processor (Stripe, PayPal, Payfast or Razorpay) still charges its own processing fee.', 'url' => '/ticket-fee-calculator'],
 
@@ -55,6 +55,7 @@ return [
     'appointments' => ['tier' => 'free', 'says' => 'Appointment booking: one free appointment type on Free. More types, paid bookings and advanced rules need Pro.', 'url' => '/features/appointments', 'guide' => 'appointments', 'match' => ['appointment']],
     'fan-content' => ['tier' => 'free', 'says' => 'Guests can submit photos, videos and comments to an event; each goes through approval.', 'url' => '/features/fan-videos', 'guide' => 'creating-events', 'match' => ['fan content', 'photo', 'video']],
     'visibility' => ['tier' => 'free', 'says' => 'An event is Public or Draft on every plan.'],
+    'vendor-map' => ['tier' => 'free', 'says' => 'A vendor map for a farmers market, craft fair, flea market, food festival or conference and expo, on a venue or curator schedule: the organizer draws the stalls, tables or booths (rows, areas, landmarks, a "You are here" spot), adds vendors by hand for the season or for one day, moves them, marks one "not coming" for a day and cancels a whole market day. Shoppers open the map page from a printable QR entrance sign or the schedule page, and search it by name or by what is sold. It is not the street map of venues.', 'url' => '/features/vendor-map', 'guide' => 'vendor-maps', 'match' => ['map', 'vendor', 'stall', 'shoppers', 'sign']],
 
     // On the Pro plan and above (not on Free)
     'paid-tickets' => ['tier' => 'pro', 'says' => 'Selling tickets that have a price: priced ticket types, paid through Stripe, PayPal, Payfast (South African rand only), Razorpay (Indian rupees only), Invoice Ninja, a payment link or cash at the door. Pro starts with a :trial_days-day free trial when you subscribe, once per account.', 'url' => '/features/ticketing', 'guide' => 'tickets', 'match' => ['ticket type', 'price', 'payment', 'stripe', 'sell tickets']],
@@ -80,6 +81,7 @@ return [
     'export' => ['tier' => 'pro', 'says' => 'Export sales as CSV. Import attendees in bulk from CSV.'],
     'api' => ['tier' => 'pro', 'says' => 'REST API and webhooks.'],
     'templates' => ['tier' => 'pro', 'says' => 'Save an event as a template.'],
+    'vendor-link' => ['tier' => 'pro', 'says' => 'Two parts of the vendor map need Pro: the vendor link, one link (usually sent on WhatsApp) where vendors find their own spot, say what they sell and sign in with an emailed code or Google, while the organizer approves each request on the map; and a first draft of the map made by AI from a few photos of the market or from the map it already prints, which the organizer checks and corrects. Drawing the map by hand and everything shoppers see stay free.', 'url' => '/features/vendor-map', 'guide' => 'vendor-maps', 'match' => ['vendor link', 'photos', 'whatsapp', 'review']],
 
     // On the Enterprise plan only
     'seating' => ['tier' => 'enterprise', 'says' => 'Reserved seating: seating plans, a seat picker for buyers and a box office console.', 'url' => '/features/allocated-seating', 'guide' => 'allocated-seating', 'match' => ['seat']],

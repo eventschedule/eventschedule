@@ -953,7 +953,7 @@ www.yourdomain.com.  CNAME    yourdomain.com.
             <pre><code>php artisan app:setup-demo</code></pre>
         </div>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">It creates the demo user and a curator schedule on the <code class="doc-inline-code">simpsons</code> subdomain, then populates a small Springfield-themed network around it on <code class="doc-inline-code">demo-</code> subdomains: talent and venue schedules, sub-schedules, events with ticket types, followed schedules, sample ticket purchases and analytics history. A reset deletes and recreates the <code class="doc-inline-code">demo-</code> schedules and empties the curator. An event one of your customers created that reached a demo schedule is only detached from it, and keeps its tickets and sales.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">It creates the demo user and a curator schedule on the <code class="doc-inline-code">simpsons</code> subdomain, then populates a small Springfield-themed network around it on <code class="doc-inline-code">demo-</code> subdomains: event and venue schedules, sub-schedules, events with ticket types, followed schedules, sample ticket purchases and analytics history. A reset deletes and recreates the <code class="doc-inline-code">demo-</code> schedules and empties the curator. An event one of your customers created that reached a demo schedule is only detached from it, and keeps its tickets and sales.</p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Do not add a cron entry of your own for the command. The scheduler already runs it, and a second runner would rebuild the demo twice an hour.</p>
 
         <div class="doc-callout doc-callout-warning">
@@ -1166,7 +1166,7 @@ www.yourdomain.com.  CNAME    yourdomain.com.
             </svg>
             Custom translations
         </h2>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">Rename built-in UI terms to match your customers' vocabulary (for example "Talent" to "Artist", or "Curator" to "Event Planner") without your changes being wiped out by <code class="doc-inline-code">php artisan app:update</code>. Overrides apply globally across every tenant on your platform.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Rename built-in UI terms to match your customers' vocabulary (for example "Event schedule" to "Artist schedule", "Lineup" to "Artists", or "Curator" to "Event Planner") without your changes being wiped out by <code class="doc-inline-code">php artisan app:update</code>. Overrides apply globally across every tenant on your platform.</p>
 
         <h3 id="translations-manager" class="doc-subheading">The Easy Way: The Translation Manager</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Sign in as a platform admin and open <strong>System &rarr; Translations</strong> in the platform admin panel (<code class="doc-inline-code">/admin/translations</code>). Search for a phrase, edit it for the locale you want, and save. The database is the source of truth: each save is stored as an override and republished to a file on disk, so nothing is lost on the next upgrade. Reverting an override restores the bundled string. The <a href="{{ route('marketing.docs.selfhost.admin') }}#system-translations" class="doc-link">Admin Panel guide</a> covers the page, including sharing your improvements with the community.</p>
@@ -1189,8 +1189,8 @@ www.yourdomain.com.  CNAME    yourdomain.com.
             <pre><code>&lt;?php
 // storage/app/lang/en/messages.php
 return [
-'talent' =&gt; 'Artist',
-'talents' =&gt; 'Artists',
+'schedule_type_talent' =&gt; 'Artist schedule',
+'lineup' =&gt; 'Artists',
 'curator' =&gt; 'Event Planner',
 'curators' =&gt; 'Event Planners',
 ];</code></pre>

@@ -93,6 +93,7 @@ class RouteLoadTest extends DuskTestCase
                 '/features/registration',
                 '/features/booking-requests',
                 '/features/lineup',
+                '/features/vendor-map',
 
                 // Integration pages
                 '/google-calendar',
@@ -128,6 +129,9 @@ class RouteLoadTest extends DuskTestCase
                 '/for-workshop-instructors',
                 '/for-visual-artists',
                 '/for-farmers-markets',
+                '/for-craft-fairs',
+                '/for-flea-markets',
+                '/for-conferences-and-expos',
                 '/for-hotels-and-resorts',
                 '/for-libraries',
                 '/for-churches',

@@ -126,6 +126,7 @@
             'availability' => $role->isTalent() ? ['label' => __('messages.availability'), 'params' => $tab == 'availability' ? [] : $monthParams] : null,
             'appointments' => $isEditorHere ? ['label' => __('messages.appointments'), 'count' => $pendingBookingCount, 'waiting' => true] : null,
             'seating' => $role->isVenue() && $isEditorHere ? ['label' => __('messages.seating_plans')] : null,
+            'vendor-map' => $isEditorHere && ($vendorMapWaiting !== null || $tab == 'vendor-map') ? ['label' => __('messages.vm_tab'), 'count' => $vendorMapWaiting ?? 0, 'waiting' => true] : null,
             'requests' => $isEditorHere && count($requests) ? ['label' => __('messages.requests'), 'count' => count($requests), 'waiting' => true] : null,
             // Shown once the schedule has a feed, and while the page itself is open (which is how
             // the first one is added). Its count is what waits for somebody: drafts and decisions.
@@ -157,7 +158,7 @@
                     <li>
                         <div class="flex">
                             <a href="#"
-                                class="mr-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ __('messages.' . strtolower($role->type)) }}</a>
+                                class="mr-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ \App\Utils\ScheduleTypeLabel::for(strtolower($role->type)) }}</a>
                         </div>
                     </li>
                     <li>
@@ -271,6 +272,16 @@
                                     </div>
                                 </a>
                             </div>
+                            {{-- The way to a market's map for a venue or a curator that has none yet: the
+                                 tab itself is listed once there is one. --}}
+                            @if (!$isViewer && $vendorMapWaiting === null && ($role->isVenue() || $role->isCurator()))
+                            <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'vendor-map']) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                                <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                                    <rect x="3" y="4" width="7" height="6" rx="1.2" /><rect x="14" y="4" width="7" height="6" rx="1.2" /><rect x="3" y="14" width="7" height="6" rx="1.2" /><rect x="14" y="14" width="7" height="6" rx="1.2" />
+                                </svg>
+                                <div>{{ __('messages.vm_start_map') }}</div>
+                            </a>
+                            @endif
                             @if (!$isViewer)
                             <a href="{{ route('event.show_import_ai', ['subdomain' => $role->subdomain]) }}" class="group flex items-center px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                                 <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -442,6 +453,8 @@
     @include('role.show-admin-appointments')
     @elseif ($tab == 'seating')
     @include('role.show-admin-seating')
+    @elseif ($tab == 'vendor-map')
+    @include('role.show-admin-vendor-map')
     @elseif ($tab == 'requests')
     @include('role.show-admin-requests')
     @elseif ($tab == 'feeds')

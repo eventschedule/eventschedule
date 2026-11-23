@@ -184,7 +184,7 @@
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Appearance Views</span></td>
                         <td>Views your events picked up while appearing on someone else's schedule</td>
-                        <td>Talent and venue schedules with at least one appearance view in range, when no single event is selected</td>
+                        <td>Event and venue schedules with at least one appearance view in range, when no single event is selected</td>
                     </tr>
                 </tbody>
             </table>
@@ -240,12 +240,12 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Clicks on your schedule's <a href="{{ route('marketing.docs.creating_schedules') }}#social-links" class="doc-link">social links</a>, one row per platform, or per site for a link to somewhere the app does not recognise. Every link has a short address on your schedule's own URL, such as <code class="doc-inline-code">/instagram</code>, or the site's name for other sites, and the icons on your schedule page go through it, so a click there or on a short link you printed is counted. A link left without a short address, because its name was already taken, is not counted until you give it one. This measures visitors leaving your schedule rather than arriving. Bots are filtered out, one visitor counts at most ten clicks a day per schedule, and clicks by you, your team members and site administrators are skipped.</p>
             </div>
             <div class="doc-field">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Featured Talents &amp; Venues</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Which talents or venues appearing on your schedule drive the most views. Shown when a single schedule is selected and at least one talent or venue is attached to its events.</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Featured Performers &amp; Venues</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Which performers or venues appearing on your schedule drive the most views. Shown when a single schedule is selected and at least one performer or venue is attached to its events.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Schedules You Appeared On</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">The external schedules that generate the most views for your events when you appear as a guest. Shown for talent and venue schedules only.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The external schedules that generate the most views for your events when you appear as a guest. Shown for event and venue schedules only.</p>
             </div>
         </div>
     </section>

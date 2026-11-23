@@ -1,12 +1,12 @@
 <x-marketing-layout :hp="true">
     <x-slot name="title">Custom Labels | Rename Events to Classes or Sessions</x-slot>
-    <x-slot name="description">Rename the words on your public schedule, so Events reads Classes and Register reads Book a mat. 37 labels, each with a translated form, on the Pro plan.</x-slot>
+    <x-slot name="description">Rename the words on your public schedule, so Events reads Classes and Register reads Book a mat. 38 labels, each with a translated form, on the Pro plan.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Labels</x-slot>
 
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule Custom Labels"
-        description="Rename the built-in labels on your public schedule. Change 'Events' to 'Classes', 'Follow' to 'Subscribe' or 'Free entry' to 'No cover', across 37 labels. Each label keeps a second form for the language your schedule translates into. Pro plan."
+        description="Rename the built-in labels on your public schedule. Change 'Events' to 'Classes', 'Follow' to 'Subscribe' or 'Free entry' to 'No cover', across 38 labels. Each label keeps a second form for the language your schedule translates into. Pro plan."
         keywords="custom labels, rename events, schedule terminology, label overrides, classes instead of events" />
     </x-slot>
 
@@ -33,7 +33,7 @@
            WHY NOT THE FIRST-WAVE TAG CLOUD: pulsing pills of random width
            said "labels" but argued nothing, and it repeated the chip and
            marquee furniture that already appears on a dozen WP pages. The
-           duplex is the argument, and the 37-row specimen table is the
+           duplex is the argument, and the 38-row specimen table is the
            record.
 
            NO FULL-TRANSLATION IMAGERY. A custom label carries exactly two
@@ -591,7 +591,7 @@
         ];
 
         // Every renameable label, grouped by the surface it appears on. The keys
-        // are Role::getCustomizableLabels() (37 of them) and the wording is the
+        // are Role::getCustomizableLabels() (38 of them) and the wording is the
         // English default from resources/lang/en/messages.php.
         $sheet = [
             [
@@ -633,6 +633,7 @@
                 [
                     ['About', 'What to expect'],
                     ['Agenda', 'Running order'],
+                    ['Lineup', 'Teachers'],
                     ['Read more', 'The long version'],
                     ['Add to Calendar', 'Save the date'],
                     ['Register', 'Book a mat'],
@@ -704,7 +705,7 @@
             ],
             [
                 'q' => 'Can I invent a label that does not exist yet?',
-                'a' => 'No. You rename one of the ' . $sheetCount . ' labels the pages already print; you cannot add a thirty-eighth. The replacement itself is yours to write, up to 200 characters, and one schedule can carry up to 30 overrides at a time.',
+                'a' => 'No. You rename one of the ' . $sheetCount . ' labels the pages already print; you cannot add a thirty-ninth. The replacement itself is yours to write, up to 200 characters, and one schedule can carry up to 30 overrides at a time.',
             ],
             [
                 'q' => 'Where do the renamed words show up?',

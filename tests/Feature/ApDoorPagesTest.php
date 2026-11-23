@@ -6,10 +6,13 @@ use App\Models\CarpoolOffer;
 use App\Models\CarpoolRequest;
 use App\Models\Role;
 use App\Models\User;
+use App\Utils\PlatformPricing;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\Support\ViewErrorBag;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -36,7 +39,7 @@ class ApDoorPagesTest extends TestCase
         // No page here may reach the network: the suite loads the developer's .env, where real
         // tokens live, and a page that asks an outside service (the Domains page asked
         // DigitalOcean) would do it for real on every run. A request nothing faked throws.
-        \Illuminate\Support\Facades\Http::preventStrayRequests();
+        Http::preventStrayRequests();
     }
 
     private function page(User $user, string $url): string
@@ -152,8 +155,10 @@ class ApDoorPagesTest extends TestCase
         // A cell with nothing in it has NOTHING in it: the list drops it from a phone's row by
         // :empty, which a space would defeat.
         $this->assertSame(2, substr_count($html, '<td class="c-contact"></td>'), 'the quiet schedule\'s two cells are empty');
-        // The kind of schedule is the name's second line.
-        $this->assertSame(1, substr_count($html, '<span class="c-sub">'.e(__('messages.talent')).'</span>'));
+        // The kind of schedule is the name's second line, and the standard kind (an event
+        // schedule, `talent` in the code) needs no word there, so it gets none.
+        $this->assertStringNotContainsString('<span class="c-sub">'.e(__('messages.talent')).'</span>', $html);
+        $this->assertStringNotContainsString('<span class="c-sub">'.e(__('messages.schedule_type_talent')).'</span>', $html);
     }
 
     /**
@@ -329,7 +334,7 @@ class ApDoorPagesTest extends TestCase
         $owner = $this->createOwner();
         $role = $this->createFreeRole($owner, 'venue', ['name' => 'Checkout Hall']);
         $this->actingAs($owner);
-        view()->share('errors', new \Illuminate\Support\ViewErrorBag);
+        view()->share('errors', new ViewErrorBag);
 
         $render = fn (string $tier, bool $enterprise) => view('subscription.show', [
             'role' => $role,
@@ -360,7 +365,7 @@ class ApDoorPagesTest extends TestCase
         }
 
         // Its own prices, through plan_price(), for both plans and both terms.
-        $this->assertGreaterThanOrEqual(1, substr_count($html, e(plan_price(\App\Utils\PlatformPricing::amount('enterprise', 'yearly')))));
+        $this->assertGreaterThanOrEqual(1, substr_count($html, e(plan_price(PlatformPricing::amount('enterprise', 'yearly')))));
         // Cancel first, the button that goes on last.
         $this->assertLessThan(strpos($html, 'id="submit-button"'), strpos($html, 'js-cancel-btn'));
 

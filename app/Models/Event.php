@@ -443,6 +443,9 @@ class Event extends Model
         'generate-style-image',
         'map-image',
         'promo',
+        // The vendor map's vendor link and the "Not coming" link from a vendor's mail.
+        'spot',
+        'vendor-away',
         'verify',
     ];
 

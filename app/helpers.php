@@ -1,5 +1,23 @@
 <?php
 
+use App\Helpers\SecurityHelper;
+use App\Models\BlogPost;
+use App\Models\LegalDocument;
+use App\Models\Role;
+use App\Models\User;
+use App\Services\DemoService;
+use App\Services\Payments\PaymentGatewayManager;
+use App\Services\VendorMaps\VendorMapKinds;
+use App\Utils\ColorUtils;
+use App\Utils\PlatformCurrency;
+use App\Utils\RealtimeTracker;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
+
 if (! function_exists('webp_path')) {
     /**
      * Convert an image path to its WebP equivalent
@@ -17,7 +35,7 @@ if (! function_exists('csp_nonce')) {
      */
     function csp_nonce(): string
     {
-        return \App\Helpers\SecurityHelper::cspNonce();
+        return SecurityHelper::cspNonce();
     }
 }
 
@@ -27,7 +45,7 @@ if (! function_exists('nonce_attr')) {
      */
     function nonce_attr(): string
     {
-        return \App\Helpers\SecurityHelper::nonceAttr();
+        return SecurityHelper::nonceAttr();
     }
 }
 
@@ -177,7 +195,7 @@ if (! function_exists('consent_granted')) {
      * would be served to every later visitor; pages decide in the browser, through
      * window.esConsent. ConsentCategoriesTest fails the build if a view calls it.
      */
-    function consent_granted(string $category, ?\Illuminate\Http\Request $request = null): bool
+    function consent_granted(string $category, ?Request $request = null): bool
     {
         $request ??= request();
 
@@ -304,7 +322,7 @@ if (! function_exists('cookie_banner_required')) {
             return false;
         }
 
-        return consent_required() || \App\Utils\RealtimeTracker::enabled();
+        return consent_required() || RealtimeTracker::enabled();
     }
 }
 
@@ -340,7 +358,7 @@ if (! function_exists('get_translated_categories')) {
      * With a Role, returns that schedule's effective enabled list
      * (custom categories included). Without, returns the 12 system defaults.
      */
-    function get_translated_categories(?\App\Models\Role $role = null, ?string $locale = null): array
+    function get_translated_categories(?Role $role = null, ?string $locale = null): array
     {
         if ($role) {
             // With no explicit locale, surface the target-language category names while the guest is
@@ -452,7 +470,7 @@ if (! function_exists('operator_lang_overrides')) {
 
         try {
             $lines = require $path;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             report($e);
 
             return [];
@@ -591,7 +609,7 @@ if (! function_exists('requested_list_animation')) {
 
         $requested = strtolower(trim($requested));
 
-        return in_array($requested, \App\Models\Role::LIST_ANIMATIONS, true) ? $requested : null;
+        return in_array($requested, Role::LIST_ANIMATIONS, true) ? $requested : null;
     }
 }
 
@@ -830,7 +848,7 @@ if (! function_exists('platform_currency')) {
      */
     function platform_currency(): string
     {
-        return \App\Utils\PlatformCurrency::code();
+        return PlatformCurrency::code();
     }
 }
 
@@ -845,7 +863,7 @@ if (! function_exists('plan_price')) {
      */
     function plan_price($amount): string
     {
-        return \App\Utils\PlatformCurrency::format($amount);
+        return PlatformCurrency::format($amount);
     }
 }
 
@@ -886,7 +904,7 @@ if (! function_exists('policy_url')) {
         // Resolved against one index read rather than by calling this helper
         // again for the cookie fallback below, which doubled the cost of the
         // cookie banner on every install that has not written one.
-        $index = \App\Models\LegalDocument::index();
+        $index = LegalDocument::index();
 
         $resolve = function (string $for) use ($index): ?string {
             $document = $index[$for] ?? null;
@@ -918,8 +936,8 @@ if (! function_exists('policy_url')) {
             // A literal PATH, never a route() result - app_url() prepends the root, and an
             // absolute path doubles a selfhost's front-controller base path.
             return config('app.is_nexus')
-                ? route(\App\Models\LegalDocument::ROUTES[$for])
-                : app_url(\App\Models\LegalDocument::PATHS[$for]);
+                ? route(LegalDocument::ROUTES[$for])
+                : app_url(LegalDocument::PATHS[$for]);
         };
 
         if ($resolved = $resolve($type)) {
@@ -928,12 +946,12 @@ if (! function_exists('policy_url')) {
 
         // Nothing written for the cookie policy: the cookie disclosure is part
         // of the privacy policy, which is where the banner has always pointed.
-        if ($fallbackPath === null && $type === \App\Models\LegalDocument::COOKIES) {
-            return $resolve(\App\Models\LegalDocument::PRIVACY)
-                ?? marketing_url(\App\Models\LegalDocument::PATHS[\App\Models\LegalDocument::PRIVACY]);
+        if ($fallbackPath === null && $type === LegalDocument::COOKIES) {
+            return $resolve(LegalDocument::PRIVACY)
+                ?? marketing_url(LegalDocument::PATHS[LegalDocument::PRIVACY]);
         }
 
-        return marketing_url($fallbackPath ?? \App\Models\LegalDocument::PATHS[$type]);
+        return marketing_url($fallbackPath ?? LegalDocument::PATHS[$type]);
     }
 }
 
@@ -1062,7 +1080,7 @@ if (! function_exists('canonical_url')) {
      */
     function canonical_url(string $path): string
     {
-        $root = \Illuminate\Support\Facades\URL::formatRoot(\Illuminate\Support\Facades\URL::formatScheme());
+        $root = URL::formatRoot(URL::formatScheme());
         $origin = preg_replace('#^(https?://[^/]+).*$#', '$1', $root);
 
         // A schemeless APP_URL ("host/public") makes parse_url() report the whole string as the
@@ -1080,15 +1098,15 @@ if (! function_exists('redirect_with_pending_action')) {
      * On custom domains, also bridges the data via cache so it survives the
      * cross-domain redirect to app.eventschedule.com for sign-up/login.
      */
-    function redirect_with_pending_action(string $url, array $sessionData): \Illuminate\Http\RedirectResponse
+    function redirect_with_pending_action(string $url, array $sessionData): RedirectResponse
     {
         foreach ($sessionData as $key => $value) {
             session([$key => $value]);
         }
 
         if (request()->attributes->get('custom_domain_host')) {
-            $token = \Illuminate\Support\Str::random(40);
-            \Illuminate\Support\Facades\Cache::put('pending_action:'.$token, $sessionData, now()->addHour());
+            $token = Str::random(40);
+            Cache::put('pending_action:'.$token, $sessionData, now()->addHour());
             $url .= (str_contains($url, '?') ? '&' : '?').'pa='.$token;
         }
 
@@ -1108,7 +1126,7 @@ if (! function_exists('restore_pending_action')) {
             return;
         }
 
-        $data = \Illuminate\Support\Facades\Cache::pull('pending_action:'.$token);
+        $data = Cache::pull('pending_action:'.$token);
         if (! is_array($data)) {
             return;
         }
@@ -1167,7 +1185,7 @@ if (! function_exists('arrival_intent_from_session')) {
     {
         $intent = session('signup_arrival_intent');
 
-        return in_array($intent, \App\Models\User::ARRIVAL_INTENTS, true) ? $intent : null;
+        return in_array($intent, User::ARRIVAL_INTENTS, true) ? $intent : null;
     }
 }
 
@@ -1203,7 +1221,7 @@ if (! function_exists('post_signup_redirect_url')) {
      * this still runs (and consumes the type) even if a stored URL wins - that
      * is intentional session cleanup.
      */
-    function post_signup_redirect_url(\App\Models\User $user): string
+    function post_signup_redirect_url(User $user): string
     {
         // roles() (any pivot level) is intentionally broader than the member()
         // check used by home()/gettingStarted(): claimRolesByPhone() preserves
@@ -1222,14 +1240,20 @@ if (! function_exists('post_signup_redirect_url')) {
             // this they fall through to the chooser below and HomeController::home() - which is
             // what reads the marker - never runs.
             || session()->has('pending_claim')
+            // A vendor who chose "Continue with Google" on a vendor map's link: the stall they
+            // asked for is held in the session and asked for in HomeController::home(), which
+            // the chooser below would skip (VendorSpotController::completePending()).
+            || session()->has('pending_vendor_claim')
             || $user->roles()->exists()) {
             return route('home', absolute: false);
         }
 
         $type = session()->pull('signup_role_type');
 
+        $vendorMap = session()->pull('signup_vendor_map');
+
         if ($type && in_array($type, ['talent', 'venue', 'curator'], true)) {
-            return route('new', ['type' => $type], false);
+            return route('new', ['type' => $type] + (in_array($vendorMap, VendorMapKinds::KINDS, true) && $type !== 'talent' ? ['vendor_map' => $vendorMap] : []), false);
         }
 
         return route('getting-started', absolute: false);
@@ -1241,9 +1265,9 @@ if (! function_exists('payment_gateways')) {
      * The payment gateway registry, for blades that need to ask what a gateway can do rather than
      * naming it. See App\Services\Payments\PaymentGatewayManager.
      */
-    function payment_gateways(): \App\Services\Payments\PaymentGatewayManager
+    function payment_gateways(): PaymentGatewayManager
     {
-        return app(\App\Services\Payments\PaymentGatewayManager::class);
+        return app(PaymentGatewayManager::class);
     }
 }
 
@@ -1265,7 +1289,7 @@ if (! function_exists('is_demo_mode')) {
         }
 
         // Check if the user is the demo user
-        return auth()->user()->email === \App\Services\DemoService::DEMO_EMAIL;
+        return auth()->user()->email === DemoService::DEMO_EMAIL;
     }
 }
 
@@ -1282,13 +1306,13 @@ if (! function_exists('can_self_update')) {
      * account predates the automatic admin flag, issue #106) keeps the old rule,
      * any signed-in account, or nobody could update it from the app.
      */
-    function can_self_update(?\App\Models\User $user = null): bool
+    function can_self_update(?User $user = null): bool
     {
         if (config('app.is_nexus') || config('app.is_testing')) {
             return false;
         }
 
-        if (! config('app.hosted') && ! \App\Models\User::where('is_admin', true)->exists()) {
+        if (! config('app.hosted') && ! User::where('is_admin', true)->exists()) {
             return true; // plain selfhost with no admin - any authenticated user
         }
 
@@ -1301,7 +1325,7 @@ if (! function_exists('is_demo_role')) {
      * Check if a given role is the demo role
      * Used to block certain operations (like sending emails) for the demo account
      */
-    function is_demo_role(?\App\Models\Role $role): bool
+    function is_demo_role(?Role $role): bool
     {
         if (! $role) {
             return false;
@@ -1316,8 +1340,8 @@ if (! function_exists('is_demo_role')) {
         // already memoizes $role->user per model instance, so the hot path (one schedule per guest
         // page) costs one query either way, and every id-caching variant tried here went stale the
         // moment a demo user was created after the first lookup.
-        return $role->subdomain === \App\Services\DemoService::DEMO_ROLE_SUBDOMAIN
-            || ($role->user && $role->user->email === \App\Services\DemoService::DEMO_EMAIL);
+        return $role->subdomain === DemoService::DEMO_ROLE_SUBDOMAIN
+            || ($role->user && $role->user->email === DemoService::DEMO_EMAIL);
     }
 }
 
@@ -1329,7 +1353,7 @@ if (! function_exists('accent_contrast_color')) {
     {
         $color = $accentColor ?? '#4E81FA';
 
-        return \App\Utils\ColorUtils::getContrastColor($color);
+        return ColorUtils::getContrastColor($color);
     }
 }
 
@@ -1424,14 +1448,14 @@ if (! function_exists('get_sub_audience_blog')) {
      *
      * @param  string  $slug  The blog post slug (e.g., 'for-solo-artists')
      */
-    function get_sub_audience_blog(string $slug): ?\App\Models\BlogPost
+    function get_sub_audience_blog(string $slug): ?BlogPost
     {
         // Cache for 5 minutes to avoid repeated queries
-        return \Illuminate\Support\Facades\Cache::remember(
+        return Cache::remember(
             'sub_audience_blog_'.$slug,
             300,
             function () use ($slug) {
-                return \App\Models\BlogPost::published()
+                return BlogPost::published()
                     ->where('slug', $slug)
                     ->first();
             }
@@ -1554,8 +1578,8 @@ if (! function_exists('selfhost_needs_setup')) {
         static $needsSetup = null;
         if ($needsSetup === null) {
             try {
-                $needsSetup = ! \Illuminate\Support\Facades\Schema::hasTable('users');
-            } catch (\Throwable $e) {
+                $needsSetup = ! Schema::hasTable('users');
+            } catch (Throwable $e) {
                 // Connection error with APP_URL set means a transient DB outage on an
                 // already-configured install, not a fresh install. Return false so a DB
                 // blip does not redirect all traffic to (and expose) the setup wizard;

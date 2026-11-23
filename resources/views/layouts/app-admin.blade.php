@@ -6,7 +6,9 @@
      for the whole window with <x-app-admin-layout wide>. Read here, ahead of the shell: inside
      its slots the attribute bag in scope is no longer this layout's own. --}}
 @php $frameWide = $attributes->has('wide') && $attributes->get('wide') !== false; @endphp
-<x-app-layout :theme-variants="true" realtime-surface="ap" :title="(request()->path() != '/' ? implode(' > ', array_map('ucwords', array_slice(explode('/', str_replace(['-', '_'], ' ', request()->path())), 0, 2))) : '') . ' | Event Schedule'">
+{{-- The tab title is the address's first two parts ("New > Venue"). /new/talent is the one
+     whose part is a type name nobody reads, so it says the type's own label instead. --}}
+<x-app-layout :theme-variants="true" realtime-surface="ap" :title="(request()->path() != '/' ? implode(' > ', array_map(fn ($part) => $part === 'talent' ? \App\Utils\ScheduleTypeLabel::for('talent') : ucwords($part), array_slice(explode('/', str_replace(['-', '_'], ' ', request()->path())), 0, 2))) : '') . ' | Event Schedule'">
 
     <x-slot name="head">
         {{-- The admin portal is the one surface that genuinely is the Event Schedule app, so it

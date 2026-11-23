@@ -58,8 +58,8 @@
         <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule is your event calendar: it is where your events live, and it gets its own public page that you share with your audience. Creating one is a short form with one field to fill in, <strong class="text-gray-900 dark:text-white">Schedule Name</strong>, plus <strong class="text-gray-900 dark:text-white">Street Address</strong> on a Venue schedule. From there a setup guide walks you to a live page: it shows as a small ring above the form, and its first line says <strong class="text-gray-900 dark:text-white">"Two steps to your live schedule"</strong>.</p>
 
         <ol class="doc-list doc-list-numbered mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Choose the type.</strong> Straight after sign-up you get a welcome screen that asks <strong class="text-gray-900 dark:text-white">"What best describes you?"</strong> over three cards, Talent, Venue and Curator. Pick the one that fits (see <a href="#schedule-types" class="doc-link">Schedule Types</a> below). If you would rather look around first, click <strong class="text-gray-900 dark:text-white">"Skip for now"</strong> and come back later. If you signed up from a page that had already picked a type, such as a page for venues, this screen is skipped and the form for that type opens.</li>
-            <li><strong class="text-gray-900 dark:text-white">Name it.</strong> The form asks for a <strong class="text-gray-900 dark:text-white">Schedule Name</strong> and, for a Venue, a <strong class="text-gray-900 dark:text-white">Street Address</strong>. That is all it needs. For a Talent schedule the name is prefilled with your own name.</li>
+            <li><strong class="text-gray-900 dark:text-white">Choose the type.</strong> Straight after sign-up you get a welcome screen that asks <strong class="text-gray-900 dark:text-white">"What best describes you?"</strong> over three cards: Event schedule, the standard kind, with Venue and Curator below it. Pick the one that fits (see <a href="#schedule-types" class="doc-link">Schedule Types</a> below). If you would rather look around first, click <strong class="text-gray-900 dark:text-white">"Skip for now"</strong> and come back later. If you signed up from a page that had already picked a type, such as a page for venues, this screen is skipped and the form for that type opens.</li>
+            <li><strong class="text-gray-900 dark:text-white">Name it.</strong> The form asks for a <strong class="text-gray-900 dark:text-white">Schedule Name</strong> and, for a Venue, a <strong class="text-gray-900 dark:text-white">Street Address</strong>. That is all it needs. For an event schedule the name is prefilled with your own name.</li>
             <li><strong class="text-gray-900 dark:text-white">Check the two lines underneath.</strong> The first is your account's email address, which becomes the schedule's contact email. The second says which timezone the schedule's times are in, with <strong class="text-gray-900 dark:text-white">Change</strong> beside it. If your device is set to a different timezone from your account, the picker opens by itself with the device's timezone selected. The email can be changed afterwards, along with everything else, on the schedule form.</li>
             <li><strong class="text-gray-900 dark:text-white">Click "Save and continue".</strong> Event Schedule creates the schedule and, because it is your first, takes you straight to adding an event, with the setup guide alongside. If your events are already listed somewhere, the question above the form, <strong class="text-gray-900 dark:text-white">"Already have your events listed somewhere?"</strong>, brings them in instead: <strong class="text-gray-900 dark:text-white">Google Calendar</strong> (for the schedule's owner), <strong class="text-gray-900 dark:text-white">A web page or calendar link</strong>, or <strong class="text-gray-900 dark:text-white">A flyer, screenshot or text</strong> (where the site has AI import set up) each opens <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">Import Events</a>, Google Calendar straight at its own steps. A schedule with no events asks the same question on its Schedule tab, above the calendar. Everything else (description, images, colors, integrations) is optional and waits for you on the schedule form. See <a href="#customize" class="doc-link">Customize Your Schedule</a> for what each section holds.</li>
         </ol>
@@ -70,7 +70,7 @@
 
         <div class="doc-callout doc-callout-plan">
             <div class="doc-callout-title">Each schedule has its own plan</div>
-            <p>A plan belongs to one schedule, so a new schedule starts on Free even when another of yours is on Pro or Enterprise. On eventschedule.com the form says so when you already have a paid schedule. To sell tickets for an event at another venue, add the event to your paid Talent or Curator schedule instead of making a new one; a Venue schedule's events are always at that venue. See <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">Plan</a>.</p>
+            <p>A plan belongs to one schedule, so a new schedule starts on Free even when another of yours is on Pro or Enterprise. On eventschedule.com the form says so when you already have a paid schedule. To sell tickets for an event at another venue, add the event to your paid event schedule or Curator schedule instead of making a new one; a Venue schedule's events are always at that venue. See <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">Plan</a>.</p>
         </div>
 
         <div class="doc-callout doc-callout-info">
@@ -106,21 +106,21 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><span class="font-semibold text-gray-900 dark:text-white">Talent</span></td>
-                        <td>Musicians, DJs, performers, speakers</td>
-                        <td>Your events at various venues</td>
+                        <td><span class="font-semibold text-gray-900 dark:text-white">Event schedule</span> (the standard kind)</td>
+                        <td>Performers, teachers, vendors, organizers</td>
+                        <td>Your events, wherever they happen</td>
                         <td>A band listing their upcoming shows</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Venue</span></td>
                         <td>Bars, clubs, theaters, event spaces</td>
-                        <td>Various events at your venue</td>
+                        <td>All events at one place</td>
                         <td>A club listing everything on its stage</td>
                     </tr>
                     <tr>
                         <td><span class="font-semibold text-gray-900 dark:text-white">Curator</span></td>
                         <td>Promoters, bloggers, community organizers</td>
-                        <td>Various events at various venues</td>
+                        <td>Events by many people in many places</td>
                         <td>A local music blog listing concerts in the area</td>
                     </tr>
                 </tbody>
@@ -130,14 +130,14 @@
         <p class="text-gray-600 dark:text-gray-300 mb-4">The type is not just a label: it changes which tabs the schedule's own page has and which sections its form offers.</p>
 
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">Talent</strong> schedules prefill the schedule name with your own name, and add an <a href="{{ route('marketing.docs.managing_schedules') }}#availability" class="doc-link">Availability</a> tab to the admin panel for marking the days you can be booked <x-doc-badge plan="enterprise" link /></li>
+            <li><strong class="text-gray-900 dark:text-white">Event schedules</strong> prefill the schedule name with your own name, and add an <a href="{{ route('marketing.docs.managing_schedules') }}#availability" class="doc-link">Availability</a> tab to the admin panel for marking the days you can be booked <x-doc-badge plan="enterprise" link /></li>
             <li><strong class="text-gray-900 dark:text-white">Venue</strong> schedules get an <a href="{{ route('marketing.docs.creating_schedules') }}#address" class="doc-link">Address</a> section, so visitors can find you and your event pages can show a map. Street Address is the one extra required field. They also get a <a href="{{ route('marketing.docs.allocated_seating') }}#build" class="doc-link">Seating plans</a> tab for drawing a reusable plan of the room and selling reserved seats from it <x-doc-badge plan="enterprise" link /></li>
-            <li><strong class="text-gray-900 dark:text-white">Curator</strong> schedules get an <a href="{{ route('marketing.docs.creating_schedules') }}#event-sources" class="doc-link">Event Sources</a> section that pulls in every event published by the talent and venue schedules you pick, a <a href="{{ route('marketing.docs.managing_schedules') }}#videos" class="doc-link">Videos</a> tab for matching YouTube videos to the talent you list, and they ask visitors to sign in before submitting an event. That is the <strong class="text-gray-900 dark:text-white">Require Account</strong> switch in the <strong class="text-gray-900 dark:text-white">Requests</strong> row of the form's Engagement section, which starts on for curators and off for venues. Talent schedules do not have it.</li>
+            <li><strong class="text-gray-900 dark:text-white">Curator</strong> schedules get an <a href="{{ route('marketing.docs.creating_schedules') }}#event-sources" class="doc-link">Event Sources</a> section that pulls in every event published by the event and venue schedules you pick, a <a href="{{ route('marketing.docs.managing_schedules') }}#videos" class="doc-link">Videos</a> tab for matching YouTube videos to the performers you list, and they ask visitors to sign in before submitting an event. That is the <strong class="text-gray-900 dark:text-white">Require Account</strong> switch in the <strong class="text-gray-900 dark:text-white">Requests</strong> row of the form's Engagement section, which starts on for curators and off for venues. Event schedules do not have it.</li>
         </ul>
 
         <div class="doc-callout doc-callout-warning">
             <div class="doc-callout-title">The type is fixed once the schedule is saved</div>
-            <p>There is no setting for changing a schedule from Talent to Venue later. While you are still on the create form for your <em>first</em> schedule, the <strong>"Choose a different type"</strong> link beside the save button takes you back to the chooser. After saving, create a second schedule of the other type instead: one account can run all three.</p>
+            <p>There is no setting for changing a schedule from an event schedule to a Venue later. While you are still on the create form for your <em>first</em> schedule, the <strong>"Choose a different type"</strong> link beside the save button takes you back to the chooser. After saving, create a second schedule of the other type instead: one account can run all three.</p>
         </div>
     </section>
 
@@ -267,7 +267,7 @@
                 <p>Choose the schedule in the sidebar, click <strong class="text-gray-900 dark:text-white">"Edit Schedule"</strong>, open the <strong class="text-gray-900 dark:text-white">Settings</strong> section and click <strong class="text-gray-900 dark:text-white">Edit</strong> beside <strong class="text-gray-900 dark:text-white">Schedule URL</strong>. See <a href="{{ route('marketing.docs.creating_schedules') }}#settings-general" class="doc-link">Schedule URL</a> for details. Changing it breaks existing links, so do it before you start sharing.</p>
             </x-doc-faq>
             <x-doc-faq question="What is the difference between the schedule types?">
-                <p><strong class="text-gray-900 dark:text-white">Talent</strong> is your events at various venues, and adds an Availability tab (Enterprise). <strong class="text-gray-900 dark:text-white">Venue</strong> is various events at your venue, and adds an Address section and a Seating plans tab (Enterprise). <strong class="text-gray-900 dark:text-white">Curator</strong> is various events at various venues, and adds Event Sources and a Videos tab. Pick carefully: the type is fixed once you save.</p>
+                <p><strong class="text-gray-900 dark:text-white">Event schedule</strong>, the standard kind, is your events wherever they happen, and adds an Availability tab (Enterprise). <strong class="text-gray-900 dark:text-white">Venue</strong> is all events at one place, and adds an Address section and a Seating plans tab (Enterprise). <strong class="text-gray-900 dark:text-white">Curator</strong> is events by many people in many places, and adds Event Sources and a Videos tab. Pick carefully: the type is fixed once you save.</p>
             </x-doc-faq>
             <x-doc-faq question="Can I import events from my existing calendar?">
                 <p>Yes, and it is free. Connect a calendar under <strong class="text-gray-900 dark:text-white">Edit Schedule &rarr; Integrations</strong>, which has a row for
@@ -344,7 +344,7 @@
                     "name": "What is the difference between the schedule types?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Talent is your events at various venues, and adds an Availability tab (Enterprise). Venue is various events at your venue, and adds an Address section and a Seating plans tab (Enterprise). Curator is various events at various venues, and adds Event Sources and a Videos tab. Pick carefully: the type is fixed once you save."
+                        "text": "Event schedule, the standard kind, is your events wherever they happen, and adds an Availability tab (Enterprise). Venue is all events at one place, and adds an Address section and a Seating plans tab (Enterprise). Curator is events by many people in many places, and adds Event Sources and a Videos tab. Pick carefully: the type is fixed once you save."
                     }
                 },
                 {
@@ -415,13 +415,13 @@
                 {
                     "@type": "HowToStep",
                     "name": "Create Your Schedule",
-                    "text": "Choose Talent, Venue or Curator, enter the schedule name, and click Save and continue. The schedule takes your account's email as its contact email. The schedule URL is generated from the name and can be changed later in the form's Settings section.",
+                    "text": "Choose Event schedule, Venue or Curator, enter the schedule name, and click Save and continue. The schedule takes your account's email as its contact email. The schedule URL is generated from the name and can be changed later in the form's Settings section.",
                     "url": "{{ url(route('marketing.docs.getting_started')) }}#create-schedule"
                 },
                 {
                     "@type": "HowToStep",
                     "name": "Choose Your Schedule Type",
-                    "text": "Talent suits performers, Venue suits event spaces, and Curator suits promoters and organizers. Each type has its own tabs and form sections, and the type is fixed once the schedule is saved.",
+                    "text": "Event schedule is the standard kind, for your own events wherever they happen, Venue suits event spaces, and Curator suits promoters and organizers. Each type has its own tabs and form sections, and the type is fixed once the schedule is saved.",
                     "url": "{{ url(route('marketing.docs.getting_started')) }}#schedule-types"
                 },
                 {

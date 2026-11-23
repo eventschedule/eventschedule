@@ -74,6 +74,9 @@ use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\SupportChatController;
 use App\Http\Controllers\SupportChatGuestController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\VendorMapController;
+use App\Http\Controllers\VendorMapPublicController;
+use App\Http\Controllers\VendorSpotController;
 use App\Http\Controllers\VenueMapController;
 use App\Http\Controllers\WaitlistController;
 use App\Http\Controllers\WebhookSettingsController;
@@ -128,6 +131,18 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // The venue map's venues (App\Services\VenueMap). Its own named bucket: an unnamed throttle
         // shares one with every other throttled route on the host.
         Route::get('/api/venue-map', [VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
+        // The vendor map (App\Services\VendorMaps): the visitors' map, the vendor link and the
+        // "Not coming" link from a vendor's mail. Ahead of the /{slug} catch-alls, so `map` and
+        // `spot` are in Event::SHADOWED_SLUGS. The map page is not throttled: a market's shoppers
+        // share one mobile network, and the page carries its own data.
+        Route::get('/map', [VendorMapPublicController::class, 'show'])->name('vendor_map.public');
+        Route::get('/map/picture', [VendorMapPublicController::class, 'picture'])->name('vendor_map.public_picture');
+        Route::get('/spot/{token}', [VendorSpotController::class, 'show'])->name('vendor_map.claim')->middleware('throttle:60,1,vendor_spot');
+        Route::post('/spot/{token}', [VendorSpotController::class, 'submit'])->name('vendor_map.claim.submit')->middleware('throttle:10,1,vendor_spot_submit');
+        Route::post('/spot/{token}/photo', [VendorSpotController::class, 'photo'])->name('vendor_map.claim.photo')->middleware('throttle:20,1,vendor_spot_photo');
+        Route::post('/spot/{token}/home', [VendorSpotController::class, 'home'])->name('vendor_map.claim.home')->middleware('throttle:30,1,vendor_spot_home');
+        Route::get('/vendor-away/{occupant}/{hash}', [VendorSpotController::class, 'awayForm'])->name('vendor_map.away')->middleware('throttle:30,1,vendor_spot_home');
+        Route::post('/vendor-away/{occupant}/{hash}', [VendorSpotController::class, 'away'])->name('vendor_map.away.submit')->middleware('throttle:30,1,vendor_spot_home');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::post('/follow', [RoleController::class, 'follow'])->name('role.follow');
         Route::get('/follow', [RoleController::class, 'followLanding']);
@@ -962,6 +977,26 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/{subdomain}/seating/box-office/{hash}/book', [BoxOfficeController::class, 'bookSeats'])->name('box_office.book')->middleware('throttle:60,1,box_office');
     Route::get('/{subdomain}/seating/box-office/{hash}/report', [BoxOfficeController::class, 'report'])->name('box_office.report');
     Route::get('/{subdomain}/seating/box-office/{hash}/report.csv', [BoxOfficeController::class, 'reportCsv'])->name('box_office.report_csv');
+    // The vendor map, owner side. Every one is editor-only and scoped to the schedule
+    // (VendorMapController::mapFor()); the AI and the vendor link are Pro, decided there too.
+    Route::post('/{subdomain}/vendor-map/setup', [VendorMapController::class, 'setup'])->name('vendor_map.setup');
+    Route::post('/{subdomain}/vendor-map/settings', [VendorMapController::class, 'settings'])->name('vendor_map.settings');
+    Route::get('/{subdomain}/vendor-map/design', [VendorMapController::class, 'design'])->name('vendor_map.design');
+    Route::get('/{subdomain}/vendor-map/structure', [VendorMapController::class, 'structure'])->name('vendor_map.structure');
+    Route::put('/{subdomain}/vendor-map/structure', [VendorMapController::class, 'saveStructure'])->name('vendor_map.save_structure')->middleware('throttle:60,1,vendor_map_save');
+    Route::get('/{subdomain}/vendor-map/day', [VendorMapController::class, 'day'])->name('vendor_map.day');
+    Route::post('/{subdomain}/vendor-map/photos', [VendorMapController::class, 'uploadPhotos'])->name('vendor_map.photos')->middleware('throttle:30,1,vendor_map_ai');
+    Route::get('/{subdomain}/vendor-map/draft', [VendorMapController::class, 'latestDraft'])->name('vendor_map.draft');
+    Route::post('/{subdomain}/vendor-map/draft/{draft}/parse', [VendorMapController::class, 'parseDraft'])->name('vendor_map.draft.parse')->middleware('throttle:6,1,vendor_map_ai');
+    Route::get('/{subdomain}/vendor-map/private/{kind}/{id}/{index?}', [VendorMapController::class, 'privateImage'])->name('vendor_map.private_image');
+    Route::post('/{subdomain}/vendor-map/occupants/{occupant}/{action}', [VendorMapController::class, 'decide'])->name('vendor_map.decide')->where('action', 'approve|decline|undo|absent|present|remove');
+    Route::post('/{subdomain}/vendor-map/approve-all', [VendorMapController::class, 'approveAll'])->name('vendor_map.approve_all');
+    Route::post('/{subdomain}/vendor-map/move', [VendorMapController::class, 'move'])->name('vendor_map.move');
+    Route::post('/{subdomain}/vendor-map/day-vendor', [VendorMapController::class, 'addForDay'])->name('vendor_map.day_vendor');
+    Route::post('/{subdomain}/vendor-map/cancel-day', [VendorMapController::class, 'cancelDay'])->name('vendor_map.cancel_day');
+    Route::post('/{subdomain}/vendor-map/link', [VendorMapController::class, 'link'])->name('vendor_map.link');
+    Route::get('/{subdomain}/vendor-map/sign', [VendorMapController::class, 'sign'])->name('vendor_map.sign');
+    Route::get('/{subdomain}/vendor-map/sign.png', [VendorMapController::class, 'signImage'])->name('vendor_map.sign_image');
     // Owner-side reschedule. Throttled like the other write routes: it drives the same inline calendar
     // fan-out and guest mail, so a compromised editor account should not be unbounded.
     Route::get('/{subdomain}/appointments/bookings/{saleHash}/reschedule', [AppointmentTypeController::class, 'showBookingReschedule'])->name('appointments.booking_reschedule');
@@ -1089,7 +1124,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     $adminTabSubdomain = config('app.is_nexus')
         ? '(?!docs(?=/|$)|features(?=/|$)|admin(?=/|$))[^/]+'
         : '(?!docs(?=/|$)|admin(?=/|$))[^/]+';
-    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|requests|feeds|followers|team|promoters|plan|videos')->where('subdomain', $adminTabSubdomain);
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|vendor-map|requests|feeds|followers|team|promoters|plan|videos')->where('subdomain', $adminTabSubdomain);
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image')->middleware('throttle:60,1');
 
@@ -1457,6 +1492,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
         Route::get('/features/gift-cards', [MarketingController::class, 'giftCards'])->name('marketing.gift_cards');
         Route::get('/features/allocated-seating', [MarketingController::class, 'allocatedSeating'])->name('marketing.allocated_seating');
+        Route::get('/features/vendor-map', [MarketingController::class, 'vendorMap'])->name('marketing.vendor_map');
         Route::get('/features/passes', [MarketingController::class, 'passes'])->name('marketing.passes');
         Route::get('/features/check-in', [MarketingController::class, 'checkIn'])->name('marketing.check_in');
         Route::get('/features/promo-codes', [MarketingController::class, 'promoCodes'])->name('marketing.promo_codes');
@@ -1537,6 +1573,9 @@ if (config('app.is_nexus')) {
         Route::get('/for-workshop-instructors', [MarketingController::class, 'forWorkshopInstructors'])->name('marketing.for_workshop_instructors');
         Route::get('/for-visual-artists', [MarketingController::class, 'forVisualArtists'])->name('marketing.for_visual_artists');
         Route::get('/for-farmers-markets', [MarketingController::class, 'forFarmersMarkets'])->name('marketing.for_farmers_markets');
+        Route::get('/for-craft-fairs', [MarketingController::class, 'forCraftFairs'])->name('marketing.for_craft_fairs');
+        Route::get('/for-flea-markets', [MarketingController::class, 'forFleaMarkets'])->name('marketing.for_flea_markets');
+        Route::get('/for-conferences-and-expos', [MarketingController::class, 'forConferencesAndExpos'])->name('marketing.for_conferences_and_expos');
         Route::get('/for-hotels-and-resorts', [MarketingController::class, 'forHotelsAndResorts'])->name('marketing.for_hotels_and_resorts');
         Route::get('/for-libraries', [MarketingController::class, 'forLibraries'])->name('marketing.for_libraries');
         Route::get('/for-churches', [MarketingController::class, 'forChurches'])->name('marketing.for_churches');
@@ -1649,6 +1688,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/subscriptions', [MarketingController::class, 'docsSubscriptions'])->name('marketing.docs.subscriptions');
         Route::get('/docs/gift-cards', [MarketingController::class, 'docsGiftCards'])->name('marketing.docs.gift_cards');
         Route::get('/docs/allocated-seating', [MarketingController::class, 'docsAllocatedSeating'])->name('marketing.docs.allocated_seating');
+        Route::get('/docs/vendor-maps', [MarketingController::class, 'docsVendorMaps'])->name('marketing.docs.vendor_maps');
         Route::get('/docs/appointments', [MarketingController::class, 'docsAppointments'])->name('marketing.docs.appointments');
         Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
         Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
@@ -1745,6 +1785,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
             Route::get('/features/gift-cards', [MarketingController::class, 'giftCards'])->name('marketing.gift_cards');
             Route::get('/features/allocated-seating', [MarketingController::class, 'allocatedSeating'])->name('marketing.allocated_seating');
+            Route::get('/features/vendor-map', [MarketingController::class, 'vendorMap'])->name('marketing.vendor_map');
             Route::get('/features/passes', [MarketingController::class, 'passes'])->name('marketing.passes');
             Route::get('/features/check-in', [MarketingController::class, 'checkIn'])->name('marketing.check_in');
             Route::get('/features/promo-codes', [MarketingController::class, 'promoCodes'])->name('marketing.promo_codes');
@@ -1827,6 +1868,9 @@ if (config('app.is_nexus')) {
             Route::get('/for-workshop-instructors', [MarketingController::class, 'forWorkshopInstructors'])->name('marketing.for_workshop_instructors');
             Route::get('/for-visual-artists', [MarketingController::class, 'forVisualArtists'])->name('marketing.for_visual_artists');
             Route::get('/for-farmers-markets', [MarketingController::class, 'forFarmersMarkets'])->name('marketing.for_farmers_markets');
+            Route::get('/for-craft-fairs', [MarketingController::class, 'forCraftFairs'])->name('marketing.for_craft_fairs');
+            Route::get('/for-flea-markets', [MarketingController::class, 'forFleaMarkets'])->name('marketing.for_flea_markets');
+            Route::get('/for-conferences-and-expos', [MarketingController::class, 'forConferencesAndExpos'])->name('marketing.for_conferences_and_expos');
             Route::get('/for-hotels-and-resorts', [MarketingController::class, 'forHotelsAndResorts'])->name('marketing.for_hotels_and_resorts');
             Route::get('/for-libraries', [MarketingController::class, 'forLibraries'])->name('marketing.for_libraries');
             Route::get('/for-churches', [MarketingController::class, 'forChurches'])->name('marketing.for_churches');
@@ -1939,6 +1983,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/subscriptions', [MarketingController::class, 'docsSubscriptions'])->name('marketing.docs.subscriptions');
             Route::get('/docs/gift-cards', [MarketingController::class, 'docsGiftCards'])->name('marketing.docs.gift_cards');
             Route::get('/docs/allocated-seating', [MarketingController::class, 'docsAllocatedSeating'])->name('marketing.docs.allocated_seating');
+            Route::get('/docs/vendor-maps', [MarketingController::class, 'docsVendorMaps'])->name('marketing.docs.vendor_maps');
             Route::get('/docs/appointments', [MarketingController::class, 'docsAppointments'])->name('marketing.docs.appointments');
             Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
             Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
@@ -2064,6 +2109,9 @@ if (config('app.is_nexus')) {
             Route::get('/for-workshop-instructors', fn () => redirect('https://'._base_domain().'/for-workshop-instructors', 301));
             Route::get('/for-visual-artists', fn () => redirect('https://'._base_domain().'/for-visual-artists', 301));
             Route::get('/for-farmers-markets', fn () => redirect('https://'._base_domain().'/for-farmers-markets', 301));
+            Route::get('/for-craft-fairs', fn () => redirect('https://'._base_domain().'/for-craft-fairs', 301));
+            Route::get('/for-flea-markets', fn () => redirect('https://'._base_domain().'/for-flea-markets', 301));
+            Route::get('/for-conferences-and-expos', fn () => redirect('https://'._base_domain().'/for-conferences-and-expos', 301));
             Route::get('/for-hotels-and-resorts', fn () => redirect('https://'._base_domain().'/for-hotels-and-resorts', 301));
             Route::get('/for-libraries', fn () => redirect('https://'._base_domain().'/for-libraries', 301));
             Route::get('/for-churches', fn () => redirect('https://'._base_domain().'/for-churches', 301));
@@ -2276,6 +2324,9 @@ if (config('app.is_nexus')) {
     Route::get('/for-workshop-instructors', fn () => redirect()->route('home'));
     Route::get('/for-visual-artists', fn () => redirect()->route('home'));
     Route::get('/for-farmers-markets', fn () => redirect()->route('home'));
+    Route::get('/for-craft-fairs', fn () => redirect()->route('home'));
+    Route::get('/for-flea-markets', fn () => redirect()->route('home'));
+    Route::get('/for-conferences-and-expos', fn () => redirect()->route('home'));
     Route::get('/for-hotels-and-resorts', fn () => redirect()->route('home'));
     Route::get('/for-libraries', fn () => redirect()->route('home'));
     Route::get('/for-churches', fn () => redirect()->route('home'));
@@ -2440,6 +2491,14 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::get('/{subdomain}/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
     Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
     Route::get('/{subdomain}/api/venue-map', [VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
+    Route::get('/{subdomain}/map', [VendorMapPublicController::class, 'show'])->name('vendor_map.public');
+    Route::get('/{subdomain}/map/picture', [VendorMapPublicController::class, 'picture'])->name('vendor_map.public_picture');
+    Route::get('/{subdomain}/spot/{token}', [VendorSpotController::class, 'show'])->name('vendor_map.claim')->middleware('throttle:60,1,vendor_spot');
+    Route::post('/{subdomain}/spot/{token}', [VendorSpotController::class, 'submit'])->name('vendor_map.claim.submit')->middleware('throttle:10,1,vendor_spot_submit');
+    Route::post('/{subdomain}/spot/{token}/photo', [VendorSpotController::class, 'photo'])->name('vendor_map.claim.photo')->middleware('throttle:20,1,vendor_spot_photo');
+    Route::post('/{subdomain}/spot/{token}/home', [VendorSpotController::class, 'home'])->name('vendor_map.claim.home')->middleware('throttle:30,1,vendor_spot_home');
+    Route::get('/{subdomain}/vendor-away/{occupant}/{hash}', [VendorSpotController::class, 'awayForm'])->name('vendor_map.away')->middleware('throttle:30,1,vendor_spot_home');
+    Route::post('/{subdomain}/vendor-away/{occupant}/{hash}', [VendorSpotController::class, 'away'])->name('vendor_map.away.submit')->middleware('throttle:30,1,vendor_spot_home');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::post('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
     Route::get('/{subdomain}/follow', [RoleController::class, 'followLanding']);

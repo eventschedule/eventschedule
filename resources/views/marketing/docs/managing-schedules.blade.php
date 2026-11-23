@@ -55,7 +55,7 @@
             Click a schedule's name in the sidebar to open its admin panel: the pages you run that schedule from, day to day. Under the schedule's name is its public address, with <strong class="text-gray-900 dark:text-white">Copy</strong> beside it, and <strong class="text-gray-900 dark:text-white">View</strong> once the schedule's email address is verified. Below that is a row of tabs, each of which is its own page (on a phone the row is a dropdown). A tab with something to count shows the number beside its name.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Not every tab is offered to every schedule: some depend on the <a href="{{ route('marketing.docs.creating_schedules') }}#schedule-types" class="doc-link">schedule type</a> or on whether the site is eventschedule.com, and Requests appears only when there is something waiting for you. A tab your plan does not include is still there, and says what the plan adds. A viewer sees only the Schedule tab, and Availability on a Talent schedule: every other tab is for owners and admins.
+            Not every tab is offered to every schedule: some depend on the <a href="{{ route('marketing.docs.creating_schedules') }}#schedule-types" class="doc-link">schedule type</a> or on whether the site is eventschedule.com, and Requests appears only when there is something waiting for you. A tab your plan does not include is still there, and says what the plan adds. A viewer sees only the Schedule tab, and Availability on an event schedule: every other tab is for owners and admins.
         </p>
 
         <x-doc-screenshot id="managing-schedules--schedule-tab" alt="A schedule's admin panel: its name and public address, the row of tabs, and the Schedule tab's month calendar" loading="eager" />
@@ -82,13 +82,13 @@
                     </tr>
                     <tr>
                         <td><a href="#videos" class="doc-link">Videos</a></td>
-                        <td>Match YouTube videos to the talent on your upcoming events</td>
+                        <td>Match YouTube videos to the performers on your upcoming events</td>
                         <td>Curator schedules, owners and admins</td>
                     </tr>
                     <tr>
                         <td><a href="#availability" class="doc-link">Availability</a></td>
                         <td>Days you are not free to be booked</td>
-                        <td>Talent schedules, viewers included. Saving needs <x-doc-badge plan="enterprise" /></td>
+                        <td>Event schedules, viewers included. Saving needs <x-doc-badge plan="enterprise" /></td>
                     </tr>
                     <tr>
                         <td><a href="#appointments" class="doc-link">Appointments</a></td>
@@ -138,7 +138,7 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Your access level changes what you see</div>
-            <p>Schedules have three access levels: <strong>owner</strong>, <strong>admin</strong>, and <strong>viewer</strong>. Viewers see only the Schedule tab (and Availability on a Talent schedule, where they mark their own days). They cannot see ticket sales, followers, requests, bookings or the team, and cannot open the schedule settings page. Following a schedule is not an access level and grants nothing in the admin panel. See <a href="#team" class="doc-link">Team</a>.</p>
+            <p>Schedules have three access levels: <strong>owner</strong>, <strong>admin</strong>, and <strong>viewer</strong>. Viewers see only the Schedule tab (and Availability on an event schedule, where they mark their own days). They cannot see ticket sales, followers, requests, bookings or the team, and cannot open the schedule settings page. Following a schedule is not an access level and grants nothing in the admin panel. See <a href="#team" class="doc-link">Team</a>.</p>
         </div>
     </section>
 
@@ -163,7 +163,7 @@
             <li>A busy day shows its first three events, and more where the week has room. <strong>+N more</strong>, or the day's number, opens the whole day, and says how many of the events it holds are drafts</li>
             <li>Rest the pointer on an event, or move to it with the keyboard, and a card opens beside its day with its date, time and place, and with <strong>View Event</strong> and <strong>Edit Event</strong>. A click on the event itself opens its public page in a new tab. On a phone, use <strong>Edit Event</strong> on the card</li>
             <li>The arrow keys move between events and days, and Page Up and Page Down change the month</li>
-            <li>On a Talent schedule, a day a team member marked as unavailable is tinted, and its info icon names who. See <a href="#availability" class="doc-link">Availability</a></li>
+            <li>On an event schedule, a day a team member marked as unavailable is tinted, and its info icon names who. See <a href="#availability" class="doc-link">Availability</a></li>
         </ul>
 
         <h3 id="schedule-add" class="doc-subheading">Adding events</h3>
@@ -191,7 +191,7 @@
                 <tbody>
                     <tr>
                         <td><strong>Search box</strong></td>
-                        <td>Matches event names, short descriptions, venues, talent, categories, agenda parts and public custom field values. On the month grid it searches the month you are viewing and says so; on a phone it searches your upcoming events</td>
+                        <td>Matches event names, short descriptions, venues, performers, categories, agenda parts and public custom field values. On the month grid it searches the month you are viewing and says so; on a phone it searches your upcoming events</td>
                     </tr>
                     <tr>
                         <td><strong>Filters</strong></td>
@@ -210,7 +210,7 @@
 
         <h3 id="schedule-unscheduled" class="doc-subheading">Unscheduled</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            On Venue and Talent schedules, events with no date at all are listed in an <strong class="text-gray-900 dark:text-white">Unscheduled</strong> section below the calendar. Each card shows the talent on the event, with its picture, name and description, and links to that talent's public page. Owners and admins get two buttons on it: <strong class="text-gray-900 dark:text-white">Schedule</strong> opens the event so you can give it a date, and <strong class="text-gray-900 dark:text-white">Decline</strong> drops it from your schedule after a confirmation.
+            On Venue schedules and event schedules, events with no date at all are listed in an <strong class="text-gray-900 dark:text-white">Unscheduled</strong> section below the calendar. Each card shows the performer on the event, with its picture, name and description, and links to that performer's public page. Owners and admins get two buttons on it: <strong class="text-gray-900 dark:text-white">Schedule</strong> opens the event so you can give it a date, and <strong class="text-gray-900 dark:text-white">Decline</strong> drops it from your schedule after a confirmation.
         </p>
 
         <h3 id="schedule-other-notices" class="doc-subheading">Other notices above the calendar</h3>
@@ -324,7 +324,7 @@
             Videos
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Videos</strong> tab is on <strong class="text-gray-900 dark:text-white">Curator</strong> schedules only. It helps you put a video on the page of every act you list. It shows the talent appearing on your <strong class="text-gray-900 dark:text-white">upcoming accepted events</strong> who have no video yet and whose page nobody has claimed, and searches YouTube for each one by name as the page loads. An act that has claimed its page chooses its own videos, so it is not offered here.
+            The <strong class="text-gray-900 dark:text-white">Videos</strong> tab is on <strong class="text-gray-900 dark:text-white">Curator</strong> schedules only. It helps you put a video on the page of every act you list. It shows the performers appearing on your <strong class="text-gray-900 dark:text-white">upcoming accepted events</strong> who have no video yet and whose page nobody has claimed, and searches YouTube for each one by name as the page loads. An act that has claimed its page chooses its own videos, so it is not offered here.
         </p>
 
         <x-doc-screenshot id="managing-schedules--videos-tab" alt="Videos tab on a Curator schedule, with every upcoming act already matched to a video" />
@@ -361,10 +361,10 @@
         </h2>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The <strong class="text-gray-900 dark:text-white">Availability</strong> tab is on <strong class="text-gray-900 dark:text-white">Talent</strong> schedules only. Each member of the team, viewers included, marks the days they are not free, which answers "can we book them that night" for the people who run the schedule with you. It is a note to your team: it is never shown publicly, and marking a day does not stop anything from being booked on it.
+            The <strong class="text-gray-900 dark:text-white">Availability</strong> tab is on <strong class="text-gray-900 dark:text-white">Event schedules</strong> only. Each member of the team, viewers included, marks the days they are not free, which answers "can we book them that night" for the people who run the schedule with you. It is a note to your team: it is never shown publicly, and marking a day does not stop anything from being booked on it.
         </p>
 
-        <x-doc-screenshot id="managing-schedules--availability" alt="Availability tab on a Talent schedule: a month grid with the Unavailable key and a Save button above it" />
+        <x-doc-screenshot id="managing-schedules--availability" alt="Availability tab on an event schedule: a month grid with the Unavailable key and a Save button above it" />
 
         <h3 class="doc-subheading">Setting Availability</h3>
         <ol class="doc-list doc-list-numbered mb-6">
@@ -475,11 +475,11 @@
                     <tr>
                         <td><strong>A request from your form</strong></td>
                         <td>Anyone with your public request link, unless you have turned <strong>Accept requests</strong> off</td>
-                        <td>The event's name under <strong>Booking Request</strong> (on a Talent schedule) or <strong>Submit Event</strong>, the person's name after <strong>From</strong>, the date and time, the sub-schedule it was filed under, the venue they named or <strong>Online</strong>, their email address and phone number, the answers to any questions you added to your request form, and their message</td>
+                        <td>The event's name under <strong>Booking Request</strong> (on an event schedule) or <strong>Submit Event</strong>, the person's name after <strong>From</strong>, the date and time, the sub-schedule it was filed under, the venue they named or <strong>Online</strong>, their email address and phone number, the answers to any questions you added to your request form, and their message</td>
                     </tr>
                     <tr>
                         <td><strong>A date from another schedule</strong></td>
-                        <td>A schedule that adds you to one of its events, when your schedule reviews it first. A Talent schedule always does, unless that schedule is already on its approved list</td>
+                        <td>A schedule that adds you to one of its events, when your schedule reviews it first. An event schedule always does, unless that schedule is already on its approved list</td>
                         <td>The event's name, that schedule's picture and its name after <strong>From</strong> as a link to its page, the date and time, the sub-schedule, the venue when it is neither of you, and the opening of that schedule's description</td>
                     </tr>
                     <tr>
@@ -517,7 +517,7 @@
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            To turn requests on, choose your request form, name schedules whose submissions skip approval, and set your request terms, see <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">Creating Schedules: Requests</a>. Talent schedules get a shorter version of those settings, because a request to book a performer is always reviewed by hand.
+            To turn requests on, choose your request form, name schedules whose submissions skip approval, and set your request terms, see <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="doc-link">Creating Schedules: Requests</a>. Event schedules get a shorter version of those settings, because a request to book a performer is always reviewed by hand.
         </p>
     </section>
 
@@ -778,7 +778,7 @@
                     </tr>
                     <tr>
                         <td><strong>Viewer</strong></td>
-                        <td>Browse the Schedule tab's calendar, mark their own unavailable days and see everyone's on a Talent schedule, generate a graphic, grab the embed code, and scan tickets at the door</td>
+                        <td>Browse the Schedule tab's calendar, mark their own unavailable days and see everyone's on an event schedule, generate a graphic, grab the embed code, and scan tickets at the door</td>
                         <td>Open any other tab (requests, followers, team, bookings, plan), add or change anything but their own availability, see ticket sales, the waitlist or the check-in dashboard, or open the schedule settings page</td>
                     </tr>
                 </tbody>
@@ -1076,7 +1076,7 @@
             <li><strong>Clear</strong> appears once a filter is set and resets them all. Longer logs are paged 50 entries at a time</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            The log is scoped to this schedule: its own settings and subscription changes, the events it owns, the events a Talent or Venue schedule has accepted, sales on those events, and its boost campaigns. An event a Curator schedule only lists, or one any schedule declined, is not in its log: that event's entries belong to the schedule that created it. Sign-ins, account-level changes and gift card activity are not shown here.
+            The log is scoped to this schedule: its own settings and subscription changes, the events it owns, the events an event schedule or Venue schedule has accepted, sales on those events, and its boost campaigns. An event a Curator schedule only lists, or one any schedule declined, is not in its log: that event's entries belong to the schedule that created it. Sign-ins, account-level changes and gift card activity are not shown here.
         </p>
     </section>
 

@@ -291,7 +291,7 @@
             new advertiser's first promotion is capped at 10 unless you raise that schedule's limit in
             the <strong>Set Spending Limit</strong> card under <strong>Manage &rarr; Boost</strong>
             in the platform admin panel. Targeting is
-            optional: a campaign can be limited to particular kinds of schedule (talent, venue or
+            optional: a campaign can be limited to particular kinds of schedule (event, venue or
             curator) and to visitors in particular countries. Leaving both untouched shows it
             everywhere.
         </p>

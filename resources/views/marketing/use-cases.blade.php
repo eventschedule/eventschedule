@@ -23,7 +23,7 @@
         // Accent belongs to the GROUP, never to the entry: a colour then says which of the six
         // you are in. 'hub' is the group's own guide, where it has one that is not an entry.
         $ucGroups = [
-            ['id' => 'performers', 'short' => 'Performers', 'side' => 'the-act', 'label' => 'Performers & Artists', 'accent' => 'blue', 'hub' => ['/for-talent', 'See the full Talent guide', 'For Talent'], 'items' => $performers],
+            ['id' => 'performers', 'short' => 'Performers', 'side' => 'the-act', 'label' => 'Performers & Artists', 'accent' => 'blue', 'hub' => ['/for-talent', 'See the full performers guide', 'For Performers & Artists'], 'items' => $performers],
             ['id' => 'venues', 'short' => 'Venues', 'side' => 'the-room', 'label' => 'Venues & Event Spaces', 'accent' => 'amber', 'hub' => ['/for-venues', 'See the full Venues guide', 'For Venues'], 'items' => $venues],
             ['id' => 'curators', 'short' => 'Curators', 'side' => 'the-guide', 'label' => 'Curators & Promoters', 'accent' => 'emerald', 'hub' => null, 'items' => [$curatorEntry]],
             ['id' => 'online', 'short' => 'Online', 'side' => 'the-stream', 'label' => 'Online Events', 'accent' => 'cyan', 'hub' => null, 'items' => $online],
@@ -999,7 +999,7 @@
                             <h3>For Performers &amp; Artists</h3>
                             <p>Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience. Sync with {{ outlook_sync_enabled() ? 'Google Calendar, Outlook or CalDAV' : 'Google Calendar or CalDAV' }}, let venues add you to their lineup through booking requests, and email your fans directly whenever you announce new dates. If a venue or promoter has already listed you, a page with your name on it may be waiting: <a href="{{ marketing_url('/docs/creating-events#claim') }}" class="hp-inline">claim it</a> with the email address they entered.</p>
                             <p class="uc-side-where"><i aria-hidden="true"></i><span>The Blue Note adds The Marlowe Trio to Jazz Night. They accept, and the date is on their own page.</span></p>
-                            <a href="{{ marketing_url('/for-talent') }}" class="hp-more">See the full Talent guide {!! $ucArrow !!}</a>
+                            <a href="{{ marketing_url('/for-talent') }}" class="hp-more">See the full performers guide {!! $ucArrow !!}</a>
                         </div>
                         <div class="uc-obj" data-uc-face="the-act" data-accent="blue" aria-hidden="true">
                             <div class="uc-card uc-req">

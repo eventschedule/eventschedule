@@ -240,7 +240,7 @@
                                         </span>
                                     </span>
                                 </td>
-                                <td class="c-quiet">{{ in_array($role->type, ['talent', 'venue', 'curator'], true) ? __('messages.'.$role->type) : $role->type }}</td>
+                                <td class="c-quiet">{{ \App\Utils\ScheduleTypeLabel::for($role->type) }}</td>
                                 @if ($hosted)
                                 @php
                                     $planType = $role->actualPlanTier();

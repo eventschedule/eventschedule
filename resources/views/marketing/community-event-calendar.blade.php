@@ -308,7 +308,7 @@
                 @php
                     $ccIntake = [
                         ['A public submission form', 'Anyone with your request link can send an event. On the AI Import form they paste the text of an announcement or upload a photo of the flyer, and the details are read out of it for them to check. Or switch to the Booking Form, a plain form with the fields you choose to require.'],
-                        ['Organizers\' own schedules', 'A curator schedule can list talent and venue schedules as event sources. Everything those schedules publish, past and upcoming, appears on your calendar on its own, usually within minutes. The library keeps its own calendar, and yours stays current without anyone copying it across.'],
+                        ['Organizers\' own schedules', 'A curator schedule can list event and venue schedules as event sources. Everything those schedules publish, past and upcoming, appears on your calendar on its own, usually within minutes. The library keeps its own calendar, and yours stays current without anyone copying it across.'],
                         ['Venues that name you', 'A venue or performer that follows your calendar can make it a default curator, and everything they schedule then lands on yours too, in the queue or straight through if you trust them.'],
                         ['You, in seconds', 'For the notice that arrives on paper, paste the text or drop a photo of it into the importer and the date, time, place and description are filled in for you to confirm. If an event is already on Event Schedule, you are offered the existing one, so it is listed once, not twice.'],
                     ];

@@ -218,7 +218,7 @@
         </div>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            If you do not own a schedule yet, the row has no dropdown. It says you need one of your own, with links to create a talent, venue or curator schedule; the credit waits for you until you do.
+            If you do not own a schedule yet, the row has no dropdown. It says you need one of your own, with links to create an event schedule, a venue schedule or a curator schedule; the credit waits for you until you do.
         </p>
 
         <h3 class="doc-subheading">What applying a credit does</h3>

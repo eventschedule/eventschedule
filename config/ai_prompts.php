@@ -2,7 +2,7 @@
 
 return [
     'event_details' => [
-        'base' => "You are an expert conversion copywriter for Event Schedule, an open-source event management platform. Generate the requested fields for an event with these details:\n\n- Event name: :event_name\n- Schedule name: :schedule_name\n- Schedule type: :schedule_type (talent = performer/artist, venue = location/place, curator = event organizer)\n- Existing short description: :short_description",
+        'base' => "You are an expert conversion copywriter for Event Schedule, an open-source event management platform. Generate the requested fields for an event with these details:\n\n- Event name: :event_name\n- Schedule name: :schedule_name\n- Schedule type: :schedule_type (talent = the standard event schedule: a person, act, business or vendor whose events happen in various places; venue = location/place; curator = event organizer)\n- Existing short description: :short_description",
         'existing_description_line' => '- Existing description: :description',
         'return_instruction' => "\nCRITICAL: Return ONLY raw JSON. Do not use markdown blocks. Your entire response must start exactly with { and end exactly with }.\n",
         'elements' => [
@@ -15,7 +15,7 @@ return [
     ],
 
     'schedule_details' => [
-        'base' => "You are an expert conversion copywriter for Event Schedule, an open-source event management platform. Generate the requested fields for a schedule with these details:\n\n- Schedule name: :name\n- Schedule type: :schedule_type (talent = performer/artist, venue = location/place, curator = event organizer)\n- Existing short description: :short_description",
+        'base' => "You are an expert conversion copywriter for Event Schedule, an open-source event management platform. Generate the requested fields for a schedule with these details:\n\n- Schedule name: :name\n- Schedule type: :schedule_type (talent = the standard event schedule: a person, act, business or vendor whose events happen in various places; venue = location/place; curator = event organizer)\n- Existing short description: :short_description",
         'existing_description_line' => '- Existing description: :description',
         'return_instruction' => "\nCRITICAL: Return ONLY raw JSON. Do not use markdown blocks. Your entire response must start exactly with { and end exactly with }.\n",
         'elements' => [
@@ -304,4 +304,23 @@ Return the corrected post in the same fields, and also:
 - fixed: a short list of what you changed
 - remaining: anything a person should look at before this is published (an empty list if nothing)
 PROMPT,
+
+    // The vendor map drafted from photos (App\Services\VendorMaps\VendorMapAi). The answer's
+    // shape is held by a response_schema, so this says what to look for, not how to format it.
+    'vendor_map' => [
+        'system' => 'You read photos of a :kind and draw its plan from above. You answer in the JSON shape you are given and nothing else.',
+        'base' => "These :count picture(s) show one :kind. Draw its plan as seen from directly above, on a frame 1000 units wide and 700 units tall (x to the right, y down).\n\n"
+            ."Your main job is to work out how the space is divided between the stalls: how many there are, where each one stands and how big it is, row by row, and which part of the place each belongs to. Names come second: read them where you can, but the layout must be right even when no name can be read.\n"
+            ."- spots: every stall, table, stand or booth where a vendor stands, as a rectangle: x and y of its top-left corner, w and h, and rotation in degrees when it sits at an angle. Place them where they are relative to each other; when the pictures are taken from the ground, estimate, keeping stalls of one row in line and of a similar size. Count the gaps between awnings, tables and poles to tell neighbouring stalls apart. A stall seen in two pictures is ONE spot.\n"
+            ."- label: the number or code painted on the spot when one can be read; otherwise number the spots 1, 2, 3 in the order someone walking in from the entrance would pass them.\n"
+            ."- name_seen: the vendor's name as written on their sign, banner or awning, in its own language and script. Try for every stall: a name that is partly hidden, small or at an angle is still worth giving, with a low confidence, because the organizer checks the names and fixes the wrong ones. Leave it empty only when no name is written where you can see it. Never make up a name that is not written.\n"
+            ."- sells_seen: a few words for what is on the table, in the language of the signs (for example 'tomatoes, cucumbers'). Empty when you cannot tell.\n"
+            ."- category: one of :categories, the one that best fits what the spot sells, or 'other'.\n"
+            ."- confidence: from 0 to 1, how sure you are of name_seen.\n"
+            ."- areas: named parts of the place (a covered hall, an orchard, a food court, a row), each with a name in the language of the signs (or a plain description) and a bounding box.\n"
+            ."- landmarks: the entrance, restrooms, parking and a stage when you can see them, each with a position and size.\n"
+            .'If a picture is a printed or drawn map of the place, follow it exactly.',
+        'area_line' => "\nThese pictures show ONE area of the place, called \":area\". Draw that area alone, filling the frame; leave the areas list empty.",
+        'notes_line' => "\nThe organizer adds: :notes",
+    ],
 ];

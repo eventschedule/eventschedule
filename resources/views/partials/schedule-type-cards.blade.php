@@ -29,43 +29,75 @@
     ];
 @endphp
 
-<div class="schedule-type-grid grid grid-cols-1 gap-4 mx-auto max-w-md lg:max-w-none lg:grid-cols-3">
+{{-- The standard schedule ("Event schedule", `talent` in the code) is the one most people want,
+     so it is one wide card on top; Venue and Curator are the two alternatives under it. The word
+     "talent" is never shown: ScheduleTypeLabel names the type. --}}
+<div class="schedule-type-grid mx-auto max-w-md lg:max-w-none">
     @foreach ($cards as $type => $card)
+        @if ($type === 'venue')
+            <p class="schedule-type-or mt-8 mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.schedule_type_alternatives') }}</p>
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        @endif
+        @php
+            $primary = $type === 'talent';
+        @endphp
         {{-- The whole card is the link. Named by its title alone, so a screen reader announces
-             "Talent, link" rather than reading every feature line as the link text. --}}
+             "Event schedule, link" rather than reading every feature line as the link text. --}}
         <a href="{{ route('new', ['type' => $type]) }}"
            data-type="{{ $type }}"
            aria-labelledby="schedule-type-{{ $type }}"
            aria-describedby="schedule-type-{{ $type }}-for"
-           class="schedule-type-card group ap-card rounded-2xl p-6 flex flex-col focus:outline-none">
+           class="schedule-type-card group ap-card rounded-2xl p-6 flex flex-col focus:outline-none {{ $primary ? 'schedule-type-primary lg:grid lg:grid-cols-2 lg:gap-x-10 lg:p-8' : '' }}">
 
-            <div class="flex items-center gap-3">
-                <span class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center {{ $card['iconTile'] }}" aria-hidden="true">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $card['icon'] }}" /></svg>
-                </span>
-                <{{ $cardHeading }} id="schedule-type-{{ $type }}" class="text-xl font-bold text-gray-900 dark:text-white">{{ __('messages.' . $type) }}</{{ $cardHeading }}>
+            <div class="flex flex-col">
+                <div class="flex items-center gap-3">
+                    <span class="flex-shrink-0 {{ $primary ? 'w-12 h-12' : 'w-10 h-10' }} rounded-xl flex items-center justify-center {{ $card['iconTile'] }}" aria-hidden="true">
+                        <svg class="{{ $primary ? 'w-6 h-6' : 'w-5 h-5' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $card['icon'] }}" /></svg>
+                    </span>
+                    <{{ $cardHeading }} id="schedule-type-{{ $type }}" class="{{ $primary ? 'text-2xl' : 'text-xl' }} font-bold text-gray-900 dark:text-white">{{ \App\Utils\ScheduleTypeLabel::for($type) }}</{{ $cardHeading }}>
+                </div>
+                <p id="schedule-type-{{ $type }}-for" class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.' . $type . '_best_for') }}</p>
+
+                {{-- The one line that tells the three types apart. The {type}_footer strings carry
+                     <b><i> around the part that differs; app.css turns that into the accent colour.
+                     Translation overrides are sanitized on save (TranslationOverrideTest), so this
+                     stays a raw echo. --}}
+                <p class="schedule-type-rule mt-4 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 {{ $card['rule'] }}">{!! __('messages.' . $type . '_footer') !!}</p>
             </div>
-            <p id="schedule-type-{{ $type }}-for" class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.' . $type . '_best_for') }}</p>
 
-            {{-- The one line that tells the three types apart. The {type}_footer strings carry
-                 <b><i> around the part that differs; app.css turns that into the accent colour.
-                 Translation overrides are sanitized on save (TranslationOverrideTest), so this
-                 stays a raw echo. --}}
-            <p class="schedule-type-rule mt-4 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 {{ $card['rule'] }}">{!! __('messages.' . $type . '_footer') !!}</p>
+            <div class="flex flex-col flex-1">
+                <ul class="mt-4 mb-6 space-y-2.5 {{ $primary ? 'lg:mt-0' : '' }}">
+                    @foreach ([1, 2, 3] as $n)
+                        <li class="flex items-start gap-2.5 text-sm text-gray-700 dark:text-gray-300">
+                            <svg class="w-4 h-4 mt-0.5 flex-shrink-0 {{ $card['check'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                            {{ __('messages.' . $type . '_feature_' . $n) }}
+                        </li>
+                    @endforeach
+                </ul>
 
-            <ul class="mt-4 mb-6 space-y-2.5">
-                @foreach ([1, 2, 3] as $n)
-                    <li class="flex items-start gap-2.5 text-sm text-gray-700 dark:text-gray-300">
-                        <svg class="w-4 h-4 mt-0.5 flex-shrink-0 {{ $card['check'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                        {{ __('messages.' . $type . '_feature_' . $n) }}
-                    </li>
-                @endforeach
-            </ul>
-
-            <span class="mt-auto flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-base font-semibold transition-all duration-200 {{ $card['cta'] }}" aria-hidden="true">
-                {{ __('messages.get_started_cta') }}
-                <svg class="w-4 h-4 rtl:rotate-180 transition-transform duration-200 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-            </span>
+                <span class="mt-auto flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-base font-semibold transition-all duration-200 {{ $card['cta'] }}" aria-hidden="true">
+                    {{ __('messages.get_started_cta') }}
+                    <svg class="w-4 h-4 rtl:rotate-180 transition-transform duration-200 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                </span>
+            </div>
         </a>
+        @if ($type === 'curator')
+            </div>
+        @endif
     @endforeach
+
+    {{-- A market, a fair or an expo is a venue with a vendor map: this opens the venue form and,
+         once it is saved, the map's setup ("When is the market?"). --}}
+    <a href="{{ route('new', ['type' => 'venue', 'vendor_map' => 'market']) }}"
+       data-type="market"
+       class="schedule-type-market group ap-card rounded-2xl mt-4 p-5 flex items-center gap-4 focus:outline-none">
+        <span class="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400" aria-hidden="true">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.75L5.25 4.5h13.5l1.5 5.25M3.75 9.75h16.5M3.75 9.75a2.25 2.25 0 004.125 1.243 2.25 2.25 0 004.125 0 2.25 2.25 0 004.125 0A2.25 2.25 0 0020.25 9.75M5.25 12.75V19.5h13.5v-6.75M9.75 19.5v-4.5h4.5v4.5" /></svg>
+        </span>
+        <span class="min-w-0 flex-1">
+            <span class="block text-base font-bold text-gray-900 dark:text-white">{{ __('messages.vm_type_card_title') }}</span>
+            <span class="block text-sm text-gray-500 dark:text-gray-400">{{ __('messages.vm_type_card_lead') }}</span>
+        </span>
+        <svg class="w-5 h-5 flex-shrink-0 text-gray-400 rtl:rotate-180 transition-transform duration-200 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+    </a>
 </div>

@@ -508,7 +508,7 @@
             ['Follow a schedule', 'Made for you', 'Signed in, it is one click. Signed out on eventschedule.com, Follow asks for a name and an email, and confirming it sets up the account, already following.'],
             ['Comment, or share a photo or video', 'Depends', 'By default a name and an email, and the email is never shown publicly. A schedule can turn on Require an account for its fan content.'],
             ['Book an appointment', 'No', 'A name and an email address on the booking page, and the confirmation comes by email.'],
-            ['Send an event to a schedule', 'Depends', 'Each schedule decides with its Require Account switch, which is on by default for Curator schedules and off for Venue schedules. A Talent schedule never asks: its requests come through the Booking Form with a name and an email.'],
+            ['Send an event to a schedule', 'Depends', 'Each schedule decides with its Require Account switch, which is on by default for Curator schedules and off for Venue schedules. An event schedule never asks: its requests come through the Booking Form with a name and an email.'],
             ['Vote in a poll', 'Yes', 'A vote counts once per person, and the account is how it knows.'],
             ['Offer or ask for a lift', 'Yes', 'Carpool offers and seat requests are made from an account, so a driver knows who is asking.'],
             ['Publish a schedule of your own', 'Yes', 'Free, with no card. Where the free plan stops is set out further down this page.'],
@@ -542,7 +542,7 @@
             ],
             [
                 'q' => 'What can I only do with an account?',
-                'a' => 'Vote in an event poll, offer or ask for a seat in a carpool, publish a schedule of your own and help run somebody else\'s. Two more depend on the schedule: sending it an event (Curator schedules ask for an account by default, Venue schedules do not, and a Talent schedule\'s Booking Form never does) and posting comments, photos or videos (allowed with a name and an email unless the schedule turns on Require an account). Buying, registering, joining a waitlist, booking an appointment and subscribing to a calendar never need one.',
+                'a' => 'Vote in an event poll, offer or ask for a seat in a carpool, publish a schedule of your own and help run somebody else\'s. Two more depend on the schedule: sending it an event (Curator schedules ask for an account by default, Venue schedules do not, and an event schedule\'s Booking Form never does) and posting comments, photos or videos (allowed with a name and an email unless the schedule turns on Require an account). Buying, registering, joining a waitlist, booking an appointment and subscribing to a calendar never need one.',
             ],
             [
                 'q' => 'Is the free plan a trial?',
@@ -811,7 +811,7 @@
                                 <span class="es-key-plan">Free</span>
                             </div>
                             <h3 class="es-key-ink mb-3 text-xl font-bold">A schedule with its own address</h3>
-                            <p class="es-key-muted mb-5">Pick Talent, Venue or Curator, give it a name, and it lives at that name on eventschedule.com. Add a profile image, a header and an accent colour and it stops looking like anybody else's. Everything below comes with it on the free plan, with no trial attached and no card taken.</p>
+                            <p class="es-key-muted mb-5">Pick Event schedule, Venue or Curator, give it a name, and it lives at that name on eventschedule.com. Add a profile image, a header and an accent colour and it stops looking like anybody else's. Everything below comes with it on the free plan, with no trial attached and no card taken.</p>
                             <div class="mt-auto flex flex-wrap gap-2">
                                 @foreach ($freeTools as $tool)
                                     <span class="es-key-chip">{{ $tool }}</span>

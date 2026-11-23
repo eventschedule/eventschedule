@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Farmers Market Calendar | Vendor Applications & Fees</x-slot>
-    <x-slot name="description">Put a farmers market season online as one recurring market day, show each week's vendors, take a rained-off Saturday out, and let traders apply for a pitch.</x-slot>
+    <x-slot name="description">Put a farmers market season online as one recurring market day, with a stall map traders claim from one link and shoppers open from a QR sign.</x-slot>
     <x-slot name="breadcrumbTitle">For Farmers Markets</x-slot>
 
     <x-slot name="headMeta">
@@ -13,7 +13,7 @@
     <x-slot name="structuredData">
     <x-seo.webpage
         name="Event Schedule for Farmers Markets"
-        description="Set the whole season out as one recurring market day with a closing date, take a washed-out Saturday back off the calendar, and let traders put themselves forward for a pitch."
+        description="Set the whole season out as one recurring market day with a closing date, put every stall on a vendor map traders claim from one link, and give shoppers a QR map of who is here today."
         audience="Farmers Markets & Outdoor Markets"
         keywords="farmers market calendar, market vendor schedule, farmers market events, outdoor market management, free farmers market scheduling" />
     </x-slot>
@@ -499,123 +499,19 @@
         .fm-aug-note { margin-top: 1rem; font-size: 0.875rem; color: #4f3d30; }
 
         /* ---------------------------------------------------------------
-           The pitch list: a plan of the square, and the list it is drawn from
+           The stall map: the vendor map's real screens, in frames. The only
+           pictures on the page that are not painted, because they are the
+           product itself.
            --------------------------------------------------------------- */
-        .fm-plot { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; align-items: start; }
-        @media (min-width: 1040px) { .fm-plot { grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr); gap: 3rem; } }
-        .fm-map { container-type: inline-size; container-name: fmmap; min-width: 0; }
-        .fm-square {
-            position: relative;
-            display: grid;
-            grid-template-columns: repeat(8, minmax(0, 1fr));
-            grid-template-rows: auto 2.2cqi auto auto auto;
-            gap: 1.7cqi;
-            padding: 6.5cqi 3.4cqi 10cqi;
-            border: 2px solid #3b2c22;
-            border-radius: 1.1rem;
-            background-color: #f1e7d0;
-            background-image:
-                linear-gradient(rgba(59, 44, 34, 0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(59, 44, 34, 0.08) 1px, transparent 1px);
-            background-size: 4.4cqi 4.4cqi;
-            box-shadow: 0 1.8rem 2.4rem -1.6rem rgba(59, 44, 34, 0.6);
-            counter-reset: fm-p;
-            color: #3b2c22;
-        }
-        .dark .fm-square { background-color: #e2d6bb; }
-        .fm-square-label { position: absolute; font-weight: 700; font-size: clamp(0.52rem, 1.75cqi, 0.74rem); letter-spacing: 0.2em; text-transform: uppercase; color: #4f3d30; white-space: nowrap; }
-        .fm-square-steps { top: 2.1cqi; left: 50%; translate: -50% 0; }
-        .fm-square-way { bottom: -1px; left: 50%; translate: -50% 50%; padding: 0.2rem 0.7rem 0.12rem; background: #3b2c22; color: #fbf6ea; border-radius: 0.2rem; }
-        .fm-cross { grid-column: 3 / span 4; grid-row: 4; display: flex; align-items: center; justify-content: center; gap: 1.4cqi; padding-block: 1cqi; }
-        .fm-cross i { width: 5.6cqi; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #3b2c22 0 22%, transparent 24% 46%, #3b2c22 48% 56%, transparent 58%); }
-        .fm-cross b { padding: 0.9cqi 1.3cqi 0.7cqi; border: 1.5px solid #3b2c22; border-radius: 0.8cqi; background: #f5d76e; font-weight: 700; font-size: clamp(0.5rem, 1.7cqi, 0.72rem); letter-spacing: 0.12em; text-transform: uppercase; line-height: 1; }
-        .fm-pitch { display: block; aspect-ratio: 1 / 0.96; counter-increment: fm-p; }
-        .fm-pitch-in {
-            display: grid;
-            grid-template-rows: 32% minmax(0, 1fr);
-            height: 100%;
-            border: 1.5px solid #3b2c22;
-            border-radius: 0.9cqi;
-            overflow: hidden;
-            background: #fffaf0;
-            transition: translate 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease;
-        }
-        .fm-pitch-in::before { content: ""; background: repeating-linear-gradient(90deg, var(--c, #cbb489) 0 16.67%, #fffaf0 16.67% 33.33%); border-bottom: 1.5px solid #3b2c22; }
-        .fm-pitch-in::after { content: counter(fm-p, decimal-leading-zero); display: grid; place-items: center; font-weight: 700; font-size: clamp(0.5rem, 2.25cqi, 0.95rem); line-height: 1; }
-        .fm-pitch.is-wait .fm-pitch-in { border-style: dashed; border-color: #a82a18; background: transparent; }
-        .fm-pitch.is-wait .fm-pitch-in::before { background: repeating-linear-gradient(135deg, var(--c) 0 3px, transparent 3px 7px); border-bottom-style: dashed; border-bottom-color: #a82a18; }
-        .fm-pitch.is-named { cursor: pointer; }
-        .fm-pitch.is-named .fm-pitch-in { box-shadow: 0 0.5cqi 0 #3b2c22; }
-        .fm-pitch.is-named.is-wait .fm-pitch-in { box-shadow: none; }
-        .fm-pitch.is-named:hover .fm-pitch-in,
-        .fm-pitch.is-named:focus-visible .fm-pitch-in { translate: 0 -0.7cqi; box-shadow: 0 1.2cqi 0 #3b2c22; }
-        #fm .fm-pitch.is-named:focus-visible { outline: none; }
-        #fm .fm-pitch.is-named:focus-visible .fm-pitch-in { outline: 3px solid #ee8a2f; outline-offset: 2px; }
-        .fm-square:has(.is-named:hover) .fm-pitch:not(:hover) .fm-pitch-in,
-        .fm-square:has(.is-named:focus-visible) .fm-pitch:not(:focus-visible) .fm-pitch-in { opacity: 0.5; }
-        /* The caption strip. Each named pitch carries its own line as three strings and prints
-           them into the foot of the square while it is pointed at; :has() clears the resting line. */
-        .fm-pitch.is-named::before,
-        .fm-pitch.is-named::after,
-        .fm-cap {
-            position: absolute;
-            bottom: 2.9cqi;
-            white-space: nowrap;
-            transition: opacity 0.2s ease;
-        }
-        .fm-pitch.is-named::before,
-        .fm-pitch.is-named::after { opacity: 0; pointer-events: none; }
-        .fm-pitch.is-named::before { left: 3.6cqi; content: "No. " counter(fm-p, decimal-leading-zero) "\2002" var(--fm-n); font-family: var(--fm-sub); font-size: clamp(0.8rem, 3.2cqi, 1.5rem); line-height: 1.1; }
-        .fm-pitch.is-named::after { right: 3.6cqi; content: var(--fm-k) "\2002\00b7\2002" var(--fm-st); bottom: 3.3cqi; font-weight: 700; font-size: clamp(0.52rem, 1.75cqi, 0.76rem); letter-spacing: 0.14em; text-transform: uppercase; color: #4f3d30; }
-        .fm-pitch.is-named:hover::before,
-        .fm-pitch.is-named:hover::after,
-        .fm-pitch.is-named:focus-visible::before,
-        .fm-pitch.is-named:focus-visible::after { opacity: 1; }
-        .fm-cap { left: 3.6cqi; right: 3.6cqi; bottom: 3.1cqi; font-size: clamp(0.62rem, 2.05cqi, 0.9rem); color: #4f3d30; overflow: hidden; text-overflow: ellipsis; }
-        .fm-square:has(.is-named:hover) .fm-cap,
-        .fm-square:has(.is-named:focus-visible) .fm-cap { opacity: 0; }
-        @media (hover: none) { .fm-cap-hover { display: none; } }
-        @media (hover: hover) { .fm-cap-touch { display: none; } }
-        html.es-anim #fm .fm-map.is-revealed .fm-pitch-in { animation: fm-pitch 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) backwards; animation-delay: calc(var(--i) * 42ms + 0.2s); }
-        @keyframes fm-pitch { from { opacity: 0; scale: 0.5; } to { opacity: 1; scale: 1; } }
-        .fm-keys { display: flex; flex-wrap: wrap; gap: 0.6rem 1.6rem; margin-top: 1.25rem; font-size: 0.9rem; color: var(--fm-ink-2); }
-        .fm-keys span { display: inline-flex; align-items: center; gap: 0.55rem; }
-        .fm-keys i { width: 1.5rem; height: 1.1rem; border: 1.5px solid var(--fm-ink); border-radius: 0.15rem; background: linear-gradient(to bottom, #3f7d3a 0 36%, var(--fm-paper) 36%); }
-        .fm-keys i.is-wait { border-style: dashed; border-color: var(--fm-tomato); background: none; }
-        @container fmmap (max-width: 30rem) {
-            .fm-square { gap: 1.4cqi; padding: 8cqi 2.6cqi 9cqi; border-radius: 0.8rem; }
-            .fm-pitch { aspect-ratio: 1; }
-            .fm-cap, .fm-pitch.is-named::before, .fm-pitch.is-named::after { display: none; }
-            .fm-square { padding-bottom: 6cqi; }
-        }
-
-        .fm-list { padding: 1.5rem 1.4rem 1.3rem; border: 2px solid #3b2c22; box-shadow: 0 1.6rem 2.2rem -1.5rem rgba(59, 44, 34, 0.6); }
-        .fm-list-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding-bottom: 0.7rem; border-bottom: 2px solid #3b2c22; }
-        .fm-list-top strong { font-size: 2.6rem; }
-        .fm-list-top span { font-weight: 700; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: #4f3d30; }
-        .fm-list table { width: 100%; border-collapse: collapse; }
-        .fm-list thead th { padding: 0.7rem 0.25rem 0.5rem; text-align: start; font-weight: 700; font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: #4f3d30; }
-        .fm-list thead th:last-child,
-        .fm-list tbody td:last-child { text-align: end; }
-        .fm-list tbody tr { border-top: 1px solid rgba(59, 44, 34, 0.28); scroll-margin-top: 7rem; transition: background-color 0.3s ease; }
-        .fm-list tbody th { padding: 0.72rem 0.25rem 0.62rem; text-align: start; font-family: var(--fm-sub); font-weight: 400; font-size: 1.08rem; line-height: 1.25; }
-        .fm-list tbody th small { display: block; font-family: var(--fm-text); font-size: 0.8rem; color: #4f3d30; }
-        .fm-list tbody td { padding: 0.72rem 0.25rem 0.62rem; font-size: 0.9rem; color: #4f3d30; }
-        .fm-list tbody tr:target { background: rgba(245, 215, 110, 0.55); }
-        .fm-status { display: inline-block; padding: 0.28rem 0.6rem 0.22rem; border: 1.5px solid #1f4d24; border-radius: 0.2rem; background: #2f6330; color: #fbf6ea; font-weight: 700; font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; }
-        .fm-status-wait { border: 1.5px dashed #8f2012; background: transparent; color: #8f2012; }
-        .fm-list-note { margin-top: 1rem; padding-top: 0.9rem; border-top: 2px solid #3b2c22; font-size: 0.875rem; color: #4f3d30; }
-        @media (max-width: 30rem) {
-            .fm-list thead th:nth-child(2),
-            .fm-list tbody td:nth-child(2) { display: none; }
-        }
-        @media (min-width: 30.01rem) { .fm-list tbody th small { display: none; } }
-        .fm-plot:has(#fm-t1:hover) .fm-pitch[href="#fm-t1"] .fm-pitch-in,
-        .fm-plot:has(#fm-t2:hover) .fm-pitch[href="#fm-t2"] .fm-pitch-in,
-        .fm-plot:has(#fm-t3:hover) .fm-pitch[href="#fm-t3"] .fm-pitch-in,
-        .fm-plot:has(#fm-t4:hover) .fm-pitch[href="#fm-t4"] .fm-pitch-in,
-        .fm-plot:has(#fm-t5:hover) .fm-pitch[href="#fm-t5"] .fm-pitch-in,
-        .fm-plot:has(#fm-t6:hover) .fm-pitch[href="#fm-t6"] .fm-pitch-in { translate: 0 -0.7cqi; box-shadow: 0 1.2cqi 0 #3b2c22, 0 0 0 0.5cqi #f5d76e; }
+        .fm-shots { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; align-items: start; }
+        @media (min-width: 1040px) { .fm-shots { grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr); } }
+        .fm-frame { overflow: hidden; border: 2px solid #3b2c22; border-radius: 0.5rem; background: #fffaf0; box-shadow: 0 1.6rem 2.2rem -1.4rem rgba(59, 44, 34, 0.6); }
+        .fm-frame img, .fm-phone img { display: block; width: 100%; height: auto; }
+        .fm-frame img.is-night { display: none; }
+        .dark .fm-frame img.is-night { display: block; }
+        .dark .fm-frame img.is-day { display: none; }
+        .fm-phone { overflow: hidden; max-width: 18rem; margin-inline: auto; border: 2px solid #3b2c22; border-radius: 1.9rem; background: #0b1220; box-shadow: 0 1.6rem 2.2rem -1.4rem rgba(59, 44, 34, 0.6); }
+        .fm-shot-cap { margin-top: 0.8rem; text-align: center; font-size: 0.9rem; color: var(--fm-ink-2); }
 
         .fm-trio { display: grid; gap: 1.25rem; margin-top: 2.75rem; }
         @media (min-width: 860px) { .fm-trio { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -987,7 +883,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             .fm-aug .fm-day.is-off::after { animation: none; }
-            .fm-btn, .fm-card, .fm-hang, .fm-near a, .fm-box-label, .fm-pitch-in, .fm-day, .fm-greens i { transition: none; }
+            .fm-btn, .fm-card, .fm-hang, .fm-near a, .fm-box-label, .fm-day, .fm-greens i { transition: none; }
         }
     </style>
 
@@ -1025,21 +921,6 @@
         $closingDay = $saturdays[$totalSaturdays - 1];
         $winterMarkets = ['Dec 5', 'Dec 12'];
 
-        // The pitch list. Two states only, because approved_subdomains is
-        // the ONLY thing that skips require_approval, and only for what a
-        // trader sends signed in from their own schedule: a submission while
-        // require_account is on (EventController::guestImportWithAccount()),
-        // or an event of theirs they add the market to
-        // (Role::autoAcceptsEventFrom()).
-        $pitches = [
-            ['Hedgerow Farm', 'Produce', true],
-            ['Loaf and Crumb', 'Bakery', true],
-            ['Ninefold Apiary', 'Honey and preserves', true],
-            ['Wolds Cut Flowers', 'Flowers and plants', false],
-            ['Salt Marsh Dairy', 'Cheese', false],
-            ['Two Rivers Press', 'Cider and juice', true],
-        ];
-
         // Market morning, as event parts on one market day.
         $morning = [
             ['06:30', 'Traders arrive', 'Pitches marked out along the top of the square.'],
@@ -1053,7 +934,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for farmers markets?',
-                'a' => 'Yes. The whole season is free forever: a recurring market day with a closing date, date exceptions for the Saturdays you lose to weather, sub-schedules for produce, bakery, flowers and the winter market, an agenda on each market day, free RSVP with a places limit, a downloadable QR code that puts your market page in a shopper\'s hand, built-in analytics, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, and an embeddable calendar. Newsletters are free too, at ten emails a month counted one per recipient, and go up to a hundred on Pro and a thousand on Enterprise. Charging a pitch fee is the one part that needs Pro at '.plan_price($proMonthly).' a month, and there are zero platform fees on what you take whatever the plan.',
+                'a' => 'Yes. The whole season is free forever: a recurring market day with a closing date, date exceptions for the Saturdays you lose to weather, sub-schedules for produce, bakery, flowers and the winter market, an agenda on each market day, free RSVP with a places limit, a downloadable QR code that puts your market page in a shopper\'s hand, built-in analytics, two-way '.(outlook_sync_enabled() ? 'Google, Outlook and CalDAV' : 'Google and CalDAV').' sync, an embeddable calendar, and the vendor map: the stalls drawn by hand, traders added yourself, Not coming, a rained-off day, and the shoppers\' map with its QR sign. Newsletters are free too, at ten emails a month counted one per recipient, and go up to a hundred on Pro and a thousand on Enterprise. Charging a pitch fee needs Pro at '.plan_price($proMonthly).' a month, and so do the vendor link, where traders claim their own stall, and the map drafted from photos. There are zero platform fees on what you take whatever the plan.',
             ],
             [
                 'q' => 'How do I set up a whole market season at once?',
@@ -1061,11 +942,11 @@
             ],
             [
                 'q' => 'What happens when a market day is rained off?',
-                'a' => 'Take that single date out of the recurrence as a date exception and it comes off the listing, leaving the rest of the season untouched. Being straight about what shoppers see: the date is simply absent rather than crossed out with a notice, so if you want to explain why, that is a newsletter or a note on the market page. The same panel has an include list that puts a one-off date on, for a bank holiday Monday market.',
+                'a' => 'Take that single date out of the recurrence as a date exception and it comes off the listing, leaving the rest of the season untouched. On the calendar the date is simply absent rather than crossed out with a notice. With a vendor map, Cancel this day on its tab does the same and also tells shoppers on the map that there is no market that day, and why (rain, a holiday or something else). The same panel has an include list that puts a one-off date on, for a bank holiday Monday market.',
             ],
             [
                 'q' => 'Can traders put themselves forward for a market day?',
-                'a' => 'Yes, on the free plan. Turn on submissions and traders can offer themselves for a date through your market page, with your terms shown on the form. Every submission waits for you to approve it, so nothing appears publicly that you have not agreed to, and you are emailed when new ones are waiting. Turn on Require Account and name your regulars as approved schedules: what they then submit, signed in, is approved automatically, which leaves you reading only the new ones. On the Pro plan you can add your own questions to that form.',
+                'a' => 'Yes. With a vendor map on Pro, send traders one link and each claims their own stall and the Saturdays they come, and you approve them on the map. On the free plan, turn on submissions and traders can offer themselves for a date through your market page, with your terms shown on the form. Every submission waits for you to approve it, so nothing appears publicly that you have not agreed to, and you are emailed when new ones are waiting. Turn on Require Account and name your regulars as approved schedules: what they then submit, signed in, is approved automatically, which leaves you reading only the new ones. On the Pro plan you can add your own questions to that form.',
             ],
             [
                 'q' => 'Can I charge for pitches and take the money online?',
@@ -1081,15 +962,15 @@
             ],
             [
                 'q' => 'What should a farmers market calendar show?',
-                'a' => 'The days and hours, the place with a map, which traders are there that week, anything on in the morning such as a demo or music, and whether a date is off. Shoppers mostly ask two things: is it on this Saturday, and is my baker there. On Event Schedule the season is one recurring event with a closing date, the venue page carries the address and map, the agenda holds the demo and the band, and the traders you name on an event are listed on its page and linked to their own. Put the parking and the dog rule in the description once, rather than in every weekly post.',
+                'a' => 'The days and hours, the place with a map, which traders are there that week, anything on in the morning such as a demo or music, and whether a date is off. Shoppers mostly ask two things: is it on this Saturday, and is my baker there. On Event Schedule the season is one recurring event with a closing date, the venue page carries the address and map, the agenda holds the demo and the band, and the vendor map shows which traders are there each Saturday, on the map and on your market page. Put the parking and the dog rule in the description once, rather than in every weekly post.',
             ],
             [
                 'q' => 'How do I show which vendors are at the market each week?',
-                'a' => 'Name them as participants on the event. A participant shows on every date of the event they are on, so how you set the season out decides it. If the same traders come every week, name them on one recurring season. If the stalls change week to week, make each market day its own event (Clone Event, free, copies last week\'s with its traders, so you only change who is new) and name that day\'s traders on it. Most markets are in between: a fixed core named on the season, and guest stalls announced in a weekly newsletter or on the market page.',
+                'a' => 'Put them on the vendor map. It keeps the traders date by date on one recurring season: a regular is on their stall every Saturday, a guest is added to an empty stall for one day, and a trader who cannot come taps Not coming for that date. Your market page shows who is at the market this week, and shoppers scan the code on the entrance sign to see today\'s map and search it by name or by what is sold. Drawing the map and adding traders yourself are free; the link where traders claim their own stall is part of Pro.',
             ],
             [
                 'q' => 'How do I tell shoppers the market is cancelled for weather?',
-                'a' => 'Decide before the season what calls it off and by what time, and write it on the market page, so traders and shoppers know when to look. On a recurring season, take the date out as a date exception, under Exclude Dates: it leaves the calendar and the subscribed calendar feeds, but nobody is emailed and nothing says why, so send a short newsletter and post it where your shoppers follow you. If each market day is its own event, Cancel event instead: the page shows it was cancelled and you can notify everyone who registered, paid a pitch fee or asked to hear about it (on eventschedule.com, people who paid or registered are emailed only when the market sends through its own email settings). Do not use Cancel on a recurring season, which cancels every date at once. Neither refunds a pitch fee; that is done sale by sale from the Sales page.',
+                'a' => 'Decide before the season what calls it off and by what time, and write it on the market page, so traders and shoppers know when to look. On a recurring season, take the date out as a date exception, under Exclude Dates: it leaves the calendar and the subscribed calendar feeds. With a vendor map, Cancel this day on its tab takes the date out the same way and the map tells shoppers why. Nobody is emailed either way, so send a short newsletter and post it where your shoppers follow you. If each market day is its own event, Cancel event instead: the page shows it was cancelled and you can notify everyone who registered, paid a pitch fee or asked to hear about it (on eventschedule.com, people who paid or registered are emailed only when the market sends through its own email settings). Do not use Cancel on a recurring season, which cancels every date at once. Neither refunds a pitch fee; that is done sale by sale from the Sales page.',
             ],
             [
                 'q' => 'How do I get the market into local event guides?',
@@ -1105,7 +986,7 @@
             ['top', 'The season'],
             ['season', 'Set it once'],
             ['rain', 'The rain call'],
-            ['pitch', 'The pitch list'],
+            ['pitch', 'The stall map'],
             ['lineup', 'This week\'s stalls'],
             ['morning', 'Market morning'],
             ['stalls', 'Pitch fees'],
@@ -1166,17 +1047,6 @@
         }
         $fmConic = 'conic-gradient(from ' . $fmTurn . 'deg, ' . implode(', ', $fmStops) . ')';
 
-        // The square: twenty-two pitches, as the morning has them. [column, row, index
-        // into $pitches or null]. Numbered in walking order from the top left.
-        $fmSquare = [
-            [1, 1, 0], [2, 1, 1], [3, 1, null], [4, 1, 2], [5, 1, null], [6, 1, null], [7, 1, null], [8, 1, 5],
-            [8, 3, null], [8, 4, null], [8, 5, null],
-            [6, 5, null], [5, 5, 4], [4, 5, null], [3, 5, null],
-            [1, 5, null], [1, 4, null], [1, 3, null],
-            [3, 3, 3], [4, 3, null], [5, 3, null], [6, 3, null],
-        ];
-        $fmCanopies = ['#3f7d3a', '#e2b33c', '#ee8a2f', '#d9412b', '#7a5a3c', '#b9722a'];
-
         $fmArrow = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>';
         $fmDown = '<svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4"><path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>';
     @endphp
@@ -1215,7 +1085,7 @@
                             See how a season is set up
                             {!! $fmDown !!}
                         </a>
-                        <a href="{{ app_url('/sign_up?type=venue') }}" class="fm-btn">
+                        <a href="{{ app_url('/sign_up?type=venue&vendor_map=market') }}" class="fm-btn">
                             Create your market's calendar
                             {!! $fmArrow !!}
                         </a>
@@ -1412,90 +1282,46 @@
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4. The pitch list: the square, and the list it is drawn from -->
+        <!-- 4. The stall map: the real screens of the vendor map          -->
         <!-- ============================================================ -->
         <section id="pitch" class="fm-sec fm-band" style="scroll-margin-top: 4rem;">
             <div class="fm-wrap">
                 <header class="fm-head is-mid">
-                    <span class="fm-tag" data-reveal>The pitch list</span>
+                    <span class="fm-tag" data-reveal>The stall map</span>
                     <h2 class="fm-d fm-h2" data-reveal style="--reveal-delay: 0.08s;">
-                        Your regulars are in. <span class="fm-em">New traders wait for you</span>.
+                        Every stall on the map. <span class="fm-em">Your traders keep it up to date</span>.
                     </h2>
                     <p class="fm-lede" data-reveal style="--reveal-delay: 0.16s;">
-                        Turn on submissions and traders can offer themselves for a date through your market
-                        page, with your terms on the form. Every one waits for your approval, and you are
-                        emailed when new ones are waiting.
+                        Draw the square once, or let AI draft it from a few photos. Send your traders one
+                        link: each finds their own stall, says what they sell and which Saturdays they come,
+                        and you approve them on the map.
                     </p>
                 </header>
 
-                <div class="fm-plot">
-                    <!-- The plan. A picture of the list beside it: six of these pitches are its six lines. -->
-                    <div class="fm-map" data-reveal>
-                        <div class="fm-square" role="group" aria-label="Plan of the square, with the six traders on this Saturday's pitch list">
-                            <span class="fm-square-label fm-square-steps" aria-hidden="true">Church steps</span>
-                            @foreach ($fmSquare as $fmI => [$fmCol, $fmRow, $fmWho])
-                                @if ($fmWho === null)
-                                    <span class="fm-pitch" style="grid-column: {{ $fmCol }}; grid-row: {{ $fmRow }};" aria-hidden="true"><span class="fm-pitch-in" style="--i: {{ $fmI }};"></span></span>
-                                @else
-                                    @php [$fmTrader, $fmKind, $fmApproved] = $pitches[$fmWho]; @endphp
-                                    <a href="#fm-t{{ $fmWho + 1 }}" class="fm-pitch is-named @if (! $fmApproved) is-wait @endif"
-                                        style="grid-column: {{ $fmCol }}; grid-row: {{ $fmRow }}; --fm-n: '{{ $fmTrader }}'; --fm-k: '{{ $fmKind }}'; --fm-st: '{{ $fmApproved ? 'Pre-approved' : 'Waiting on you' }}';"
-                                        aria-label="Pitch {{ $fmI + 1 }}: {{ $fmTrader }}, {{ $fmKind }}, {{ $fmApproved ? 'Pre-approved' : 'Waiting on you' }}. Go to its line in the list."><span class="fm-pitch-in" style="--i: {{ $fmI }}; --c: {{ $fmCanopies[$fmWho] }};"></span></a>
-                                @endif
-                            @endforeach
-                            <span class="fm-cross" aria-hidden="true"><i></i><b>Coffee</b></span>
-                            <span class="fm-cap" aria-hidden="true"><span class="fm-cap-hover">Point at a coloured pitch to read its line of the list.</span><span class="fm-cap-touch">The six coloured pitches are the six lines of the list.</span></span>
-                            <span class="fm-square-label fm-square-way" aria-hidden="true">Way in</span>
+                <div class="fm-shots">
+                    <figure data-reveal>
+                        <div class="fm-frame">
+                            <img src="{{ asset('images/marketing/vendor-map/tab-desktop-light.webp') }}" width="1440" height="1400" loading="lazy" decoding="async" class="is-day"
+                                 alt="The Vendor map tab of a farmers market: the vendor link with Send on WhatsApp, the card for shoppers, the market days across the top, the map, and two traders asking for the same stall">
+                            <img src="{{ asset('images/marketing/vendor-map/tab-desktop-dark.webp') }}" width="1440" height="1400" loading="lazy" decoding="async" class="is-night"
+                                 alt="The Vendor map tab in dark mode, with the vendor link, the market days, the map and the requests waiting">
                         </div>
-                        <p class="fm-keys" aria-hidden="true">
-                            <span><i></i> Pre-approved</span>
-                            <span><i class="is-wait"></i> Waiting on you</span>
-                        </p>
-                    </div>
-
-                    <div class="fm-paper fm-list" data-reveal style="--reveal-delay: 0.12s;">
-                        <div class="fm-list-top" aria-hidden="true"><strong class="fm-d">This Saturday</strong><span>Pitch list</span></div>
-                        <table>
-                            <caption class="sr-only">This Saturday's pitch list: each trader, the sub-schedule they sit in, and whether their submission is approved automatically or waiting for the market to approve it</caption>
-                            <thead>
-                                <tr>
-                                    <th scope="col">Trader</th>
-                                    <th scope="col">Sub-schedule</th>
-                                    <th scope="col">This Saturday</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($pitches as [$pName, $pKind, $pApproved])
-                                    <tr id="fm-t{{ $loop->iteration }}">
-                                        <th scope="row">
-                                            {{ $pName }}
-                                            <small>{{ $pKind }}</small>
-                                        </th>
-                                        <td>{{ $pKind }}</td>
-                                        <td>
-                                            @if ($pApproved)
-                                                <span class="fm-status">Pre-approved</span>
-                                            @else
-                                                <span class="fm-status fm-status-wait">Waiting on you</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <p class="fm-list-note">
-                            Two states, because the product has two. Ask traders for an account, name one as an
-                            approved schedule, and their submissions go straight on; everybody else waits.
-                            Nothing publishes itself.
-                        </p>
-                    </div>
+                        <figcaption class="fm-shot-cap">Your side: the Vendor map tab, on a market day with three traders waiting for an answer.</figcaption>
+                    </figure>
+                    <figure data-reveal style="--reveal-delay: 0.12s;">
+                        <div class="fm-phone">
+                            <img src="{{ asset('images/marketing/vendor-map/claim-phone.webp') }}" width="780" height="1688" loading="lazy" decoding="async"
+                                 alt="The vendor link on a trader's phone: Is one of these you? Find your stall, with every stall by number and the names already on them">
+                        </div>
+                        <figcaption class="fm-shot-cap">Their side: the link in the traders' group.</figcaption>
+                    </figure>
                 </div>
 
                 <div class="fm-trio" data-reveal-group="100">
                     @foreach ([
-                        ['Your terms on the form', false, 'Write the pitch rules once and they appear on the submission form: insurance, waste, what time the square closes to vehicles.'],
-                        ['Ask your own questions', true, 'Add fields to the submission form, so a trader tells you the stall frontage or whether they need power while they are asking.'],
-                        ['Sorted as it arrives', false, 'Sub-schedules keep produce, bakery, flowers and craft on separate strands of one link, each with a link that shows only that strand.'],
+                        ['Traders find their own stall', true, 'One link, sent on WhatsApp. They tap "Is one of these you?", add what they sell and a photo, and confirm with a code sent to their email or with Google. No password.'],
+                        ['A map from your photos', true, 'Stand somewhere high, get a whole row in each photo, keep the signs readable. The map you already print gives a near-final map.'],
+                        ['Or draw it by hand', false, 'Rows of stalls along the square, single ones where they stand, areas, the entrance, the toilets, parking and "You are here". On a phone or a computer.'],
                     ] as [$qT, $qIsPro, $qD])
                         <div class="fm-paper fm-card" data-reveal>
                             <h3 class="fm-s">{{ $qT }}</h3>
@@ -1508,26 +1334,26 @@
                         </div>
                     @endforeach
                 </div>
+
+                <p class="fm-small fm-foot" data-reveal>
+                    New traders who are not on the map yet can still apply: turn on submissions and they offer themselves through your market page, with your terms on the form, and wait for your approval.
+                    <a href="{{ marketing_url('/features/vendor-map') }}" class="fm-link">How the vendor map works</a>
+                </p>
             </div>
         </section>
 
         <!-- ============================================================ -->
-        <!-- 4b. This Saturday's stalls: one season, or one event a day    -->
+        <!-- 4b. This Saturday's stalls: the map, date by date             -->
         <!-- ============================================================ -->
         @php
-            // The two ways to set a season out, read across the things a market
-            // manager actually has to do with it. [label, what happens, plan]
-            $fmOneSeason = [
-                ['Stalls', 'Name your regulars on the series and they show on every market day, linked to their own pages.', 'Every date'],
-                ['Rain', 'Take the date out. It vanishes from the calendar, and nobody is emailed.', 'Silent'],
-                ['Pages', 'One event page for the whole season.', 'One'],
-                ['Setup', 'Once, before opening day. The hours change in one place.', 'Once'],
-            ];
-            $fmOneADay = [
-                ['Stalls', 'Each Saturday carries its own traders, so the guest cheesemaker shows on the 13th and nowhere else.', 'Per day'],
-                ['Rain', 'Cancel that day. Its page says so, and you can tell everyone who registered, paid or asked to hear (on eventschedule.com, people who paid or registered are emailed only when the market sends through its own email settings).', 'Notice'],
-                ['Pages', 'A page per Saturday to share: this week\'s stalls, this week\'s demo.', 'Each'],
-                ['Setup', 'Clone Event once a week, or the whole season in one sitting before opening day.', 'Weekly'],
+            // What the map does with a week, read across the things a market manager actually has
+            // to do. [label, what happens, plan]
+            $fmThisWeek = [
+                ['Regulars', 'Approved for every market day: on their stall each Saturday until they stop.', 'Free'],
+                ['Visitors', 'A guest cheesemaker for one Saturday: tap an empty stall, add a name and what they sell, no account.', 'Free'],
+                ['Away', 'A trader taps Not coming for the 13th. Their stall reads "Not here today" that day only.', 'Free'],
+                ['Rain', 'Cancel this day: it leaves the calendar and the map tells shoppers there is no market, and why.', 'Free'],
+                ['Moves', 'Swap two neighbours for one Saturday, or from now on.', 'Free'],
             ];
         @endphp
         <section id="lineup" class="fm-sec" style="scroll-margin-top: 4rem;">
@@ -1538,51 +1364,58 @@
                         Who is at the market <span class="fm-em">this week</span>?
                     </h2>
                     <p class="fm-lede" data-reveal style="--reveal-delay: 0.16s;">
-                        It is the question a farmers market calendar gets asked most, after the hours. The answer decides how you set the season out, because a trader you name on an event shows on every date of that event. Same stalls every week: one recurring season. Stalls that change: one event a market day.
+                        It is the question a farmers market calendar gets asked most, after the hours. The map answers it date by date: pick a Saturday and it shows who is coming, who is not, and which stalls are empty. Shoppers see the same answer from the code at the gate.
                     </p>
                 </header>
 
                 <div class="fm-duo" style="align-items: start;">
-                    @foreach ([['One recurring season', 'Same stalls weekly', $fmOneSeason], ['One event a market day', 'Stalls that rotate', $fmOneADay]] as [$fmWayTitle, $fmWayFor, $fmWayRows])
-                        <div class="fm-paper fm-aug" data-reveal style="rotate: {{ $loop->first ? '-0.6deg' : '0.7deg' }};">
-                            <div class="fm-aug-top">
-                                <h3 class="fm-d">{{ $fmWayTitle }}</h3>
-                                <span>{{ $fmWayFor }}</span>
-                            </div>
-                            <div class="fm-book">
-                                @foreach ($fmWayRows as [$fmWayK, $fmWayV, $fmWayPlan])
-                                    <div>
-                                        <span>{{ $fmWayK }}</span>
-                                        <span>{{ $fmWayV }}</span>
-                                        <span>{{ $fmWayPlan }}</span>
-                                    </div>
-                                @endforeach
-                            </div>
+                    <div class="fm-paper fm-aug" data-reveal style="rotate: -0.6deg;">
+                        <div class="fm-aug-top">
+                            <h3 class="fm-d">One map, every Saturday</h3>
+                            <span>Date by date</span>
                         </div>
-                    @endforeach
+                        <div class="fm-book">
+                            @foreach ($fmThisWeek as [$fmWayK, $fmWayV, $fmWayPlan])
+                                <div>
+                                    <span>{{ $fmWayK }}</span>
+                                    <span>{{ $fmWayV }}</span>
+                                    <span>{{ $fmWayPlan }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="fm-aug-note">The traders on the map are the market's, not the event's: the season stays one recurring event, and nothing is cloned week to week.</p>
+                    </div>
+
+                    <figure data-reveal style="--reveal-delay: 0.12s;">
+                        <div class="fm-phone">
+                            <img src="{{ asset('images/marketing/vendor-map/map-phone.webp') }}" width="780" height="1688" loading="lazy" decoding="async"
+                                 alt="The shoppers' map on a phone: the stalls by number in their areas, a search box for a name or what they sell, and the list of who is here on the market day">
+                        </div>
+                        <figcaption class="fm-shot-cap">What a shopper sees after scanning the sign at the gate.</figcaption>
+                    </figure>
                 </div>
 
                 <div class="fm-trio" data-reveal-group="100">
                     <div class="fm-paper fm-card" data-reveal>
-                        <h3 class="fm-s">Regulars on the season, guests on the day</h3>
+                        <h3 class="fm-s">Search the stalls and what they sell</h3>
                         <span class="fm-tag fm-tier fm-tier-free">Free</span>
-                        <p>Most markets are a fixed core with a few visitors. Keep the season recurring with the core named on it, and say who is visiting in a weekly newsletter or on the market page, rather than adding a guest to the series, where they would show on every Saturday until October.</p>
+                        <p>Shoppers search by a trader's name or by what they sell, or tap a category: bread, honey, flowers, hot food. A trader with a page of their own is one tap away.</p>
                     </div>
                     <div class="fm-paper fm-card" data-reveal>
-                        <h3 class="fm-s">A trader's own calendar fills too</h3>
+                        <h3 class="fm-s">The sign at the gate</h3>
                         <span class="fm-tag fm-tier fm-tier-free">Free</span>
-                        <p>Name a trader with a schedule of their own and your market days are linked from your page to theirs; the dates wait on their requests tab until they accept, unless you are on their team, or you listed them before they claimed their page. A trader not here yet gets a page listing the dates you gave them, which they can claim.</p>
+                        <p>Print the entrance sign on A4, or download it at 300 dpi for the print shop. It carries the whole map, "You are here" and a code that opens today's market.</p>
                     </div>
                     <div class="fm-paper fm-card" data-reveal>
-                        <h3 class="fm-s">Special market days</h3>
+                        <h3 class="fm-s">On your page and your website</h3>
                         <span class="fm-tag fm-tier fm-tier-free">Free</span>
-                        <p>The harvest festival or the Christmas market is an event of its own, with its own stalls and hours. If it falls on a Saturday, take that date out of the season first, or shoppers see two markets on one morning.</p>
+                        <p>Your market page shows who is at the market this week, and the map can sit on the website you already have, from one snippet.</p>
                     </div>
                 </div>
 
                 <p class="fm-small fm-foot" data-reveal>
-                    Cancel is for one event: on a recurring season it cancels every Saturday at once, so a single rained-off date in a season is a date exception. Neither refunds a pitch fee. Cancelling can email everyone who paid or registered (on eventschedule.com, people who paid or registered are emailed only when the market sends through its own email settings); a date exception emails nobody, so a trader who paid for that Saturday hears it from you.
-                    <a href="{{ marketing_url('/docs/creating-events') }}#participants" class="fm-link">Naming traders on an event</a>
+                    Drawing the map, adding traders yourself, moves, Not coming and cancelling a day are free on every plan. The vendor link and the map from photos are part of Pro.
+                    <a href="{{ marketing_url('/docs/vendor-maps') }}" class="fm-link">Read the vendor map guide</a>
                 </p>
             </div>
         </section>
@@ -2114,7 +1947,7 @@
                                     <input id="es-claim-input" type="text" placeholder="your-market" autocomplete="off" spellcheck="false" maxlength="30">
                                     <span>.eventschedule.com</span>
                                 </div>
-                                <a href="{{ app_url('/sign_up?type=venue') }}" class="fm-btn">
+                                <a href="{{ app_url('/sign_up?type=venue&vendor_map=market') }}" class="fm-btn">
                                     Create your market's calendar
                                     {!! $fmArrow !!}
                                 </a>

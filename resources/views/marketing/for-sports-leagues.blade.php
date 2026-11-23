@@ -593,7 +593,7 @@
                         'League lists teams as sources',
                         'Each team runs its own schedule, so each has its own feed, and the league\'s curator schedule lists the teams as sources and shows every fixture together.',
                         'A league where families want one team in their calendar, or where each team\'s volunteer keeps its own fixtures.',
-                        'Each team is set up as a Talent schedule, one of the two types a curator can list as a source. The league\'s email digest announces only events the league creates itself, so a family that wants new fixtures by email follows its team\'s schedule.',
+                        'Each team is set up as an event schedule, one of the two types a curator can list as a source. The league\'s email digest announces only events the league creates itself, so a family that wants new fixtures by email follows its team\'s schedule.',
                         'Free plan', 'free',
                     ],
                 ] as [$cName, $cWhere, $cWhat, $cFor, $cWatch, $cPlan, $cKey])

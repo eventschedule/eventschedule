@@ -54,7 +54,7 @@
                             @endif
                         </p>
                         <p class="truncate text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('messages.'.$row['type']) }}
+                            {{ \App\Utils\ScheduleTypeLabel::for($row['type']) }}
                             @if ($row['place'])
                                 &middot; <bdi>{{ $row['place'] }}</bdi>
                             @endif

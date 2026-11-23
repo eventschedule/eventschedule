@@ -51,7 +51,7 @@
                 </div>
                 @endif
                 <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
-                    {{ __('messages.' . $role->type) }}
+                    {{ \App\Utils\ScheduleTypeLabel::for($role->type) }}
                 </h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {{ __('messages.' . $role->type . '_tagline') }}
@@ -64,6 +64,13 @@
 
                     {{-- See the block comment at the top of this file before touching these. --}}
                     <input type="hidden" name="type" value="{{ $role->type }}">
+                    {{-- "Running a market, fair or expo?": the new schedule opens on its vendor map. --}}
+                    @php
+                        $vendorMapKind = request('vendor_map', old('vendor_map'));
+                    @endphp
+                    @if (! $role->isTalent() && in_array($vendorMapKind, \App\Services\VendorMaps\VendorMapKinds::KINDS, true))
+                    <input type="hidden" name="vendor_map" value="{{ $vendorMapKind }}">
+                    @endif
                     <input type="hidden" name="email" value="{{ $user->email }}">
                     {{-- Falls back, because create() copies it straight off the user and a user
                          can carry none: roles.language_code is NOT NULL, and the full form never

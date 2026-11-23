@@ -27,6 +27,12 @@
     </script>
 
     <style {!! nonce_attr() !!}>
+        /* The vendor link card: a phone beside the notes, stacked on small screens. */
+        .ft-spot-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; align-items: center; }
+        @media (min-width: 900px) { .ft-spot-grid { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); } }
+        .ft-spot-phone { max-width: 16rem; margin-inline: auto; overflow: hidden; border-radius: 1.75rem; border: 2px solid #1d1a16; background: #0b1220; }
+        .ft-spot-phone img { display: block; width: 100%; height: auto; }
+
         /* ==============================================================
            For-food-trucks-and-vendors "Order Up" styles.
 
@@ -1488,6 +1494,10 @@
                 'a' => 'Ask the organizer how they publish their line-up. If the market runs its own schedule on Event Schedule, it can name you on its market day, and the date comes to you as a request you accept (unless that schedule had already listed you before you claimed your page), so it is on your page and theirs without being typed twice. You can also follow the market\'s schedule and, while it takes requests, tick it under Also list on when you add the stop. Either way, send them your schedule link so they can see where else you trade.',
             ],
             [
+                'q' => 'A market sent me a link to find my stall. What is it?',
+                'a' => 'The market keeps a vendor map on Event Schedule. Open the link, find your stall by name or number, say what you sell and which days you come, and confirm with a code sent to your email or with Google. No password, and nothing to pay. The organizer approves you, and the same link is where you mark a day you cannot come and share where to find you.',
+            ],
+            [
                 'q' => 'Can people book me for catering and private events?',
                 'a' => 'Yes. Turn on booking requests and people can ask to book you, with their own date and details attached. Every request waits for you to accept it, and you get an email when a new one lands, so an enquiry does not sit unread in a comment thread.',
             ],
@@ -2046,6 +2056,36 @@
                         <p class="ft-card-foot">Request Terms are free and shown at the top of the form, before anything is typed. See <x-link href="{{ marketing_url('/docs/creating-schedules#engagement-requests') }}" class="ft-inline">request settings</x-link> in the guide</p>
                     </article>
                 </div>
+
+                {{-- The vendor's side of the vendor map (VendorSpotController): a market that keeps
+                     one sends a single link, and the vendor finds their own spot on it. The phone is
+                     the app's real screen. --}}
+                <article class="ft-card ft-spot" data-reveal="panel" style="margin-top: 1.5rem;">
+                    <div class="ft-spot-grid">
+                        <div>
+                            <h3 class="ft-d">When the market sends you a link to find your stall</h3>
+                            <ul class="ft-notes">
+                                @foreach ([
+                                    ['Find your stall', 'The link opens the market\'s map with "Is one of these you?". Search your name or your number, or tap your spot on the map.'],
+                                    ['Say what you serve', 'Your name at the market, what you sell, a photo for the shoppers, and a phone number only the organizer sees. Every market day, or the dates you are there.'],
+                                    ['No password', 'You confirm with a code sent to your email, or with Google. The market approves you, and you hear when it does.'],
+                                    ['Find me at stall 12', 'Share where to find me posts your spot to your own followers, and the shoppers\' map links to your own page.'],
+                                    ['Not coming this week', 'Open the same link and tap Not coming for that date. The organizer is told, and shoppers see "Not here today" on your stall.'],
+                                ] as [$t, $d])
+                                    <li>
+                                        <span class="ft-pin" aria-hidden="true"></span>
+                                        <span><span class="ft-note-t">{{ $t }}</span> <span class="ft-note-d">- {{ $d }}</span></span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                            <p class="ft-card-foot">It costs you nothing: the market's plan covers the link. See the <x-link href="{{ marketing_url('/features/vendor-map') }}" class="ft-inline">vendor map</x-link>.</p>
+                        </div>
+                        <div class="ft-spot-phone">
+                            <img src="{{ asset('images/marketing/vendor-map/claim-phone.webp') }}" width="780" height="1688" loading="lazy" decoding="async"
+                                 alt="A market's vendor link on a phone: Is one of these you? Find your stall, with every stall by number and the names already on them">
+                        </div>
+                    </div>
+                </article>
             </div>
         </section>
 

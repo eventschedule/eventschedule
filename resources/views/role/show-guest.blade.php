@@ -123,7 +123,12 @@ html[data-es-view="list"] #gp-calendar {
           $venueMapBand = (request()->embed || request()->graphic)
               ? null
               : \App\Services\VenueMap::band($role, $selectedGroup ?? null, $upcoming ?? null);
-          $toolsBelow = $headerStyle === 'banner' && (! empty($sponsorLogos) || $venueMapBand);
+          // The vendor map's band (role/partials/vendor-map-band): a market's "At the market this
+          // week", where its map is on and has spots. Never in an embed or the ?graphic=1 picture.
+          $vendorMapBand = (request()->embed || request()->graphic)
+              ? null
+              : \App\Services\VendorMaps\VendorMapBand::forSchedule($role);
+          $toolsBelow = $headerStyle === 'banner' && (! empty($sponsorLogos) || $venueMapBand || $vendorMapBand);
         @endphp
         @if ($headerStyle === 'banner')
         @include('role.partials.headers.banner', ['toolsBelow' => $toolsBelow])
@@ -391,6 +396,13 @@ html[data-es-view="list"] #gp-calendar {
       </div>
       @endif
 
+      @if ($vendorMapBand)
+      <div class="{{ (empty($sponsorLogos) && ! $venueMapBand) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 mx-auto transition-[max-width] duration-300 ease-in-out" data-view-width data-map-wrap
+           style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
+          @include('role.partials.vendor-map-band', ['vmBand' => $vendorMapBand])
+      </div>
+      @endif
+
       @if ($toolsBelow)
       <div class="gk-tools-band mx-auto px-0 md:px-6 lg:px-16 mb-2 transition-[max-width] duration-300 ease-in-out" data-view-width
            style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}">
@@ -440,7 +452,7 @@ html[data-es-view="list"] #gp-calendar {
         </div>
       @endif
       <div
-        class="calendar-panel-border {{ (empty($sponsorLogos) && ! $venueMapBand) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
+        class="calendar-panel-border {{ (empty($sponsorLogos) && ! $venueMapBand && ! $vendorMapBand) ? 'mt-2 md:mt-6' : '' }} mb-6 px-0 md:px-6 lg:px-16 pt-0 md:pt-4 pb-0 md:pb-6 transition-[max-width] duration-300 ease-in-out mx-auto"
         id="gp-calendar"
         data-view-width
         style="max-width: {{ $role->activeEventLayout() === 'list' ? '56rem' : '200rem' }}"

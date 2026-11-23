@@ -644,7 +644,7 @@
             ],
             [
                 'q' => 'Who can see the answers?',
-                'a' => 'The owners and admins of the event\'s schedule, and of a venue or talent schedule that has accepted the event, see every order and what was answered on it, and so does the person who created the event. A viewer on the team sees no sales. Each buyer sees their own answers on their ticket page. Nothing a buyer answers at checkout is published. Schedule fields are different: one ticked On event page is printed on the public event page, one offered as a filter shows its values to visitors, and every schedule field that is not Private is also matched by the search on your schedule page. A field marked Private is never shown outside the admin portal, the Requests tab and your request emails, so mark a field Private when it is for your team only.',
+                'a' => 'The owners and admins of the event\'s schedule, and of a venue schedule or event schedule that has accepted the event, see every order and what was answered on it, and so does the person who created the event. A viewer on the team sees no sales. Each buyer sees their own answers on their ticket page. Nothing a buyer answers at checkout is published. Schedule fields are different: one ticked On event page is printed on the public event page, one offered as a filter shows its values to visitors, and every schedule field that is not Private is also matched by the search on your schedule page. A field marked Private is never shown outside the admin portal, the Requests tab and your request emails, so mark a field Private when it is for your team only.',
             ],
             [
                 'q' => 'Can I add a custom field after tickets are on sale?',
@@ -1323,7 +1323,7 @@
                         @endforeach
                     </ul>
                     <p class="es-form-muted mt-auto pt-5 text-xs">
-                        Who reads the answers: the owners and admins of the event's schedule, and of a venue or talent schedule that has accepted the event, see orders and what was answered on them, a viewer sees no sales, and each buyer sees their own answers on their ticket page.
+                        Who reads the answers: the owners and admins of the event's schedule, and of a venue schedule or event schedule that has accepted the event, see orders and what was answered on them, a viewer sees no sales, and each buyer sees their own answers on their ticket page.
                     </p>
                 </div>
             </div>

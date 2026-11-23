@@ -14,8 +14,10 @@ use App\Rules\NotBlocklisted;
 use App\Rules\ValidTurnstile;
 use App\Services\AuditService;
 use App\Services\Blocklist;
+use App\Services\VendorMaps\VendorMapKinds;
 use App\Utils\HeroExperiment;
 use App\Utils\HoneypotUtils;
+use App\Utils\StubAccountUtils;
 use App\Utils\TimezoneUtils;
 use App\Utils\TurnstileUtils;
 use Illuminate\Auth\Events\Registered;
@@ -67,6 +69,13 @@ class RegisteredUserController extends Controller
         $requestedType = request('type');
         if (in_array($requestedType, ['talent', 'venue', 'curator'], true)) {
             session(['signup_role_type' => $requestedType]);
+        }
+
+        // "Running a market, fair or expo?" from the marketing site: the kind of vendor map rides
+        // through sign-up with the type, so the new venue opens on its vendor map's setup.
+        $requestedVendorMap = request('vendor_map');
+        if (in_array($requestedVendorMap, VendorMapKinds::KINDS, true)) {
+            session(['signup_vendor_map' => $requestedVendorMap]);
         }
 
         // The name typed into the homepage's "your-name.eventschedule.com" box, kept the same way
@@ -472,7 +481,7 @@ class RegisteredUserController extends Controller
      * password as well as the code. Every exit therefore answers JSON to a JSON request - the
      * ValidationExceptions do that on their own, the two redirects go through signupRedirect().
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse|JsonResponse
     {
@@ -708,8 +717,8 @@ class RegisteredUserController extends Controller
             // address is mailed its set-password link, as the login page does for it.
             if (! config('app.hosted')) {
                 throw ValidationException::withMessages([
-                    'email' => [match (\App\Utils\StubAccountUtils::send($existingUser)) {
-                        \App\Utils\StubAccountUtils::THROTTLED => __('messages.login_password_link_already_sent'),
+                    'email' => [match (StubAccountUtils::send($existingUser)) {
+                        StubAccountUtils::THROTTLED => __('messages.login_password_link_already_sent'),
                         default => __('messages.login_no_password_yet'),
                     }],
                 ]);

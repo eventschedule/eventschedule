@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Utils\PlatformPricing;
+use Carbon\CarbonInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Tests\TestCase;
@@ -68,7 +70,7 @@ class UseCasesPageTest extends TestCase
 
         $this->assertSame(count($listed), count(array_unique($listed)), 'A name is on the list twice');
         $this->assertSame($listed, array_column($cards, 'key'), 'The list and the records the script is handed are not the same names in the same order');
-        $this->assertCount(40, $cards);
+        $this->assertCount(43, $cards);
 
         foreach ($cards as $card) {
             $this->assertNotSame('', $card['blurb'], $card['key'].' has no sentence for the stage');
@@ -154,7 +156,7 @@ class UseCasesPageTest extends TestCase
     public function test_the_samples_are_dated_in_the_week_to_come(): void
     {
         $html = $this->html();
-        $monday = now()->startOfWeek(\Carbon\CarbonInterface::MONDAY)->addWeek();
+        $monday = now()->startOfWeek(CarbonInterface::MONDAY)->addWeek();
         $this->assertTrue($monday->isFuture() || $monday->isToday());
 
         // Position in next week, Monday first, by what the tile prints.
@@ -194,7 +196,7 @@ class UseCasesPageTest extends TestCase
 
         // A sample ticket is somebody's own price. Printed beside the word "plan" or "month" it
         // would read as one of ours, which MarketingPriceTest forbids as a literal.
-        $ours = collect(\App\Utils\PlatformPricing::all())->map(fn ($amount) => (int) $amount)->filter()->unique()->all();
+        $ours = collect(PlatformPricing::all())->map(fn ($amount) => (int) $amount)->filter()->unique()->all();
         foreach (config('marketing_directory') as $path => $extra) {
             foreach ($extra['sample']['rows'] ?? [] as $row) {
                 if (preg_match('/^\$(\d+)$/', $row[3], $price)) {
@@ -265,8 +267,8 @@ class UseCasesPageTest extends TestCase
         $items = $collection['mainEntity']['itemListElement'];
 
         $this->assertSame(count($items), $collection['mainEntity']['numberOfItems']);
-        // The forty names on the list and the two guides that head a group.
-        $this->assertCount(42, $items);
+        // The forty-three names on the list and the two guides that head a group.
+        $this->assertCount(45, $items);
         foreach ($items as $item) {
             $this->assertStringContainsString('href="'.$item['url'].'"', $html, 'The schema lists '.$item['name'].', which the page does not link');
         }
