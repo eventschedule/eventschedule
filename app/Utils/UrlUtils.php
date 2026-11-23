@@ -25,7 +25,9 @@ class UrlUtils
     private const PLATFORM_DOMAINS = [
         'facebook.com' => 'facebook',
         'fb.com' => 'facebook',
+        'fb.me' => 'facebook',
         'instagram.com' => 'instagram',
+        'instagr.am' => 'instagram',
         'youtube.com' => 'youtube',
         'youtu.be' => 'youtube',
         'whatsapp.com' => 'whatsapp',
@@ -265,8 +267,8 @@ class UrlUtils
         // Any other *.php is a page too (permalink.php, photo.php, story.php, l.php...), and
         // /share/ is an account only for the code the app's "Copy link" gives a page or a
         // profile (see askedAccountPlatform()).
-        'facebook' => ['sharer', 'events', 'groups', 'watch', 'login', 'photo', 'photos', 'media', 'reel', 'reels', 'story', 'marketplace', 'dialog', 'hashtag', 'stories', 'gaming'],
-        'linkedin' => ['feed', 'posts', 'pulse', 'jobs', 'login', 'events', 'search', 'groups', 'redir'],
+        'facebook' => ['sharer', 'events', 'groups', 'watch', 'login', 'photo', 'photos', 'media', 'reel', 'reels', 'story', 'marketplace', 'dialog', 'hashtag', 'stories', 'gaming', 'search', 'plugins', 'ads', 'help', 'settings', 'notifications', 'messages', 'business'],
+        'linkedin' => ['feed', 'posts', 'pulse', 'jobs', 'login', 'events', 'search', 'groups', 'redir', 'profile'],
         'twitter' => ['home', 'intent', 'share', 'search', 'i', 'explore', 'login', 'hashtag', 'settings', 'messages', 'notifications', 'compose'],
     ];
 
@@ -338,11 +340,21 @@ class UrlUtils
             return $kind !== '' && ! in_array($kind, self::FACEBOOK_SHARE_KINDS, true) ? $platform : null;
         }
 
-        if ($platform === 'linkedin' && in_array($first, self::LINKEDIN_PAGE_KINDS, true)) {
+        if ($platform === 'linkedin') {
+            // company/<name> (or in/, school/, showcase/), with any of the page's own tabs after
+            // it; never company/in/<name>, which a name typed after the button's address makes.
+            return in_array($first, self::LINKEDIN_PAGE_KINDS, true) && isset($segments[1])
+                && ! in_array(strtolower($segments[1]), self::LINKEDIN_PAGE_KINDS, true) ? $platform : null;
+        }
+
+        // Facebook's older page and profile addresses carry a name and a number.
+        if ($platform === 'facebook' && in_array($first, ['pages', 'people'], true)) {
             return isset($segments[1]) ? $platform : null;
         }
 
-        return $platform;
+        // Anything under the name is one of its posts, reels or tabs, not the account
+        // (x.com/band/status/123, instagram.com/band/reels/, a .php page deeper down).
+        return count($segments) === 1 ? $platform : null;
     }
 
     /**

@@ -11158,6 +11158,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (/^(www\.)?([a-z0-9-]+\.)+[a-z]{2,}\/\S/i.test(rest) || rest.toLowerCase().replace(/^www\./, '') === host) {
                 return 'https://' + rest;
             }
+            // LinkedIn's own kind of page typed after the company address ("in/jane-doe"): the
+            // address is that page, not a company called "in".
+            if (host === 'linkedin.com' && /^\/?(in|company|school|showcase)\/[^\s\/]/i.test(rest)) {
+                return 'https://www.linkedin.com/' + rest.replace(/^\//, '');
+            }
             // A username.
             if (/^@?[^\s\/:?#]+$/.test(rest)) return linkPrefill + rest.replace(/^@/, '');
             return value;

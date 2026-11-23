@@ -4062,7 +4062,7 @@ return [
     'no_social_links' => 'No hay enlaces sociales',
     'social_links_ask_tag' => 'Aparecen como iconos en tu página, y podemos etiquetarte cuando publiquemos sobre ti.',
     'social_links_ask_follow' => 'Aparecen como iconos en tu página, para que la gente pueda seguirte.',
-    'add_social_platform' => 'Agregar :platform',
+    'add_social_platform' => 'Añadir :platform',
     'social_link_handle_required' => 'Añade tu nombre de usuario después de la barra o pega el enlace completo',
     'no_payment_links' => 'No hay enlaces de pago',
     'email_signups' => 'Registros por correo',
