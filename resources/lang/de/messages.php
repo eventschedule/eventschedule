@@ -643,6 +643,8 @@ return [
     'social_media' => 'Soziale Medien',
     'create_schedule' => 'Zeitplan erstellen',
     'create_your_own_event_schedule' => 'Erstellen Sie Ihren eigenen Veranstaltungszeitplan!',
+    'create_own_title' => 'Veranstalten Sie selbst etwas?',
+    'create_own_line' => 'Stellen Sie Ihre Termine auf eine Seite wie diese und teilen Sie sie.',
     'events' => 'Veranstaltungen',
     'manage_account' => 'Konto verwalten',
     'venue_details' => 'Veranstaltungsort-Details',

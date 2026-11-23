@@ -326,6 +326,8 @@ return [
     'address_not_found' => 'Indirizzo non trovato',
     'create_schedule' => 'Crea Programma',
     'create_your_own_event_schedule' => 'Crea il tuo programma di eventi!',
+    'create_own_title' => 'Organizzi un evento tutto tuo?',
+    'create_own_line' => 'Metti le tue date su una pagina come questa e condividila.',
     'events' => 'Eventi',
     'manage_account' => 'Gestisci account',
     'venue_details' => 'Dettagli della sede',

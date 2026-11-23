@@ -761,6 +761,8 @@ return [
     'social_media' => 'Réseaux sociaux',
     'create_schedule' => 'Créer un planning',
     'create_your_own_event_schedule' => 'Créez votre propre planning d\'événements !',
+    'create_own_title' => 'Vous organisez votre propre événement ?',
+    'create_own_line' => 'Publiez vos dates sur une page comme celle-ci et partagez-la.',
     'events' => 'Événements',
     'manage_account' => 'Gérer le compte',
     'venue_details' => 'Détails du lieu',

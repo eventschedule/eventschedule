@@ -2731,16 +2731,22 @@
            free curator's page dropped this card while still carrying the free-tier credit. --}}
     @if ($role->showBranding() && ! $embedEvent)
     <div class="gk-event-foot">
-      <div id="gp-create-your-own" class="gk-panel gk-panel-flush gk-create bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm {{ $role->isRtl() ? 'rtl' : '' }}">
-        <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
-          {{ __('messages.create_your_own_event_schedule') }}
-        </p>
+      {{-- Event Schedule's own ask, so in its colours (the credit pill's mark and blue, which
+           sits under it at the foot of the page), not the schedule's: the mark, a question and
+           one line, and the button beside them. --}}
+      <div id="gp-create-your-own" class="gk-panel gk-create {{ $role->isRtl() ? 'rtl' : '' }}">
+        <span aria-hidden="true" class="gk-create-mark">ES</span>
+        <div class="gk-create-text">
+          <p class="gk-create-title">{{ __('messages.create_own_title') }}</p>
+          <p class="gk-create-line">{{ __('messages.create_own_line') }}</p>
+        </div>
         {{-- Straight to sign-up, marked as from a schedule's page (users.arrival_intent =
              guest_page): it used to open the marketing homepage, and nothing could say whether
              the card ever brought anybody. --}}
-        <x-guest.button variant="secondary" size="sm" href="{{ app_url('/sign_up?ref=gp') }}" target="_blank" rel="noopener noreferrer">
-          {{ __('messages.create_schedule') }}
-        </x-guest.button>
+        <a href="{{ app_url('/sign_up?ref=gp') }}" target="_blank" rel="noopener noreferrer" class="gk-create-cta">
+          <span>{{ __('messages.create_schedule') }}</span>
+          <svg class="gk-create-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
       </div>
     </div>
     @endif

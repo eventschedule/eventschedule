@@ -359,7 +359,22 @@
          stops after five. Cut below 48rem only, a tablet got all twenty there. --}}
     @media (max-width: 63.99rem) { .gk-up-late { display: none; } }
     .gk-event-foot { display: grid; gap: 1rem; margin-top: 1rem; }
-    .gk-create { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; padding: .875rem 1rem; }
+    {{-- "Create your own" (event/show-guest, free schedules only): Event Schedule's ask, in the
+         credit pill's mark and blue (partials/guest-stage-styles, .es-foot-credit), which follows
+         it at the foot of the page. The button drops under the words when they need the room. --}}
+    .gk-create { display: flex; flex-wrap: wrap; align-items: center; gap: .875rem 1.25rem; padding: 1.125rem 1rem; border: 1px solid var(--gk-line); }
+    @media (min-width: 40rem) { .gk-create { padding: 1.375rem 1.5rem; } }
+    .gk-create-mark { display: inline-grid; flex: none; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 999px; background: #06121a; color: #5cc4fb; color: oklch(0.8 0.15 240); font-size: .8125rem; font-weight: 800; letter-spacing: .02em; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .1); }
+    .gk-create-text { display: grid; gap: .25rem; flex: 1 1 18rem; min-width: 0; }
+    .gk-create-title { margin: 0; font-size: 1.1875rem; font-weight: 700; line-height: 1.3; color: var(--gk-ink); }
+    .gk-create-line { margin: 0; font-size: 1rem; line-height: 1.45; color: var(--gk-ink-2); text-wrap: pretty; }
+    .gk-create-cta { display: inline-flex; flex: none; align-items: center; gap: .625rem; padding: .875rem 1.375rem; border-radius: .875rem; background: #3eb0ee; background: oklch(0.74 0.15 240); color: #06121a; font-size: 1rem; font-weight: 700; line-height: 1.2; text-decoration: none; transition: background-color var(--gk-swap); }
+    .gk-create-cta:hover { background: #5cc4fb; background: oklch(0.8 0.15 240); }
+    .gk-create-cta:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
+    .gk-create-arrow { width: 1.125rem; height: 1.125rem; flex: none; }
+    [dir="rtl"] .gk-create-arrow { transform: scaleX(-1); }
+    {{-- On a phone the button takes the card's width under the words, a thumb's target. --}}
+    @media (max-width: 39.99rem) { .gk-create-cta { flex: 1 1 100%; justify-content: center; } }
     @media (min-width: 64rem) {
         .gk-event { display: grid; grid-template-columns: 23.75rem minmax(0, 1fr); gap: 2.5rem; align-items: start; }
         .gk-event-col { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }

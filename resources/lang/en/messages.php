@@ -805,6 +805,8 @@ return [
     'social_media' => 'Social Media',
     'create_schedule' => 'Create Schedule',
     'create_your_own_event_schedule' => 'Create your own event schedule!',
+    'create_own_title' => 'Running an event of your own?',
+    'create_own_line' => 'Put your dates on a page like this and share it.',
     'events' => 'Events',
     'manage_account' => 'Manage Account',
     'venue_details' => 'Details',

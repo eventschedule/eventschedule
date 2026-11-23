@@ -44,7 +44,7 @@ class GuestBrandingTest extends TestCase
     private const CHIP_GRANTED = 'utm_source=granted-plan';
 
     /** The card in the column beside an event's details. */
-    private const CARD = 'Create your own event schedule!';
+    private const CARD = 'Running an event of your own?';
 
     /** @param  'nexus'|'saas'|'selfhost'  $mode */
     private function deploy(string $mode): void

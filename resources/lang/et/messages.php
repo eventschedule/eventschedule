@@ -800,6 +800,8 @@ return [
     'social_media' => 'Sotsiaalmeedia',
     'create_schedule' => 'Loo ajakava',
     'create_your_own_event_schedule' => 'Koostage oma sündmuste ajakava!',
+    'create_own_title' => 'Korraldate ise mõnd üritust?',
+    'create_own_line' => 'Pange oma kuupäevad sellisele lehele ja jagage seda.',
     'events' => 'Sündmused',
     'manage_account' => 'Konto haldamine',
     'venue_details' => 'Üksikasjad',

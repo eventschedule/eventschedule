@@ -758,6 +758,8 @@ return [
     'social_media' => 'Redes Sociales',
     'create_schedule' => 'Crear Horario',
     'create_your_own_event_schedule' => '¡Crea tu propio horario de eventos!',
+    'create_own_title' => '¿Organizas tu propio evento?',
+    'create_own_line' => 'Pon tus fechas en una página como esta y compártela.',
     'events' => 'Eventos',
     'manage_account' => 'Gestionar cuenta',
     'venue_details' => 'Detalles del lugar',

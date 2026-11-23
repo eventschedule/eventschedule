@@ -802,6 +802,8 @@ return [
     'social_media' => 'Rețele Sociale',
     'create_schedule' => 'Creează Program',
     'create_your_own_event_schedule' => 'Creează-ți propriul program de evenimente!',
+    'create_own_title' => 'Organizezi un eveniment al tău?',
+    'create_own_line' => 'Pune-ți datele pe o pagină ca aceasta și distribuie-o.',
     'events' => 'Evenimente',
     'manage_account' => 'Administrare Cont',
     'venue_details' => 'Detalii',

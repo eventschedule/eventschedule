@@ -320,6 +320,8 @@ return [
     'address_not_found' => 'כתובת לא נמצאה',
     'create_schedule' => 'צור לוח זמנים',
     'create_your_own_event_schedule' => 'צור לוח זמנים משלך',
+    'create_own_title' => 'מארגנים אירוע משלכם?',
+    'create_own_line' => 'שימו את התאריכים שלכם בעמוד כזה ושתפו אותו.',
     'events' => 'אירועים',
     'manage_account' => 'ניהול חשבון',
     'venue_details' => 'פרטי המקום',

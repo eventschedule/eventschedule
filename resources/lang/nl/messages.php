@@ -326,6 +326,8 @@ return [
     'address_not_found' => 'Adres niet gevonden',
     'create_schedule' => 'Schema Aanmaken',
     'create_your_own_event_schedule' => 'Maak je eigen evenementenschema!',
+    'create_own_title' => 'Organiseer je zelf een evenement?',
+    'create_own_line' => 'Zet je data op een pagina zoals deze en deel hem.',
     'events' => 'Evenementen',
     'manage_account' => 'Account beheren',
     'venue_details' => 'Locatiegegevens',

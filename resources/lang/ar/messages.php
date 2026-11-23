@@ -641,6 +641,8 @@ return [
     'social_media' => 'وسائل التواصل الاجتماعي',
     'create_schedule' => 'إنشاء جدول',
     'create_your_own_event_schedule' => 'أنشئ جدول أحداثك الخاص!',
+    'create_own_title' => 'هل تنظّم فعالية خاصة بك؟',
+    'create_own_line' => 'ضع مواعيدك في صفحة كهذه وشاركها.',
     'events' => 'الأحداث',
     'manage_account' => 'إدارة الحساب',
     'venue_details' => 'تفاصيل المكان',
