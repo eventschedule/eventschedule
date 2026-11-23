@@ -19,50 +19,68 @@ use App\Models\EventRole;
 use App\Models\Newsletter;
 use App\Models\Referral;
 use App\Models\Role;
+use App\Models\RoleUser;
 use App\Models\Sale;
 use App\Models\Setting;
+use App\Models\SubscriptionCancellation;
 use App\Models\UsageDaily;
 use App\Models\User;
 use App\Services\ActiveDays;
 use App\Services\AdminAlertService;
 use App\Services\AdminPlanCounts;
+use App\Services\AdsService;
 use App\Services\AppUpdateService;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\DemoService;
 use App\Services\DigitalOceanService;
+use App\Services\EmailService;
+use App\Services\FederationService;
 use App\Services\GrowthExportService;
 use App\Services\OneSignalService;
+use App\Services\PromotionService;
 use App\Services\RecurringRevenue;
+use App\Services\SaleRefundService;
 use App\Services\ScheduleDeletionService;
 use App\Services\SchedulerHealth;
+use App\Services\Stay22Service;
 use App\Services\SubdomainUnavailableException;
 use App\Services\TranslationQueue;
 use App\Services\WebhookService;
 use App\Services\WorkBacklog;
+use App\Support\HomeSchedule;
 use App\Utils\AdminDateRange;
 use App\Utils\AdminReauthUtils;
 use App\Utils\HeroExperiment;
+use App\Utils\HomeQuotes;
 use App\Utils\MoneyUtils;
 use App\Utils\PlatformCurrency;
 use App\Utils\PlatformPricing;
+use App\Utils\RealtimeTracker;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Laravel\Cashier\Cashier;
 use Laravel\Cashier\Subscription;
+use Stripe\Exception\InvalidRequestException;
 
 class AdminController extends Controller
 {
@@ -618,11 +636,11 @@ class AdminController extends Controller
         }
 
         try {
-            \Laravel\Cashier\Cashier::stripe()->subscriptions->cancel($row->stripe_id);
+            Cashier::stripe()->subscriptions->cancel($row->stripe_id);
         } catch (\Throwable $e) {
             // Already over on Stripe's side, and only our row is stale: record it, as
             // Role::cancelBillingForDeletion() does. Anything else is a real failure.
-            if (! ($e instanceof \Stripe\Exception\InvalidRequestException && Role::stripeSubscriptionIsOver($row->stripe_id))) {
+            if (! ($e instanceof InvalidRequestException && Role::stripeSubscriptionIsOver($row->stripe_id))) {
                 report($e);
 
                 return $back->with('error', __('messages.orphaned_subscription_cancel_failed'));
@@ -635,7 +653,7 @@ class AdminController extends Controller
             ->whereNull('ends_at')
             ->update(['stripe_status' => 'canceled', 'ends_at' => now()]);
 
-        \App\Models\SubscriptionCancellation::record([
+        SubscriptionCancellation::record([
             'role_id' => $row->role_id,
             'stripe_subscription_id' => $row->stripe_id,
             'source' => 'admin',
@@ -712,7 +730,7 @@ class AdminController extends Controller
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%');
 
-        $googleCalendarEnabled = \App\Models\RoleUser::where('level', 'owner')
+        $googleCalendarEnabled = RoleUser::where('level', 'owner')
             ->whereNotNull('google_calendar_id')
             ->whereIn('role_id', (clone $baseRoleQuery)->select('id'))
             ->count();
@@ -1086,7 +1104,31 @@ class AdminController extends Controller
             // it has seen since then. Only the nexus serves the homepage the test runs on. The
             // payload already carries it (null off the nexus), so it is not computed twice.
             'heroTest' => $data['hero_test'],
+            'stamp' => $this->growthState(),
         ]);
+    }
+
+    /**
+     * What the open page asks every half minute: has anything it counts changed? A trial that
+     * starts or converts writes a `subscriptions` row; a sign-up, a schedule and a sale add a row.
+     * Cheap on purpose (primary keys and the small subscriptions table), so the page rebuilds
+     * the whole payload only when there is something new to show.
+     */
+    public function growthStamp(): JsonResponse
+    {
+        abort_unless(auth()->user()->isAdmin() && config('app.hosted'), 404);
+
+        return response()->json(['stamp' => $this->growthState()]);
+    }
+
+    private function growthState(): string
+    {
+        $subscriptions = DB::table('subscriptions')->selectRaw('COUNT(*) AS n, MAX(id) AS id, MAX(updated_at) AS at')->first();
+
+        return md5(implode('|', [
+            $subscriptions->n ?? 0, $subscriptions->id ?? 0, $subscriptions->at ?? '',
+            DB::table('users')->max('id'), DB::table('roles')->max('id'), DB::table('sales')->max('id'),
+        ]));
     }
 
     /**
@@ -1860,7 +1902,7 @@ class AdminController extends Controller
                     Role::rewriteApprovedSubdomainReferences($renamedFrom, $role->subdomain);
                 }
             });
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             // The uniqueness check in the request is a check-then-write; the index is the only
             // real authority. Surface the same message rather than a 500, and never the driver's.
             if ((int) ($e->errorInfo[1] ?? 0) === 1062) {
@@ -2094,7 +2136,7 @@ class AdminController extends Controller
                 'class_name' => $this->extractJobClassName($job->payload),
                 'queue' => $job->queue,
                 'exception' => $job->exception,
-                'exception_excerpt' => \Illuminate\Support\Str::limit($job->exception, 200),
+                'exception_excerpt' => Str::limit($job->exception, 200),
                 'failed_at' => Carbon::parse($job->failed_at),
             ];
         });
@@ -2426,7 +2468,7 @@ class AdminController extends Controller
     /**
      * Parse log entries from the end of the file up to $maxBytes.
      */
-    private function parseLogEntries(string $logPath, int $maxBytes): \Illuminate\Support\Collection
+    private function parseLogEntries(string $logPath, int $maxBytes): Collection
     {
         $fileSize = filesize($logPath);
         $readFrom = max(0, $fileSize - $maxBytes);
@@ -2526,7 +2568,7 @@ class AdminController extends Controller
             $firstLine = preg_replace('/\b[0-9a-f]{8,}\b/', '{hash}', $firstLine);
             $firstLine = preg_replace('/\b\d{4,}\b/', '{id}', $firstLine);
 
-            return $class.': '.\Illuminate\Support\Str::limit($firstLine, 120, '');
+            return $class.': '.Str::limit($firstLine, 120, '');
         }
 
         // No exception class - use first ~120 chars
@@ -2534,7 +2576,7 @@ class AdminController extends Controller
         $firstLine = preg_replace('/\b[0-9a-f]{8,}\b/', '{hash}', $firstLine);
         $firstLine = preg_replace('/\b\d{4,}\b/', '{id}', $firstLine);
 
-        return \Illuminate\Support\Str::limit($firstLine, 120, '');
+        return Str::limit($firstLine, 120, '');
     }
 
     /**
@@ -2820,7 +2862,7 @@ class AdminController extends Controller
 
         // Approve-before-serve review queue. Same predicate as AdminAlertService's
         // promos_pending count, so the dashboard badge and this panel can never disagree.
-        $pendingPromotions = \App\Services\PromotionService::isEnabled()
+        $pendingPromotions = PromotionService::isEnabled()
             ? BoostCampaign::awaitingReview()
                 ->with(['event', 'role', 'user', 'ads'])
                 ->orderBy('created_at')
@@ -2956,7 +2998,7 @@ class AdminController extends Controller
         // it - federatableQuery() is two EXISTS subqueries plus three REGEXP predicates
         // over the whole events table, and it was running on every load for nothing.
         $federationAvailable = ! config('app.is_nexus');
-        $federation = app(\App\Services\FederationService::class);
+        $federation = app(FederationService::class);
         $admin = auth()->user();
 
         // Resolved ahead of the view array so the "and N more" line below can decide
@@ -3022,9 +3064,9 @@ class AdminController extends Controller
             'federationVisits' => Setting::get('federation_visits_30d') === null ? null : (int) Setting::get('federation_visits_30d'),
             'federationFromInvite' => (bool) session('federation_from_invite'),
             // The schedule a selfhost install shows at its own address (App\Support\HomeSchedule).
-            'homeScheduleAvailable' => \App\Support\HomeSchedule::available(),
-            'homeScheduleId' => \App\Support\HomeSchedule::id(),
-            'homeScheduleChoices' => \App\Support\HomeSchedule::available() ? \App\Support\HomeSchedule::choices() : collect(),
+            'homeScheduleAvailable' => HomeSchedule::available(),
+            'homeScheduleId' => HomeSchedule::id(),
+            'homeScheduleChoices' => HomeSchedule::available() ? HomeSchedule::choices() : collect(),
             // The network has this install at an older address: events wait until it has the new one.
             'federationAddressPending' => $federation->addressPending(),
             'federationNetworkUrl' => Setting::get('federation_network_url'),
@@ -3061,28 +3103,28 @@ class AdminController extends Controller
             // 'enterprise' for every schedule, so there is no free tier and nothing can ever
             // render; the card previously accepted a publisher ID, saved it successfully, and
             // did nothing, with no indication why.
-            'adsAvailable' => \App\Services\AdsService::isEnabled()
+            'adsAvailable' => AdsService::isEnabled()
                 && config('app.hosted')
                 && ! config('app.is_nexus'),
-            'adsAdsenseEnabled' => \App\Services\AdsService::boolSetting('adsense_enabled'),
-            'adsAdsenseClientId' => \App\Services\AdsService::setting('adsense_client_id'),
-            'adsAdsenseSlotId' => \App\Services\AdsService::setting('adsense_slot_id'),
-            'adsPersonalized' => \App\Services\AdsService::boolSetting('personalized'),
-            'adsNativeEnabled' => \App\Services\AdsService::boolSetting('native_enabled'),
-            'adsNativePriority' => \App\Services\AdsService::boolSetting('native_priority'),
-            'adsNativeCpm' => \App\Services\AdsService::setting('native_cpm'),
-            'adsNativeCpc' => \App\Services\AdsService::setting('native_cpc'),
+            'adsAdsenseEnabled' => AdsService::boolSetting('adsense_enabled'),
+            'adsAdsenseClientId' => AdsService::setting('adsense_client_id'),
+            'adsAdsenseSlotId' => AdsService::setting('adsense_slot_id'),
+            'adsPersonalized' => AdsService::boolSetting('personalized'),
+            'adsNativeEnabled' => AdsService::boolSetting('native_enabled'),
+            'adsNativePriority' => AdsService::boolSetting('native_priority'),
+            'adsNativeCpm' => AdsService::setting('native_cpm'),
+            'adsNativeCpc' => AdsService::setting('native_cpc'),
 
             // Only the env master switch gates this card. Unlike monetization it is not
             // hosted-only and not nexus-excluded: a single-tenant selfhost can run it, and the
             // nexus is precisely the operator most likely to want a fallback affiliate ID.
-            'stay22Available' => \App\Services\Stay22Service::isEnabled(),
-            'stay22Aid' => \App\Services\Stay22Service::operatorAid(),
+            'stay22Available' => Stay22Service::isEnabled(),
+            'stay22Aid' => Stay22Service::operatorAid(),
             // The homepage's quotes: the nexus serves the homepage they are printed on.
             'homeQuotesAvailable' => (bool) config('app.is_nexus'),
             'homeQuoteRows' => $this->homeQuoteRows(),
-            'realtimeEnabled' => \App\Utils\RealtimeTracker::enabled(),
-            'realtimeOwnerView' => \App\Utils\RealtimeTracker::ownerViewSetting(),
+            'realtimeEnabled' => RealtimeTracker::enabled(),
+            'realtimeOwnerView' => RealtimeTracker::ownerViewSetting(),
         ]);
     }
 
@@ -3102,7 +3144,7 @@ class AdminController extends Controller
 
         // Same three conditions as the card's own visibility, so a POST cannot store settings
         // for a deployment that can never act on them.
-        if (! \App\Services\AdsService::isEnabled() || ! config('app.hosted') || config('app.is_nexus')) {
+        if (! AdsService::isEnabled() || ! config('app.hosted') || config('app.is_nexus')) {
             return redirect()->route('admin.settings')->with('error', __('messages.not_authorized'));
         }
 
@@ -3163,12 +3205,12 @@ class AdminController extends Controller
      */
     public function updateHomeSchedule(Request $request): RedirectResponse
     {
-        if (! auth()->user()->isAdmin() || ! \App\Support\HomeSchedule::available()) {
+        if (! auth()->user()->isAdmin() || ! HomeSchedule::available()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         // Only from the set the card offers, by encoded id like every id the page prints.
-        $offered = \App\Support\HomeSchedule::choices()
+        $offered = HomeSchedule::choices()
             ->mapWithKeys(fn ($role) => [UrlUtils::encodeId($role->id) => $role->id]);
 
         $request->validate([
@@ -3179,11 +3221,11 @@ class AdminController extends Controller
             return redirect()->route('admin.settings')->with('error', __('messages.demo_mode_settings_disabled'));
         }
 
-        $old = ['home_schedule_id' => \App\Support\HomeSchedule::id()];
+        $old = ['home_schedule_id' => HomeSchedule::id()];
         $new = ['home_schedule_id' => $request->filled('home_schedule') ? $offered[$request->input('home_schedule')] : null];
 
         if ($old !== $new) {
-            \App\Support\HomeSchedule::set($new['home_schedule_id']);
+            HomeSchedule::set($new['home_schedule_id']);
 
             AuditService::log(
                 AuditService::ADMIN_SETTINGS_UPDATE,
@@ -3333,7 +3375,7 @@ class AdminController extends Controller
 
         // Same condition as the card's own visibility, so a POST cannot store a setting for
         // a deployment that can never act on it.
-        if (! \App\Services\Stay22Service::isEnabled()) {
+        if (! Stay22Service::isEnabled()) {
             return redirect()->route('admin.settings')->with('error', __('messages.not_authorized'));
         }
 
@@ -3386,11 +3428,11 @@ class AdminController extends Controller
         $text = fn ($value) => is_string($value) ? trim(str_replace(["\r\n", "\r"], "\n", $value)) : '';
         // Only a stored quote whose schedule is down may keep it with no subdomain: emptying the
         // subdomain of a quote on a live schedule is asking for a schedule, and says so.
-        $storedIds = array_column(\App\Utils\HomeQuotes::stored(), 'role_id');
+        $storedIds = array_column(HomeQuotes::stored(), 'role_id');
         $storedIds = array_values(array_diff($storedIds, Role::whereIn('id', $storedIds ?: [0])->where('is_deleted', false)->pluck('id')->map(fn ($id) => (int) $id)->all()));
 
         $rows = [];
-        foreach (array_slice((array) $request->input('quotes', []), 0, \App\Utils\HomeQuotes::MAX) as $i => $row) {
+        foreach (array_slice((array) $request->input('quotes', []), 0, HomeQuotes::MAX) as $i => $row) {
             $row = is_array($row) ? $row : [];
             $rows[(int) $i] = [
                 'subdomain' => strtolower($text($row['subdomain'] ?? '')),
@@ -3404,12 +3446,12 @@ class AdminController extends Controller
         }
 
         $roles = [];
-        $validator = \Illuminate\Support\Facades\Validator::make(['quotes' => $rows], [
-            'quotes' => ['array', 'max:'.\App\Utils\HomeQuotes::MAX],
+        $validator = Validator::make(['quotes' => $rows], [
+            'quotes' => ['array', 'max:'.HomeQuotes::MAX],
             'quotes.*.subdomain' => ['nullable', 'string', 'max:63'],
-            'quotes.*.quote' => ['nullable', 'string', 'max:'.\App\Utils\HomeQuotes::QUOTE_MAX],
-            'quotes.*.title' => ['nullable', 'string', 'max:'.\App\Utils\HomeQuotes::TITLE_MAX],
-            'quotes.*.name' => ['nullable', 'string', 'max:'.\App\Utils\HomeQuotes::NAME_MAX],
+            'quotes.*.quote' => ['nullable', 'string', 'max:'.HomeQuotes::QUOTE_MAX],
+            'quotes.*.title' => ['nullable', 'string', 'max:'.HomeQuotes::TITLE_MAX],
+            'quotes.*.name' => ['nullable', 'string', 'max:'.HomeQuotes::NAME_MAX],
         ]);
         $validator->after(function ($validator) use ($rows, &$roles) {
             foreach ($rows as $i => $row) {
@@ -3453,8 +3495,8 @@ class AdminController extends Controller
             }
         }
 
-        $before = count(\App\Utils\HomeQuotes::stored());
-        \App\Utils\HomeQuotes::save($quotes);
+        $before = count(HomeQuotes::stored());
+        HomeQuotes::save($quotes);
 
         // The count only: the words are the operator's to keep in the setting, not to copy into
         // every audit row.
@@ -3479,7 +3521,7 @@ class AdminController extends Controller
      */
     private function homeQuoteRows(): array
     {
-        $stored = \App\Utils\HomeQuotes::stored();
+        $stored = HomeQuotes::stored();
         // A schedule deleted since shows an empty subdomain (a deletion renames it to a placeholder
         // no save would accept); the row's hidden role_id keeps the quote on its schedule.
         $subdomains = Role::whereIn('id', array_column($stored, 'role_id'))->where('is_deleted', false)->pluck('subdomain', 'id');
@@ -3489,7 +3531,7 @@ class AdminController extends Controller
             $rows[] = ['role_id' => $quote['role_id'], 'subdomain' => (string) ($subdomains[$quote['role_id']] ?? ''), 'quote' => $quote['quote'], 'title' => $quote['title'], 'name' => $quote['name']];
         }
 
-        while (count($rows) < \App\Utils\HomeQuotes::MAX) {
+        while (count($rows) < HomeQuotes::MAX) {
             $rows[] = ['role_id' => null, 'subdomain' => '', 'quote' => '', 'title' => '', 'name' => ''];
         }
 
@@ -3530,7 +3572,7 @@ class AdminController extends Controller
         // network card does not carry the header/footer code, so it leaves that alone
         // rather than writing back whatever an older copy of the page held.
         if (! config('app.is_nexus') && $request->boolean('federation_settings_submitted')) {
-            $federation = app(\App\Services\FederationService::class);
+            $federation = app(FederationService::class);
             $wasEnabled = (bool) Setting::get('federation_enabled');
             $nowEnabled = $request->boolean('federation_enabled');
             $newEmail = trim((string) $request->input('federation_contact_email'));
@@ -3738,7 +3780,7 @@ class AdminController extends Controller
                 WebhookService::dispatch('sale.paid', $guestSale);
             }
         }
-        (new \App\Services\EmailService)->sendSaleConfirmationEmails($sale);
+        (new EmailService)->sendSaleConfirmationEmails($sale);
 
         AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'Sale', $sale->id, null, null, 'Approved amount_mismatch sale');
 
@@ -3766,7 +3808,7 @@ class AdminController extends Controller
         // its first call failed resource_missing - and its "fallback" then retried with a
         // completely different account's credentials, which is not a retry at all. It also had no
         // idempotency key, recorded no refund id, and reported failures in an untranslated string.
-        $result = app(\App\Services\SaleRefundService::class)
+        $result = app(SaleRefundService::class)
             ->refund($sale, null, auth()->id(), 'admin_amount_mismatch');
 
         if (! $result->moved()) {
@@ -3852,7 +3894,7 @@ class AdminController extends Controller
 
         // The candidate snapshot is cached, so without this the approval would not take
         // effect until the TTL expired.
-        app(\App\Services\PromotionService::class)->forgetCandidates();
+        app(PromotionService::class)->forgetCandidates();
 
         $this->notifyPromotionDecision($campaign->fresh(), true);
 
@@ -3892,7 +3934,7 @@ class AdminController extends Controller
 
         $this->refundRejectedPromotion($campaign);
 
-        app(\App\Services\PromotionService::class)->forgetCandidates();
+        app(PromotionService::class)->forgetCandidates();
 
         $this->notifyPromotionDecision($campaign->fresh(), false);
 
@@ -4053,7 +4095,7 @@ class AdminController extends Controller
             Cache::forget("custom_domain:{$role->custom_domain_host}");
 
             AuditService::log(AuditService::ADMIN_DOMAIN_REPROVISION, auth()->id(), 'Role', $role->id, null, null, "Re-provisioned domain: {$role->custom_domain_host}");
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             // The DigitalOcean side may well have succeeded; app:sync-domain-statuses reconciles
             // the stored status either way. Never surface the driver's message.
             report($e);

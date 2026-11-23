@@ -80,6 +80,30 @@ class GrowthExportTest extends TestCase
      * app:send-activation-nudges is hand-run, and before this the only way to know whether it had
      * ever been was a production query against schedule_nudges.
      */
+    /** The open page redraws itself when a trial starts or converts, instead of needing a reload. */
+    public function test_the_page_hears_a_new_or_changed_subscription(): void
+    {
+        $admin = $this->createOwner(true);
+        $page = $this->adminActing($admin)->get('/admin/growth')->assertOk();
+        $this->assertMatchesRegularExpression('/id="growth-live" data-stamp="([a-f0-9]{32})"/', $page->getContent());
+        preg_match('/data-stamp="([a-f0-9]{32})"/', $page->getContent(), $m);
+
+        $this->adminActing($admin)->getJson('/admin/growth/stamp')->assertOk()->assertJson(['stamp' => $m[1]]);
+
+        $role = $this->freeRole();
+        DB::table('subscriptions')->insert(['role_id' => $role->id, 'type' => 'default', 'stripe_id' => 'sub_live_test',
+            'stripe_status' => 'trialing', 'stripe_price' => 'price_x', 'quantity' => 1,
+            'trial_ends_at' => now()->addDays(14), 'created_at' => now(), 'updated_at' => now()]);
+        $trialing = $this->adminActing($admin)->getJson('/admin/growth/stamp')->json('stamp');
+        $this->assertNotSame($m[1], $trialing, 'a new trial moves the stamp');
+
+        $this->travel(5)->seconds();
+        DB::table('subscriptions')->where('stripe_id', 'sub_live_test')->update(['stripe_status' => 'active', 'updated_at' => now()]);
+        $this->assertNotSame($trialing, $this->adminActing($admin)->getJson('/admin/growth/stamp')->json('stamp'), 'a trial that converts moves it again');
+
+        $this->assertNotSame(200, $this->actingAs($this->createOwner())->get('/admin/growth/stamp')->status(), 'not for a schedule owner');
+    }
+
     public function test_the_page_says_whether_the_activation_nudges_ever_ran(): void
     {
         $admin = $this->createOwner(true);

@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <div class="page-shell page-stack">
+    <div class="page-shell page-stack" id="growth-live" data-stamp="{{ $stamp }}" data-stamp-url="{{ route('admin.growth.stamp') }}">
         {{-- Activation: how far the whole verified base actually gets --}}
         <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
             <x-admin-stat-tile :label="__('messages.growth_signups')" :icon="$icons['signup']"
@@ -395,6 +395,44 @@
             </x-page-card>
         @endif
     </div>
+
+    {{-- Live: a trial that starts or converts (or a sign-up, a schedule, a sale) shows without a
+         reload. The page asks a cheap stamp every 30 seconds while it is in view and redraws its
+         figures only when the stamp moved; never while a field or button in it has focus. --}}
+    <script {!! nonce_attr() !!}>
+    (function () {
+        var root = document.getElementById('growth-live');
+        if (!root || !window.fetch || !window.DOMParser) return;
+        var stamp = root.dataset.stamp;
+        var busy = false;
+
+        function redraw() {
+            return fetch(window.location.href, { headers: { 'Accept': 'text/html' }, credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.text() : null; })
+                .then(function (html) {
+                    if (!html) return;
+                    var fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('growth-live');
+                    if (!fresh || root.contains(document.activeElement) && document.activeElement !== document.body) return;
+                    root.innerHTML = fresh.innerHTML;
+                    stamp = fresh.dataset.stamp;
+                    root.dataset.stamp = stamp;
+                });
+        }
+
+        function check() {
+            if (busy || document.hidden) return;
+            busy = true;
+            fetch(root.dataset.stampUrl, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (data) { return data && data.stamp && data.stamp !== stamp ? redraw() : null; })
+                .catch(function () {})
+                .then(function () { busy = false; });
+        }
+
+        setInterval(check, 30000);
+        document.addEventListener('visibilitychange', function () { if (!document.hidden) check(); });
+    })();
+    </script>
 
     <x-slot name="head">
         @include('admin.partials._insight-styles')

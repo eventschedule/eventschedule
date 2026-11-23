@@ -1205,6 +1205,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
         // would be misleading). Same registration-time reasoning as federation below:
         // phpunit leaves IS_HOSTED unset, so a registration-time gate would be untestable.
         Route::get('/admin/growth', [AdminController::class, 'growth'])->name('admin.growth');
+        Route::get('/admin/growth/stamp', [AdminController::class, 'growthStamp'])->name('admin.growth.stamp');
         Route::post('/admin/growth/hero-test/reset', [AdminController::class, 'growthResetHeroTest'])->name('admin.growth.hero_test_reset');
         Route::post('/admin/growth/hero-test/end', [AdminController::class, 'growthEndHeroTest'])->name('admin.growth.hero_test_end');
         Route::get('/admin/boost', [AdminController::class, 'boost'])->name('admin.boost');
