@@ -1,4 +1,4 @@
-<x-app-layout :title="$guestTitle()" realtime-surface="gp" :realtime-role="$role" :realtime-event="$event" :force-mode="request()->embed ? null : \App\Utils\GuestTheme::pageMode($role, $otherRole ?? null, $event ?? null)" :mode-chosen="! request()->embed && \App\Utils\GuestTheme::pagePalette($role, $otherRole ?? null, $event ?? null) !== null" :carry-hosts="request()->embed ? [] : \App\Utils\GuestTheme::carryHosts($role, $otherRole ?? null, $event ?? null)">
+<x-app-layout :title="$guestTitle()" :icon="$role->isPro() && $role->profile_image_url ? $role->profile_image_url : null" realtime-surface="gp" :realtime-role="$role" :realtime-event="$event" :force-mode="request()->embed ? null : \App\Utils\GuestTheme::pageMode($role, $otherRole ?? null, $event ?? null)" :mode-chosen="! request()->embed && \App\Utils\GuestTheme::pagePalette($role, $otherRole ?? null, $event ?? null) !== null" :carry-hosts="request()->embed ? [] : \App\Utils\GuestTheme::carryHosts($role, $otherRole ?? null, $event ?? null)">
 
     <noscript>
       <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-4 text-center text-base">
@@ -356,11 +356,8 @@
         <base target="_blank">
         @endif
 
-        {{-- Use the schedule's logo as the favicon on its guest pages (Pro/Enterprise) --}}
-        @if ($role->isPro() && $role->profile_image_url)
-            <link rel="icon" href="{{ $role->profile_image_url }}">
-            <link rel="apple-touch-icon" href="{{ $role->profile_image_url }}">
-        @endif
+        {{-- The schedule's logo is the favicon on its guest pages (Pro/Enterprise): the :icon on
+             x-app-layout above, which prints it instead of ours rather than after it. --}}
 
         {{-- This schedule's own manifest, never the platform one. Not plan-gated, unlike the
              favicon above: that gate chooses between a tenant's logo and a neutral default,

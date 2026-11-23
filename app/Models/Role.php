@@ -3017,15 +3017,43 @@ class Role extends Model implements MustVerifyEmail
 
         $gallery = $header ? null : ($this->showsGallery() ? $this->galleryImages->first() : null);
 
-        return match (true) {
-            (bool) $header => SeoUtils::imageObject($header, $this->imageSourceDimensions('header')),
+        $candidates = array_values(array_filter([
+            $header ? SeoUtils::imageObject($header, $this->imageSourceDimensions('header')) : null,
             // A wide photo the page shows (#gp-gallery) before the square profile photo, which a
             // large link-preview card crops badly.
-            (bool) $gallery => SeoUtils::imageObject($gallery->url(), $gallery->width && $gallery->height ? [$gallery->width, $gallery->height] : null),
-            (bool) $this->profile_image_url => SeoUtils::imageObject($this->profile_image_url, $this->imageSourceDimensions()),
-            (bool) $background => SeoUtils::imageObject($background, $this->imageSourceDimensions('background')),
-            default => null,
-        };
+            $gallery ? SeoUtils::imageObject($gallery->url(), $gallery->width && $gallery->height ? [$gallery->width, $gallery->height] : null) : null,
+            $this->profile_image_url ? SeoUtils::imageObject($this->profile_image_url, $this->imageSourceDimensions()) : null,
+            $background ? SeoUtils::imageObject($background, $this->imageSourceDimensions('background')) : null,
+        ]));
+
+        // Facebook and WhatsApp refuse an og:image under 200px on either side, and then show the
+        // site's icon in its place: a 975x180 banner header previewed as our favicon. So the first
+        // picture big enough wins, and a too-small one only when the owner has nothing else.
+        foreach ($candidates as $image) {
+            if (self::shareImageIsUsable($image)) {
+                return $image;
+            }
+        }
+
+        return $candidates[0] ?? null;
+    }
+
+    /** The smallest side Facebook and WhatsApp accept for og:image. */
+    public const SHARE_IMAGE_MIN_SIDE = 200;
+
+    /**
+     * Whether a link preview will show this picture: big enough on both sides, or of a size
+     * nobody recorded (which is given the benefit of the doubt, as before).
+     *
+     * @param  array{url: string, width?: int, height?: int}  $image
+     */
+    public static function shareImageIsUsable(array $image): bool
+    {
+        if (empty($image['width']) || empty($image['height'])) {
+            return true;
+        }
+
+        return min($image['width'], $image['height']) >= self::SHARE_IMAGE_MIN_SIDE;
     }
 
     public function getProfileImageUrlAttribute($value)

@@ -250,6 +250,58 @@ class GuestSocialImageTest extends TestCase
     }
 
     /**
+     * A banner header under 200px tall is refused by Facebook and WhatsApp, which then preview the
+     * page's icon instead (it was our favicon, on a band's own domain). The logo goes first then.
+     */
+    public function test_a_header_too_small_for_a_preview_gives_way_to_the_logo(): void
+    {
+        $role = $this->role([
+            'profile_image_url' => 'profile_bluenote.png',
+            'header_image' => '',
+            'header_image_url' => 'header_bluenote.png',
+            'header_image_variants' => ['src' => ['w' => 975, 'h' => 180]],
+        ]);
+
+        $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertStringContainsString('profile_bluenote.png', (string) $this->ogImage($content));
+        $this->assertStringNotContainsString('header_bluenote.png', (string) $this->twitterImage($content));
+    }
+
+    /** With nothing else uploaded, a small header is still better than no picture at all. */
+    public function test_a_small_header_is_kept_when_it_is_the_only_picture(): void
+    {
+        $role = $this->role([
+            'profile_image_url' => null,
+            'header_image' => '',
+            'header_image_url' => 'header_bluenote.png',
+            'header_image_variants' => ['src' => ['w' => 975, 'h' => 180]],
+        ]);
+
+        $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertStringContainsString('header_bluenote.png', (string) $this->ogImage($content));
+    }
+
+    /**
+     * A preview that cannot use the og:image falls back to the first icon the page declares, so a
+     * schedule with its own icon must not declare ours at all, not even ahead of its own.
+     */
+    public function test_a_schedule_with_its_own_icon_does_not_declare_ours(): void
+    {
+        $role = $this->role(['profile_image_url' => 'profile_bluenote.png']);
+
+        $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('images/favicon', $content);
+        $this->assertMatchesRegularExpression('/<link rel="icon" href="[^"]*profile_bluenote\.png">/', $content);
+
+        $free = $this->role(['profile_image_url' => 'profile_bluenote.png', 'plan_type' => 'free']);
+
+        $this->assertStringContainsString('images/favicon.png', $this->get('/'.$free->subdomain)->assertOk()->getContent());
+    }
+
+    /**
      * A built-in header is stock art, not the owner's picture. With nothing uploaded the page
      * still advertises no image - even though an upload from before they picked the built-in one
      * is still stored.

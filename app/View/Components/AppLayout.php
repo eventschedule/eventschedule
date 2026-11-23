@@ -43,6 +43,12 @@ class AppLayout extends Component
         public bool $modeChosen = false,
         /** Hosts of their own that this guest page links to (GuestTheme::carryHosts()). */
         public array $carryHosts = [],
+        /**
+         * The page's own icon (a schedule's logo on its guest pages), printed IN PLACE of ours,
+         * never after it: a link preview whose og:image it cannot use falls back to the first
+         * icon a page declares, which put our logo on a schedule's shared link.
+         */
+        public ?string $icon = null,
     ) {}
 
     /**
