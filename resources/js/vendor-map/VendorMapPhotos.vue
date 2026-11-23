@@ -258,7 +258,7 @@ async function parse() {
         let res;
         // One area per request when the market was photographed area by area: ask again until
         // every area is read.
-        for (let guard = 0; guard <= maxAreas; guard++) {
+        for (let guard = 0; guard <= maxAreas + 40; guard++) {
             res = await fetch(props.urls.parse.replace('__DRAFT__', draftId.value), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': props.csrfToken },
@@ -267,7 +267,9 @@ async function parse() {
             data = await res.json().catch(() => ({}));
             if (!(res.ok && data.ok && data.pending)) break;
             note.value = '';
-            areaProgress.value = (props.t.mapping_area || '').replace(':name', data.next || '').replace(':current', String(data.done + 1)).replace(':total', String(data.total));
+            // Another request is still reading this draft (a Try again): ask again shortly.
+            if (data.busy) { await new Promise((r) => setTimeout(r, 4000)); continue; }
+            if (data.total) areaProgress.value = (props.t.mapping_area || '').replace(':name', data.next || '').replace(':current', String(data.done + 1)).replace(':total', String(data.total));
         }
         clearInterval(stageTimer);
         if (res.ok && data.ok) {

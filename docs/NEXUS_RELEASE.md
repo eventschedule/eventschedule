@@ -105,6 +105,35 @@ included.
 A new secret goes in the console as an **encrypted, app-level** variable, never in a stored spec
 file.
 
+## Unreleased: vendor map for markets, fairs and expos; "Event schedule" in the UI (2026-11-23)
+
+**What ships:**
+- **"Talent" leaves the UI:** the standard schedule type reads "Event schedule" (code, database,
+  URLs and the API keep `talent`); performers on an event are the Lineup.
+- **Vendor map** (`App\Services\VendorMaps`, `/docs/vendor-maps`): an organizer draws the market
+  (by hand, or from photos read by Gemini area by area), shares one vendor link (Pro), reviews
+  requests on the map, calls off a day; shoppers open `/{schedule}/map` from a QR sign (on a phone,
+  the market's areas first). New marketing pages: `/features/vendor-map`, `/for-craft-fairs`,
+  `/for-flea-markets`, `/for-conferences-and-expos`.
+- **Plural forms:** `App\Support\PluralSelector` reads exact forms beside a language's own; four
+  existing Russian and Romanian strings that read wrong for 21 or 101 now read right. No other
+  string changes.
+
+**Migration:** `2026_11_23_000000_create_vendor_maps_tables` creates six new tables (no change to an
+existing one; foreign keys to `roles`, `events` and `users`). Runs in the start command.
+
+**Scheduler:** `app:send-vendor-map-notices` (every 5 minutes) and `app:prune-vendor-map-drafts`
+(hourly), on both rails. Nothing is backfilled and no mail goes out on deploy: every mail answers
+a request made after it.
+
+**Storage:** AI photos and vendor photos are written to the default disk with private visibility
+(the bucket's per-object ACL; check the Space has no bucket policy granting public read). Public
+copies (`vmthumb_*`, `vmpic_*`) are written public, as other images are.
+
+**After:** open `/features/vendor-map`; as an organizer, Actions > Set up a vendor map on a test
+venue, draw two spots, open `/{schedule}/map` on a phone; check `/admin/queue` shows the two new
+scheduler entries running.
+
 ## Unreleased: guest portal redesign (2026-11-22)
 
 **What ships:**

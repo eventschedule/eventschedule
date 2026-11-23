@@ -149,16 +149,17 @@ class VendorMapAi
      */
     public static function parse(VendorMapDraft $draft, ?string $notes = null): ?array
     {
-        // One read of a draft at a time: a Try again pressed while the first request still runs
-        // waits for it and then answers from what it found, instead of paying for a second read.
+        // One read of a draft at a time. A Try again pressed while the first request still runs
+        // is told "still reading" at once (the page asks again in a few seconds) rather than
+        // holding a worker while it waits, and never pays for a second read.
         try {
-            return Cache::lock('vendor-map-draft:'.$draft->id, 200)->block(95, function () use ($draft, $notes) {
+            return Cache::lock('vendor-map-draft:'.$draft->id, 200)->block(3, function () use ($draft, $notes) {
                 $draft->refresh();
 
                 return self::parseNow($draft, $notes);
             });
         } catch (LockTimeoutException) {
-            throw ValidationException::withMessages(['photos' => __('messages.vm_ai_failed')]);
+            return ['pending' => true, 'busy' => true, 'done' => 0, 'total' => 0, 'next' => ''];
         }
     }
 

@@ -99,11 +99,6 @@ class VendorSpotController extends Controller
 
         $props = $this->props($request, $role, $map, $token, $home);
 
-        // "Sign in" on a stall that is taken: the vendor comes back to this link afterwards.
-        if (! $request->user() && ! session()->has('url.intended')) {
-            session()->put('url.intended', VendorMapPresenter::claimUrl($role, $map));
-        }
-
         return response()->view('vendor-map.claim', [
             'role' => $role,
             'map' => $map,
@@ -515,6 +510,11 @@ class VendorSpotController extends Controller
         $this->assertSpotOpen($map, $spot, $user);
 
         $details = (array) ($pending['details'] ?? []);
+        // A photo picked long ago may have been cleaned up meanwhile (unsent files go after a
+        // day): the request goes without it rather than pointing at nothing.
+        if (! empty($details['photo_path']) && VendorMapImages::size($details['photo_path']) === 0) {
+            $details['photo_path'] = null;
+        }
 
         if ($this->seasonFor($map, $user)) {
             // Already at this market for the season: the link is their home, not a second stall.
@@ -1008,9 +1008,9 @@ class VendorSpotController extends Controller
         }
 
         // Read the size first: a small file can declare a huge picture, and decoding it would run
-        // out of memory (the browser sends ~1600px; 40 megapixels is far beyond any phone photo).
+        // out of memory (the browser sends ~1600px; the app's own 12-megapixel limit holds a camera's).
         $size = @getimagesizefromstring($bytes);
-        if (! $size || $size[0] * $size[1] > 40_000_000) {
+        if (! $size || $size[0] * $size[1] > ImageUtils::VARIANT_MAX_PIXELS) {
             return null;
         }
         $image = @imagecreatefromstring($bytes);

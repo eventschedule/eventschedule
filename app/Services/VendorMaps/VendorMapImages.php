@@ -97,7 +97,7 @@ class VendorMapImages
         }
 
         $size = @getimagesizefromstring($bytes);
-        if (! $size || $size[0] * $size[1] > 40_000_000) {
+        if (! $size || $size[0] * $size[1] > ImageUtils::VARIANT_MAX_PIXELS) {
             return null;
         }
         $image = @imagecreatefromstring($bytes);
@@ -126,10 +126,52 @@ class VendorMapImages
         return $filename;
     }
 
-    /** A published thumbnail, by the name publishThumbnail() gave it and no other. */
+    /**
+     * The public copy of a map's tracing picture, for shoppers when its owner chose to show it:
+     * one name per private picture (keyed with the app key, so the private path cannot be read
+     * back from it), served from the public store and its CDN, never through PHP.
+     */
+    public static function pictureName(string $privatePath): string
+    {
+        return 'vmpic_'.substr(hash_hmac('sha256', $privatePath, (string) config('app.key')), 0, 32).'.jpg';
+    }
+
+    /** Makes the public copy when there is none (at most 2400px, a JPEG). Null when it cannot. */
+    public static function publishPicture(string $privatePath): ?string
+    {
+        $name = self::pictureName($privatePath);
+        $disk = self::disk();
+        if ($disk->exists(ImageUtils::storagePathFor($name))) {
+            return $name;
+        }
+        $bytes = self::readPrivate($privatePath);
+        $size = $bytes ? @getimagesizefromstring($bytes) : false;
+        if (! $size || $size[0] * $size[1] > ImageUtils::VARIANT_MAX_PIXELS || ! function_exists('imagecreatefromstring')) {
+            return null;
+        }
+        $image = @imagecreatefromstring($bytes);
+        if (! $image) {
+            return null;
+        }
+        $scale = min(1, 2400 / max($size[0], $size[1]));
+        $w = max(1, (int) round($size[0] * $scale));
+        $h = max(1, (int) round($size[1] * $scale));
+        $out = imagecreatetruecolor($w, $h);
+        imagecopyresampled($out, $image, 0, 0, 0, 0, $w, $h, $size[0], $size[1]);
+        ob_start();
+        imagejpeg($out, null, 84);
+        $jpeg = (string) ob_get_clean();
+        imagedestroy($image);
+        imagedestroy($out);
+        $disk->put(ImageUtils::storagePathFor($name), $jpeg, ['visibility' => 'public']);
+
+        return $name;
+    }
+
+    /** A published thumbnail or map picture, by the name this class gave it and no other. */
     public static function deletePublic(?string $filename): void
     {
-        if (is_string($filename) && preg_match('/^vmthumb_[a-z0-9]{32}\.jpg$/', $filename) === 1) {
+        if (is_string($filename) && preg_match('/^(vmthumb|vmpic)_[a-z0-9]{32}\.jpg$/', $filename) === 1) {
             self::disk()->delete(ImageUtils::storagePathFor($filename));
         }
     }

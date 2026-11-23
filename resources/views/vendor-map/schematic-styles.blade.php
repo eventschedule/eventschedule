@@ -96,4 +96,6 @@
     .vmo-plan.has-picture .vmo-tile { background: color-mix(in srgb, var(--zc) 28%, color-mix(in srgb, var(--gk-stage) 86%, transparent)); border-width: 2px; border-color: var(--zc); box-shadow: 0 2px 10px rgba(0, 0, 0, .25); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
     .vmo-plan.has-picture .vmo-place { background: color-mix(in srgb, var(--gk-stage) 88%, transparent); border-style: solid; }
     @media (prefers-reduced-motion: reduce) { .vmo-card { transition: none; } }
+    /* A single long name (one Hebrew word) wraps inside its block instead of being cut. */
+    .vms-zh b, .vmo-card-head b { min-width: 0; overflow-wrap: anywhere; }
 </style>

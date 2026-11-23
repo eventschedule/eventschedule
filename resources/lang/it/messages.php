@@ -9007,4 +9007,7 @@ return [
     'vm_picture_public' => 'Mostrala sulla mappa dei visitatori',
     'vm_public_area_coming' => '{0} Non viene nessuno|{1} Ne viene 1|[2,*] Ne vengono :count',
     'vm_claim_see_map' => 'Apri la mappa',
+    'log_in_first' => 'Accedi prima dalla pagina di accesso, poi torna a questo modulo.',
+    'vm_reopen_day' => 'Riapri questo giorno',
+    'vm_vendors_can_join_lead' => 'I venditori aprono il link, toccano il loro posto e dicono cosa vendono. Niente compare sulla mappa finché non approvi.',
 ];

@@ -2924,4 +2924,6 @@ return array_replace(require __DIR__.'/../pt/messages.php', function_exists('ope
     'vm_areas_lead' => 'Um espaço grande? Fotografe cada área em separado: o pavilhão, cada área ao ar livre. A IA desenha cada área e depois junta-as.',
     'vm_max_photos' => 'Até 20 fotografias por área e um PDF.',
     'vm_claim_tap_area' => 'Toque na área onde monta a banca.',
+    'log_in_first' => 'Inicie sessão primeiro na página de início de sessão e depois volte a este formulário.',
+    'vm_vendors_can_join_lead' => 'Os expositores abrem o link, tocam no seu lugar e dizem o que vendem. Nada aparece no mapa até aprovar.',
 ]);

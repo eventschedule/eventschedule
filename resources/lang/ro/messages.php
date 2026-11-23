@@ -9028,4 +9028,7 @@ return [
     'vm_picture_public' => 'Arat-o și pe harta cumpărătorilor',
     'vm_public_area_coming' => '{0} Nu vine nimeni|Vine :count|Vin :count|Vin :count de vânzători',
     'vm_claim_see_map' => 'Deschide harta',
+    'log_in_first' => 'Conectează-te mai întâi pe pagina de autentificare, apoi revino la acest formular.',
+    'vm_reopen_day' => 'Redeschide această zi',
+    'vm_vendors_can_join_lead' => 'Vânzătorii deschid linkul, ating locul lor și spun ce vând. Nimic nu apare pe hartă până nu aprobi.',
 ];

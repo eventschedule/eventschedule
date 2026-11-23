@@ -9009,4 +9009,7 @@ return [
     'vm_picture_public' => 'Mostrar no mapa dos clientes',
     'vm_public_area_coming' => '{0} Ninguém vem|{1} Vem 1|[2,*] Vêm :count',
     'vm_claim_see_map' => 'Abrir o mapa',
+    'log_in_first' => 'Entre primeiro na página de login e depois volte a este formulário.',
+    'vm_reopen_day' => 'Reabrir este dia',
+    'vm_vendors_can_join_lead' => 'Os expositores abrem o link, tocam no seu lugar e dizem o que vendem. Nada aparece no mapa até você aprovar.',
 ];

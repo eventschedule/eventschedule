@@ -4144,7 +4144,7 @@
                                     $existingLabelKeys = array_keys($role->custom_labels ?? []);
                                     $availableLabels = collect(\App\Models\Role::getCustomizableLabels())
                                         ->filter(fn($v, $k) => !in_array($k, $existingLabelKeys))
-                                        ->mapWithKeys(fn($v, $k) => [$k => __('messages.' . $k)])
+                                        ->mapWithKeys(fn($v, $k) => [$k => $k === 'lineup' ? \App\Utils\ScheduleTypeLabel::lineup() : __('messages.' . $k)])
                                         ->sort(SORT_LOCALE_STRING);
                                 @endphp
                                 @foreach($availableLabels as $labelKey => $labelTranslated)
@@ -9760,7 +9760,7 @@ function updateEventCustomFieldButton() {
 }
 
 @if ($role->isPro())
-var customLabelDefaults = @json(collect(\App\Models\Role::getCustomizableLabels())->mapWithKeys(fn($v, $k) => [$k => __('messages.' . $k)]));
+var customLabelDefaults = @json(collect(\App\Models\Role::getCustomizableLabels())->mapWithKeys(fn($v, $k) => [$k => $k === 'lineup' ? \App\Utils\ScheduleTypeLabel::lineup() : __('messages.' . $k)]));
 var showEnField = {{ ($role->language_code !== 'en') ? 'true' : 'false' }};
 
 // Enable/disable Add button based on select value

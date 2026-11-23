@@ -59,7 +59,9 @@ class VendorMapBand
     {
         $event = $map->event;
 
-        if (! $event || $event->is_draft) {
+        // As the public map (VendorMapPublicController::show): a season that is not public has
+        // no dates or vendors to show a stranger.
+        if (! $event || $event->is_draft || $event->isInternal() || $event->isPasswordProtected() || $event->is_private) {
             return null;
         }
 

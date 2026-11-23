@@ -9080,4 +9080,7 @@ return [
     'vm_picture_public' => 'Show it on the shoppers\' map',
     'vm_public_area_coming' => '{0} Nobody coming|{1} 1 coming|[2,*] :count coming',
     'vm_claim_see_map' => 'Open the map',
+    'log_in_first' => 'Log in on the login page first, then come back to this form.',
+    'vm_reopen_day' => 'Open this day again',
+    'vm_vendors_can_join_lead' => 'Vendors open the link, tap their spot and say what they sell. Nothing shows on the map until you approve it.',
 ];

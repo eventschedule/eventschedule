@@ -18,7 +18,7 @@
 <template>
   <div class="vm-page" :class="{ 'is-phone': phone }">
     <header class="vm-head">
-      <a :href="boot.back.url" class="vm-back">
+      <a v-if="!boot.embed" :href="boot.back.url" class="vm-back">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" :style="rtl ? 'transform: scaleX(-1)' : null"><path d="M15 5l-7 7 7 7" /></svg>
         <bdi>{{ boot.back.label }}</bdi>
       </a>

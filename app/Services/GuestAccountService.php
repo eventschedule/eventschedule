@@ -43,6 +43,8 @@ class GuestAccountService
 
     public const CODES_PER_HOUR = 5;
 
+    public const CODES_PER_DAY = 12;
+
     /** Wrong codes allowed per account (or per address with no account yet), and the wait. */
     public const WRONG_CODES = 5;
 
@@ -291,8 +293,11 @@ class GuestAccountService
         // Counted before the send and atomically, so requests in parallel cannot slip past the
         // hourly cap (each code is a set of guesses at an account's sign-in).
         $sendsKey = 'guest_code_sends:'.self::addressKey($email);
+        $dayKey = 'guest_code_sends_day:'.self::addressKey($email);
         Cache::add($sendsKey, 0, now()->addHour());
-        if ((int) Cache::increment($sendsKey) > self::CODES_PER_HOUR) {
+        Cache::add($dayKey, 0, now()->addDay());
+        // An hour's cap, and a day's: every code is five guesses at the account.
+        if ((int) Cache::increment($sendsKey) > self::CODES_PER_HOUR || (int) Cache::increment($dayKey) > self::CODES_PER_DAY) {
             throw ValidationException::withMessages(['email' => [__('messages.code_rate_limit')]]);
         }
 
@@ -412,8 +417,13 @@ class GuestAccountService
             throw ValidationException::withMessages(['email' => [__('messages.account_blocked')]]);
         }
 
+        // An emailed code is a password-less way in: never for an account that runs the platform,
+        // which signs in on the login page.
         if ($existing && $existing->hasTwoFactorEnabled()) {
             throw ValidationException::withMessages(['email' => [__('messages.two_factor_sign_in_first')]]);
+        }
+        if ($existing && $existing->is_admin) {
+            throw ValidationException::withMessages(['email' => [__('messages.log_in_first')]]);
         }
 
         if ($existing && ! $existing->isStub()) {

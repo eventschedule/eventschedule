@@ -259,8 +259,11 @@ class VendorMapPublicTest extends TestCase
         $this->assertNull($this->boot($this->get($this->mapUrl())->getContent())['schematic']['picture']);
 
         $this->map->forceFill(['background_public' => true])->save();
-        $this->get($url)->assertOk()->assertHeader('Content-Type', 'image/png');
-        $this->assertStringContainsString('/map/picture', $this->boot($this->get($this->mapUrl())->getContent())['schematic']['picture']);
+        // Served from the public store (its CDN), never through PHP: the route only points there.
+        $location = $this->get($url)->assertRedirect()->headers->get('Location');
+        $this->assertStringContainsString('vmpic_', $location);
+        $this->assertStringContainsString('vmpic_', $this->boot($this->get($this->mapUrl())->getContent())['schematic']['picture']);
+        $this->assertStringNotContainsString($this->map->background_path, $location, 'the private path is not in the public name');
     }
 
     public function test_a_switched_off_map_is_not_found(): void
@@ -268,6 +271,16 @@ class VendorMapPublicTest extends TestCase
         $this->map->forceFill(['enabled' => false])->save();
 
         $this->get($this->mapUrl())->assertNotFound();
+    }
+
+    public function test_an_event_slugged_map_keeps_its_short_link_where_there_is_no_market_map(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['name' => 'A Concert Hall']);
+        $this->createEvent($venue, ['name' => 'Map', 'slug' => 'map', 'creator_role_id' => $venue->id,
+            'starts_at' => now()->addDays(3)->format('Y-m-d').' 20:00:00']);
+
+        $this->get('/'.$venue->subdomain.'/map')->assertOk()->assertSee('A Concert Hall');
     }
 
     public function test_a_schedule_without_a_map_is_not_found(): void

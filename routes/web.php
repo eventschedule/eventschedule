@@ -132,8 +132,9 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // shares one with every other throttled route on the host.
         Route::get('/api/venue-map', [VenueMapController::class, 'show'])->name('role.venue_map')->middleware('throttle:60,1,venue_map');
         // The vendor map (App\Services\VendorMaps): the visitors' map, the vendor link and the
-        // "Not coming" link from a vendor's mail. Ahead of the /{slug} catch-alls, so `map` and
-        // `spot` are in Event::SHADOWED_SLUGS. The map page is not throttled: a market's shoppers
+        // "Not coming" link from a vendor's mail. Ahead of the /{slug} catch-alls, so `spot` and
+        // `vendor-away` are in Event::SHADOWED_SLUGS; `map` hands a schedule with no market map to
+        // the event page (an event slugged "map" keeps its short link). The map page is not throttled: a market's shoppers
         // share one mobile network, and the page carries its own data.
         Route::get('/map', [VendorMapPublicController::class, 'show'])->name('vendor_map.public');
         Route::get('/map/picture', [VendorMapPublicController::class, 'picture'])->name('vendor_map.public_picture');
@@ -987,13 +988,14 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::get('/{subdomain}/vendor-map/day', [VendorMapController::class, 'day'])->name('vendor_map.day');
     Route::post('/{subdomain}/vendor-map/photos', [VendorMapController::class, 'uploadPhotos'])->name('vendor_map.photos')->middleware('throttle:30,1,vendor_map_ai');
     Route::get('/{subdomain}/vendor-map/draft', [VendorMapController::class, 'latestDraft'])->name('vendor_map.draft');
-    Route::post('/{subdomain}/vendor-map/draft/{draft}/parse', [VendorMapController::class, 'parseDraft'])->name('vendor_map.draft.parse')->middleware('throttle:6,1,vendor_map_ai');
+    Route::post('/{subdomain}/vendor-map/draft/{draft}/parse', [VendorMapController::class, 'parseDraft'])->name('vendor_map.draft.parse')->middleware('throttle:20,1,vendor_map_ai');
     Route::get('/{subdomain}/vendor-map/private/{kind}/{id}/{index?}', [VendorMapController::class, 'privateImage'])->name('vendor_map.private_image');
     Route::post('/{subdomain}/vendor-map/occupants/{occupant}/{action}', [VendorMapController::class, 'decide'])->name('vendor_map.decide')->where('action', 'approve|decline|undo|absent|present|remove');
     Route::post('/{subdomain}/vendor-map/approve-all', [VendorMapController::class, 'approveAll'])->name('vendor_map.approve_all');
     Route::post('/{subdomain}/vendor-map/move', [VendorMapController::class, 'move'])->name('vendor_map.move');
     Route::post('/{subdomain}/vendor-map/day-vendor', [VendorMapController::class, 'addForDay'])->name('vendor_map.day_vendor');
     Route::post('/{subdomain}/vendor-map/cancel-day', [VendorMapController::class, 'cancelDay'])->name('vendor_map.cancel_day');
+    Route::post('/{subdomain}/vendor-map/reopen-day', [VendorMapController::class, 'reopenDay'])->name('vendor_map.reopen_day');
     Route::post('/{subdomain}/vendor-map/link', [VendorMapController::class, 'link'])->name('vendor_map.link');
     Route::get('/{subdomain}/vendor-map/sign', [VendorMapController::class, 'sign'])->name('vendor_map.sign');
     Route::get('/{subdomain}/vendor-map/sign.png', [VendorMapController::class, 'signImage'])->name('vendor_map.sign_image');

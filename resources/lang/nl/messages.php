@@ -9010,4 +9010,7 @@ return [
     'vm_picture_public' => 'Ook tonen op de plattegrond voor bezoekers',
     'vm_public_area_coming' => '{0} Niemand komt|{1} 1 komt|[2,*] :count komen',
     'vm_claim_see_map' => 'Plattegrond openen',
+    'log_in_first' => 'Log eerst in op de inlogpagina en kom dan terug naar dit formulier.',
+    'vm_reopen_day' => 'Deze dag weer openen',
+    'vm_vendors_can_join_lead' => 'Verkopers openen de link, tikken op hun plek en zeggen wat ze verkopen. Niets verschijnt op de plattegrond tot jij het goedkeurt.',
 ];

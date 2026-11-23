@@ -102,8 +102,8 @@ class VendorMapSchematic
             'here' => ! empty($payload['here']),
             'places' => self::places($payload),
             // The owner's picture of the market under the overview, laid over the whole plan.
-            'picture' => $map->background_public && $map->background_path && $map->role
-                ? route('vendor_map.public_picture', ['subdomain' => $map->role->subdomain]).'?v='.substr(md5($map->background_path), 0, 8)
+            'picture' => $map->background_public && $map->background_path
+                ? VendorMapImages::publicUrl(VendorMapImages::pictureName($map->background_path))
                 : null,
             'frame' => [(int) ($map->width ?: 1000), (int) ($map->height ?: 700)],
             'hereAt' => ! empty($payload['here']) ? [(int) $payload['here']['x'], (int) $payload['here']['y']] : null,

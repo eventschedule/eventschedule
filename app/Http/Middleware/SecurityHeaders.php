@@ -2,8 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\AdsService;
+use App\Services\Stay22Service;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
 
 class SecurityHeaders
@@ -28,7 +31,7 @@ class SecurityHeaders
         // reused against a page an attacker can write into.
         $nonce = base64_encode(Str::random(16));
         $request->attributes->set('csp_nonce', $nonce);
-        \Illuminate\Support\Facades\Vite::useCspNonce($nonce);
+        Vite::useCspNonce($nonce);
 
         if (app()->bound('debugbar')) {
             app('debugbar')->getJavascriptRenderer()->setCspNonce($nonce);
@@ -52,6 +55,7 @@ class SecurityHeaders
             'ticket.view',               // Ticket confirmation page
             'event.rsvp',                // RSVP POST
             'role.audience.join_embed',  // Embedded subscribe form POST
+            'vendor_map.public',         // A market's map, "Put the map on your website"
             'payment_url.success',       // Payment URL success
             'payment_url.cancel',        // Payment URL cancel
             // Every gateway's return and cancel landings share these two route names, so this covers
@@ -222,7 +226,7 @@ class SecurityHeaders
         // jsDelivr, unpkg and anything an operator injects via custom_header_code. The
         // creatives themselves render in cross-origin iframes, into which this policy does
         // not propagate, so frame-src is all that is needed to reach them.
-        if (\App\Services\AdsService::adSenseConfigured()) {
+        if (AdsService::adSenseConfigured()) {
             $extra['script-src'] = [
                 'pagead2.googlesyndication.com', '*.googlesyndication.com',
                 'partner.googleadservices.com', '*.googletagservices.com',
@@ -255,7 +259,7 @@ class SecurityHeaders
         // opt into this". Note this widening is independent of ADS_ENABLED, and unlike the
         // hardcoded *.eventschedule.com above it is host-independent, so it is enforced
         // identically on a customer's custom domain.
-        if (\App\Services\Stay22Service::isEnabled()) {
+        if (Stay22Service::isEnabled()) {
             $extra['frame-src'][] = '*.stay22.com';
         }
 

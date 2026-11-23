@@ -125,14 +125,23 @@ class VendorMapController extends Controller
         if ($request->filled('background_from_draft')) {
             $this->keepBackground($map, (string) $request->input('background_from_draft'));
         } elseif ($request->boolean('clear_background')) {
+            if ($map->background_path) {
+                VendorMapImages::deletePublic(VendorMapImages::pictureName($map->background_path));
+            }
             VendorMapImages::deletePrivate($map->background_path);
             $map->forceFill(['background_path' => null, 'background_public' => false])->save();
         }
 
-        // Under the shoppers' map too: the owner's choice, and only for a picture there is.
+        // Under the shoppers' map too: the owner's choice, and only for a picture there is. The
+        // public copy is made when it is switched on and taken down when it is switched off.
         if ($request->has('background_public')) {
             $map->refresh();
-            $map->forceFill(['background_public' => $request->boolean('background_public') && $map->background_path !== null])->save();
+            $public = $request->boolean('background_public') && $map->background_path !== null
+                && VendorMapImages::publishPicture($map->background_path) !== null;
+            if (! $public && $map->background_path) {
+                VendorMapImages::deletePublic(VendorMapImages::pictureName($map->background_path));
+            }
+            $map->forceFill(['background_public' => $public])->save();
         }
 
         VendorMapPng::refreshShareImage($map->fresh());
@@ -200,7 +209,7 @@ class VendorMapController extends Controller
 
         // Photographed area by area: one area is read per request, and the page asks again.
         if (! empty($result['pending'])) {
-            return response()->json(['ok' => true, 'pending' => true, 'done' => $result['done'], 'total' => $result['total'], 'next' => $result['next']]);
+            return response()->json(['ok' => true, 'pending' => true, 'busy' => ! empty($result['busy']), 'done' => $result['done'], 'total' => $result['total'], 'next' => $result['next']]);
         }
 
         return response()->json(['ok' => true, 'result' => $result]);
@@ -345,12 +354,10 @@ class VendorMapController extends Controller
             $excluded[] = $data['date'];
             $event->recurring_exclude_dates = array_values(array_unique($excluded));
             $event->save();
-        } elseif ((float) $event->duration <= 24) {
-            // A one-day event: that day is the event.
-            $event->forceFill(['is_cancelled' => true, 'cancelled_at' => now()])->save();
         }
-        // One day of an event over several days (an expo) is called off on the map alone
-        // (VendorMapOccupancy::isOpenOn reads it); the other days go on.
+        // An event that is not weekly (one day, or an expo over several) is called off on the map
+        // alone (VendorMapOccupancy::isOpenOn reads it): the event's own Cancel, with its mail to
+        // ticket buyers, stays the organizer's, and a day called off here can be opened again.
 
         // Why, for the visitors' "No market today (rain)". Kept on the map: the event's
         // excluded dates are a plain list.
@@ -358,6 +365,27 @@ class VendorMapController extends Controller
         $cancelled[$data['date']] = $data['reason'] ?? 'other';
         ksort($cancelled);
         $map->forceFill(['cancelled_days' => array_slice($cancelled, -60, null, true)])->save();
+
+        return response()->json(['ok' => true] + VendorMapPresenter::dayForEditors($map->fresh(), $data['date']));
+    }
+
+    /** A day called off by mistake, or the rain stopped: the market is on that day again. */
+    public function reopenDay(Request $request, string $subdomain)
+    {
+        [$role, $map] = $this->mapFor($subdomain);
+        $data = $request->validate(['date' => ['required', 'date_format:Y-m-d']]);
+
+        $event = $map->event;
+        abort_unless($event && $request->user()->runsEvent($event), 403);
+
+        if ($event->days_of_week) {
+            $event->recurring_exclude_dates = array_values(array_diff((array) ($event->recurring_exclude_dates ?? []), [$data['date']]));
+            $event->save();
+        }
+
+        $cancelled = (array) ($map->cancelled_days ?? []);
+        unset($cancelled[$data['date']]);
+        $map->forceFill(['cancelled_days' => $cancelled])->save();
 
         return response()->json(['ok' => true] + VendorMapPresenter::dayForEditors($map->fresh(), $data['date']));
     }
@@ -480,6 +508,11 @@ class VendorMapController extends Controller
         }
 
         $old = $map->background_path;
+        // A new picture is not public until its owner says so for this one.
+        if ($map->background_path) {
+            VendorMapImages::deletePublic(VendorMapImages::pictureName($map->background_path));
+        }
+        $map->background_public = false;
         $map->forceFill(['background_path' => VendorMapImages::storePrivate($bytes, pathinfo($path, PATHINFO_EXTENSION))])->save();
         VendorMapImages::deletePrivate($old);
     }

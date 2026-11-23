@@ -9013,4 +9013,7 @@ return [
     'vm_picture_public' => 'L\'afficher sur le plan des visiteurs',
     'vm_public_area_coming' => '{0} Personne ne vient|{1} 1 vient|[2,*] :count viennent',
     'vm_claim_see_map' => 'Ouvrir le plan',
+    'log_in_first' => 'Connectez-vous d\'abord sur la page de connexion, puis revenez à ce formulaire.',
+    'vm_reopen_day' => 'Rouvrir ce jour',
+    'vm_vendors_can_join_lead' => 'Les exposants ouvrent le lien, touchent leur emplacement et disent ce qu\'ils vendent. Rien n\'apparaît sur le plan avant votre accord.',
 ];

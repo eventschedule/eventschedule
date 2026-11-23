@@ -25,6 +25,18 @@
     .gk-vm-band .gk-map-open:focus-visible { outline: none; }
     .gk-vm-band .gk-map-band:has(.gk-map-open:focus-visible) { outline: 2px solid var(--gk-ink); outline-offset: -2px; border-radius: inherit; }
     .gk-vm-band .gk-map-stack .gk-vm-initial { display: grid; place-items: center; background: var(--gk-well); font-size: .6875rem; font-weight: 700; color: var(--gk-ink-2); }
+    /* The narrow screen's own rule (guest-map-styles), at this rule's weight: fewer faces, so the
+       title and "Open map" keep their room. */
+    @media (max-width: 26rem) {
+        .gk-vm-band .gk-map-stack .gk-vm-initial.gk-map-wide { display: none; }
+        .gk-vm-band .gk-map-stack .gk-vm-initial.gk-map-narrow { display: grid; }
+    }
+    /* On a phone the faces take a row of their own under the title, so "At the market this week"
+       and Open map keep their width (the venue map's band has one short word for a title). */
+    @media (max-width: 40rem) {
+        .gk-vm-band .gk-map-band { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "icon title acts" "sub sub sub" "stack stack stack"; row-gap: .375rem; }
+        .gk-vm-band .gk-map-stack { padding-inline-start: 0; }
+    }
     .gk-vm-people { display: flex; flex-direction: column; gap: 1rem; }
     .gk-vm-people .gk-label { margin-bottom: 0; }
     .gk-vm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: .75rem 1rem; margin: 0; padding: 0; list-style: none; }

@@ -71,6 +71,7 @@ class VendorMapPresenter
                 'move' => route('vendor_map.move', ['subdomain' => $sub], false),
                 'dayVendor' => route('vendor_map.day_vendor', ['subdomain' => $sub], false),
                 'cancelDay' => route('vendor_map.cancel_day', ['subdomain' => $sub], false),
+                'reopenDay' => route('vendor_map.reopen_day', ['subdomain' => $sub], false),
                 'link' => route('vendor_map.link', ['subdomain' => $sub], false),
                 'sign' => route('vendor_map.sign', ['subdomain' => $sub], false),
                 'signImage' => route('vendor_map.sign_image', ['subdomain' => $sub], false),

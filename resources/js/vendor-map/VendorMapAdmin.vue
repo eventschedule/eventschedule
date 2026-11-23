@@ -157,6 +157,7 @@
 
                 <p class="vma-counts" aria-live="polite">
                     <span v-if="!day.open && day.cancelled" class="vma-pill is-red">{{ t.cancelled_banner }}</span>
+                    <button v-if="!day.open && day.cancelled" type="button" class="vma-ghost" :disabled="busy" @click="reopenDay">{{ t.reopen_day }}</button>
                     <span v-else-if="!day.open" class="vma-pill">{{ t.no_market_day }}</span>
                     <template v-else>
                         <span class="vma-pill is-green">{{ fill(t.here_count, day.counts.present) }}</span>
@@ -325,7 +326,7 @@
 </template>
 
 <script setup>
-import { computed, defineComponent, h, onMounted, reactive, ref } from 'vue';
+import { computed, defineComponent, h, onMounted, reactive, ref, watch } from 'vue';
 import MapCanvas from './MapCanvas.vue';
 import VendorMapPhotos from './VendorMapPhotos.vue';
 
@@ -394,7 +395,9 @@ const weekdays = computed(() => {
 
 const setup = reactive({
     kind: props.initial.preferKind || 'market',
-    event: (props.initial.events || [])[0]?.id ?? null,
+    // A new market event by default: a venue's next concert is not its market. One of its own
+    // events is a deliberate choice in the list.
+    event: null,
     name: '',
     days: [],
     first_date: new Date().toISOString().slice(0, 10),
@@ -568,6 +571,11 @@ async function cancelDay() {
     if (data) applyDay(data);
 }
 
+async function reopenDay() {
+    const data = await post(state.urls.reopenDay, { date: day.date });
+    if (data) applyDay(data);
+}
+
 async function linkAction(action) {
     const data = await post(state.urls.link, { action });
     if (data?.props) Object.assign(state, data.props);
@@ -691,8 +699,23 @@ function showToast(text, { undo = false, whatsapp = null, name = '' } = {}) {
     toastTimer = setTimeout(() => { toast.value = null; lastDecision.value = null; }, undo ? 10000 : 5000);
 }
 
+const messageFor = (link) => (t.whatsapp_message || '').replace(':link', link || '').replace(':name', state.scheduleName || '');
+
+// The message always carries the link that works: made on the first press, or a new one after
+// "Make a new link" (the old one no longer opens). Edits the organizer made are kept.
+watch(() => state.claimUrl, (now, before) => {
+    if (!now) return;
+    if (before && whatsappText.value.includes(before)) {
+        whatsappText.value = whatsappText.value.split(before).join(now);
+    } else if (!whatsappText.value.includes(now)) {
+        whatsappText.value = whatsappText.value === messageFor('') || !whatsappText.value.trim()
+            ? messageFor(now)
+            : whatsappText.value.trimEnd() + ' ' + now;
+    }
+});
+
 onMounted(() => {
-    whatsappText.value = (t.whatsapp_message || '').replace(':link', state.claimUrl || '').replace(':name', state.scheduleName || '');
+    whatsappText.value = messageFor(state.claimUrl);
     if (state.exists && state.hasSpots && !props.day && state.date) loadDay(state.date);
 });
 

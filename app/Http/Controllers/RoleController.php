@@ -699,7 +699,11 @@ class RoleController extends Controller
             try {
                 $vendorRow->forceFill(['vendor_role_id' => $target->id])->save();
             } catch (QueryException $e) {
-                // A duplicate approved spot for that day: keep the target's.
+                // A duplicate approved spot for that day: keep the target's. Anything else (a
+                // deadlock, a lock timeout) has rolled the merge back and must not pass silently.
+                if ((int) ($e->errorInfo[1] ?? 0) !== 1062) {
+                    throw $e;
+                }
             }
         }
 

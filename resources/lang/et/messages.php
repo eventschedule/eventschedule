@@ -9009,4 +9009,7 @@ return [
     'vm_picture_public' => 'Näita seda ka ostjate kaardil',
     'vm_public_area_coming' => '{0} Keegi ei tule|{1} 1 tuleb|[2,*] :count tuleb',
     'vm_claim_see_map' => 'Ava kaart',
+    'log_in_first' => 'Logi esmalt sisse sisselogimislehel ja tule siis selle vormi juurde tagasi.',
+    'vm_reopen_day' => 'Ava see päev uuesti',
+    'vm_vendors_can_join_lead' => 'Müüjad avavad lingi, puudutavad oma kohta ja ütlevad, mida müüvad. Kaardile ei ilmu midagi enne, kui sina kinnitad.',
 ];

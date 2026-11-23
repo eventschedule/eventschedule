@@ -9008,4 +9008,7 @@ return [
     'vm_picture_public' => 'Auch auf dem Plan für Besucher zeigen',
     'vm_public_area_coming' => '{0} Niemand kommt|{1} 1 kommt|[2,*] :count kommen',
     'vm_claim_see_map' => 'Plan öffnen',
+    'log_in_first' => 'Melden Sie sich zuerst auf der Anmeldeseite an und kehren Sie dann zu diesem Formular zurück.',
+    'vm_reopen_day' => 'Diesen Tag wieder öffnen',
+    'vm_vendors_can_join_lead' => 'Händler öffnen den Link, tippen auf ihren Platz und sagen, was sie verkaufen. Auf dem Plan erscheint nichts, bevor Sie zustimmen.',
 ];

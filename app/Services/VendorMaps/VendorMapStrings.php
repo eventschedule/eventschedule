@@ -33,7 +33,7 @@ class VendorMapStrings
         'embed_help', 'send_whatsapp', 'whatsapp_message', 'edit_message', 'vendors_can_join', 'make_new_link',
         'make_new_link_confirm', 'link_off', 'upgrade_link', 'registration_off', 'edit_map', 'redo_with_photos',
         'date', 'today', 'not_coming_count', 'waiting_count', 'here_count', 'free_count', 'cancel_day',
-        'cancel_day_title', 'reason', 'reason_weather', 'reason_holiday', 'reason_other', 'cancel_day_confirm',
+        'cancel_day_title', 'reopen_day', 'vendors_can_join_lead', 'remove', 'reason', 'reason_weather', 'reason_holiday', 'reason_other', 'cancel_day_confirm',
         'cancelled_banner', 'no_market_day', 'review', 'waiting_for_you', 'approve', 'decline', 'decline_note',
         'approve_all', 'approved_toast', 'declined_toast', 'undo', 'two_want', 'name_differs', 'typed_name',
         'name_on_stall', 'every_date', 'on_dates', 'tell_on_whatsapp', 'whatsapp_approved', 'move_to', 'swap',

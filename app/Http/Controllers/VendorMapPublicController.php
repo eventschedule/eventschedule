@@ -42,17 +42,11 @@ class VendorMapPublicController extends Controller
         if (! $map || ! $map->background_public || ! $map->background_path) {
             abort(404);
         }
-        $bytes = VendorMapImages::readPrivate($map->background_path);
-        if ($bytes === null) {
-            abort(404);
-        }
+        // The public copy, from the public store and its CDN (made on the first ask if missing).
+        $name = VendorMapImages::publishPicture($map->background_path);
+        abort_unless($name !== null, 404);
 
-        return response($bytes, 200, [
-            'Content-Type' => VendorMapImages::mimeFor($map->background_path),
-            // Short, so switching the picture off reaches shoppers soon.
-            'Cache-Control' => 'public, max-age=300',
-            'X-Content-Type-Options' => 'nosniff',
-        ]);
+        return redirect(VendorMapImages::publicUrl($name), 302, ['Cache-Control' => 'public, max-age=300']);
     }
 
     public function show(Request $request, string $subdomain)
@@ -67,8 +61,10 @@ class VendorMapPublicController extends Controller
 
         $map = VendorMap::where('role_id', $role->id)->where('enabled', true)->first();
 
+        // No market map here: the address is what it was before maps existed, an event slugged
+        // "map" (its short link keeps working).
         if (! $map) {
-            abort(404);
+            return app(RoleController::class)->viewGuest($request, $subdomain, 'map');
         }
 
         $map->setRelation('role', $role);
@@ -132,6 +128,8 @@ class VendorMapPublicController extends Controller
             'emptyText' => $status === 'none' ? __('messages.vm_public_no_dates') : __('messages.vm_public_empty'),
             'selected' => $selected,
             'showHere' => (bool) $showHere,
+            // On the market's own website (?embed=1): no way back to a page the frame is not on.
+            'embed' => in_array($request->input('embed'), ['1', 'true'], true),
             'rtl' => is_rtl(),
             'back' => ['url' => $role->getGuestUrl(true) ?: $role->getGuestUrl(), 'label' => $role->translatedName()],
             't' => $t,
