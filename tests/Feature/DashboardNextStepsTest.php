@@ -26,13 +26,27 @@ use Tests\TestCase;
  */
 class DashboardNextStepsTest extends TestCase
 {
-    use CreatesScheduleData;
+    use CreatesScheduleData {
+        createRole as createRoleWithoutAccounts;
+    }
     use RefreshDatabase;
 
     protected function setUp(): void
     {
         parent::setUp();
         config(['app.hosted' => true]);
+    }
+
+    /**
+     * Every schedule here has an Instagram unless the test says otherwise, so the social accounts
+     * row (the last of them) is not what answers a test about the others. The social tests below
+     * pass 'social_links' => null.
+     */
+    protected function createRole(User $user, string $type = 'venue', array $attrs = []): Role
+    {
+        return $this->createRoleWithoutAccounts($user, $type, $attrs + [
+            'social_links' => json_encode([['url' => 'https://www.instagram.com/fixture']]),
+        ]);
     }
 
     private function nextSteps($user): array
@@ -614,6 +628,8 @@ class DashboardNextStepsTest extends TestCase
         $this->dismissAll($user)->assertRedirect();
 
         $this->assertSame([], $this->types($user));
+        // The three rows and no social one: these schedules have an Instagram, so none was
+        // waiting behind the tickets row.
         $this->assertSame(3, DB::table('dismissed_next_steps')->where('user_id', $user->id)->count());
     }
 
@@ -1121,5 +1137,124 @@ class DashboardNextStepsTest extends TestCase
         $this->actingAs($user->fresh())->postJson(route('home.suggestions'), ['on' => true])->assertOk();
 
         $this->assertCount(2, $this->types($user->fresh()), 'back on: the two that were never dismissed');
+    }
+
+    // ---- Social accounts -------------------------------------------------------------------
+
+    /** An upcoming event with tickets, nothing more pressing, and none of the four accounts. */
+    private function sellingScheduleWithoutAccounts(User $user, array $attrs = []): Role
+    {
+        $role = $this->createRole($user, 'venue', $attrs + ['social_links' => null]);
+        $event = $this->createEvent($role, ['creator_role_id' => $role->id, 'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $this->createTicket($event, ['price' => 0]);
+
+        return $role;
+    }
+
+    /**
+     * Event Schedule tags the schedules it posts about, so a schedule with dates and none of
+     * Instagram, Facebook, LinkedIn or X is asked for them, last of all. The promise to tag is
+     * eventschedule.com's own; any other install asks so people can follow.
+     */
+    public function test_a_schedule_with_dates_and_no_accounts_is_asked_for_them(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->sellingScheduleWithoutAccounts($user);
+
+        config(['app.is_nexus' => true]);
+        $steps = $this->nextSteps($user);
+        $this->assertSame(['next_step_social'], array_column($steps, 'type'));
+        $this->assertSame(__('messages.next_step_add_social_tag'), $steps[0]['title']);
+        $this->assertStringEndsWith('#links-tab-social_links', $steps[0]['url']);
+
+        config(['app.is_nexus' => false]);
+        $this->assertSame(__('messages.next_step_add_social'), $this->nextSteps($user)[0]['title']);
+
+        // One of the four is enough, the website included.
+        $role->forceFill(['website' => 'https://x.com/thevenue'])->saveQuietly();
+        $this->assertSame([], $this->types($user));
+    }
+
+    public function test_a_schedule_with_nothing_coming_up_is_asked_for_a_date_not_for_accounts(): void
+    {
+        $user = $this->createOwner();
+        $this->createRole($user, 'venue', ['social_links' => null]);
+
+        $this->assertSame(['next_step_first_event'], $this->types($user));
+    }
+
+    /**
+     * A dismissed row keeps its schedule's slot, with one exception: a tickets row that was
+     * dismissed, or answered "No tickets needed" in the guide, hands it to the social row. Most
+     * bands and venues do not sell, and would otherwise never be asked. An open tickets row still
+     * comes first.
+     */
+    public function test_an_answered_tickets_row_hands_its_slot_to_the_social_row(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user, 'venue', ['social_links' => null]);
+        $this->createEvent($role, ['creator_role_id' => $role->id, 'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->assertSame(['next_step_tickets'], $this->types($user), 'an open tickets row comes first');
+
+        $this->dismiss($user, $role, 'next_step_tickets')->assertRedirect();
+        $this->assertSame(['next_step_social'], $this->types($user));
+
+        $this->dismiss($user, $role, 'next_step_social')->assertRedirect();
+        $this->assertSame([], $this->types($user), 'and its own X is final');
+        $this->assertTrue(DismissedNextStep::where('role_id', $role->id)->where('step_type', 'next_step_social')->exists());
+
+        // "No tickets needed" in a guide long over is the same answer.
+        $other = $this->createOwner();
+        $theirs = $this->createRole($other, 'venue', ['social_links' => null]);
+        $this->createEvent($theirs, ['creator_role_id' => $theirs->id, 'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+        $other->forceFill(['setup_guide' => ['role_id' => $theirs->id, 'started_at' => now()->subDays(60)->toIso8601String(), 'skipped' => ['tickets']]])->save();
+        $this->assertSame(['next_step_social'], $this->types($other->fresh()));
+    }
+
+    /**
+     * "Dismiss all" answers the social row along with each tickets row it dismisses: otherwise
+     * the schedule came back on the next load with a row nobody had been shown, and the button
+     * read as not working. Undo takes both back.
+     */
+    public function test_dismiss_all_does_not_bring_a_social_row_in_behind_it(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->createRole($user, 'venue', ['social_links' => null]);
+        $this->createEvent($role, ['creator_role_id' => $role->id, 'starts_at' => now()->addDays(10)->format('Y-m-d H:i:s')]);
+
+        $this->assertSame(['next_step_tickets'], $this->types($user));
+
+        $written = $this->actingAs($user)->postJson(route('home.next_steps_dismiss_all'), [
+            'rows' => [['schedule' => UrlUtils::encodeId($role->id), 'type' => 'next_step_tickets']],
+        ])->assertOk()->json('rows');
+
+        $this->assertSame([], $this->types($user));
+        $this->assertEqualsCanonicalizing(['next_step_tickets', 'next_step_social'], array_column($written, 'type'));
+
+        $this->actingAs($user)->postJson(route('home.next_steps_restore'), ['rows' => $written])->assertOk();
+        $this->assertSame(['next_step_tickets'], $this->types($user));
+        $this->assertSame(0, DismissedNextStep::where('role_id', $role->id)->count());
+
+        // An earlier answer about the social row is neither written again nor taken back by Undo.
+        DismissedNextStep::create(['user_id' => $user->id, 'role_id' => $role->id, 'step_type' => 'next_step_social']);
+        $written = $this->actingAs($user)->postJson(route('home.next_steps_dismiss_all'), [
+            'rows' => [['schedule' => UrlUtils::encodeId($role->id), 'type' => 'next_step_tickets']],
+        ])->assertOk()->json('rows');
+        $this->assertSame(['next_step_tickets'], array_column($written, 'type'));
+        $this->actingAs($user)->postJson(route('home.next_steps_restore'), ['rows' => $written])->assertOk();
+        $this->assertTrue(DismissedNextStep::where('role_id', $role->id)->where('step_type', 'next_step_social')->exists());
+    }
+
+    public function test_a_recent_event_without_a_gallery_comes_before_the_accounts(): void
+    {
+        $user = $this->createOwner();
+        $role = $this->sellingScheduleWithoutAccounts($user);
+        $this->createEvent($role, ['creator_role_id' => $role->id, 'starts_at' => now()->subDays(3)->format('Y-m-d H:i:s')]);
+
+        $this->assertSame(['next_step_gallery'], $this->types($user));
+
+        $this->dismiss($user, $role, 'next_step_gallery')->assertRedirect();
+        $this->assertSame([], $this->types($user), 'a dismissed gallery row keeps its slot while the event is recent');
     }
 }

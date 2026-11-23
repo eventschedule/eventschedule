@@ -439,7 +439,7 @@ const status = computed(() => {
     return t.one_step;
   }
 
-  return [t.one_to_go, t.one_to_go, t.two_to_go, t.three_to_go][remaining.value] || t.three_to_go;
+  return [t.one_to_go, t.one_to_go, t.two_to_go, t.three_to_go, t.four_to_go][remaining.value] || t.four_to_go;
 });
 
 const next = computed(() => {
@@ -457,6 +457,11 @@ const next = computed(() => {
 
   if (current.value === 'share') {
     return t.next_share;
+  }
+
+  // Ahead of the sellers' wording: a seller's tickets come before it, so it is not "tickets" next.
+  if (current.value === 'social') {
+    return t.next_social;
   }
 
   if (g.sells) {
@@ -583,6 +588,24 @@ const shareLinks = () => [
   { label: t.qr_code, href: g.urls.qr, act: 'shared' },
 ];
 
+// The accounts Event Schedule can tag when it posts about the schedule. Any one of the four
+// answers it (Role::hasSocialAccount()); the form offers the others quietly.
+const socialRow = () => {
+  const state = stateOf('social');
+  const row = { key: 'social', state, title: t.step_social };
+
+  if (state === 'skipped') {
+    row.note = t.skipped;
+    row.links = undoSkip('social');
+  } else if (state !== 'done') {
+    row.body = t.social_body;
+    row.primary = { label: t.add_social, href: g.urls.social };
+    row.links = [skipLink('social')];
+  }
+
+  return row;
+};
+
 const ticketsRow = () => {
   const state = stateOf('tickets');
   // Somebody who came to sell is not asked whether they need tickets: they are asked to put them
@@ -627,7 +650,7 @@ const rows = computed(() => {
 
   // The first stretch, banked: one checked row rather than three. Then the steps in the order
   // the server put them (App\Utils\SetupGuide::resolve()).
-  const build = { events: eventsRow, share: shareRow, tickets: ticketsRow };
+  const build = { events: eventsRow, share: shareRow, social: socialRow, tickets: ticketsRow };
 
   return [{ key: 'live', state: 'done', title: fmt(t.live_at) }]
     .concat(order.value.filter((key) => build[key]).map((key) => build[key]()));
@@ -1194,6 +1217,10 @@ const panelBody = computed(() => {
     return g.total >= 2 ? t.events_more_one : t.events_more_two;
   }
 
+  if (current.value === 'social') {
+    return t.social_body;
+  }
+
   return current.value === 'share' ? t.share_body : next.value;
 });
 
@@ -1206,6 +1233,10 @@ const sharing = computed(() => current.value === 'share' && !! g.steps.share && 
 const forward = computed(() => {
   if (current.value === 'events') {
     return { label: t.add_another, href: g.urls.add };
+  }
+
+  if (current.value === 'social') {
+    return { label: t.add_social, href: g.urls.social };
   }
 
   // A seller whose page is live and has no tickets yet: putting them on sale comes first.
@@ -1443,8 +1474,10 @@ const onKey = (event) => {
 // "Add to your website", followed on the Schedule tab itself, is a link to #embed on the page
 // already open: the embed dialog opens with no navigation. On a phone the guide's sheet is
 // stacked above that dialog, so the sheet gets out of its way. Focus is the dialog's to take.
+// "Add your accounts" on the schedule's own form is the same: the form opens its social links
+// (role/edit's jumpTo(), which says so with a popstate rather than a hashchange).
 const onHash = () => {
-  if (window.location.hash === '#embed') {
+  if (['#embed', '#links-tab-social_links'].includes(window.location.hash)) {
     cardOpen.value = false;
   }
 };
@@ -1499,6 +1532,7 @@ onMounted(() => {
   document.addEventListener('click', onPageClick, true);
   document.addEventListener('keydown', onKey);
   window.addEventListener('hashchange', onHash);
+  window.addEventListener('popstate', onHash);
   settleHost();
   writeSeen();
 
@@ -1524,6 +1558,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', onPageClick, true);
   document.removeEventListener('keydown', onKey);
   window.removeEventListener('hashchange', onHash);
+  window.removeEventListener('popstate', onHash);
   window.removeEventListener('resize', liftAboveBanner);
   clearTimeout(undoTimer);
   sug.stop();

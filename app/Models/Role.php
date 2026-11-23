@@ -3406,6 +3406,42 @@ class Role extends Model implements MustVerifyEmail
         }));
     }
 
+    /**
+     * Which of the four networks Event Schedule tags people on (UrlUtils::ASKED_PLATFORMS) this
+     * schedule has an account on, from its social links and its website (many a band's website
+     * IS its Instagram). Reads two columns and asks no query.
+     *
+     * @return array<int, string> platform keys, in ASKED_PLATFORMS order
+     */
+    public function askedPlatforms(): array
+    {
+        $found = [];
+
+        $urls = array_map(fn ($link) => is_string($link->url) ? $link->url : '', $this->decodeLinks('social_links'));
+        $urls[] = is_string($this->website) ? $this->website : '';
+
+        foreach ($urls as $url) {
+            if ($platform = UrlUtils::askedAccountPlatform($url)) {
+                $found[$platform] = true;
+            }
+        }
+
+        return array_values(array_filter(
+            array_keys(UrlUtils::ASKED_PLATFORMS),
+            fn ($platform) => isset($found[$platform]),
+        ));
+    }
+
+    /**
+     * Whether Event Schedule can tag this schedule on one of the four networks it posts on: the
+     * setup guide's social step and the dashboard's suggestion are answered by any ONE of them,
+     * since most bands and venues have no LinkedIn.
+     */
+    public function hasSocialAccount(): bool
+    {
+        return $this->askedPlatforms() !== [];
+    }
+
     /** @var array<int, string>|null */
     private ?array $shortLinkSlugs = null;
 

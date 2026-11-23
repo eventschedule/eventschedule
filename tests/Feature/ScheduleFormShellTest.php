@@ -2,9 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Mail\EmailSettingsFailedMail;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\DemoService;
+use App\Utils\GalleryUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\ViewErrorBag;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -260,7 +265,7 @@ class ScheduleFormShellTest extends TestCase
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'talent');
 
-        $mail = new \App\Mail\EmailSettingsFailedMail($role, $owner, 'SMTP said no', now());
+        $mail = new EmailSettingsFailedMail($role, $owner, 'SMTP said no', now());
         $this->assertStringContainsString('#integration-tab-email', json_encode($mail->content()->with));
         $this->assertStringContainsString('id="integration-tab-email"', $this->formHtml($owner, $role), 'and the row is there to open');
     }
@@ -502,7 +507,7 @@ class ScheduleFormShellTest extends TestCase
     {
         [$owner, $role] = $this->talentForm();
         // By query: saving the model would un-verify the address it was just given.
-        User::where('id', $owner->id)->update(['email' => \App\Services\DemoService::DEMO_EMAIL]);
+        User::where('id', $owner->id)->update(['email' => DemoService::DEMO_EMAIL]);
         $this->assertTrue(User::find($owner->id)->hasVerifiedEmail());
 
         $html = $this->formHtml($owner->fresh(), $role);
@@ -524,7 +529,7 @@ class ScheduleFormShellTest extends TestCase
         $this->assertSame(0, preg_match('/<span class="[^"]*rounded-full[^"]*">\s*'.preg_quote(__('messages.new'), '/').'\s*<\/span>/', $html), 'a "New" pill is on the form');
         $view = file_get_contents(resource_path('views/role/edit.blade.php'));
         $this->assertStringNotContainsString("__('messages.new')", $view);
-        $this->assertFalse(defined(\App\Utils\GalleryUtils::class.'::NEW_UNTIL'), 'and nothing times one');
+        $this->assertFalse(defined(GalleryUtils::class.'::NEW_UNTIL'), 'and nothing times one');
     }
 
     /**
@@ -546,6 +551,53 @@ class ScheduleFormShellTest extends TestCase
         // Social links open the Page content tab under their own name; the videos are a row of it.
         $this->assertSame(1, preg_match('/<div id="page-tab-general" class="page-tab-content">\s*<p class="event-group-label">'.preg_quote(__('messages.social_links'), '/').'<\/p>\s*<div id="links-tab-social_links"/', $html), 'the social links are the first thing in Page content');
         $this->assertSame(1, preg_match('/<div id="page-tab-videos" class="event-subrow-body page-tab-content" hidden>\s*<div id="links-tab-youtube_videos"/', $html), 'and the videos are its first row');
+    }
+
+    /**
+     * The four networks Event Schedule tags people on each have a button under the social links,
+     * shown only while the list has no account there; each types its network's address into the
+     * Add Link dialog. The line saying why shows only while none of them is there, and the promise
+     * to tag is eventschedule.com's own.
+     */
+    public function test_the_four_networks_are_offered_under_the_social_links(): void
+    {
+        config(['app.is_nexus' => true]);
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $html = $this->formHtml($owner, $role);
+
+        $general = strpos($html, '<div id="page-tab-general" class="page-tab-content">');
+        $list = strpos($html, '<div id="links-tab-social_links"', (int) $general);
+        $ask = strpos($html, '<div class="social-ask" data-social-ask data-website-platform="" >', (int) $list);
+        $this->assertTrue($general !== false && $list !== false && $ask !== false, 'after the list');
+        $this->assertStringNotContainsString('id="page-tab-videos"', substr($html, $general, $ask - $general), 'inside the always-open block, not a row');
+        foreach (['instagram', 'facebook', 'linkedin', 'twitter'] as $platform) {
+            $this->assertSame(1, preg_match('/<button type="button"\s+class="btn-show-add-link social-ask-button"\s+data-link-type="social_links"\s+data-platform="'.$platform.'"\s+data-prefill="https:\/\/[^"]+"[^>]*?\s*>/s', $html), $platform);
+        }
+        $this->assertStringContainsString('<p class="social-ask-why" >'.e(__('messages.social_links_ask_tag')).'</p>', $html);
+
+        $role->forceFill(['social_links' => json_encode([['url' => 'https://www.instagram.com/theband']])])->saveQuietly();
+        config(['app.is_nexus' => false]);
+        $html = $this->formHtml($owner, $role->fresh());
+
+        $this->assertSame(1, preg_match('/data-platform="instagram"[^>]*hidden\s*>/s', $html), 'the network the list has is not offered again');
+        $this->assertSame(0, preg_match('/data-platform="facebook"[^>]*hidden\s*>/s', $html), 'the others still are');
+        $this->assertStringContainsString('<p class="social-ask-why" hidden>'.e(__('messages.social_links_ask_follow')).'</p>', $html);
+        $this->assertStringContainsString('data-asked-platform="instagram"', $html, 'the row says which network it is an account on');
+
+        // A saved website that is one of the four counts, as it does for the setup guide.
+        $role->forceFill(['social_links' => null, 'website' => 'https://x.com/theband'])->saveQuietly();
+        $html = $this->formHtml($owner, $role->fresh());
+        $this->assertStringContainsString('data-website-platform="twitter"', $html);
+        $this->assertSame(1, preg_match('/data-platform="twitter"[^>]*hidden\s*>/s', $html));
+        $this->assertStringContainsString('<p class="social-ask-why" hidden>', $html);
+
+        // An address, typed left to right whatever the page's language; and a deep link to the
+        // list scrolls to it once the page lets go of the top.
+        $this->assertSame(1, preg_match('/<input[^>]*id="link"[^>]*>/', $html, $input));
+        $this->assertStringContainsString('dir="ltr"', $input[0]);
+        $this->assertStringContainsString('autocapitalize="off"', $input[0]);
+        $this->assertStringContainsString("['federation_enabled', 'links-tab-social_links'].includes(settingsFocus)", $html);
     }
 
     /** The ids of the panes and tabs that hold each element of a rendered form. */
@@ -633,7 +685,7 @@ class ScheduleFormShellTest extends TestCase
         config(['stay22.enabled' => true]);
 
         // As a refused save leaves them: in the session, which the page's middleware shares.
-        $bag = fn (array $messages) => ['errors' => (new \Illuminate\Support\ViewErrorBag)->put('default', new \Illuminate\Support\MessageBag($messages))];
+        $bag = fn (array $messages) => ['errors' => (new ViewErrorBag)->put('default', new MessageBag($messages))];
         $html = $this->withSession($bag($errors))->actingAs($owner)->get(route('role.edit', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
         $xpath = $this->holders($html);
 

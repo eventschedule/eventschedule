@@ -75,6 +75,62 @@
         #page-tab-general {
             margin-bottom: 1.5rem;
         }
+        /* The four networks' buttons under the social links: quiet pills, one per network the list
+           has no account on. While they show, they say what the empty list would. */
+        #page-tab-general:has(.social-ask-why:not([hidden])) .link-empty-state {
+            display: none;
+        }
+        .social-ask {
+            margin-top: 1rem;
+        }
+        .social-ask[hidden],
+        .social-ask [hidden] {
+            display: none;
+        }
+        .social-ask-why {
+            margin: 0 0 0.625rem;
+            font-size: 0.875rem;
+            line-height: 1.4;
+            color: rgb(var(--ap-ink-2));
+        }
+        .social-ask-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .social-ask-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            min-height: 2.25rem;
+            margin: 0;
+            padding-block: 0.375rem;
+            padding-inline: 0.625rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgb(var(--ap-ink));
+            background: rgb(var(--ap-surface-hover));
+            border: 1px solid rgb(var(--ap-border));
+            transition: all 200ms;
+        }
+        .social-ask-button:hover {
+            background: rgb(var(--ap-surface-active));
+            border-color: rgb(var(--ap-border-strong));
+        }
+        .social-ask-button:focus-visible {
+            outline: 2px solid var(--brand-blue);
+            outline-offset: 2px;
+        }
+        .social-ask-plus {
+            width: 0.875rem;
+            height: 0.875rem;
+            color: rgb(var(--ap-ink-3));
+        }
+        .social-ask-icon {
+            width: 1rem;
+            height: 1rem;
+        }
         /* A link inside the form scrolls to a row or a tab's header: below the portal's sticky top
            bar (4rem, layouts/app-admin), not under it. */
         .event-subrow,
@@ -3085,6 +3141,7 @@
                                     data-link-custom="{{ $linkCustom }}"
                                     data-link-auto="{{ $linkAuto }}"
                                     data-link-platform="{{ $linkPlatform }}"
+                                    data-asked-platform="{{ \App\Utils\UrlUtils::askedAccountPlatform($link->url) }}"
                                     data-link-suggestion="{{ $linkSuggestion }}"
                                     data-link-clicks="{{ $linkClicks }}">
                                     <div class="flex items-center gap-4">
@@ -3162,6 +3219,43 @@
                                  rejection has nowhere else to render; the editor reports collisions
                                  inline as the owner types. --}}
                             <x-input-error class="mt-2" :messages="$errors->get('social_links')" />
+                        </div>
+                        {{-- The four networks Event Schedule tags people on, one button each for the
+                             ones this list has no account on: each opens the Add Link dialog with
+                             the network's address typed in, so the owner types only a username.
+                             All four are drawn and hidden by script (refreshSocialAsk()), since the
+                             dialog's listeners are bound once at load. Outside the list above, whose
+                             changes the form counts as edits. The line above them says why, and only
+                             while none of the four is there. A saved website that is one of them
+                             counts, as it does for the setup guide (Role::askedPlatforms()). --}}
+                        @php
+                            $socialAskWebsite = \App\Utils\UrlUtils::askedAccountPlatform(is_string($role->website) ? $role->website : null);
+                            $socialAskHave = collect($role->decodeLinks('social_links'))
+                                ->map(fn ($link) => \App\Utils\UrlUtils::askedAccountPlatform($link->url))
+                                ->push($socialAskWebsite)
+                                ->filter()->flip()->all();
+                        @endphp
+                        <div class="social-ask" data-social-ask data-website-platform="{{ $socialAskWebsite }}" {!! count($socialAskHave) === count(\App\Utils\UrlUtils::ASKED_PLATFORMS) ? 'hidden' : '' !!}>
+                            <p class="social-ask-why" {!! $socialAskHave ? 'hidden' : '' !!}>{{ __(config('app.is_nexus') ? 'messages.social_links_ask_tag' : 'messages.social_links_ask_follow') }}</p>
+                            <div class="social-ask-buttons">
+                                @foreach (\App\Utils\UrlUtils::ASKED_PLATFORMS as $askPlatform => $askPrefill)
+                                    @php
+                                        $askBrand = \App\Utils\UrlUtils::getPlatformBrandName($askPlatform);
+                                    @endphp
+                                    <button type="button"
+                                        class="btn-show-add-link social-ask-button"
+                                        data-link-type="social_links"
+                                        data-platform="{{ $askPlatform }}"
+                                        data-prefill="{{ $askPrefill }}"
+                                        data-title="{{ __('messages.add_social_platform', ['platform' => $askBrand]) }}"
+                                        aria-label="{{ __('messages.add_social_platform', ['platform' => $askBrand]) }}"
+                                        {!! isset($socialAskHave[$askPlatform]) ? 'hidden' : '' !!}>
+                                        <svg class="social-ask-plus" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M10 4.5v11M4.5 10h11" /></svg>
+                                        <x-url-icon class="social-ask-icon" color="currentColor">{{ $askPrefill }}</x-url-icon>
+                                        <span>{{ $askBrand }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
                         </div>
                         </div>
 
@@ -3673,13 +3767,17 @@
                                             <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100" id="add-link-modal-title">
                                                 {{ __('messages.add_link') }}</h3>
                                             <div class="mt-2">
-                                                <x-text-input id="link" type="url" class="mt-1 block w-full" autofocus />
+                                                {{-- An address: left to right in every language, and nothing
+                                                     a phone's keyboard should capitalise or correct. --}}
+                                                <x-text-input id="link" type="url" class="mt-1 block w-full" dir="ltr" autocapitalize="off" autocorrect="off" spellcheck="false" autofocus />
                                                 <p id="link-error" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display:none"></p>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                                        <x-brand-button type="button" id="btn-save-link" class="w-full sm:col-start-2">{{ __('messages.save') }}</x-brand-button>
+                                        {{-- "Add", not "Save": the link joins the list, and the form's own Save
+                                             is what keeps it. --}}
+                                        <x-brand-button type="button" id="btn-save-link" class="w-full sm:col-start-2">{{ __('messages.add') }}</x-brand-button>
                                         <button type="button"
                                             class="btn-hide-add-link mt-3 inline-flex w-full items-center justify-center rounded-lg bg-gray-200 dark:bg-gray-700 px-5 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors sm:col-start-1 sm:mt-0"
                                             >{{ __('messages.cancel') }}</button>
@@ -8230,7 +8328,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const settingsFocus = settingsParams.get('focus');
-    if (['federation_enabled'].includes(settingsFocus)) {
+    // links-tab-social_links: the setup guide and the dashboard ask for social accounts there, and
+    // on a phone Page content opens far below the fold.
+    if (['federation_enabled', 'links-tab-social_links'].includes(settingsFocus)) {
         window.__settingsFocusId = settingsFocus;
     }
 
@@ -8261,7 +8361,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
     document.addEventListener('click', function(e) {
-        var link = e.target.closest ? e.target.closest('[data-form-jump], .js-email-settings-link') : null;
+        // ...and the setup guide's "Add your accounts", which on this page points into it.
+        var link = e.target.closest ? e.target.closest('[data-form-jump], .js-email-settings-link, a[href="#links-tab-social_links"]') : null;
         // A click with a modifier, or not the main button, opens the address the browser's way.
         if (! link || e.metaKey || e.ctrlKey || e.shiftKey || e.button) {
             return;
@@ -8275,7 +8376,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             return;
         }
-        jumpTo(link.getAttribute('data-form-jump'));
+        jumpTo(link.getAttribute('data-form-jump') || 'links-tab-social_links');
     });
 
     // Mailing list and Notifications each say how the other's switch stands: turning off the
@@ -11009,6 +11110,57 @@ document.addEventListener('DOMContentLoaded', function() {
             var input = document.getElementById(linkType + '_data');
             input.value = JSON.stringify(linkData[linkType]);
             if (window._markFormDirty) window._markFormDirty();
+            if (linkType === 'social_links') refreshSocialAsk();
+        }
+
+        // The four networks' buttons under the social links: one for each network the schedule has
+        // no account on, and the line saying why only while it has none of them. Which network a
+        // row (or the saved website) is an account on is the server's answer
+        // (UrlUtils::askedAccountPlatform()), carried on the row, so the buttons follow the same
+        // rule as the setup guide's step.
+        function refreshSocialAsk() {
+            var ask = document.querySelector('[data-social-ask]');
+            if (!ask) return;
+            var have = {};
+            if (ask.dataset.websitePlatform) have[ask.dataset.websitePlatform] = true;
+            document.querySelectorAll('#links-tab-social_links li[data-asked-platform]').forEach(function(li) {
+                if (li.dataset.askedPlatform) have[li.dataset.askedPlatform] = true;
+            });
+            var missing = 0;
+            ask.querySelectorAll('.social-ask-button').forEach(function(btn) {
+                var shown = !have[btn.dataset.platform];
+                btn.hidden = !shown;
+                if (shown) missing++;
+            });
+            var why = ask.querySelector('.social-ask-why');
+            if (why) why.hidden = Object.keys(have).length > 0;
+            ask.hidden = missing === 0;
+        }
+
+        // What the dialog holds when a network's button opened it: its address, typed in ahead of
+        // the owner's username. Empty for "+ Add link" and for the videos.
+        var linkPrefill = '';
+        var defaultLinkTitle = @json(__('messages.add_link'));
+
+        // The address to look up from what was typed in a dialog a network's button opened. The
+        // owner may type only a username ("band", "@band", "the.band": Instagram and Facebook
+        // names often carry a dot), after the address the button typed in or in a cleared box,
+        // or paste a whole link, with or without its https://.
+        function addressFromPrefill(value) {
+            if (!linkPrefill) return value;
+            var host = linkPrefill.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
+            var rest = (value.indexOf(linkPrefill) === 0 ? value.slice(linkPrefill.length) : value).trim();
+            // A whole link, pasted after the button's address or in its place.
+            var pasted = rest.match(/(https?:\/\/\S+)$/i);
+            if (pasted) return pasted[1];
+            // An address without its scheme: the network's own ("instagram.com/band") or another
+            // of its hosts ("twitter.com/band", "fb.com/band").
+            if (/^(www\.)?([a-z0-9-]+\.)+[a-z]{2,}\/\S/i.test(rest) || rest.toLowerCase().replace(/^www\./, '') === host) {
+                return 'https://' + rest;
+            }
+            // A username.
+            if (/^@?[^\s\/:?#]+$/.test(rest)) return linkPrefill + rest.replace(/^@/, '');
+            return value;
         }
 
         // Helper: get tab content div from link type
@@ -11111,6 +11263,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Short-link row, matching the Blade markup above so the shared handlers and
             // renderSlugRow() work on a link added without a page reload.
             var platform = link.platform || '';
+            if (linkType === 'social_links') {
+                li.setAttribute('data-asked-platform', link.asked_platform || '');
+            }
             if (linkType === 'social_links' && guestUrl) {
                 var host = guestUrl.replace(/^https?:\/\//, '');
                 // auto_slug is the server's own answer for this URL, computed against everything
@@ -11222,12 +11377,20 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.addEventListener('click', function() {
                 currentLinkType = this.getAttribute('data-link-type');
                 document.getElementById('link_type').value = currentLinkType;
-                document.getElementById('link').value = '';
+                // A network's button types its address in and names the dialog after it; every
+                // other opening starts empty under the dialog's own name.
+                linkPrefill = this.getAttribute('data-prefill') || '';
+                document.getElementById('add-link-modal-title').textContent = this.getAttribute('data-title') || defaultLinkTitle;
+                document.getElementById('link').value = linkPrefill;
                 document.getElementById('link-error').style.display = 'none';
                 addLinkModal.style.display = '';
                 addLinkModal.classList.remove('hidden');
                 var linkInput = document.getElementById('link');
-                if (linkInput) linkInput.focus();
+                if (linkInput) {
+                    linkInput.focus();
+                    // After the address, where the username goes.
+                    try { linkInput.setSelectionRange(linkPrefill.length, linkPrefill.length); } catch (e) {}
+                }
             });
         });
 
@@ -11261,10 +11424,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            linkUrl = addressFromPrefill(linkUrl);
+
+            // Opened from a network's button and nothing that names an account: the network's
+            // own address however it was written ("@", "instagram.com", "HTTPS://WWW.INSTAGRAM.COM/").
+            var bare = function(address) {
+                return address.toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/+$/, '');
+            };
+            if (linkPrefill && (bare(linkUrl) === bare(linkPrefill) || bare(linkUrl) === bare(linkPrefill).split('/')[0])) {
+                errorEl.textContent = @json(__('messages.social_link_handle_required'));
+                errorEl.style.display = '';
+                return;
+            }
+            // "instagram.com/band", as people copy addresses, is an address.
+            if (!/^[a-z][a-z0-9+.-]*:/i.test(linkUrl) && /^[^\s\/]+\.[a-z]{2,}(\/|$)/i.test(linkUrl)) {
+                linkUrl = 'https://' + linkUrl;
+            }
+
             // Loading state
             var origText = saveLinkBtn.textContent;
             saveLinkBtn.disabled = true;
-            saveLinkBtn.textContent = @json(__('messages.saving'));
+            // The link is looked up here, and kept only by the form's own Save.
+            saveLinkBtn.textContent = @json(__('messages.checking'));
 
             fetch(@json($role->subdomain ? route('role.preview_link', ['subdomain' => $role->subdomain]) : ''), {
                 method: 'POST',
@@ -11286,6 +11467,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     url: link.url,
                     thumbnail_url: link.thumbnail_url
                 });
+                linkPrefill = '';
 
                 // Append to DOM
                 var tab = getTabDiv(currentLinkType);

@@ -915,6 +915,33 @@ class HomeController extends Controller
         $this->nextStepsDismissedBefore = $dismissedRows
             ->contains(fn ($row) => in_array($row->step_type, DismissedNextStep::STEP_TYPES, true));
 
+        // The social accounts row (6), for a schedule with something upcoming. A function because
+        // it is offered in two places: last of all, and in the slot of a tickets row the owner
+        // has already answered.
+        $declinedTickets = SetupGuide::declinedTicketsFor($user);
+        $skippedSocial = SetupGuide::skippedSocialFor($user);
+        $wantsSocial = fn (Role $role) => ! $role->hasSocialAccount()
+            && ! isset($dismissed[$role->id.':next_step_social'])
+            && $skippedSocial !== (int) $role->id;
+        $pushSocial = function (Role $role) use ($items, $wantsSocial) {
+            if (! $wantsSocial($role)) {
+                return;
+            }
+
+            $items->push([
+                'type' => 'next_step_social',
+                'count' => 1,
+                // The promise to tag is eventschedule.com's own, never another install's.
+                'title' => config('app.is_nexus')
+                    ? __('messages.next_step_add_social_tag')
+                    : __('messages.next_step_add_social'),
+                'subtitle' => $role->name,
+                'url' => route('role.edit', ['subdomain' => $role->subdomain, 'focus' => 'links-tab-social_links']).'#links-tab-social_links',
+                'color' => 'blue',
+                'dismiss_schedule' => UrlUtils::encodeId($role->id),
+            ]);
+        };
+
         foreach ($roles as $role) {
             // 1) Something upcoming and no way to buy: the step that matters most. On a schedule
             // that cannot sell a priced ticket the ask is registration, and one that already
@@ -925,7 +952,13 @@ class HomeController extends Controller
                 // A dismissal suppresses the row and the schedule keeps its slot: the continue
                 // below still runs. Falling through would replace a dismissed suggestion with
                 // the next-best one on the same schedule, which reads as the button not working.
-                if (! isset($dismissed[$role->id.':next_step_tickets'])) {
+                // The one exception is the social accounts row: a schedule that does not sell
+                // (an X here, or "No tickets needed" in the setup guide) is most of the bands and
+                // venues there are, and would otherwise never be asked. It is a different
+                // question, so the X still reads as working.
+                if (isset($dismissed[$role->id.':next_step_tickets']) || $declinedTickets === (int) $role->id) {
+                    $pushSocial($role);
+                } else {
                     $waiting = (int) ($interestCounts[$role->id] ?? 0);
 
                     $items->push([
@@ -948,6 +981,9 @@ class HomeController extends Controller
                         // Read by SetupGuide::withoutCoveredSteps(): a row saying people are
                         // waiting to buy is never hidden behind the guide's own tickets step.
                         'waiting' => $waiting,
+                        // The social accounts row would take this row's slot once it is
+                        // dismissed: "Dismiss all" answers that one too (dismissAllNextSteps()).
+                        'social_behind' => $wantsSocial($role),
                     ]);
                 }
 
@@ -1040,6 +1076,15 @@ class HomeController extends Controller
                     'color' => 'blue',
                     'dismiss_schedule' => UrlUtils::encodeId($role->id),
                 ]);
+
+                continue;
+            }
+
+            // 6) Nothing more pressing on a schedule with upcoming dates (4 took every schedule
+            // without): the accounts Event Schedule can tag it on when it posts about it. A
+            // dismissed gallery row keeps its slot while its event is recent, as above.
+            if (! isset($recentWithoutGallery[$role->id])) {
+                $pushSocial($role);
             }
         }
 
@@ -1052,6 +1097,7 @@ class HomeController extends Controller
             'next_step_next_event' => 2,
             'next_step_publish_event' => 2,
             'next_step_gallery' => 3,
+            'next_step_social' => 4,
         ];
 
         // Each row carries its schedule's face (photo or initial) for the dashboard's card.
@@ -1691,6 +1737,18 @@ class HomeController extends Controller
 
             $offer = $offer->reject(fn ($item) => $item['dismiss_schedule'] === $own);
         }
+
+        // A dismissed tickets row hands its schedule's slot to the social accounts row
+        // (getNextStepItems()), so "Dismiss all" answers that one too: otherwise every schedule
+        // that does not sell came back on the next load with a row it was never shown, which
+        // reads as the button not working. Written and undone with the rest.
+        // Only where that row would really come (no account, not already answered): an Undo
+        // must never take back an older answer, and a schedule with an account must not be kept
+        // from being asked if it ever loses it.
+        $offer = $offer->concat(
+            $offer->where('type', 'next_step_tickets')->filter(fn ($item) => ! empty($item['social_behind']))
+                ->map(fn ($item) => ['type' => 'next_step_social', 'dismiss_schedule' => $item['dismiss_schedule']])
+        )->unique(fn ($item) => $item['dismiss_schedule'].':'.$item['type'])->values();
 
         $rows = $offer->map(fn ($item) => [
             'user_id' => $user->id,

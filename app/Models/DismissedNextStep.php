@@ -60,6 +60,9 @@ class DismissedNextStep extends Model
         // An event that just ended with no photo gallery (a Pro feature): the moment an organizer
         // has photos to share.
         'next_step_gallery',
+        // A schedule with upcoming dates and none of the four accounts Event Schedule tags
+        // people on (Role::hasSocialAccount()).
+        'next_step_social',
     ];
 
     /**
@@ -89,6 +92,7 @@ class DismissedNextStep extends Model
         // No email asks this, so a dismissal of it silences nothing.
         'next_step_publish_event' => [],
         'next_step_gallery' => [],
+        'next_step_social' => [],
     ];
 
     /**

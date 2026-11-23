@@ -47,7 +47,7 @@
         $sgPayload = \App\Utils\SetupGuide::payload($sgState, $sgSurface);
         $sgWords = $sgPayload['t'];
         $sgLive = $sgState['live'];
-        $sgRemaining = ['', 'one_to_go', 'two_to_go', 'three_to_go'][$sgState['remaining']] ?? 'three_to_go';
+        $sgRemaining = ['', 'one_to_go', 'two_to_go', 'three_to_go', 'four_to_go'][$sgState['remaining']] ?? 'four_to_go';
         $sgStatus = ! $sgLive
             ? $sgWords['one_step']
             : ($sgState['remaining'] > 0 ? $sgWords[$sgRemaining] : $sgWords['title']);
@@ -97,12 +97,15 @@
             $sgAll = $sgOwn + $sgOthers;
             $sgHeights = array_fill(0, 3, 64 + ($sgAll ? $sgRowsBlock($sgAll, 3, $sgAll > 1) + 12 : 0));
         } else {
+            // Measured 2026-11-23 with the social accounts step, which made every live guide
+            // one row longer from 1024px (a phone shows the open step alone).
             $sgOpen = [
                 'event' => [520, 412, 393],
-                'events' => [529, 480, 437],
-                'share' => [599, 550, 514],
-                'tickets' => [533, 465, 465],
-            ][$sgState['current'] ?? 'events'] ?? [529, 480, 437];
+                'events' => [548, 524, 481],
+                'share' => [599, 618, 558],
+                'social' => [524, 500, 500],
+                'tickets' => [533, 509, 509],
+            ][$sgState['current'] ?? 'events'] ?? [548, 524, 481];
 
             $sgHeights = array_map(fn ($height) => $height + $sgOwn * 48 + $sgBand, $sgOpen);
         }

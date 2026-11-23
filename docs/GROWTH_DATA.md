@@ -700,6 +700,15 @@ created over the API or WhatsApp cannot carry a price.
 
 ## Changelog (`meta.schema_version`)
 
+- **30** (2026-11-23)
+  - **The setup guide has a social accounts step:** after "Add more events" (and before a
+    non-seller's tickets), answered by any one of Facebook, Instagram, LinkedIn or X on the
+    schedule. A guide started before this needs one more step to reach `setup_guide = finished`;
+    one that had already finished stays finished.
+  - **`dismissed_steps` gains `social`:** the dashboard's "Add your socials" row, offered to a
+    schedule with upcoming dates and none of the four, including in the slot of a tickets row
+    that was dismissed or answered "No tickets needed".
+
 - **29** (2026-11-18)
   - **`hero_test` can hold a page round:** two homepages, each a variant with its `page`
     (`full`, today's, or `new`). New on the section: `split`, `ended`, `p_new_better`,

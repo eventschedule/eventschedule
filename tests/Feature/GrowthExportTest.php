@@ -149,10 +149,11 @@ class GrowthExportTest extends TestCase
         // since blocked accounts are left out, 25 since nudge_outcomes carries acted_subscribed, 26
         // since signup_sources dates signups by source, 27 since signups carry arrival_intent and
         // traffic signup_google_starts, 28 since marketing_pages counts each page's readers, 29
-        // since hero_test can hold a page round (two homepages, an even split, ended by hand).
+        // since hero_test can hold a page round (two homepages, an even split, ended by hand), 30
+        // since the setup guide asks for social accounts and dismissed_steps can hold `social`.
         // Bumping this is deliberate: a reader diffing two pulls needs to know the shape (or the
         // meaning) moved.
-        $this->assertSame(29, $data['meta']['schema_version']);
+        $this->assertSame(30, $data['meta']['schema_version']);
         $this->assertSame(GrowthExportService::SCHEMA_VERSION, $data['meta']['schema_version']);
         $this->assertSame(now()->format('Y-m'), $data['meta']['partial_month']['month']);
         $this->assertSame(['funnel', 'funnel_trend'], $data['meta']['range_applies_to']);

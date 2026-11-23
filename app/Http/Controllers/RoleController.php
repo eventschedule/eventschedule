@@ -8053,7 +8053,9 @@ class RoleController extends Controller
 
         $request->validate(['url' => 'required|string|url|max:1000']);
 
-        $urlInfo = UrlUtils::getUrlInfo($request->url);
+        // A link to Instagram, Facebook, LinkedIn or X keeps what makes it an account and loses
+        // what the app it was copied from added ("instagram.com/band/?igsh=...").
+        $urlInfo = UrlUtils::getUrlInfo(UrlUtils::tidyAskedLink($request->url));
         if ($urlInfo === null) {
             return response()->json(['error' => __('messages.invalid_url')], 422);
         }
@@ -8061,6 +8063,9 @@ class RoleController extends Controller
         $urlInfo->brand = UrlUtils::getBrand($urlInfo->url);
         $urlInfo->clean_url = UrlUtils::clean($urlInfo->url);
         $urlInfo->platform = UrlUtils::detectPlatform($urlInfo->url);
+        // Which of the four networks the setup guide asks for this is an account on, if any: the
+        // form's buttons for those networks hide by it.
+        $urlInfo->asked_platform = UrlUtils::askedAccountPlatform($urlInfo->url);
 
         $role = Role::subdomain($subdomain)->first();
         $taken = $role ? $this->takenSlugs($role) : [];

@@ -2,9 +2,11 @@
 
 namespace App\Utils;
 
+use App\Models\CalendarImportHold;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\CalendarArrival;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -38,7 +40,7 @@ class SetupGuide
     public const QUIET_HOURS = 72;
 
     /** The steps of the second stretch, in order. Each can be turned down; the first three cannot. */
-    public const SKIPPABLE = ['events', 'share', 'tickets'];
+    public const SKIPPABLE = ['events', 'share', 'tickets', 'social'];
 
     /** How many events make "a page worth sharing". One that repeats also counts. */
     public const EVENTS_GOAL = 3;
@@ -188,6 +190,26 @@ class SetupGuide
         $guide = $user?->setup_guide;
 
         return is_array($guide) && ! empty($guide['role_id']) && in_array('tickets', $guide['skipped'] ?? [], true)
+            ? (int) $guide['role_id']
+            : null;
+    }
+
+    /**
+     * The schedule whose guide was told "not now" about social accounts, while that guide's 30
+     * days last, or null. A guide that finished goes from the dashboard the same day, and the
+     * dashboard then asking for what was skipped that morning would be a nag; once the 30 days
+     * are over it may ask once more, and its own X is the lasting answer.
+     */
+    public static function skippedSocialFor(?User $user): ?int
+    {
+        $guide = $user?->setup_guide;
+
+        if (! is_array($guide) || empty($guide['role_id']) || empty($guide['started_at'])
+            || ! in_array('social', $guide['skipped'] ?? [], true)) {
+            return null;
+        }
+
+        return Carbon::parse($guide['started_at'])->gt(now()->subDays(self::LIFETIME_DAYS))
             ? (int) $guide['role_id']
             : null;
     }
@@ -355,7 +377,16 @@ class SetupGuide
     {
         $route = request()->route()?->getName();
 
+        // On the schedule's own form the social step points into the page, not at a reload of it
+        // (which would ask about unsaved changes): role/edit's own jump opens Page content there.
+        $urls = $state['urls'] ?? [];
+
+        if (isset($urls['social']) && $route === 'role.edit' && request()->route('subdomain') === ($state['subdomain'] ?? null)) {
+            $urls['social'] = '#links-tab-social_links';
+        }
+
         return array_merge($state, [
+            'urls' => $urls,
             'surface' => $surface,
             't' => self::strings(),
             // The page that IS the current step shows "You are here" rather than a button back to
@@ -473,6 +504,8 @@ class SetupGuide
             'dismiss' => __('messages.dismiss'),
             'more' => __('messages.and_n_more'),
             'settings' => __('messages.settings'),
+            // The promise to tag is eventschedule.com's own, never another install's.
+            'social_body' => __(config('app.is_nexus') ? 'messages.social_links_ask_tag' : 'messages.social_links_ask_follow'),
         ];
     }
 
@@ -606,6 +639,12 @@ class SetupGuide
                 return isset($state['steps']['tickets']) && empty($item['waiting']);
             }
 
+            // The guide asks for the accounts itself, in every state of its step: skipped there is
+            // "not now", and the dashboard asking again the same day would be a nag.
+            if ($item['type'] === 'next_step_social') {
+                return isset($state['steps']['social']);
+            }
+
             return in_array($item['type'], $covered, true);
         })->values();
     }
@@ -710,6 +749,15 @@ class SetupGuide
                     'done' => $live && ($page['total'] >= self::EVENTS_GOAL || $page['repeating'] > 0),
                     'skipped' => in_array('events', $skipped, true),
                 ],
+                // The accounts Event Schedule can tag the schedule on when it posts about it
+                // (Role::hasSocialAccount(): any one of the four). After the events, so it is
+                // never asked of a page with nothing on it, and ahead of a non-seller's tickets,
+                // whose row says "Last one". Added after guides had already finished: one that
+                // has stays finished (Vue works "finished" out from the steps, not from this).
+                'social' => [
+                    'done' => $role->hasSocialAccount(),
+                    'skipped' => $finished || in_array('social', $skipped, true),
+                ],
             ]
             + $tickets;
 
@@ -787,6 +835,9 @@ class SetupGuide
                 // The Events row of Style, where the animation is chosen: the tab alone opened on
                 // its rows closed.
                 'animate' => route('role.edit', ['subdomain' => $subdomain]).'#style-content-animation',
+                // The social links at the top of Page content; ?focus= brings them into view on a
+                // phone, where the tab opens far below the fold.
+                'social' => route('role.edit', ['subdomain' => $subdomain, 'focus' => 'links-tab-social_links']).'#links-tab-social_links',
                 'repeat' => $owned
                     ? route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($owned->id)]).'#section-recurring'
                     : null,
@@ -903,8 +954,8 @@ class SetupGuide
      */
     private static function draft(Role $role): ?array
     {
-        if (\App\Services\CalendarArrival::tablesReady()) {
-            $waiting = \App\Models\CalendarImportHold::where('role_id', $role->id)
+        if (CalendarArrival::tablesReady()) {
+            $waiting = CalendarImportHold::where('role_id', $role->id)
                 ->whereNull('decided_at')
                 ->whereHas('event', fn ($q) => $q->where('creator_role_id', $role->id)->where('is_draft', true))
                 ->count();
@@ -922,7 +973,7 @@ class SetupGuide
             ->where('is_draft', true)
             ->where('is_internal', false)
             ->whereNull('appointment_type_id')
-            ->when(\App\Services\CalendarArrival::tablesReady(), fn ($q) => $q->whereNotExists(fn ($held) => $held
+            ->when(CalendarArrival::tablesReady(), fn ($q) => $q->whereNotExists(fn ($held) => $held
                 ->selectRaw('1')->from('calendar_import_holds')->whereColumn('calendar_import_holds.event_id', 'events.id')))
             ->orderByRaw('starts_at IS NULL')
             ->orderBy('starts_at')

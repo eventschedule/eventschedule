@@ -270,8 +270,8 @@ class SetupGuideTest extends TestCase
         $this->assertTrue($state['live']);
         $this->assertTrue($state['celebrate']);
         $this->assertSame('share', $state['current'], 'sharing comes while they are still here');
-        $this->assertSame(3, $state['remaining']);
-        $this->assertSame(['event', 'share', 'events', 'tickets'], array_keys($state['steps']));
+        $this->assertSame(4, $state['remaining']);
+        $this->assertSame(['event', 'share', 'events', 'social', 'tickets'], array_keys($state['steps']));
         $this->assertFalse($state['sells']);
         $this->assertSame('Friday Jazz Night', $state['events'][0]['name']);
     }
@@ -290,7 +290,7 @@ class SetupGuideTest extends TestCase
 
             $state = $this->state($seller);
 
-            $this->assertSame(['event', 'tickets', 'share', 'events'], array_keys($state['steps']), $intent);
+            $this->assertSame(['event', 'tickets', 'share', 'events', 'social'], array_keys($state['steps']), $intent);
             $this->assertSame('tickets', $state['current'], $intent);
             $this->assertTrue($state['sells'], $intent);
         }
@@ -307,7 +307,7 @@ class SetupGuideTest extends TestCase
 
             $state = $this->state($other);
 
-            $this->assertSame(['event', 'share', 'events', 'tickets'], array_keys($state['steps']), (string) $intent);
+            $this->assertSame(['event', 'share', 'events', 'social', 'tickets'], array_keys($state['steps']), (string) $intent);
             $this->assertSame('share', $state['current']);
             $this->assertFalse($state['sells']);
         }
@@ -455,7 +455,7 @@ class SetupGuideTest extends TestCase
         $state = $this->state($user);
 
         $this->assertTrue($state['live'], 'a listed event is on its page');
-        $this->assertSame(['event', 'share', 'events'], array_keys($state['steps']));
+        $this->assertSame(['event', 'share', 'events', 'social'], array_keys($state['steps']));
         $this->assertNull($state['ticket_event']);
     }
 
@@ -772,6 +772,7 @@ class SetupGuideTest extends TestCase
         $this->publishedEvent($role);
 
         $this->post_(['action' => 'skip', 'step' => 'events'])->assertOk();
+        $this->post_(['action' => 'skip', 'step' => 'social'])->assertOk();
         $this->post_(['action' => 'skip', 'step' => 'tickets'])->assertOk();
         $this->assertArrayNotHasKey('completed_at', $this->stored($user), 'one step is still open');
 
@@ -1006,6 +1007,8 @@ class SetupGuideTest extends TestCase
     {
         config(['app.hosted' => true]);
         [$user, $role] = $this->startGuide();
+        // An account to tag, so the social row is not what takes the tickets row's place.
+        $role->forceFill(['social_links' => json_encode([['url' => 'https://www.instagram.com/thefixture']])])->saveQuietly();
         // Far enough out to still be upcoming once the guide's 30 days are over.
         $this->publishedEvent($role, ['starts_at' => now()->addDays(90)->format('Y-m-d H:i:s')]);
 
@@ -1223,5 +1226,174 @@ class SetupGuideTest extends TestCase
             [$other->id],
             DismissedNextStep::where('user_id', $user->id)->pluck('role_id')->all()
         );
+    }
+
+    // ---- Social accounts -------------------------------------------------------------------
+
+    /**
+     * Event Schedule tags the schedules it posts about on Instagram, Facebook, LinkedIn and X, so
+     * the guide asks for those accounts. Any ONE answers it: most bands and venues have no
+     * LinkedIn, and asking for all four would never end. What counts is an account, not the
+     * network's own address (the form's LinkedIn button types in linkedin.com/company/), and a
+     * website that is one of them counts too.
+     */
+    public function test_any_one_of_the_four_networks_answers_the_social_step(): void
+    {
+        $role = new Role;
+
+        foreach ([
+            'https://www.instagram.com/theband',
+            'https://x.com/theband',
+            'https://twitter.com/theband',
+            'https://fb.com/theband',
+            'https://www.facebook.com/profile.php?id=1000123',
+            'https://www.linkedin.com/company/the-venue',
+            'https://www.linkedin.com/in/someone',
+            'instagram.com/theband',
+        ] as $url) {
+            $role->social_links = json_encode([['url' => $url]]);
+            $role->website = null;
+            $this->assertTrue($role->hasSocialAccount(), $url);
+        }
+
+        foreach ([
+            'https://www.tiktok.com/@theband',
+            'https://www.instagram.com/',
+            'https://www.linkedin.com/company/',
+            'https://www.facebook.com/profile.php',
+            'https://www.facebook.com/sharer/sharer.php?u=x',
+            'https://www.instagram.com/p/C0ffee/',
+            'https://x.com/intent/post?text=hi',
+            'https://theband.example',
+        ] as $url) {
+            $role->social_links = json_encode([['url' => $url]]);
+            $this->assertFalse($role->hasSocialAccount(), $url);
+        }
+
+        $role->social_links = null;
+        $role->website = 'https://www.instagram.com/theband/';
+        $this->assertSame(['instagram'], $role->askedPlatforms(), 'a website that is an Instagram counts');
+
+        [$user, $guided] = $this->startGuide();
+        $this->publishedEvent($guided);
+        $this->assertFalse($this->state($user)['steps']['social']['done']);
+
+        $guided->forceFill(['social_links' => json_encode([['url' => 'https://x.com/theband']])])->saveQuietly();
+        $this->assertTrue($this->state($user)['steps']['social']['done']);
+    }
+
+    public function test_a_link_copied_from_one_of_the_apps_keeps_only_the_account(): void
+    {
+        // Facebook's "Copy link" on a page or a profile is an account; on a post it is not.
+        $this->assertSame('facebook', UrlUtils::askedAccountPlatform('https://www.facebook.com/share/1AbCdEf/?mibextid=wwXIfr'));
+        $this->assertSame('https://www.facebook.com/share/1AbCdEf', UrlUtils::tidyAskedLink('https://www.facebook.com/share/1AbCdEf/?mibextid=wwXIfr'));
+        $this->assertNull(UrlUtils::askedAccountPlatform('https://www.facebook.com/share/p/1AbCdEf/'));
+
+        // A post, a photo, an intent and Facebook's own redirect are not accounts, and keep the
+        // query that makes them work.
+        foreach ([
+            'https://l.facebook.com/l.php?u=https%3A%2F%2Fsite.example',
+            'https://www.facebook.com/permalink.php?story_fbid=1&id=2',
+            'https://www.facebook.com/photo.php?fbid=1',
+            'https://www.facebook.com/photo/?fbid=1',
+            'https://x.com/intent/follow?screen_name=band',
+            'https://developers.facebook.com/docs/x',
+        ] as $url) {
+            $this->assertNull(UrlUtils::askedAccountPlatform($url), $url);
+            $this->assertSame($url, UrlUtils::tidyAskedLink($url), $url);
+        }
+        foreach (['https://m.facebook.com/theband', 'https://web.facebook.com/theband', 'https://mobile.twitter.com/theband'] as $url) {
+            $this->assertNotNull(UrlUtils::askedAccountPlatform($url), $url);
+        }
+        foreach (['r', 'v', 'g'] as $kind) {
+            $this->assertNull(UrlUtils::askedAccountPlatform("https://www.facebook.com/share/{$kind}/1AbC/"), $kind);
+        }
+        $this->assertSame('linkedin', UrlUtils::askedAccountPlatform('https://uk.linkedin.com/in/someone'));
+
+        $this->assertSame('https://www.instagram.com/theband', UrlUtils::tidyAskedLink('https://www.instagram.com/theband/?igsh=abc123'));
+        $this->assertSame('https://x.com/theband', UrlUtils::tidyAskedLink('https://x.com/theband?s=21&t=xyz#top'));
+        $this->assertSame('https://www.facebook.com/profile.php?id=1000123', UrlUtils::tidyAskedLink('https://www.facebook.com/profile.php?id=1000123&mibextid=abc'));
+        $this->assertSame('https://shop.example/?ref=1', UrlUtils::tidyAskedLink('https://shop.example/?ref=1'), 'any other site as given');
+    }
+
+    /**
+     * The step can be put off and brought back like the others, and a guide that had finished
+     * before the step existed stays finished: the component works "finished" out from the steps.
+     */
+    public function test_the_social_step_can_be_skipped_and_a_finished_guide_stays_finished(): void
+    {
+        [$user, $role] = $this->startGuide();
+        $this->publishedEvent($role);
+
+        $this->post_(['action' => 'skip', 'step' => 'social'])->assertOk();
+        $this->assertTrue($this->state($user)['steps']['social']['skipped']);
+
+        $this->post_(['action' => 'unskip', 'step' => 'social'])->assertOk();
+        $this->assertFalse($this->state($user)['steps']['social']['skipped']);
+
+        // Finished before the step existed, and still in the session it finished in.
+        SetupGuide::stamp($user->fresh(), 'completed_at');
+        session(['setup_guide_finished' => $role->id]);
+        $state = $this->state($user->fresh());
+        $this->assertTrue($state['steps']['social']['skipped'], 'a finished guide does not reopen');
+        $this->assertTrue($state['finished']);
+    }
+
+    public function test_the_social_step_leads_to_the_social_links_and_says_why(): void
+    {
+        [$user, $role] = $this->startGuide();
+        $this->publishedEvent($role);
+        $state = $this->state($user);
+
+        $this->assertStringEndsWith('#links-tab-social_links', $state['urls']['social']);
+        $this->assertStringContainsString('focus=links-tab-social_links', $state['urls']['social'], 'brought into view on a phone');
+
+        // The promise to tag is eventschedule.com's own.
+        config(['app.is_nexus' => true]);
+        $this->assertSame(__('messages.social_links_ask_tag'), SetupGuide::payload($state, 'section')['t']['social_body']);
+        config(['app.is_nexus' => false]);
+        $this->assertSame(__('messages.social_links_ask_follow'), SetupGuide::payload($state, 'section')['t']['social_body']);
+
+        // From anywhere else it is the form's address...
+        $this->get(route('home'));
+        $this->assertSame($state['urls']['social'], SetupGuide::payload($state, 'section')['urls']['social']);
+
+        // ...and on the schedule's own form it points into the page instead of reloading it.
+        $this->get(route('role.edit', ['subdomain' => $role->subdomain]));
+        $this->assertSame('#links-tab-social_links', SetupGuide::payload($state, 'ring')['urls']['social']);
+
+        $vue = file_get_contents(resource_path('js/components/SetupGuide.vue'));
+        $this->assertStringContainsString('social: socialRow', $vue);
+        $this->assertStringContainsString('t.four_to_go', $vue);
+        $this->assertStringContainsString("'four_to_go'", file_get_contents(resource_path('views/partials/setup-guide.blade.php')));
+    }
+
+    /**
+     * The dashboard's own "Add your socials" row stays away while the guide asks the same, and,
+     * once the step was put off, for the rest of the guide's 30 days: a guide that finished leaves
+     * the dashboard that day, and the row would otherwise be back that afternoon.
+     */
+    public function test_the_dashboard_does_not_ask_for_socials_the_guide_asked_for(): void
+    {
+        config(['app.hosted' => true]);
+        [$user, $role] = $this->startGuide();
+        $this->publishedEvent($role, ['starts_at' => now()->addDays(60)->format('Y-m-d H:i:s')]);
+        // No tickets needed: the schedule's slot is free for the social row.
+        $this->post_(['action' => 'skip', 'step' => 'tickets'])->assertOk();
+
+        $this->assertNotContains('next_step_social', $this->nextStepTypes($user), 'held while the step is open');
+
+        // "Not now", then the rest, which finishes the guide: once its finished day is over
+        // nothing of it is on the dashboard to hold the row, and only the skip itself does.
+        $this->post_(['action' => 'skip', 'step' => 'social'])->assertOk();
+        $this->post_(['action' => 'skip', 'step' => 'events'])->assertOk();
+        $this->post_(['action' => 'share'])->assertOk();
+        $this->assertNotEmpty($this->stored($user)['completed_at']);
+        $this->travel(SetupGuide::FINISHED_HOURS + 1)->hours();
+        $this->assertNull($this->state($user->fresh()), 'the guide has left the dashboard');
+        $this->assertNotContains('next_step_social', $this->nextStepTypes($user->fresh()), 'held after "not now"');
+
+        $this->travel(SetupGuide::LIFETIME_DAYS + 1)->days();
+        $this->assertContains('next_step_social', $this->nextStepTypes($user->fresh()), 'asked once more after the guide');
     }
 }

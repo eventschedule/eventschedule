@@ -243,6 +243,163 @@ class UrlUtils
         'charidy' => 'Charidy',
     ];
 
+    /**
+     * The four networks the schedule form offers a button for and the setup guide asks about, so
+     * Event Schedule can tag a schedule it posts about. Each with the address its button types in
+     * ahead of the owner's username; LinkedIn's is a company page, which a pasted /in/ link
+     * overrides.
+     */
+    public const ASKED_PLATFORMS = [
+        'instagram' => 'https://www.instagram.com/',
+        'facebook' => 'https://www.facebook.com/',
+        'linkedin' => 'https://www.linkedin.com/company/',
+        'twitter' => 'https://x.com/',
+    ];
+
+    /**
+     * First path segments that are one of the four networks' own pages rather than an account:
+     * a link to one of these names nobody.
+     */
+    private const ASKED_PLATFORM_PAGES = [
+        'instagram' => ['p', 'reel', 'reels', 'tv', 'explore', 'stories', 'accounts', 'direct', 'web'],
+        // Any other *.php is a page too (permalink.php, photo.php, story.php, l.php...), and
+        // /share/ is an account only for the code the app's "Copy link" gives a page or a
+        // profile (see askedAccountPlatform()).
+        'facebook' => ['sharer', 'events', 'groups', 'watch', 'login', 'photo', 'photos', 'media', 'reel', 'reels', 'story', 'marketplace', 'dialog', 'hashtag', 'stories', 'gaming'],
+        'linkedin' => ['feed', 'posts', 'pulse', 'jobs', 'login', 'events', 'search', 'groups', 'redir'],
+        'twitter' => ['home', 'intent', 'share', 'search', 'i', 'explore', 'login', 'hashtag', 'settings', 'messages', 'notifications', 'compose'],
+    ];
+
+    /**
+     * The hosts an account on one of the four networks lives at, besides the network's own
+     * domain: www and the mobile site. Not l.facebook.com (the redirect a link copied inside
+     * Facebook goes through), developers.facebook.com or help.instagram.com. LinkedIn also
+     * answers on a country's two letters (uk.linkedin.com/in/...).
+     */
+    private const ACCOUNT_HOST_PREFIXES = ['', 'www.', 'm.', 'mobile.'];
+
+    /** Facebook's other sites for people: whole regions are sent to web.facebook.com. */
+    private const FACEBOOK_HOST_PREFIXES = ['web.', 'mbasic.', 'touch.'];
+
+    /** The share codes that are a post, a reel, a video or a group rather than a page. */
+    private const FACEBOOK_SHARE_KINDS = ['p', 'r', 'v', 'g'];
+
+    /** LinkedIn's kinds of page: the account is the segment after one of these. */
+    private const LINKEDIN_PAGE_KINDS = ['company', 'in', 'school', 'showcase'];
+
+    /**
+     * The asked network ($ASKED_PLATFORMS) $url is an ACCOUNT on, or null: one of the four, with
+     * a name after the network's own address. A bare instagram.com, the button's own
+     * linkedin.com/company/ and facebook.com/profile.php with no id are not an account, nor is a
+     * post or a share page.
+     */
+    public static function askedAccountPlatform(?string $url): ?string
+    {
+        $url = is_string($url) ? trim($url) : '';
+
+        if ($url === '') {
+            return null;
+        }
+
+        if (! preg_match('#^https?://#i', $url)) {
+            $url = 'https://'.$url;
+        }
+
+        $platform = self::detectPlatform($url);
+
+        if (! isset(self::ASKED_PLATFORMS[$platform]) || ! self::isAccountHost($url, $platform)) {
+            return null;
+        }
+
+        $segments = array_values(array_filter(
+            explode('/', (string) parse_url($url, PHP_URL_PATH)),
+            fn ($segment) => $segment !== '' && $segment !== '@',
+        ));
+        $first = strtolower($segments[0] ?? '');
+
+        if ($first === '' || in_array($first, self::ASKED_PLATFORM_PAGES[$platform], true)) {
+            return null;
+        }
+
+        if ($platform === 'facebook' && $first === 'profile.php') {
+            parse_str((string) parse_url($url, PHP_URL_QUERY), $query);
+
+            return is_string($query['id'] ?? null) && $query['id'] !== '' ? $platform : null;
+        }
+
+        if ($platform === 'facebook' && str_ends_with($first, '.php')) {
+            return null;
+        }
+
+        // The Facebook app's "Copy link" on a page or a profile: facebook.com/share/<code>.
+        if ($platform === 'facebook' && $first === 'share') {
+            $kind = strtolower($segments[1] ?? '');
+
+            return $kind !== '' && ! in_array($kind, self::FACEBOOK_SHARE_KINDS, true) ? $platform : null;
+        }
+
+        if ($platform === 'linkedin' && in_array($first, self::LINKEDIN_PAGE_KINDS, true)) {
+            return isset($segments[1]) ? $platform : null;
+        }
+
+        return $platform;
+    }
+
+    /**
+     * A link to one of the four asked networks without what the app it was copied from added to
+     * it: the query and the fragment ("instagram.com/band/?igsh=..." is instagram.com/band), and
+     * a trailing slash. The exception is Facebook's profile.php, whose id IS the account, which
+     * keeps that one parameter. Any other link is returned as given.
+     */
+    public static function tidyAskedLink(string $url): string
+    {
+        $url = trim($url);
+
+        // Only an account: a post, a photo or Facebook's own redirect is the query (l.php?u=...,
+        // permalink.php?story_fbid=...), and without it the link goes nowhere.
+        if (self::askedAccountPlatform($url) === null) {
+            return $url;
+        }
+
+        $parts = parse_url($url);
+
+        if (! isset($parts['host'])) {
+            return $url;
+        }
+
+        $path = rtrim($parts['path'] ?? '', '/');
+        $query = '';
+
+        if (strtolower(basename($path)) === 'profile.php') {
+            parse_str($parts['query'] ?? '', $params);
+            $query = is_string($params['id'] ?? null) ? '?id='.rawurlencode($params['id']) : '';
+        }
+
+        return ($parts['scheme'] ?? 'https').'://'.$parts['host'].$path.$query;
+    }
+
+    /** Whether $url's host is one an account on $platform lives at (ACCOUNT_HOST_PREFIXES). */
+    private static function isAccountHost(string $url, string $platform): bool
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+
+        foreach (self::PLATFORM_DOMAINS as $domain => $domainPlatform) {
+            if ($domainPlatform !== $platform || ! str_ends_with('.'.$host, '.'.$domain)) {
+                continue;
+            }
+
+            $prefix = substr($host, 0, strlen($host) - strlen($domain));
+
+            if (in_array($prefix, self::ACCOUNT_HOST_PREFIXES, true)
+                || ($platform === 'facebook' && in_array($prefix, self::FACEBOOK_HOST_PREFIXES, true))
+                || ($platform === 'linkedin' && preg_match('/^[a-z]{2}\.$/', $prefix))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static function getUniquePlatforms(): array
     {
         return array_values(array_unique(
