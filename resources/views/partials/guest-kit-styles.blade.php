@@ -289,8 +289,12 @@
     .gk-row-lock { display: inline-block; width: 1rem; height: 1rem; margin-inline-end: .375rem; vertical-align: -.125rem; color: var(--gk-ink-3); }
     .gk-row-chips { display: flex; flex-wrap: wrap; gap: .375rem; margin-top: .125rem; }
     {{-- A chip on a card wraps inside the text column: a coupon chip is wider than the column
-         beside a picture, and unwrapped its end went under the flyer. --}}
-    :where(.gk-row-chips) .gk-chip { max-width: 100%; white-space: normal; }
+         beside a picture, and unwrapped its end went under the flyer. The chip is a flex box, so
+         its parts (the label, the code, the discount) are items and white-space alone moved
+         nothing: the items themselves wrap, a code with no spaces breaks where it must, and the
+         corners are a radius a two-line chip still holds its text inside (one line is the same
+         pill as before). --}}
+    :where(.gk-row-chips) .gk-chip { max-width: 100%; flex-wrap: wrap; row-gap: 0; padding-block: .0625rem; border-radius: .75rem; white-space: normal; overflow-wrap: anywhere; }
     {{-- Edit, for whoever may: at the foot of the text column, in room the row keeps for it, so
          the picture still runs the card's full height and an owner sees the card visitors see.
          It is a sibling of the row (which is pressed as a whole), never inside it, and it keeps

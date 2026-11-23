@@ -788,7 +788,9 @@ class GuestListRowsTest extends TestCase
         // wide at 640px beside a picture this size.
         $this->assertStringNotContainsString('grid-template-columns: 9.5rem', $guest);
         // A chip wraps inside the text column instead of running under the picture.
-        $this->assertStringContainsString(':where(.gk-row-chips) .gk-chip { max-width: 100%; white-space: normal; }', $guest);
+        // It is a flex box, so it is its parts that wrap (white-space alone left a coupon chip
+        // on one line, its end under the flyer).
+        $this->assertStringContainsString(':where(.gk-row-chips) .gk-chip { max-width: 100%; flex-wrap: wrap; row-gap: 0; padding-block: .0625rem; border-radius: .75rem; white-space: normal; overflow-wrap: anywhere; }', $guest);
         // A screen that needs more than the 480 derivative of a bigger picture gets the 960.
         $this->assertStringContainsString(':srcset="event.image_srcset || null" sizes="15rem"', $guest);
         // A flyer is shown whole at the column's width, and its card is that height before the
