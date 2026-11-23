@@ -408,7 +408,9 @@
 
         function redraw() {
             return fetch(window.location.href, { headers: { 'Accept': 'text/html' }, credentials: 'same-origin' })
-                .then(function (r) { return r.ok ? r.text() : null; })
+                // A lapsed admin window answers the page with a redirect to confirm the password:
+                // that is no page to swap in.
+                .then(function (r) { return r.ok && !r.redirected ? r.text() : null; })
                 .then(function (html) {
                     if (!html) return;
                     var fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('growth-live');
@@ -422,7 +424,7 @@
         function check() {
             if (busy || document.hidden) return;
             busy = true;
-            fetch(root.dataset.stampUrl, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+            fetch(root.dataset.stampUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
                 .then(function (r) { return r.ok ? r.json() : null; })
                 .then(function (data) { return data && data.stamp && data.stamp !== stamp ? redraw() : null; })
                 .catch(function () {})
