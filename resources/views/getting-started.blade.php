@@ -8,49 +8,44 @@
         @include('partials.web-app-manifest', ['platformApp' => true])
     </x-slot>
 
-    <div class="flex flex-col items-center px-4 pt-8 pb-16 sm:px-6 lg:px-8">
-        {{-- Deliberately not a link: the dashboard would forward zero-schedule users straight back here --}}
-        <x-application-logo />
-
-        {{-- The step band, for the guest-submit flow only. Everyone else gets the setup guide's
-             ring in the welcome line below, which adds no height above the cards. --}}
-        @if (session('pending_request'))
-        <div class="w-full max-w-2xl mt-2 rounded-2xl overflow-hidden">
-            <x-step-indicator :currentStep="2" />
-        </div>
-        @endif
-
-        {{-- isolate: the glow sits at -z-10, behind the heading and cards but still above the
-             body's background. It starts below the step band when that is shown, whose own panel
-             background would otherwise cut a hard rectangle out of it. Never move it onto
-             html/body (see CLAUDE.md on containing blocks). --}}
-        <div class="relative isolate w-full max-w-6xl mt-8">
-            <div class="getting-started-glow" aria-hidden="true"></div>
-
-            <div class="text-center mb-8">
-                {{-- The plain welcome also for somebody who turned suggestions off: the ring and
-                     its "two steps" line are the setup guide's, and off means all of it. --}}
-                @if (session('pending_request') || ! auth()->user()->wantsSuggestions())
-                <p class="text-sm sm:text-base font-semibold text-[var(--brand-blue)]">
-                    {{ __('messages.getting_started_welcome', ['name' => auth()->user()->firstName()]) }}
-                </p>
-                @else
-                @include('partials.setup-guide-eyebrow', ['line' => __('messages.setup_guide_welcome_two_steps', ['name' => auth()->user()->firstName()])])
+    <div class="px-4 pt-7 pb-16 sm:px-6 lg:px-8">
+        {{-- One column of the chooser's width, every line on its left edge, on the page's own flat
+             ground (the 2026-11 design has no glow behind the heading). --}}
+        <div class="mx-auto w-full max-w-[57.5rem]">
+            {{-- The logo at one end and the step at the other, as on the first schedule's form.
+                 Deliberately not a link: the dashboard would forward zero-schedule users straight
+                 back here. --}}
+            <header class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                <div class="flex">
+                    <img class="h-9 w-auto dark:hidden" src="{{ asset(ltrim(config('app.logo_dark'), '/')) }}" alt="{{ config('app.name') }}"/>
+                    <img class="h-9 w-auto hidden dark:block" src="{{ asset(ltrim(config('app.logo_light'), '/')) }}" alt="{{ config('app.name') }}"/>
+                </div>
+                {{-- Step 1 of 2: choosing the type. Not for somebody who turned suggestions off
+                     (the setup guide's, and off means all of it), nor in the guest-submit flow,
+                     which has its own band below. --}}
+                @if (! session('pending_request') && auth()->user()->wantsSuggestions())
+                    @include('partials.setup-step-bar', ['current' => 1, 'total' => 2])
                 @endif
-                <h1 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
-                    {{ __('messages.schedule_type_question') }}
+            </header>
+
+            {{-- The step band, for the guest-submit flow only. --}}
+            @if (session('pending_request'))
+            <div class="mt-4 rounded-2xl overflow-hidden">
+                <x-step-indicator :currentStep="2" />
+            </div>
+            @endif
+
+            <div class="mt-9 mb-9 flex max-w-2xl flex-col gap-2.5">
+                <p class="text-[0.9375rem] font-medium text-[var(--brand-blue)]" v-pre>
+                    {{ __('messages.getting_started_welcome_name', ['name' => auth()->user()->firstName()]) }}
+                </p>
+                <h1 class="text-3xl sm:text-[2.625rem] font-bold leading-[1.1] tracking-tight text-gray-900 dark:text-white" style="text-wrap: balance">
+                    {{ __('messages.schedule_type_question_for') }}
                 </h1>
-                <p class="mt-3 text-base text-gray-500 dark:text-gray-400">{{ __('messages.can_create_more_schedules_later') }}</p>
+                <p class="text-base text-gray-600 dark:text-gray-400">{{ __('messages.schedule_type_pick_lead') }}</p>
             </div>
 
-            @include('partials.schedule-type-cards')
-
-            <div class="text-center mt-8">
-                <a href="{{ route('home', ['skip_onboarding' => 1]) }}"
-                   class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
-                    {{ __('messages.skip_for_now') }}
-                </a>
-            </div>
+            @include('partials.schedule-type-cards', ['skipUrl' => route('home', ['skip_onboarding' => 1])])
         </div>
     </div>
 </x-app-layout>

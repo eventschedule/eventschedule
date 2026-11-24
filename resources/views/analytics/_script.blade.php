@@ -60,15 +60,14 @@
         });
     });
 
-    // "Show all": the rest of a list is in the page already.
+    // "Show 7 more": the rest of a list is in the page already.
     document.querySelectorAll('.an [data-an-more]').forEach(function (button) {
         var list = button.previousElementSibling;
-        var more = button.firstChild.textContent;
         button.addEventListener('click', function () {
             var open = button.getAttribute('aria-expanded') !== 'true';
             list.querySelectorAll('[data-an-extra]').forEach(function (row) { row.hidden = ! open; });
             button.setAttribute('aria-expanded', open ? 'true' : 'false');
-            button.firstChild.textContent = open ? button.dataset.less + ' ' : more;
+            button.textContent = open ? button.dataset.less : button.dataset.more;
         });
     });
 })();
@@ -306,33 +305,6 @@
             },
         };
 
-        // The highest point of the main line, with its number: the one value worth printing.
-        var peak = {
-            id: 'anPeak',
-            afterDatasetsDraw: function (chart) {
-                var ds = chart.data.datasets[0], meta = chart.getDatasetMeta(0);
-                if (! chart.$anCount || ! ds || chart.config.type === 'bar' || ds.data.length < 3) return;
-                var max = Math.max.apply(null, ds.data);
-                if (! (max > 0)) return;
-                var i = ds.data.indexOf(max), pt = meta.data[i];
-                if (! pt) return;
-                var ctx = chart.ctx;
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
-                ctx.fillStyle = ds.borderColor;
-                ctx.strokeStyle = surface;
-                ctx.lineWidth = 2;
-                ctx.fill();
-                ctx.stroke();
-                ctx.font = '600 11px ' + getComputedStyle(document.body).fontFamily;
-                ctx.fillStyle = ink2;
-                ctx.textAlign = pt.x > chart.chartArea.right - 24 ? 'right' : (pt.x < chart.chartArea.left + 24 ? 'left' : 'center');
-                ctx.textBaseline = 'bottom';
-                ctx.fillText(chart.$anCount(max), pt.x, pt.y - 8);
-                ctx.restore();
-            },
-        };
         // The events of the window: a flyer (or a dot) under the date each falls on, so a rise
         // reads against the show it led up to. Several on one date stand side by side.
         var images = {};
@@ -406,8 +378,8 @@
                 if (bar && s.id === 'previous') {
                     return {
                         type: 'line', id: s.id, label: s.label, data: s.values,
-                        borderColor: color, backgroundColor: 'transparent', borderWidth: 1.5,
-                        tension: 0.35, cubicInterpolationMode: 'monotone', pointRadius: 0, pointHoverRadius: 3.5,
+                        borderColor: color, backgroundColor: 'transparent', borderWidth: 1.5, borderDash: [4, 4],
+                        tension: 0, pointRadius: 0, pointHoverRadius: 3.5,
                         pointHoverBackgroundColor: color, pointHoverBorderColor: surface, pointHoverBorderWidth: 2, order: 0,
                     };
                 }
@@ -423,21 +395,16 @@
                 return {
                     id: s.id, label: s.label, data: s.values,
                     borderColor: color,
-                    borderWidth: main ? 2 : (s.id === 'previous' ? 1.5 : 1.75),
-                    backgroundColor: main ? function (ctx) {
-                        var area = ctx.chart.chartArea;
-                        if (! area) return alpha(color, 0.1);
-                        var g = ctx.chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
-                        g.addColorStop(0, alpha(color, 0.2));
-                        g.addColorStop(1, alpha(color, 0));
-                        return g;
-                    } : 'transparent',
+                    borderWidth: main ? 2.5 : (s.id === 'previous' ? 1.5 : 1.75),
+                    // A flat, faint wash under the line, and the window before as a dashed
+                    // grey line: straight segments, as the 2026-11 designs draw them.
+                    backgroundColor: main ? alpha(color, 0.08) : 'transparent',
                     fill: main ? 'origin' : false,
+                    borderDash: s.id === 'previous' ? [4, 4] : undefined,
                     segment: {
                         borderDash: function (ctx) { return d.partial && main && ctx.p1DataIndex === last ? [4, 4] : undefined; },
                     },
-                    tension: 0.35,
-                    cubicInterpolationMode: 'monotone',
+                    tension: 0,
                     pointRadius: few ? 3 : 0,
                     pointBackgroundColor: color,
                     pointHoverRadius: 4.5,
@@ -447,6 +414,28 @@
                     order: main ? 0 : (s.id === 'previous' ? 3 : 1),
                 };
             });
+
+            // The y axis says three things: a round top a little over the highest point, its
+            // half, and zero (950 / 475 / 0 for a peak of 942).
+            var high = 0;
+            d.series.forEach(function (s) { s.values.forEach(function (v) { if (Number(v) > high) high = Number(v); }); });
+            var yMax, yStep;
+            if (high > 0) {
+                var unit = Math.pow(10, Math.floor(Math.log10(high))) / 2;
+                yMax = Math.round(Math.ceil(high / unit) * unit * 1e6) / 1e6;
+                if (! d.currency && yMax % 2) {
+                    yMax += 1;
+                }
+                yStep = yMax / 2;
+            }
+            // Five dates along the bottom, the first and last at the ends (every one when there
+            // are six or fewer).
+            var shown = {};
+            if (d.keys.length <= 6) {
+                d.keys.forEach(function (k, i) { shown[i] = true; });
+            } else {
+                [0, 1, 2, 3, 4].forEach(function (j) { shown[Math.round(j * last / 4)] = true; });
+            }
 
             var drawn = {};
             events.forEach(function (e) {
@@ -461,13 +450,13 @@
             var chart = new Chart(canvas.getContext('2d'), {
                 type: bar ? 'bar' : 'line',
                 data: { labels: d.keys, datasets: datasets },
-                plugins: bar ? [crosshair, marks] : [crosshair, peak, marks],
+                plugins: [crosshair, marks],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     animation: still ? false : { duration: 500, easing: 'easeOutQuart' },
                     interaction: { mode: 'index', intersect: false },
-                    layout: { padding: { top: 18, bottom: events.length ? 32 : 0 } },
+                    layout: { padding: { top: 6, bottom: events.length ? 32 : 0 } },
                     plugins: {
                         legend: { display: false },
                         tooltip: {
@@ -523,22 +512,24 @@
                                 color: ink3,
                                 font: { size: 11 },
                                 maxRotation: 0,
-                                autoSkip: true,
-                                autoSkipPadding: 16,
-                                callback: function (value, index) { return label(d.keys[index], period, locale, false); },
+                                autoSkip: false,
+                                align: 'inner',
+                                callback: function (value, index) { return shown[index] ? label(d.keys[index], period, locale, false) : null; },
                             },
                         },
                         y: {
                             beginAtZero: true,
-                            grace: '8%',
+                            min: 0,
+                            max: yMax,
                             grid: { color: hairline, drawTicks: false },
                             border: { display: false },
                             ticks: {
                                 color: ink3,
                                 font: { size: 11 },
                                 padding: 8,
-                                maxTicksLimit: 5,
-                                precision: 0,
+                                stepSize: yStep,
+                                maxTicksLimit: 3,
+                                precision: d.currency ? undefined : 0,
                                 callback: function (value) { return compact.format(value); },
                             },
                         },
@@ -546,7 +537,6 @@
                 },
             });
             chart.$anEvents = events;
-            chart.$anCount = function (v) { return money ? money.format(v) : count(v); };
             chart.draw();
         }
     };

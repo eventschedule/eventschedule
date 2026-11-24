@@ -202,20 +202,21 @@
                             </div>
                         </div>
                     </div>
-                </section>
-            </div>
 
-            <div class="page-form-actions">
-                <x-secondary-link :href="$feedsUrl">{{ __('messages.cancel') }}</x-secondary-link>
-                {{-- In "Publish them" the button says how many events that publishes, so pressing
-                     it is never a surprise. The words are both here; which shows follows the
-                     choice above (the script at the foot), and without script it is the plain one. --}}
-                <x-brand-button type="submit" id="feed-add">
-                    <span data-feed-add="draft">{{ __('messages.feeds_add_submit') }}</span>
-                    @if ($toAdd)
-                    <span data-feed-add="publish" hidden>{{ trans_choice('messages.feeds_add_and_publish', $toAdd, ['count' => number_format($toAdd)]) }}</span>
-                    @endif
-                </x-brand-button>
+                    {{-- A short form keeps Cancel and the button that goes on inside its (last) card. --}}
+                    <div class="page-form-actions">
+                        <x-secondary-link :href="$feedsUrl">{{ __('messages.cancel') }}</x-secondary-link>
+                        {{-- In "Publish them" the button says how many events that publishes, so pressing
+                             it is never a surprise. The words are both here; which shows follows the
+                             choice above (the script at the foot), and without script it is the plain one. --}}
+                        <x-brand-button type="submit" id="feed-add">
+                            <span data-feed-add="draft">{{ __('messages.feeds_add_submit') }}</span>
+                            @if ($toAdd)
+                            <span data-feed-add="publish" hidden>{{ trans_choice('messages.feeds_add_and_publish', $toAdd, ['count' => number_format($toAdd)]) }}</span>
+                            @endif
+                        </x-brand-button>
+                    </div>
+                </section>
             </div>
         </form>
 

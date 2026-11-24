@@ -19,7 +19,7 @@
             @method('patch')
 
             <div>
-                <x-input-label for="payment_url" :value="__('messages.payment_url') . ' *'" />
+                <x-input-label for="payment_url" :value="__('messages.payment_url')" />
                 <x-text-input id="payment_url" name="payment_url" type="url" class="mt-1 block w-full" dir="ltr" placeholder="https://"
                     :value="old('payment_url', $user->payment_url)" autocomplete="off" required :disabled="is_demo_mode()" />
                 <x-input-error class="mt-2" :messages="$errors->get('payment_url')" />

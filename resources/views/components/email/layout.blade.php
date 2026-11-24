@@ -21,6 +21,9 @@
     // Owner mail shows the schedule up top, so the platform signs at the bottom. Account mail
     // already carries the wordmark up top, and guest mail never names the platform at all.
     $footerBrand = $t->voice === 'owner' && $t->appName;
+    // The page is the AP's cool grey (#eef0f4, the 2026-11 design's ground) and the card keeps a 1px
+    // hairline rather than the design's soft shadow, which most mail clients drop. The small print
+    // under the card starts at the card's own edge, as the design draws it.
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $t->lang }}" dir="{{ $t->dir }}" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -49,7 +52,7 @@ u + .es-body a { color: inherit; text-decoration: none; font-size: inherit; font
 .es-btn-wrap { width: 100% !important; }
 .es-btn-a { display: block !important; }
 .es-col { display: block !important; width: 100% !important; max-width: 100% !important; }
-.es-foot-pad { padding: 20px 12px 0 !important; }
+.es-foot-pad { padding: 20px 4px 0 !important; }
 }
 </style>
 <style>
@@ -90,25 +93,25 @@ a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !im
 @endforeach
 </style>
 </head>
-<body class="es-body" style="margin: 0; padding: 0; width: 100%; background-color: #f1f5f9; -webkit-font-smoothing: antialiased;">
+<body class="es-body" style="margin: 0; padding: 0; width: 100%; background-color: #eef0f4; -webkit-font-smoothing: antialiased;">
 @if (filled($preheader))
 <div style="display: none; max-height: 0px; max-width: 0px; overflow: hidden; opacity: 0; mso-hide: all;">{{ $preheader }}{!! str_repeat('&#847;&zwnj;&nbsp;', 30) !!}</div>
 @endif
-<div role="article" aria-roledescription="email" @if (filled($title)) aria-label="{{ $title }}" @endif lang="{{ $t->lang }}" dir="{{ $t->dir }}" class="es-page" style="background-color: #f1f5f9;">
-<table role="presentation" dir="{{ $t->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" class="es-page" style="background-color: #f1f5f9;">
+<div role="article" aria-roledescription="email" @if (filled($title)) aria-label="{{ $title }}" @endif lang="{{ $t->lang }}" dir="{{ $t->dir }}" class="es-page" style="background-color: #eef0f4;">
+<table role="presentation" dir="{{ $t->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" class="es-page" style="background-color: #eef0f4;">
 <tr>
 <td align="center" class="es-page-pad" style="padding: 32px 16px 40px; font-family: {{ \App\Utils\EmailTheme::FONT }};">
 <!--[if mso]><table role="presentation" dir="{{ $t->dir }}" align="center" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
 <table role="presentation" dir="{{ $t->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; margin: 0 auto;">
 @if ($t->senderName !== null)
 <tr>
-<td style="padding: 0 4px 16px; text-align: {{ $t->start }};">
+<td style="padding: 0 4px 24px; text-align: {{ $t->start }};">
 <x-email.sender :theme="$t" />
 </td>
 </tr>
 @endif
 <tr>
-<td class="es-card" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; text-align: {{ $t->start }};">
+<td class="es-card" style="background-color: #ffffff; border: 1px solid #e3e6ec; border-radius: 20px; text-align: {{ $t->start }};">
 @if ($hasHero)
 {{ $hero }}
 @endif
@@ -123,7 +126,7 @@ a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !im
 </tr>
 @if ($hasFooter || $footerBrand)
 <tr>
-<td align="center" class="es-foot-pad" style="padding: 24px 24px 0; text-align: center; font-family: {{ \App\Utils\EmailTheme::FONT }};">
+<td class="es-foot-pad" style="padding: 24px 4px 0; text-align: {{ $t->start }}; font-family: {{ \App\Utils\EmailTheme::FONT }};">
 @if ($hasFooter)
 {{ $footer }}
 @endif

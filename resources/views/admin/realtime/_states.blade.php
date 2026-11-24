@@ -1,5 +1,5 @@
-{{-- Polling stopped: re-auth lapsed, or signed out. Tracking switched off is _off, which stands in
-     the Now card's place. --}}
+{{-- Polling stopped: re-auth lapsed, or signed out. Tracking switched off is _off, one line
+     above the panels. --}}
 <div v-if="status === 'reauth' || status === 'stopped'"
      class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
     <div class="flex items-start gap-3">

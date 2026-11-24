@@ -8110,7 +8110,7 @@ class RoleController extends Controller
      * evening show in the Americas lands on the next day. creatorRole is what resolves the
      * schedule's zone, and roles feeds the image fallback, so both are eager loaded.
      *
-     * @return array<int, array{name: string, image: string|null, month: string, day: string}>
+     * @return array<int, array{name: string, image: string|null, month: string, day: string, weekday: string, time: string, date: string}>
      */
     private function listAnimationPreviewEvents(Role $role): array
     {
@@ -8133,7 +8133,7 @@ class RoleController extends Controller
                 ->get())
             : $upcoming;
 
-        return $events->map(function (Event $event) {
+        return $events->map(function (Event $event) use ($role) {
             $start = $event->getStartDateTime(null, true);
 
             return [
@@ -8141,6 +8141,10 @@ class RoleController extends Controller
                 'image' => $event->getImageUrl(ImageUtils::VARIANT_WIDTH) ?: null,
                 'month' => $start->locale(app()->getLocale())->translatedFormat('M'),
                 'day' => $start->format('j'),
+                // The weekday over the day, as the public list's date tile has it.
+                'weekday' => $start->locale(app()->getLocale())->translatedFormat('D'),
+                // The clock time, where the preview's cards used to draw grey bars.
+                'time' => $start->format($role->use_24_hour_time ? 'G:i' : 'g:i A'),
                 // The day itself, for the Style tab's preview, which draws the month an event is in.
                 'date' => $start->format('Y-m-d'),
             ];

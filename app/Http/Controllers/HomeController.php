@@ -21,6 +21,7 @@ use App\Services\CalendarArrival;
 use App\Services\FederationService;
 use App\Services\HomeDashboard;
 use App\Services\ScheduleRealtime;
+use App\Services\VendorMaps\VendorMapKinds;
 use App\Support\HomeSchedule;
 use App\Utils\DateUtils;
 use App\Utils\LegacyRedirects;
@@ -109,9 +110,17 @@ class HomeController extends Controller
         // rather than straight to /new/{type} so the bounce above still applies: a days-old email
         // opened after they set up a schedule lands on the dashboard, not on a second new-schedule
         // form.
+        // The chooser's own Continue lands here too (partials/schedule-type-cards is a GET form
+        // to this address), carrying the market switch it shows under Venue. The switch means
+        // something only beside a venue: one left on and then another type chosen is dropped.
         $type = $request->query('type');
         if (in_array($type, ['talent', 'venue', 'curator'], true)) {
-            return redirect()->route('new', ['type' => $type]);
+            $params = ['type' => $type];
+            if ($type === 'venue' && in_array($request->query('vendor_map'), VendorMapKinds::KINDS, true)) {
+                $params['vendor_map'] = $request->query('vendor_map');
+            }
+
+            return redirect()->route('new', $params);
         }
 
         return view('getting-started');

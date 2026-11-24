@@ -1,7 +1,8 @@
 <x-auth-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('messages.reset_password') }}
-    </div>
+    <x-slot name="topBar">
+        <a class="text-sm font-semibold text-[var(--brand-blue)] hover:underline" href="{{ route('login') }}">{{ __('messages.log_in') }}</a>
+    </x-slot>
+    <h1 class="mb-6 text-[1.875rem] font-bold leading-tight tracking-tight text-gray-900 dark:text-gray-100">{{ __('messages.reset_password') }}</h1>
 
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />

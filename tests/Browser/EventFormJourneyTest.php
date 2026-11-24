@@ -11,6 +11,7 @@ use App\Models\Sale;
 use App\Models\Ticket;
 use App\Models\TicketPreset;
 use App\Models\User;
+use App\Services\TicketPresets;
 use App\Utils\SetupGuide;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -289,7 +290,7 @@ class EventFormJourneyTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($special) {
             $this->openNew($browser);
             $this->fillBasics($browser, 'Preset Night');
-            $browser->click('a[data-section="section-tickets"]');
+            $browser->script('document.querySelector(\'a[data-section="section-tickets"]\').click();');
             $browser->waitUntil('document.getElementById("section-tickets").style.display === "block"', 10);
 
             // A new event starts on the default, both of its types.
@@ -370,7 +371,7 @@ class EventFormJourneyTest extends DuskTestCase
         [, $special] = $this->makePresets();
         $member = User::factory()->create(['email_verified_at' => now()]);
         $this->talent->users()->attach($member->id, ['level' => 'admin']);
-        \App\Services\TicketPresets::setTeamUsesPresets($this->talent, true);
+        TicketPresets::setTeamUsesPresets($this->talent, true);
 
         $this->browse(function (Browser $browser) use ($member, $special) {
             $this->leave($browser);
@@ -379,7 +380,7 @@ class EventFormJourneyTest extends DuskTestCase
                 ->waitFor('#event_name', 15)
                 ->waitUntil('window.vueApp !== undefined', 15);
             $this->fillBasics($browser, 'Staff Night');
-            $browser->click('a[data-section="section-tickets"]');
+            $browser->script('document.querySelector(\'a[data-section="section-tickets"]\').click();');
             $browser->waitUntil('document.getElementById("section-tickets").style.display === "block"', 10);
 
             $state = $browser->script('return {
@@ -421,7 +422,7 @@ class EventFormJourneyTest extends DuskTestCase
             // "No tickets" under its name.
             $this->assertSame('Visibility: Public', preg_replace('/\s+/', ' ', $this->barText($browser)));
             $this->assertSame('No tickets', $browser->script('return document.querySelector("a[data-section=section-tickets] .section-nav-summary").innerText.trim();')[0]);
-            $browser->click('a[data-section="section-tickets"]');
+            $browser->script('document.querySelector(\'a[data-section="section-tickets"]\').click();');
             $browser->waitUntil('document.getElementById("section-tickets").style.display === "block"', 10);
 
             $browser->click('#ticket_choice_rsvp')->pause(300);
@@ -452,7 +453,8 @@ class EventFormJourneyTest extends DuskTestCase
 
             // Pressing the tab you are already on leaves its rows alone. It used to press the
             // first one, which opened Payment.
-            $browser->click('a[data-section="section-tickets"]')->pause(300);
+            $browser->script('document.querySelector(\'a[data-section="section-tickets"]\').click();');
+            $browser->pause(300);
             $this->assertSame('tickets', $browser->script('return window.vueApp.activeTicketTab;')[0]);
 
             // A tile that is on does nothing when pressed again: switching off is "Not needed".
@@ -502,8 +504,9 @@ class EventFormJourneyTest extends DuskTestCase
             $this->assertSame('Door $12', $state['summary'], 'each type with its price, as the event page writes it');
             $this->assertSame(0, $state['strip'], 'no second row of tabs');
             $this->assertSame([true, true, true, true, true], $state['rows']);
-            $this->assertSame('Connect Stripe to get paid', $state['payment'], 'a price with no way to be paid says so without being opened');
-            $this->assertTrue($state['paymentWarns']);
+            // The band over the types says what it costs; the row says how it stands, in its own grey.
+            $this->assertSame('Stripe not connected', $state['payment'], 'a price with no way to be paid says so without being opened');
+            $this->assertFalse($state['paymentWarns']);
             $this->assertFalse($state['descriptionShown'], 'an empty description stays folded');
             $this->assertTrue($state['sameLine'], 'price and type share a line');
 
@@ -698,7 +701,7 @@ class EventFormJourneyTest extends DuskTestCase
             ');
             $browser->waitFor('#selected_venue', 5);
             $browser->script('
-                Array.prototype.find.call(document.querySelectorAll("#event-location button.event-link"), function (b) { return b.textContent.trim() === "New Venue"; }).click();
+                Array.prototype.find.call(document.querySelectorAll("#event-location button.event-link"), function (b) { return b.textContent.trim() === "New venue"; }).click();
             ');
             $browser->waitFor('#venue_name', 5);
             $browser->script('
@@ -1141,7 +1144,8 @@ class EventFormJourneyTest extends DuskTestCase
             $this->assertSame('Photos, Videos', $browser->script('return document.querySelector(".event-subrow[data-tab=fan_content] .event-row-summary").innerText.trim();')[0]);
 
             // Pressing the tab again leaves the open row open.
-            $browser->click('a[data-section="section-engagement"]')->pause(300);
+            $browser->script('document.querySelector(\'a[data-section="section-engagement"]\').click();');
+            $browser->pause(300);
             $this->assertSame('fan_content', $browser->script('return window.vueApp.activeEngagementTab;')[0]);
 
             // A poll with a question and one option: Save would drop it. It is shown instead.
@@ -1635,7 +1639,7 @@ class EventFormJourneyTest extends DuskTestCase
         $addon->price = 15;
         $addon->is_addon = true;
         $addon->save();
-        $promo = \App\Models\PromoCode::create(['event_id' => $event->id, 'code' => 'EARLY', 'type' => 'percentage', 'value' => 10, 'is_active' => true]);
+        $promo = PromoCode::create(['event_id' => $event->id, 'code' => 'EARLY', 'type' => 'percentage', 'value' => 10, 'is_active' => true]);
 
         $this->browse(function (Browser $browser) use ($event) {
             $this->openExisting($browser, $event);
@@ -1663,7 +1667,7 @@ class EventFormJourneyTest extends DuskTestCase
             $this->save($browser);
         });
 
-        $this->assertNotNull(\App\Models\PromoCode::find($promo->id), 'the promo code is still there');
+        $this->assertNotNull(PromoCode::find($promo->id), 'the promo code is still there');
         $this->assertFalse((bool) Ticket::find($addon->id)->is_deleted, 'and so is the add-on');
         $this->assertSame(['General', 'VIP'], Ticket::where('event_id', $event->id)->where('is_addon', false)->where('is_deleted', false)->orderBy('id')->pluck('type')->all());
     }

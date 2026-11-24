@@ -8,10 +8,16 @@
      (formkit:dirty, formkit:removes, formkit:says, formkit:errors, formkit:saving), which partials/form-kit-script
      and the page's own script dispatch.
 
-     Must sit inside the <form> it saves; partials/form-save-bar-script goes with the page's other
-     scripts, after partials/form-kit-script. --}}
+     Sits inside the <form> it saves, or anywhere with $saveBarForm naming the form's id (the
+     settings page puts it under the Profile card, outside the card's form, as the other forms
+     have it under theirs). $saveBarStays: its Cancel puts the section back and stays on the page
+     (the script's $scoped). $saveBarSaved says "Saved" until something changes, after the save that
+     just happened; $saveBarDemo keeps Save switched off in demo mode. partials/form-save-bar-script
+     goes with the page's other scripts, after partials/form-kit-script. --}}
 <div class="event-save-spacer"></div>
-<div class="event-save-bar" id="form-save-bar">
+<div class="event-save-bar" id="form-save-bar"
+    @if (! empty($saveBarForm)) data-form="{{ $saveBarForm }}" @endif
+    @if (! empty($saveBarSaved)) data-saved="1" @endif>
     <div class="event-save-bar-inner">
         <div class="event-save-status" aria-live="polite">
             <span v-cloak v-if="confirmingDiscard">{{ __('messages.discard_unsaved_changes') }}</span>
@@ -27,7 +33,9 @@
 
         <div class="event-save-actions" v-show="! confirmingDiscard">
             <button type="button" class="event-bar-text" @click="cancel">{{ __('messages.cancel') }}</button>
-            <x-brand-button type="submit" class="event-bar-save" v-bind:disabled="saving" v-bind:class="{ 'is-idle': ! dirty }">
+            <x-brand-button type="submit" class="event-bar-save" :form="$saveBarForm ?? null"
+                :title="! empty($saveBarDemo) ? __('messages.saving_disabled_demo_mode') : null"
+                v-bind:disabled="saving{{ ! empty($saveBarDemo) ? ' || true' : '' }}" v-bind:class="{ 'is-idle': ! dirty }">
                 <span v-if="waiting" v-cloak>@{{ waiting }}</span>
                 <span v-else-if="saving" v-cloak>{{ __('messages.saving') }}</span>
                 <span v-else>{{ __('messages.save') }}</span>
@@ -38,7 +46,11 @@
             <button type="button" class="event-bar-quiet" @click="discard">{{ __('messages.discard') }}</button>
         </div>
         {{-- The page's own cancel (layouts/app-admin: back, or the fallback URL), which the bar's
-             Cancel calls once it knows nothing unsaved is being thrown away. --}}
+             Cancel calls once it knows nothing unsaved is being thrown away. A bar that saves one
+             section of a page ($saveBarStays, with the script's $scoped) puts the section back
+             where it stays, and has no use for it. --}}
+        @if (empty($saveBarStays))
         <x-cancel-button id="form-cancel-real" class="hidden" tabindex="-1" aria-hidden="true" />
+        @endif
     </div>
 </div>

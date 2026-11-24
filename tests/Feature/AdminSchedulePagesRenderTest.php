@@ -80,12 +80,12 @@ class AdminSchedulePagesRenderTest extends TestCase
 
         $live = $this->createRole($owner, 'venue', ['subdomain' => 'live-one']);
         $admin->get(route('admin.schedules.edit', ['role' => $live->encodeId()]))->assertOk()
-            ->assertSee('Mark as Deleted');
+            ->assertSee('Mark as deleted');
 
         $deleted = $this->createRole($owner, 'venue', ['subdomain' => 'gone-deleted-9']);
         Role::whereKey($deleted->id)->update(['is_deleted' => true, 'subdomain_before_delete' => 'gone']);
         $admin->get(route('admin.schedules.edit', ['role' => $deleted->encodeId()]))->assertOk()
-            ->assertSee('Restore Schedule');
+            ->assertSee('Restore schedule');
 
         // The expected outcome of a release that did its job: somebody else has the old name.
         $this->createRole($owner, 'venue', ['subdomain' => 'gone']);
@@ -96,7 +96,7 @@ class AdminSchedulePagesRenderTest extends TestCase
         $backlog = $this->createRole($owner, 'venue', ['subdomain' => 'backlog-one']);
         Role::whereKey($backlog->id)->update(['is_deleted' => true]);
         $admin->get(route('admin.schedules.edit', ['role' => $backlog->encodeId()]))->assertOk()
-            ->assertSee('Release Subdomain');
+            ->assertSee('Release subdomain');
 
         // An ownerless row DOES have a page now - the claim page that invites the performer or
         // venue to take it over - so the card has to say that releasing the subdomain takes it

@@ -4,6 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\ViewErrorBag;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -28,7 +31,7 @@ class AdminPortalKitTest extends TestCase
         // No page here may reach the network: the suite loads the developer's .env, where real
         // tokens live, and a page that asks an outside service (the Domains page asked
         // DigitalOcean) would do it for real on every run. A request nothing faked throws.
-        \Illuminate\Support\Facades\Http::preventStrayRequests();
+        Http::preventStrayRequests();
     }
 
     private function adminActing(): User
@@ -81,6 +84,12 @@ class AdminPortalKitTest extends TestCase
         $this->assertSame(1, preg_match('/<div class="page-form-actions">(.*?)<\/div>/s', $html, $actions));
         $this->assertLessThan(strpos($actions[1], __('messages.save')), strpos($actions[1], __('messages.cancel')), 'Cancel first, Save last');
         $this->assertSame(0, substr_count($html, 'data-fallback-url='), 'the grey capitals Cancel button is gone');
+        // A short form keeps them inside its card (the 2026-11 review: one way to save), and its
+        // four fields are two pairs from a tablet up, as on Settings.
+        $this->assertSame(1, preg_match('/<div class="page-form-actions">.*?<\/div>\s*<\/div>\s*<\/form>/s', $html), 'Cancel and Save close the card, not a row under it');
+        $this->assertStringContainsString('class="page-form-fields sm:grid-cols-2"', $html);
+        $this->assertStringNotContainsString(__('messages.name').' *', $html, 'required fields carry no marker');
+        $this->assertStringContainsString(__('messages.label_optional_suffix'), $html, 'the phone says it is optional');
     }
 
     public function test_my_tickets_is_one_list_at_every_width(): void
@@ -95,7 +104,10 @@ class AdminPortalKitTest extends TestCase
 
         $html = $this->actingAs($buyer)->get(route('tickets'))->assertOk()->getContent();
 
-        $this->assertSame(1, substr_count($html, '<table class="page-table'), 'one list');
+        // Coming tickets in date order are the next one on its own and the rest by day (the
+        // 2026-11 redesign), drawn once; the table is for past tickets and other orders.
+        $this->assertSame(1, substr_count($html, 'class="tickets-next '), 'the next ticket, once');
+        $this->assertSame(0, substr_count($html, '<table class="page-table'), 'and no second copy as a table');
         $this->assertSame(1, substr_count($html, 'Flaming Moe Night'), 'the event is named once');
         $this->assertSame(1, substr_count($html, '<span class="event-status is-on">'.__('messages.paid').'</span>'), 'and so is what became of the order');
         $this->assertSame(1, substr_count($html, '<h1 class="page-title"'));
@@ -110,7 +122,7 @@ class AdminPortalKitTest extends TestCase
 
         $html = $this->get(route('admin.audit_log'))->assertOk()->getContent();
 
-        $this->assertSame(1, preg_match('/<h1 class="sr-only">([^<]*)<\/h1>/', $html, $h1), 'the page has a name');
+        $this->assertSame(1, preg_match('/<h1 class="page-title admin-page-title">(.*?)<\/h1>/s', $html, $h1), 'the page has a name');
         $this->assertStringContainsString(__('messages.audit_log'), $h1[1]);
 
         // Four tabs (Dashboard, Insights, Manage, System); the group this page is in is the lit one.
@@ -135,10 +147,12 @@ class AdminPortalKitTest extends TestCase
         $this->assertSame(0, substr_count($html, 'openDropdown'));
     }
 
-    public function test_pointing_at_a_group_lists_its_pages(): void
+    public function test_a_group_is_a_plain_tab_and_its_pages_are_the_row_under_it(): void
     {
-        // A page in another group was two presses and a page you did not want away: the group's
-        // tab, then its row. Each group's tab now has its pages in a menu, from the same list.
+        // Until 2026-11 pointing at a group's tab opened a menu of its pages as well: a menu and
+        // a tab in one control (the design language review). The tabs are plain pill tabs now,
+        // each leading to its group's first page, and the second row names every page of the
+        // group you are in, from the same list as the phone's dropdown.
         config(['app.hosted' => true, 'auth.admin_requires_two_factor' => false]);
         $this->adminActing();
 
@@ -146,34 +160,30 @@ class AdminPortalKitTest extends TestCase
 
         $this->assertSame(1, preg_match('/<nav class="ap-tabs" id="admin-nav"[^>]*>(.*?)<\/nav>/s', $html, $nav));
         $this->assertSame(1, preg_match('/<nav class="ap-subtabs[^"]*"[^>]*>(.*?)<\/nav>/s', $html, $row));
-        preg_match_all('/<div class="admin-nav-menu[^"]*" id="admin-nav-menu-(\w+)" data-admin-menu="\1" hidden>(.*?)<\/div>/s', $html, $menus, PREG_SET_ORDER);
-        $this->assertSame(['insights', 'manage', 'system'], array_column($menus, 1), 'one closed menu for each group');
 
-        // The strip scrolls sideways, which would cut off a menu hanging inside it.
-        $this->assertStringNotContainsString('class="admin-nav-menu', $nav[1]);
+        // Nothing hangs from a tab.
+        $this->assertStringNotContainsString('admin-nav-menu', $html);
+        $this->assertStringNotContainsString('aria-expanded', $nav[1]);
+        $this->assertStringNotContainsString('aria-controls', $nav[1]);
+        $this->assertStringNotContainsString('<svg', $nav[1], 'no chevron on a tab');
 
-        foreach ($menus as [, $group]) {
-            $this->assertSame(1, preg_match('/data-admin-group="'.$group.'"[^>]*aria-controls="admin-nav-menu-'.$group.'" aria-expanded="false"/', $nav[1]), "$group: the tab names its menu");
+        // Each group's tab is a link to its first page.
+        foreach (['insights' => 'admin.users', 'manage' => 'admin.boost', 'system' => 'admin.audit_log'] as $group => $route) {
+            $this->assertSame(1, preg_match('/href="'.preg_quote(route($route), '/').'" class="ap-tab" data-admin-group="'.$group.'"/', $nav[1]), "$group leads to its first page");
         }
 
-        // The System menu is the row this page shows, link for link, with this page marked.
-        $menu = collect($menus)->firstWhere(1, 'system')[2];
-        preg_match_all('/href="([^"]+)"/', $menu, $inMenu);
+        // The row is the System group, link for link as the phone's dropdown lists it.
+        $this->assertSame(1, preg_match('/<select id="admin-nav-select"[^>]*>(.*?)<\/select>/s', $html, $select));
+        $this->assertSame(1, preg_match('/<optgroup label="'.preg_quote(__('messages.system'), '/').'">(.*?)<\/optgroup>/s', $select[1], $system));
         preg_match_all('/href="([^"]+)"/', $row[1], $inRow);
-        $this->assertSame($inRow[1], $inMenu[1]);
-        $this->assertSame(1, substr_count($menu, 'aria-current="page"'));
-        $this->assertSame(1, preg_match('/href="'.preg_quote(route('admin.audit_log'), '/').'" class="admin-nav-menu-link"\s+aria-current="page"/', $menu));
+        preg_match_all('/value="([^"]+)"/', $system[1], $inSelect);
+        $this->assertSame($inSelect[1], $inRow[1]);
+        $this->assertSame(1, preg_match('/href="'.preg_quote(route('admin.audit_log'), '/').'" class="ap-subtab"\s+aria-current="page"/', $row[1]));
 
-        // The other two list their own pages, and nothing there is marked.
-        $insights = collect($menus)->firstWhere(1, 'insights')[2];
-        foreach (['admin.users', 'admin.revenue', 'admin.analytics', 'admin.usage', 'admin.growth'] as $route) {
-            $this->assertSame(1, substr_count($insights, 'href="'.route($route).'"'), "$route is in the Insights menu");
+        // The other groups' pages are in the dropdown, one press away on a phone.
+        foreach (['admin.users', 'admin.revenue', 'admin.analytics', 'admin.usage', 'admin.growth', 'admin.boost', 'admin.schedules', 'admin.blocked', 'admin.feeds', 'admin.domains', 'admin.referrals', 'admin.newsletters.index'] as $route) {
+            $this->assertSame(1, substr_count($select[1], 'value="'.route($route).'"'), "$route is in the dropdown");
         }
-        $manage = collect($menus)->firstWhere(1, 'manage')[2];
-        foreach (['admin.boost', 'admin.schedules', 'admin.blocked', 'admin.feeds', 'admin.domains', 'admin.referrals', 'admin.newsletters.index'] as $route) {
-            $this->assertSame(1, substr_count($manage, 'href="'.route($route).'"'), "$route is in the Manage menu");
-        }
-        $this->assertSame(0, substr_count($insights.$manage, 'aria-current'));
     }
 
     public function test_the_navigation_has_no_words_left_in_english(): void
@@ -328,8 +338,9 @@ class AdminPortalKitTest extends TestCase
     /**
      * On a wide window the header and tabs of a page ran to its edge while lists and cards
      * stopped at 64rem against the sidebar, so one page had two right-hand edges. Every page is
-     * one frame now: the layout caps <main>, brings the bar above it in to the same edges, and
-     * the 64rem column is gone from the kit and from every view.
+     * one column now, the 2026-11 redesign's 1040px (it replaced an 80rem frame that spread every
+     * card some 15% wider than the designs): the layout caps <main>, the line under the page sits
+     * in the column right under it, and the 64rem column is gone from the kit and every view.
      */
     public function test_every_page_of_the_portal_shares_one_frame(): void
     {
@@ -342,14 +353,15 @@ class AdminPortalKitTest extends TestCase
             // On <main> itself: SetupGuide.vue measures #main-content to dock beside a form.
             $this->assertTrue($this->hasClasses($html, ['ap-frame'], '<main id="main-content"[^>]*'), $url);
             $this->assertTrue($this->hasClasses($html, ['sticky', 'header-gradient', 'ap-frame-bar']), 'the bar above the page');
-            $this->assertTrue($this->hasClasses($html, ['mt-auto', 'ap-frame']), 'the line under the page');
+            $this->assertTrue($this->hasClasses($html, ['ap-frame', 'ap-foot-line']), 'the line under the page');
+            $this->assertFalse($this->hasClasses($html, ['mt-auto', 'ap-foot-line']), 'right under the page, not at the foot of the window');
             $this->assertFalse($this->hasClasses($html, ['is-wide'], '<main id="main-content"[^>]*'), 'only a canvas lifts the cap');
         }
 
         $kit = $this->rules('partials/admin-page-styles');
         [[$media, $frame]] = $this->declared($kit, '.ap-frame');
         $this->assertNull($media);
-        $this->assertStringContainsString('max-width: 84rem;', $frame);
+        $this->assertStringContainsString('max-width: 65rem;', $frame);
         $this->assertStringContainsString('margin-inline: auto;', $frame);
         $this->assertSame([], $this->declared($kit, '.page-col'), 'no column of its own for lists and cards');
 
@@ -375,8 +387,8 @@ class AdminPortalKitTest extends TestCase
         // The layout alone, outside a request: it wants somebody signed in and the error bag the
         // session middleware would have shared.
         $this->actingAs($this->createOwner());
-        view()->share('errors', new \Illuminate\Support\ViewErrorBag);
-        $html = \Illuminate\Support\Facades\Blade::render('<x-app-admin-layout wide><p>canvas</p></x-app-admin-layout>');
+        view()->share('errors', new ViewErrorBag);
+        $html = Blade::render('<x-app-admin-layout wide><p>canvas</p></x-app-admin-layout>');
         $this->assertTrue($this->hasClasses($html, ['ap-frame', 'is-wide'], '<main id="main-content"[^>]*'));
         $this->assertTrue($this->hasClasses($html, ['header-gradient', 'ap-frame-bar', 'is-wide']));
     }
@@ -437,85 +449,134 @@ class AdminPortalKitTest extends TestCase
     }
 
     /**
-     * From a 1440px window a settings card puts its title on one side and its body on the other,
-     * so the card runs to the frame's edges without a form stretched across it. A page does this
-     * for all of its titled cards that are not lists, or for none: card by card, the content of
-     * one page went left, right, full, right, full on its way down.
+     * In the 1040px column a card is one block: its title over its body. A settings card used to
+     * set its title beside its body from a 1440px window, and a form kept to 48rem inside it,
+     * which is what kept an 80rem frame from looking stretched; in the column they only left two
+     * right edges in one card. So no card splits, no view asks one to, and a form runs its card.
      */
-    public function test_a_settings_page_sets_all_of_its_cards_side_by_side_or_none(): void
+    public function test_a_card_is_its_title_over_its_body(): void
     {
-        $card = fn (string $props) => \Illuminate\Support\Facades\Blade::render('<x-page-card '.$props.'><p>body</p></x-page-card>');
-        $this->assertStringContainsString('page-card is-beside', $card('beside title="Plan pricing"'));
-        $this->assertStringNotContainsString('is-beside', $card('title="Plan pricing"'));
-        // The card never invents a title to stand beside its body.
-        $this->assertStringNotContainsString('is-beside', $card('beside'));
+        $card = Blade::render('<x-page-card beside title="Plan pricing"><p>body</p></x-page-card>');
+        $this->assertStringNotContainsString('is-beside', $card);
 
-        // Every view that sets one card side by side sets all of its titled cards that are not
-        // lists: found by reading the views, not from a list of them kept here.
-        $pages = [];
+        $asking = [];
         $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(resource_path('views'), \FilesystemIterator::SKIP_DOTS));
         foreach ($files as $file) {
-            if (! str_ends_with($file->getPathname(), '.blade.php')) {
-                continue;
-            }
-            preg_match_all('/<x-page-card\b[^>]*>/s', file_get_contents($file->getPathname()), $cards);
-            $titled = array_filter($cards[0], fn ($tag) => preg_match('/\s:?title=/', $tag) && ! preg_match('/\sflush\b/', $tag));
-            $beside = array_filter($titled, fn ($tag) => preg_match('/\sbeside\b/', $tag));
-            if ($beside) {
-                $pages[str_replace([resource_path('views').'/', '.blade.php'], '', $file->getPathname())] = [count($titled), count($beside)];
+            if (str_ends_with($file->getPathname(), '.blade.php')
+                && preg_match('/<x-page-card\b[^>]*\sbeside\b/s', file_get_contents($file->getPathname()))) {
+                $asking[] = str_replace(resource_path('views').'/', '', $file->getPathname());
             }
         }
-        $this->assertSame(
-            ['admin/app-update', 'admin/blocked-account', 'admin/legal', 'admin/newsletters/segment-edit', 'admin/newsletters/segments', 'admin/private-calendars-schedule', 'admin/schedules-edit', 'admin/settings', 'newsletter/segment-edit', 'newsletter/segments'],
-            collect($pages)->keys()->sort()->values()->all()
-        );
-        foreach ($pages as $view => [$titled, $beside]) {
-            $this->assertSame($titled, $beside, "every titled card of $view that is not a list");
+        $this->assertSame([], $asking);
+
+        $kit = $this->rules('partials/admin-page-styles');
+        $this->assertSame([], $this->declared($kit, '.page-card.is-beside'));
+        foreach (['.page-form-fields', '.page-form-fields + .page-form-actions', '.page-card > .page-kv', 'form.page-stack > .page-form-actions'] as $selector) {
+            $this->assertSame([], array_filter($this->declared($kit, $selector), fn ($rule) => str_contains($rule[1], 'max-width')), $selector);
+        }
+
+        // A bar that reaches past the gutters keeps doing so (it covers what scrolls under it)
+        // and draws its line at the content's width, from where the column stops growing:
+        // 1040px beside the 18rem sidebar.
+        [[$media, $line]] = $this->declared($kit, '.ap-frame-bleed::after');
+        $this->assertSame('(min-width: 83rem)', $media);
+        $this->assertStringContainsString('inset-inline: 2rem;', $line);
+        // The forms' save bar is a card at the foot of the form now, not a strip that bleeds, so
+        // it draws no line of its own.
+        $this->assertSame([], $this->declared($this->rules('partials/form-kit-styles'), '.event-save-bar::before'));
+        foreach ($this->declared($this->rules('partials/form-kit-styles'), '.event-save-bar') as [$media, $body]) {
+            $this->assertStringNotContainsString('margin-inline: 0', $body, 'the bar keeps its reach');
         }
     }
 
     /**
-     * What keeps a full frame from looking stretched, and at which widths. The first version
-     * capped a form at 48rem only from a 1536px window, but the frame is wider than the old
-     * column from 1377px: on a 1440px laptop a schedule's admin edit page had inputs 1048px wide,
-     * and at 1536px they snapped back to 768px, so a wider window gave a narrower form. The cap
-     * also reached button rows and pairs inside cards that were not capped themselves (Merge
-     * 480px short of the rows it acts on; two right edges for the numbers of one card).
+     * The shell of the 2026-11 redesign, as the design-language review settled it: the cool rail
+     * (18rem, #14161a, 40px rows of 15px names, group labels as small capitals), the current
+     * schedule brought into the rail's view, the schedule tabs as plain words with the current
+     * one a white pill in the deep brand blue, and the secondary buttons at 600 weight, 44px at
+     * the least.
      */
-    public function test_a_form_keeps_its_measure_at_every_width(): void
+    public function test_the_shell_follows_the_designs(): void
     {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $html = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))->assertOk()->getContent();
+
+        $this->assertTrue($this->hasClasses($html, ['lg:w-72', 'lg:fixed']), 'the rail is 18rem');
+        $this->assertTrue($this->hasClasses($html, ['lg:ps-72', 'min-h-screen']), 'and the page starts where it ends');
+        $this->assertStringContainsString('function showCurrentNavItem(', $html);
+
         $kit = $this->rules('partials/admin-page-styles');
+        [[, $row]] = $this->declared($kit, '.sidebar-gradient .dark-nav-hover');
+        $this->assertStringContainsString('min-height: 2.5rem;', $row);
+        $this->assertStringContainsString('font-size: 0.9375rem;', $row);
+        [[, $label]] = $this->declared($kit, '.sidebar-gradient nav > ul > li > .text-sm.font-semibold');
+        $this->assertStringContainsString('text-transform: uppercase;', $label);
+        $this->assertStringContainsString('font-size: 0.6875rem;', $label);
 
-        foreach (['.page-form-fields', '.page-form-fields + .page-form-actions', '.page-card > .page-kv'] as $selector) {
-            $rules = $this->declared($kit, $selector);
-            $capped = array_values(array_filter($rules, fn ($rule) => str_contains($rule[1], 'max-width: 48rem;')));
-            $this->assertCount(1, $capped, $selector);
-            $this->assertNull($capped[0][0], "$selector holds at every width");
-        }
-        // A side-by-side card holds its whole body to the measure while it is still stacked.
-        $stacked = array_values(array_filter($this->declared($kit, '.page-card.is-beside > :not(.page-card-head)'), fn ($rule) => $rule[0] === null));
-        $this->assertCount(1, $stacked);
-        $this->assertStringContainsString('max-width: 48rem;', $stacked[0][1]);
-        // Not every button row in a card, and not every pair: only the ones beside capped fields.
-        $this->assertSame([], array_filter($this->declared($kit, '.page-card .page-form-actions'), fn ($rule) => str_contains($rule[1], 'max-width')));
-        $this->assertSame([], array_filter($this->declared($kit, '.page-kv'), fn ($rule) => str_contains($rule[1], 'max-width')));
+        // The default palette's rail is the review's cool near-black, its open row #262a33.
+        $css = file_get_contents(resource_path('css/app.css'));
+        $this->assertMatchesRegularExpression('/html\[data-theme="mist"\] \{[^}]*--ap-rail: 20 22 26;/s', $css);
+        $this->assertMatchesRegularExpression('/html\[data-theme="mist"\] \{[^}]*--ap-rail-active: 38 42 51;/s', $css);
 
-        // Side by side from the width at which the card first has room for a title beside 48rem
-        // of form, and never with a title column of nothing.
-        [[$media, $grid]] = $this->declared($kit, '.page-card.is-beside');
-        $this->assertSame('(min-width: 90rem)', $media);
-        $this->assertStringContainsString('grid-template-columns: minmax(14rem, 1fr) minmax(0, 48rem);', $grid);
+        [[, $strip]] = $this->declared($kit, '.ap-tabs');
+        $this->assertStringNotContainsString('background', $strip, 'no grey track');
+        [[, $current]] = $this->declared($kit, '.ap-tab[aria-current="page"]');
+        $this->assertStringContainsString('color: var(--brand-blue-dark);', $current);
+        [[, $tab]] = $this->declared($kit, '.ap-tab');
+        $this->assertStringContainsString('font-size: 0.8125rem;', $tab);
 
-        // A bar that reaches past the gutters keeps doing so (it covers what scrolls under it)
-        // and draws its line at the frame's width, from where the frame stops growing.
-        foreach ([['partials/form-kit-styles', '.event-save-bar::before'], ['partials/admin-page-styles', '.ap-frame-bleed::after']] as [$view, $selector]) {
-            [[$media, $line]] = $this->declared($this->rules($view), $selector);
-            $this->assertSame('(min-width: 102rem)', $media, $selector);
-            $this->assertStringContainsString('inset-inline: 2rem;', $line);
+        [[, $tool]] = $this->declared($kit, '.page-tool');
+        $this->assertStringContainsString('font-weight: 600;', $tool);
+        $this->assertStringContainsString('min-height: 2.75rem;', $tool);
+        $this->assertMatchesRegularExpression('/\.ap-secondary-btn \{[^}]*min-height: 2\.75rem;[^}]*font-weight: 600;/s', $css);
+    }
+
+    /**
+     * The design-language review's rules that the kit holds for every page at once: a main
+     * button and a field 52px, anything else pressed 44px at the least, one focus style (a blue
+     * border and a 3px ring) for fields and buttons, card titles as 12px small capitals with no
+     * icon chip, the header's title and grey line, and the line under the page clear of the
+     * support chat's button.
+     */
+    public function test_the_kit_holds_the_review_rules(): void
+    {
+        $css = file_get_contents(resource_path('css/app.css'));
+        $this->assertMatchesRegularExpression('/\.ap-btn \{\s*min-height: 3\.25rem;/', $css);
+        $this->assertMatchesRegularExpression('/\.ap-btn-sm \{\s*min-height: 2\.75rem;/', $css);
+        $this->assertMatchesRegularExpression('/\.ap-btn:focus-visible,[^{]*\{[^}]*border-color: var\(--brand-blue\);[^}]*box-shadow: 0 0 0 3px var\(--ap-focus-ring\);/s', $css);
+        $this->assertStringContainsString('--ap-focus-ring: rgba(36, 86, 230, 0.18);', $css);
+
+        foreach (['brand-link', 'secondary-link', 'primary-button', 'danger-button'] as $component) {
+            $this->assertStringContainsString("'class' => 'ap-btn ", file_get_contents(resource_path("views/components/$component.blade.php")), $component);
         }
-        foreach ($this->declared($this->rules('partials/form-kit-styles'), '.event-save-bar') as [$media, $body]) {
-            $this->assertStringNotContainsString('margin-inline: 0', $body, 'the bar keeps its bleed');
-        }
+        $brand = file_get_contents(resource_path('views/components/brand-button.blade.php'));
+        $this->assertStringContainsString("'ap-btn-sm ", $brand);
+        $this->assertStringContainsString("'ap-btn px-4 py-3 text-base'", $brand);
+        $this->assertStringNotContainsString('min-h-0', $brand, 'a small button is still 44px');
+
+        // Fields: the blue border and the ring, in the shell every page shares.
+        $shell = file_get_contents(resource_path('views/layouts/app.blade.php'));
+        $this->assertMatchesRegularExpression('/textarea:focus \{[^}]*border-color: var\(--brand-blue\);[^}]*box-shadow: 0 0 0 3px var\(--ap-focus-ring/s', $shell);
+
+        $kit = $this->rules('partials/admin-page-styles');
+        [[, $title]] = $this->declared($kit, '.page-card-title');
+        $this->assertStringContainsString('font-size: 0.75rem;', $title);
+        $this->assertStringContainsString('text-transform: uppercase;', $title);
+        $chips = $this->declared($kit, '.ap-card .dashboard-icon');
+        $this->assertNotSame([], $chips, 'an icon chip inside a card is put away');
+        $this->assertStringContainsString('display: none;', $chips[0][1]);
+
+        [[, $pageTitle]] = $this->declared($kit, '.page-title');
+        $this->assertStringContainsString('font-size: clamp(1.75rem, 4vw, 2.375rem);', $pageTitle);
+        $this->assertStringContainsString('letter-spacing: -0.03em;', $pageTitle);
+        [[, $lead]] = $this->declared($kit, '.page-top .page-lead');
+        $this->assertStringContainsString('color: rgb(var(--ap-ink-2));', $lead);
+
+        [[, $foot]] = $this->declared($kit, 'body:has(#support-chat-widget) .ap-foot-line');
+        $this->assertStringContainsString('padding-bottom: 6.5rem;', $foot);
+
+        $this->assertStringContainsString('text-xs leading-tight font-semibold uppercase', file_get_contents(resource_path('views/components/admin-stat-tile.blade.php')));
     }
 
     /**
@@ -553,13 +614,16 @@ class AdminPortalKitTest extends TestCase
 
         // A usage bar that is a panel of its own keeps to the form measure; the compact one
         // inside another panel takes the width it is given.
-        $meter = fn (string $variant) => \Illuminate\Support\Facades\Blade::render('<x-usage-meter label="Photos" :used="5" :limit="25" variant="'.$variant.'" />');
+        $meter = fn (string $variant) => Blade::render('<x-usage-meter label="Photos" :used="5" :limit="25" variant="'.$variant.'" />');
         $this->assertSame(1, preg_match('/<div class="max-w-3xl">\s*<h5/', $meter('panel')));
         $this->assertStringNotContainsString('max-w-3xl', $meter('inline'));
 
-        // One size of Save on Platform settings: each card's Save is that card's one action.
+        // One size of Save on Platform settings: each card's Save is that card's one action, and
+        // is drawn outlined until its own card is changed (admin.partials._quiet-saves), so the
+        // one blue on the screen is the card somebody is filling in.
         $settings = file_get_contents(resource_path('views/admin/settings.blade.php'));
-        $this->assertSame(9, preg_match_all('/<x-brand-button type="submit">\{\{ __\(\'messages\.save\'\) \}\}<\/x-brand-button>/', $settings));
+        $this->assertSame(9, preg_match_all('/<x-brand-button type="submit" data-quiet-until-change>\{\{ __\(\'messages\.save\'\) \}\}<\/x-brand-button>/', $settings));
         $this->assertSame(0, preg_match_all('/<x-brand-button[^>]*size="sm"/', $settings));
+        $this->assertSame(1, substr_count($settings, "@include('admin.partials._quiet-saves')"));
     }
 }

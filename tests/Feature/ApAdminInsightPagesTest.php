@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -45,7 +46,7 @@ class ApAdminInsightPagesTest extends TestCase
         // through the HTTP client may leave at all, so a later change that reaches for the
         // network fails here instead of going out.
         config(['services.digitalocean.api_token' => '', 'services.digitalocean.app_id' => '']);
-        \Illuminate\Support\Facades\Http::preventStrayRequests();
+        Http::preventStrayRequests();
 
         $this->admin = $this->createOwner(true);
     }
@@ -143,7 +144,7 @@ class ApAdminInsightPagesTest extends TestCase
         // Seven figures in one strip where there were two rows of boxes.
         $this->assertSame(1, substr_count($html, 'page-stats is-auto insight-strip'));
         $this->assertSame(7, substr_count($html, 'class="page-stat"'));
-        $this->assertSame(4, substr_count($html, 'class="ap-card rounded-xl p-4 sm:p-6 h-full flex flex-col items-center'), 'four headline tiles');
+        $this->assertSame(4, substr_count($html, 'class="ap-card rounded-xl p-4 sm:p-5 h-full flex flex-col items-start'), 'four headline tiles');
     }
 
     /**
@@ -187,10 +188,10 @@ class ApAdminInsightPagesTest extends TestCase
     public function test_signups_by_method_opens_on_organizers_and_can_show_the_rest(): void
     {
         $this->createOwner();
-        \Illuminate\Support\Facades\DB::table('users')->where('id', $this->createOwner()->id)
+        DB::table('users')->where('id', $this->createOwner()->id)
             ->update(['google_oauth_id' => 'g-organizer', 'password' => null]);
         foreach (['subscriber', 'follow'] as $intent) {
-            \Illuminate\Support\Facades\DB::table('users')->where('id', $this->createOwner()->id)->update(['signup_intent' => $intent]);
+            DB::table('users')->where('id', $this->createOwner()->id)->update(['signup_intent' => $intent]);
         }
 
         $response = $this->withSession(['admin_password_confirmed_at' => now()->timestamp])

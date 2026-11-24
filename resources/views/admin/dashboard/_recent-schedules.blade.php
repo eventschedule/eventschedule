@@ -1,12 +1,7 @@
 {{-- The newest real schedules: claimed, live, not demo content. data-created is what the page's
-     script compares with the admin's last visit to mark the new ones. --}}
-@php
-    $planTones = [
-        'trial' => 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300',
-        'pro' => 'bg-[var(--brand-blue-a10)] text-[var(--brand-blue)]',
-        'enterprise' => 'bg-[var(--brand-blue-a10)] text-[var(--brand-blue)]',
-    ];
-@endphp
+     script compares with the admin's last visit to mark the new ones. A row is words only (2026-11,
+     as the main dashboard's lists): no photo or letter tile, and the plan a word in the grey line
+     rather than a chip. --}}
 
 <section id="dash-recent" class="ap-card rounded-xl flex flex-col overflow-hidden scroll-mt-20" data-new-list>
     <div class="px-4 sm:px-5 pt-4 sm:pt-5 pb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -31,15 +26,9 @@
     @else
         <ul class="divide-y divide-gray-100 dark:divide-white/[0.06]" style="border-top: 1px solid var(--ap-hairline)">
             @foreach ($schedules['rows'] as $index => $row)
-                <li class="flex items-center gap-3 px-4 sm:px-5 py-2.5 hover:bg-gray-50 dark:hover:bg-black/10 transition-all duration-200 {{ $index >= \App\Services\AdminDashboard::LIST_VISIBLE ? 'hidden' : '' }}"
+                <li class="flex items-center gap-3 px-4 sm:px-5 py-3 hover:bg-gray-50 dark:hover:bg-black/10 transition-all duration-200 {{ $index >= \App\Services\AdminDashboard::LIST_VISIBLE ? 'hidden' : '' }}"
                     data-created="{{ $row['created_at']?->getTimestamp() }}"
                     @if ($index >= \App\Services\AdminDashboard::LIST_VISIBLE) data-more-row @endif>
-                    @if ($row['image'])
-                        <img src="{{ $row['image'] }}" alt="" width="56" height="56" loading="lazy" class="w-14 h-14 rounded-xl object-cover shrink-0">
-                    @else
-                        <span class="w-14 h-14 rounded-xl shrink-0 flex items-center justify-center text-lg font-semibold text-gray-500 dark:text-gray-400" style="background: var(--ap-tint-2)" aria-hidden="true">{{ mb_strtoupper(mb_substr((string) $row['name'], 0, 1)) }}</span>
-                    @endif
-
                     <div class="min-w-0 flex-1">
                         <p class="flex items-center gap-2 min-w-0">
                             {{-- The name opens the schedule in the admin, the arrow its guest page in a new tab
@@ -49,9 +38,6 @@
                             @if ($row['url'])
                                 <x-public-page-link :href="$row['url']" :label="$row['name']" class="-my-1 -ms-1" />
                             @endif
-                            @if ($row['plan'])
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-medium leading-4 whitespace-nowrap {{ $planTones[$row['plan']] }}">{{ __('messages.'.$row['plan']) }}</span>
-                            @endif
                         </p>
                         <p class="truncate text-xs text-gray-500 dark:text-gray-400">
                             {{ \App\Utils\ScheduleTypeLabel::for($row['type']) }}
@@ -60,6 +46,9 @@
                             @endif
                             @if ($row['owner'])
                                 &middot; <bdi>{{ $row['owner'] }}</bdi>
+                            @endif
+                            @if ($row['plan'])
+                                &middot; {{ __('messages.'.$row['plan']) }}
                             @endif
                         </p>
                     </div>

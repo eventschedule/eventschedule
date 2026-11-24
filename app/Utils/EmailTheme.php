@@ -30,8 +30,11 @@ final class EmailTheme
 {
     public const BRAND = '#4e81fa';
 
-    /** The AP's --brand-blue-dark. White on it is 4.53:1; white on BRAND is 3.59:1, which fails. */
-    public const BRAND_BUTTON = '#3d6fe8';
+    /**
+     * The AP's button blue since the 2026-11 redesign (--brand-button-bg, #2456E6). White on it is
+     * 5.9:1; white on BRAND is 3.59:1, which fails.
+     */
+    public const BRAND_BUTTON = '#2456e6';
 
     public const WHITE = '#ffffff';
 

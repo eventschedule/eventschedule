@@ -24,15 +24,9 @@
                 <div v-show="activeSection === 'content'" id="nb-pane-content" role="tabpanel" aria-labelledby="nb-tab-content" class="ap-card nb-card">
 
                     <div v-if="!isTemplateMode" class="nb-section">
-                        <label for="subject" class="nb-label">{{ t.subject }} <span aria-hidden="true">*</span></label>
+                        <label for="subject" class="nb-label">{{ t.subject }}</label>
                         <input id="subject" name="subject" type="text" maxlength="255" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
-                            v-model="subject" @input="onSubjectInput" required />
-                        <!-- Who it goes to, said where it is written; the choice itself is on Settings. -->
-                        <p class="nb-audience">
-                            <span class="nb-audience-to">{{ t.to }}</span>
-                            <bdi class="nb-audience-who">{{ audienceLine }}</bdi>
-                            <button v-if="!(abTest && abTest.variant === 'B')" type="button" class="event-link" @click="goToRecipients()">{{ t.change }}</button>
-                        </p>
+                            v-model="subject" @input="onSubjectInput" :placeholder="t.subject_placeholder" required />
                     </div>
 
                     <!-- Preview text: the line an inbox shows after the subject. Posted by the
@@ -42,6 +36,12 @@
                         <input id="newsletter_preview_text" type="text" maxlength="150" class="nb-input block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] shadow-sm"
                             v-model="styleSettings.previewText" />
                         <p class="nb-hint">{{ t.preview_text_help }}</p>
+                        <!-- Who it goes to, said where it is written; the choice itself is on Settings. -->
+                        <p class="nb-audience">
+                            <span class="nb-audience-to">{{ audienceTo }}</span>
+                            <bdi class="nb-audience-who">{{ audienceLine }}</bdi>
+                            <button v-if="!(abTest && abTest.variant === 'B')" type="button" class="event-link" @click="goToRecipients()">{{ t.change }}</button>
+                        </p>
                     </div>
 
                     <!-- The blocks, in the order the mail has them -->
@@ -49,7 +49,7 @@
                         <div class="nb-section-head">
                             <h3 class="nb-title">{{ t.blocks }} <span class="nb-count">{{ blocks.length }}</span></h3>
                             <button type="button" class="page-tool nb-add" :aria-expanded="showBlockPalette ? 'true' : 'false'" aria-controls="nb-palette" @click="toggleBlockPalette()">
-                                <svg v-if="!showBlockPalette" class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" /></svg>
+                                <span v-if="!showBlockPalette" aria-hidden="true">+</span>
                                 {{ showBlockPalette ? t.done : t.add_block }}
                             </button>
                         </div>
@@ -77,22 +77,19 @@
 
                                 <!-- The block's line: drag handle, what it is and holds, its tools -->
                                 <div class="nb-block-head">
-                                    <span class="drag-handle nb-handle" aria-hidden="true">
-                                        <svg class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8h16M4 16h16" /></svg>
+                                    <!-- Up and down, which are also where a block is dragged from. -->
+                                    <span class="drag-handle nb-moves">
+                                        <button type="button" class="nb-tool nb-arrow" :disabled="index === 0" :title="t.move_up" :aria-label="t.move_up" @click="moveBlock(block.id, -1)"><span aria-hidden="true">&uarr;</span></button>
+                                        <button type="button" class="nb-tool nb-arrow" :disabled="index === blocks.length - 1" :title="t.move_down" :aria-label="t.move_down" @click="moveBlock(block.id, 1)"><span aria-hidden="true">&darr;</span></button>
                                     </span>
                                     <button type="button" class="nb-block-toggle" :aria-expanded="selectedBlockId === block.id ? 'true' : 'false'" @click="selectBlock(block.id)">
                                         <svg class="nb-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" :d="blockIconPath(block.type)" /></svg>
                                         <span class="nb-block-name">{{ blockLabel(block.type) }}</span>
                                         <span v-if="selectedBlockId !== block.id && blockSnippet(block)" class="nb-block-snippet"><bdi>{{ blockSnippet(block) }}</bdi></span>
                                         <span v-else-if="selectedBlockId !== block.id && blockWantsContent(block)" class="nb-block-snippet is-empty">{{ t.no_content }}</span>
+                                        <span class="nb-block-act" aria-hidden="true">{{ selectedBlockId === block.id ? t.row_hide : (blockWantsContent(block) && !blockSnippet(block) ? t.row_add : t.row_edit) }}</span>
                                     </button>
                                     <div class="nb-block-tools">
-                                        <button type="button" class="nb-tool" :disabled="index === 0" :title="t.move_up" :aria-label="t.move_up" @click="moveBlock(block.id, -1)">
-                                            <svg class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
-                                        </button>
-                                        <button type="button" class="nb-tool" :disabled="index === blocks.length - 1" :title="t.move_down" :aria-label="t.move_down" @click="moveBlock(block.id, 1)">
-                                            <svg class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                                        </button>
                                         <button type="button" class="nb-tool" :title="t.clone_block" :aria-label="t.clone_block" @click="cloneBlock(block.id)">
                                             <svg class="nb-icon is-sm" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                         </button>
@@ -680,7 +677,7 @@
                             <a :href="routes.manage_segments" class="event-link nb-manage">{{ t.manage_segments }}</a>
                         </template>
                         <p v-if="audience" class="nb-audience is-total">
-                            <span class="nb-audience-to">{{ t.to }}</span>
+                            <span class="nb-audience-to">{{ audienceTo }}</span>
                             <bdi class="nb-audience-who">{{ audienceLine }}</bdi>
                         </p>
                     </div>
@@ -780,6 +777,13 @@
                             so bouncing to the confirm-password page would throw the work away. Say what
                             happened and let them re-confirm in another tab.
                         -->
+                        <!-- The mail as an inbox lists it, above the mail itself: who it is from, the
+                             subject (a grey stand-in until one is typed), and the preview text. -->
+                        <div v-if="!isTemplateMode" class="nb-inbox" aria-hidden="true">
+                            <bdi class="nb-inbox-from">{{ props.roleName }}</bdi>
+                            <bdi class="nb-inbox-subject" :class="{ 'is-empty': ! hasSubject }">{{ hasSubject ? subject.trim() : t.inbox_subject }}</bdi>
+                            <bdi class="nb-inbox-pre">{{ inboxPreview }}</bdi>
+                        </div>
                         <div v-if="previewNeedsReauth" class="nb-warn is-flush">
                             <svg class="nb-warn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                             <span>{{ t.preview_session_expired }}</span>
@@ -817,11 +821,14 @@
                     <span v-else-if="saving">{{ t.saving }}</span>
                     <span v-else-if="dirty" class="event-save-strong">{{ t.unsaved_changes }}</span>
                     <span v-else-if="justSaved">{{ t.saved }}</span>
+                    <span v-else-if="canSend && !isTemplateMode && !(subject || '').trim()">{{ t.add_subject_to_send }}</span>
                 </div>
                 <div class="event-save-actions">
                     <button v-if="canSend" type="button" class="event-bar-text" @click="openTest()">{{ t.send_a_test }}</button>
                     <button type="button" :class="canSend ? 'event-bar-quiet' : ['event-bar-save', brandClasses]" :disabled="saving" @click="save()">{{ t.save }}</button>
-                    <button v-if="canSend" type="button" :class="['event-bar-save', brandClasses]" :disabled="saving || busy" @click="openReview()">{{ abPending ? t.send_ab_test : (props.repeat ? t.change_repeat : t.review_and_send) }}</button>
+                    <!-- Pale and switched off until there is a subject (the 2026-11 redesign): the line
+                         beside it says what is missing. -->
+                    <button v-if="canSend" type="button" :class="['event-bar-save', brandClasses, { 'is-idle': ! hasSubject }]" :disabled="saving || busy || ! hasSubject" @click="openReview()">{{ abPending ? t.send_ab_test : (props.repeat ? t.change_repeat : t.review_and_send) }} <span class="nb-forward" aria-hidden="true">&rarr;</span></button>
                 </div>
             </div>
         </div>
@@ -954,10 +961,11 @@ import 'easymde/dist/easymde.min.css';
 import {
     applyEditorDirection,
     attachDirectionShortcut,
+    attachEditorChrome,
     attachEditorObserver,
     attachPasteSanitizer,
+    editorToolbar,
     resolveEditorDirection,
-    toggleEditorDirection,
     unlockEditorDirection,
 } from '../editor-helpers';
 
@@ -1230,14 +1238,41 @@ function fmt(n) {
     }
 }
 
+// Who it goes to, in words; how many is said in the label above it ("To · 12 people").
 const audienceLine = computed(() => {
     if (audience.value) {
-        return audience.value.label + ' (' + fmt(audience.value.count) + ')';
+        return audience.value.label;
     }
     if (selectedSegmentIds.value.length) {
         return props.segments.filter(s => selectedSegmentIds.value.includes(s.id)).map(s => s.name).join(', ');
     }
     return props.everyoneLabel;
+});
+
+const audienceTo = computed(() => {
+    if (!audience.value) {
+        return t.to;
+    }
+    const count = audience.value.count;
+
+    return (count === 1 ? t.to_one : t.to_many).replace(':count', fmt(count));
+});
+
+const hasSubject = computed(() => !!(subject.value || '').trim());
+
+// The inbox's second line: the preview text, or what a mail client shows without one (the
+// opening of the first text block), or a stand-in that says so.
+const inboxPreview = computed(() => {
+    const typed = (styleSettings.previewText || '').trim();
+    if (typed) {
+        return typed;
+    }
+    const text = blocks.value.find(block => block.type === 'text' && (block.data.content || '').trim());
+    if (text) {
+        return text.data.content.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[*_\x60~#>|]+/g, '').replace(/\s+/g, ' ').trim().slice(0, 140);
+    }
+
+    return t.inbox_preview;
 });
 
 const allowanceText = computed(() => {
@@ -1784,24 +1819,10 @@ function initEasyMDE(blockId) {
     const block = blocks.value.find(b => b.id === blockId);
     if (!block) return;
 
-    const et = window.editorTranslations || {};
     const initialDir = resolveEditorDirection(el, block.data.content || '');
     const instance = new EasyMDE({
         element: el,
-        toolbar: [
-            { name: "bold", action: EasyMDE.toggleBold, className: "editor-button-text", title: et.bold || "Bold", text: "B" },
-            { name: "italic", action: EasyMDE.toggleItalic, className: "editor-button-text", title: et.italic || "Italic", text: "I" },
-            { name: "heading", action: EasyMDE.toggleHeadingSmaller, className: "editor-button-text", title: et.heading || "Heading", text: "H" },
-            "|",
-            { name: "link", action: function(editor) { EasyMDE.drawLink(editor); }, className: "editor-button-text", title: et.link || "Link", text: "🔗" },
-            { name: "quote", action: EasyMDE.toggleBlockquote, className: "editor-button-text", title: et.quote || "Quote", text: "\"" },
-            { name: "unordered-list", action: EasyMDE.toggleUnorderedList, className: "editor-button-text", title: et.unorderedList || "Unordered List", text: "UL" },
-            { name: "ordered-list", action: EasyMDE.toggleOrderedList, className: "editor-button-text", title: et.orderedList || "Ordered List", text: "OL" },
-            { name: "direction", action: (editor) => toggleEditorDirection(editor, el), className: "editor-button-text no-disable", title: (et.textDirection || "Text Direction") + " (Ctrl+Shift)", text: initialDir.toUpperCase() },
-            "|",
-            { name: "preview", action: EasyMDE.togglePreview, className: "editor-button-text no-disable", title: et.preview || "Toggle Preview", text: "👁" },
-            { name: "guide", action: "https://www.markdownguide.org/basic-syntax/", className: "editor-button-text", title: et.guide || "Markdown Guide", text: "?" },
-        ],
+        toolbar: editorToolbar(EasyMDE, el),
         initialValue: block.data.content || '',
         minHeight: "200px",
         spellChecker: true,
@@ -1822,6 +1843,7 @@ function initEasyMDE(blockId) {
     attachEditorObserver(instance);
     attachDirectionShortcut(instance, el);
     attachPasteSanitizer(instance);
+    attachEditorChrome(instance, el);
 }
 
 function destroyEasyMDE(blockId) {
@@ -2139,7 +2161,9 @@ let keepScroll = 0;
 let awaitingPreview = false;
 
 const previewUrl = computed(() => routes.preview || '');
-const paneHeight = computed(() => phonePreviewOpen.value ? '100dvh - 4rem' : '100vh - 14rem');
+// Beside the editor the mail stops short of the save bar (--nb-bar-space, the bar's height and
+// its gap, set in _builder-styles): it is sticky, and its last lines used to sit under the bar.
+const paneHeight = computed(() => phonePreviewOpen.value ? '100dvh - 4rem' : '100vh - 14rem - var(--nb-bar-space, 0px)');
 
 const previewFrameStyle = computed(() => {
     const pane = previewPaneWidth.value || PREVIEW_LAYOUT.desktop;

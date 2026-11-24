@@ -75,6 +75,8 @@
     @endphp
 
     @include('admin.partials._navigation', ['active' => 'boost'])
+    @include('admin.partials._quiet-saves')
+
 
     <div class="page-head">
         <p class="page-lead">{{ $hosted ? __('messages.admin_boost_lead') : __('messages.admin_boost_lead_selfhost') }}</p>
@@ -117,7 +119,7 @@
                     <input type="email" id="bp-admin-email" name="email" required dir="ltr" autocomplete="off" class="block w-full {{ $field }}">
                 </div>
                 <div class="is-end">
-                    <x-brand-button type="submit">{{ __('messages.boost_partners_admin_enable') }}</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>{{ __('messages.boost_partners_admin_enable') }}</x-brand-button>
                 </div>
             </form>
             @endif
@@ -182,7 +184,7 @@
                                 @if ($bpAdminCanConfirm)
                                 <form method="POST" action="{{ route('admin.boost.partners.confirm', ['partner' => $bpAdminPartner->id]) }}">
                                     @csrf
-                                    <x-brand-button type="submit" size="sm">{{ __('messages.boost_partners_admin_confirm') }}</x-brand-button>
+                                    <button type="submit" class="page-tool">{{ __('messages.boost_partners_admin_confirm') }}</button>
                                 </form>
                                 @endif
                             </td>
@@ -415,7 +417,7 @@
                         <input type="number" name="amount" id="credit-amount" required min="1" max="1000" step="0.01" dir="ltr"
                             class="mt-1 block w-full {{ $field }}">
                     </div>
-                    <x-brand-button type="submit">@lang('messages.grant_credit')</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>@lang('messages.grant_credit')</x-brand-button>
                 </form>
 
                 @if ($rolesWithCredit->count() > 0)
@@ -450,7 +452,7 @@
                         <input type="number" name="amount" id="limit-amount" required min="1" max="{{ config('services.meta.max_budget', 1000) }}" step="0.01" dir="ltr"
                             class="mt-1 block w-full {{ $field }}">
                     </div>
-                    <x-brand-button type="submit">@lang('messages.set_limit')</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>@lang('messages.set_limit')</x-brand-button>
                 </form>
 
                 @if ($rolesWithLimit->count() > 0)
@@ -603,6 +605,21 @@
         };
         const textColor = token('--ap-ink-3');
         const gridColor = token('--ap-border');
+        // The portal's chart palette (2026-11): the brand blue for the main series, the same blue
+        // weaker or grey for the rest, and green and red only where they mean running and failed.
+        const brandBlue = palette.getPropertyValue('--brand-blue').trim() || '#2456E6';
+        const blueAt = function (alpha) {
+            return /^#[0-9a-f]{6}$/i.test(brandBlue) ? brandBlue + Math.round(alpha * 255).toString(16).padStart(2, '0') : brandBlue;
+        };
+        const probe = function (className) {
+            const el = document.createElement('span');
+            el.className = className;
+            el.style.display = 'none';
+            document.body.appendChild(el);
+            const value = getComputedStyle(el).color;
+            el.remove();
+            return value;
+        };
 
         // Status filter auto-submit
         document.getElementById('status-filter').addEventListener('change', function() {
@@ -620,21 +637,21 @@
         // Status Distribution Donut Chart
         @if (array_sum($statusDistribution) > 0)
         const statusColors = {
-            'active': '#10B981',
-            'paused': '#F59E0B',
-            'completed': '#3B82F6',
-            'cancelled': '#6B7280',
-            'failed': '#EF4444',
-            'pending_payment': '#F97316',
-            'rejected': '#DC2626',
-            'draft': '#9CA3AF',
+            'active': probe('text-green-600 dark:text-green-400'),
+            'paused': blueAt(0.5),
+            'completed': brandBlue,
+            'cancelled': token('--ap-ink-4'),
+            'failed': probe('text-red-600 dark:text-red-400'),
+            'pending_payment': blueAt(0.3),
+            'rejected': probe('text-red-600 dark:text-red-400'),
+            'draft': token('--ap-border-strong'),
         };
 
         const statusData = @json($statusDistribution);
         // The states in the reader's language, as the list under the chart names them.
         const statusLabels = @json(collect($statusDistribution)->keys()->map($statusWord)->values());
         const statusValues = Object.values(statusData);
-        const statusBgColors = Object.keys(statusData).map(s => statusColors[s] || '#9CA3AF');
+        const statusBgColors = Object.keys(statusData).map(s => statusColors[s] || token('--ap-ink-4'));
 
         new Chart(document.getElementById('statusChart'), {
             type: 'doughnut',
@@ -669,17 +686,17 @@
                     {
                         label: @json(__('messages.ad_spend')),
                         data: @json($adSpendData),
-                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim(),
-                        backgroundColor: 'rgba(78, 129, 250, 0.1)',
+                        borderColor: brandBlue,
+                        backgroundColor: blueAt(0.1),
                         fill: true,
                         tension: 0.3,
                     },
                     {
                         label: @json(__('messages.markup_revenue')),
                         data: @json($markupData),
-                        borderColor: '#10B981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        fill: true,
+                        borderColor: token('--ap-ink-4'),
+                        backgroundColor: 'transparent',
+                        fill: false,
                         tension: 0.3,
                     }
                 ]

@@ -1,10 +1,11 @@
 {{-- theme-variants opts this layout in to the six palettes. The guest portal
      renders through the same <x-app-layout> shell and deliberately does not. --}}
-{{-- One frame for every page of the portal (partials/admin-page-styles, .ap-frame): the header,
-     the tabs and what a page shows share both edges, 80rem apart at most, in the middle of the
-     room beside the sidebar. A page that is a canvas (the seating designer, the box office) asks
-     for the whole window with <x-app-admin-layout wide>. Read here, ahead of the shell: inside
-     its slots the attribute bag in scope is no longer this layout's own. --}}
+{{-- One column for every page of the portal (partials/admin-page-styles, .ap-frame): the
+     header, the tabs and what a page shows share both edges, 1040px at most with the gutters, in
+     the middle of the room beside the sidebar (the 2026-11 redesign's max-width:1040px). A page
+     that is a canvas (the seating designer, the box office) asks for the whole window with
+     <x-app-admin-layout wide>. Read here, ahead of the shell: inside its slots the attribute bag
+     in scope is no longer this layout's own. --}}
 @php $frameWide = $attributes->has('wide') && $attributes->get('wide') !== false; @endphp
 {{-- The tab title is the address's first two parts ("New > Venue"). /new/talent is the one
      whose part is a type name nobody reads, so it says the type's own label instead. --}}
@@ -37,10 +38,29 @@
                     }
                 }
 
+                // The schedule (or page) you are on, in view in the rail's own scroll: with many
+                // schedules the rail opened at the top and the one in use was below the fold.
+                // Scrolled by hand, never scrollIntoView(), which would move the page as well.
+                function showCurrentNavItem(root) {
+                    root.querySelectorAll('.sidebar-gradient .overflow-y-auto').forEach(function(column) {
+                        var current = column.querySelector('.dark-nav-active');
+                        if (! current || ! column.clientHeight) {
+                            return;
+                        }
+                        var box = column.getBoundingClientRect();
+                        var row = current.getBoundingClientRect();
+                        if (row.top < box.top || row.bottom > box.bottom) {
+                            column.scrollTop += (row.top - box.top) - (box.height - row.height) / 2;
+                        }
+                    });
+                }
+                showCurrentNavItem(document);
+
                 function openMenu() {
                     lastFocusBeforeOpen = document.activeElement;
                     esShow(sidebar);
                     sidebar.setAttribute('data-state', 'open');
+                    showCurrentNavItem(sidebar);
                     document.addEventListener('keydown', onEscapeClose);
                     requestAnimationFrame(function() {
                         if (closeButton && typeof closeButton.focus === 'function') {
@@ -77,6 +97,15 @@
              three forms and a schedule's tabs used them. --}}
         @include('partials.form-kit-styles')
         @include('partials.admin-page-styles')
+        {{-- The words a folded row says instead of a chevron (form-kit-styles, .event-subrow::after),
+             in this page's language. JSON strings are CSS strings. --}}
+        <style {!! nonce_attr() !!}>
+            :root {
+                --row-add: @json(__('messages.add'), JSON_UNESCAPED_UNICODE);
+                --row-change: @json(__('messages.change'), JSON_UNESCAPED_UNICODE);
+                --row-hide: @json(__('messages.row_action_hide'), JSON_UNESCAPED_UNICODE);
+            }
+        </style>
         {{-- The month (the Schedule and Availability tabs, the dashboard) on the portal's own
              tokens, on a page that draws a calendar (role/partials/calendar says so). --}}
         @if (request()->attributes->get('month_kit'))
@@ -183,7 +212,7 @@
                             <x-dropdown align="right" width="48">
                                 <x-slot name="trigger">
                                     <button
-                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                        class="inline-flex items-center px-2 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg text-gray-600 dark:text-gray-300 bg-transparent hover:text-gray-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] transition ease-in-out duration-150">
                                         <div>{{ Auth::user()->name }}</div>
 
                                         <div class="ms-1">
@@ -212,9 +241,8 @@
 
                         @if ($upgradeSubdomain)
                         <a href="{{ route('role.subscribe', ['subdomain' => $upgradeSubdomain]) }}"
-                           class="group relative inline-flex items-center justify-center px-3 py-1 text-sm font-semibold text-white bg-green-600 hover:bg-gradient-to-r hover:from-green-600 hover:to-emerald-500 rounded-lg overflow-hidden transition-all hover:scale-105 hover:shadow-lg hover:shadow-green-500/25">
-                            <span class="relative z-10">{{ __('messages.upgrade') }}</span>
-                            <div class="absolute inset-0 animate-shimmer"></div>
+                           class="inline-flex items-center justify-center px-3.5 py-2 text-sm font-semibold text-[var(--brand-blue)] bg-white dark:bg-transparent border border-[rgb(var(--ap-border-strong))] dark:border-gray-600 rounded-[0.625rem] transition-all duration-200 hover:border-[var(--brand-blue)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                            {{ __('messages.upgrade') }}
                         </a>
                         @endif
 
@@ -224,7 +252,7 @@
 
             {{-- The frame is on <main> itself and not on a div inside it: SetupGuide.vue reads
                  this element's box to dock the guide beside a form's fields. --}}
-            <main id="main-content" tabindex="-1" class="py-10 ap-frame{{ $frameWide ? ' is-wide' : '' }}">
+            <main id="main-content" tabindex="-1" class="pt-3 pb-6 ap-frame{{ $frameWide ? ' is-wide' : '' }}">
                 <div class="px-4 sm:px-6 lg:px-8">
 
                     {{-- What a form that was just sent got wrong, said once for every page of
@@ -250,9 +278,12 @@
                 </div>
             </main>
 
-            <div class="mt-auto pb-8 px-4 sm:px-6 lg:px-8 ap-frame{{ $frameWide ? ' is-wide' : '' }} text-sm text-gray-500 dark:text-gray-400" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}">
+            {{-- The line under the page sits right under what the page shows, in the column with
+                 it (the designs' "Questions or suggestions? Email ..."), not pinned to the foot of
+                 the window, where it stood far from a short page. --}}
+            <div class="pb-10 px-4 sm:px-6 lg:px-8 ap-frame ap-foot-line{{ $frameWide ? ' is-wide' : '' }}" dir="{{ is_rtl() ? 'rtl' : 'ltr' }}">
                 @if (config('app.hosted'))
-                    {!! str_replace(':email', '<bdi dir="ltr"><a href="mailto:'.config('app.support_email').'?subject=Feedback" class="hover:underline">'.config('app.support_email').'</a></bdi>', __('messages.questions_or_suggestions')) !!}
+                    {!! str_replace(':email', '<bdi dir="ltr"><a href="mailto:'.config('app.support_email').'?subject=Feedback" class="text-[var(--brand-blue)] hover:underline">'.config('app.support_email').'</a></bdi>', __('messages.questions_or_suggestions')) !!}
                 @else
                     <div class="flex items-center justify-between w-full">
                         <span>

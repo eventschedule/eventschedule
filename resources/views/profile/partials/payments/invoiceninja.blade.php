@@ -101,7 +101,7 @@
             @method('patch')
 
             <div>
-                <x-input-label for="invoiceninja_api_key" :value="__('messages.api_token') . ' *'" />
+                <x-input-label for="invoiceninja_api_key" :value="__('messages.api_token')" />
                 <x-password-input id="invoiceninja_api_key" name="invoiceninja_api_key" class="mt-1 block w-full"
                     autocomplete="new-password" required :disabled="is_demo_mode()" />
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.invoiceninja_api_token_help') }}</p>

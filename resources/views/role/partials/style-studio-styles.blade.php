@@ -202,8 +202,8 @@
     appearance: none;
     flex: none;
     display: block;
-    width: 2.5rem !important;
-    height: 2.5rem !important;
+    width: 2.75rem !important;
+    height: 2.75rem !important;
     padding: 0 !important;
     margin: 0 !important;
     border: 0 !important;
@@ -224,16 +224,16 @@
     border: 1px solid rgb(var(--ap-border-strong));
     border-radius: 0.75rem;
 }
+{{-- The hex as the 2026-11 redesign sets it: 15px, medium, tracked out, 112px wide. --}}
 #section-style input.st-hex {
-    width: 5.5rem;
-    height: 2.5rem;
-    padding: 0 0.5rem !important;
-    text-align: center;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.875rem !important;
-    letter-spacing: 0.02em;
+    width: 7rem;
+    height: 2.75rem;
+    padding: 0 0.75rem !important;
+    font-size: 0.9375rem !important;
+    font-weight: 500;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    border-radius: 0.625rem;
+    border-radius: 0.75rem;
     border: 1px solid rgb(var(--ap-border-strong));
     background: rgb(var(--ap-surface));
     color: rgb(var(--ap-ink));
@@ -248,8 +248,8 @@
     gap: 0.5rem;
 }
 #section-style button.st-swatch {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.875rem;
+    height: 1.875rem;
     border-radius: 999px;
     border: 0;
     padding: 0;
@@ -817,7 +817,7 @@
     align-content: flex-start;
     overflow: hidden;
 }
-#section-style .st-pv-list.is-cards > .st-pv-card {
+#section-style .st-pv-list.is-cards > .st-pv-each > .st-pv-card {
     width: 100%;
     flex: none;
 }
@@ -960,8 +960,83 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+{{-- The list's heading: "Upcoming events" and its count, then Filter and the List or Calendar
+     switch, as the public page has them. --}}
+#section-style .st-pv-listhead {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.25rem;
+    padding: 0.3125rem 0.3125rem 0.3125rem 0.625rem;
+    border-radius: 0.625rem;
+    background: var(--pv-panel);
+}
+#section-style .st-pv-listname {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--pv-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#section-style .st-pv-listname small {
+    margin-inline-start: 0.3125rem;
+    font-size: 0.625rem;
+    font-weight: 500;
+    color: var(--pv-soft);
+}
+#section-style .st-pv-switch {
+    display: inline-flex;
+    padding: 0.125rem;
+    border-radius: 0.4375rem;
+    background: var(--pv-panel);
+    box-shadow: inset 0 0 0 1px var(--pv-line);
+}
+#section-style .st-pv-switch i {
+    padding: 0.1875rem 0.3125rem;
+    border-radius: 0.3125rem;
+    font-size: 0.625rem;
+    font-style: normal;
+    font-weight: 600;
+    color: var(--pv-soft);
+}
+#section-style .st-pv-switch i.is-on {
+    background: var(--pv-tile);
+    color: var(--pv-ink);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+}
+{{-- The header's buttons: Follow in the accent's fill, Share as a small square icon beside it. --}}
+#section-style .st-pv-acts {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    flex: none;
+}
+#section-style .st-pv-share {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.4375rem;
+    background: var(--pv-panel);
+    box-shadow: inset 0 0 0 1px var(--pv-line);
+    color: var(--pv-ink);
+}
+#section-style .st-pv-share svg {
+    width: 0.75rem;
+    height: 0.75rem;
+}
+{{-- The list as the public page draws it: a heading for each day, then a card an event with its
+     time, its picture, its name and an outlined button in the accent. --}}
+#section-style .st-pv-each {
+    display: contents;
+}
 #section-style .st-pv-day {
-    align-self: center;
+    align-self: flex-start;
     margin-top: 0.125rem;
     padding: 0.25rem 0.625rem;
     border-radius: 0.5rem;
@@ -970,6 +1045,10 @@
     font-size: 0.6875rem;
     font-weight: 600;
 }
+#section-style .st-pv-day span {
+    margin-inline-end: 0.25rem;
+    font-weight: 700;
+}
 #section-style .st-pv-card {
     display: flex;
     align-items: stretch;
@@ -977,12 +1056,32 @@
     background: var(--pv-panel);
     overflow: hidden;
     box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-    min-height: 4.5rem;
+    min-height: 4.25rem;
+}
+#section-style .st-pv-clock {
+    flex: none;
+    padding: 0.625rem 0.5rem 0 0.625rem;
+    font-size: 0.625rem;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--pv-ink);
+}
+#section-style .st-pv-page[dir="rtl"] .st-pv-clock {
+    padding: 0.625rem 0.625rem 0 0.5rem;
+}
+#section-style .st-pv-card-img {
+    flex: none;
+    width: 3.75rem;
+    background: #1c1c1e center / cover no-repeat;
 }
 #section-style .st-pv-card-text {
     flex: 1;
     min-width: 0;
     padding: 0.625rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.375rem;
 }
 #section-style .st-pv-card-title {
     font-size: 0.8125rem;
@@ -994,62 +1093,24 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
-#section-style .st-pv-when {
-    margin-top: 0.4375rem;
-    display: flex;
-    align-items: center;
-    gap: 0.4375rem;
-}
-#section-style .st-pv-date {
-    flex: none;
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 0.4375rem;
-    background: var(--pv-tile);
-    box-shadow: inset 0 0 0 1px var(--pv-line);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    color: var(--pv-ink);
-}
-#section-style .st-pv-date small {
-    font-size: 0.375rem;
+#section-style .st-pv-go {
+    display: inline-block;
+    border: 1px solid;
+    border-radius: 0.375rem;
+    padding: 0.1875rem 0.5rem;
+    font-size: 0.625rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-#section-style .st-pv-date b {
-    font-size: 0.75rem;
-    font-weight: 700;
-}
-#section-style .st-pv-icon {
-    flex: none;
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 0.4375rem;
-    background: var(--pv-tile);
-    box-shadow: inset 0 0 0 1px var(--pv-line);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-#section-style .st-pv-icon svg {
-    width: 0.875rem;
-    height: 0.875rem;
+    line-height: 1.2;
+    white-space: nowrap;
 }
 #section-style .st-pv-lines {
     flex: 1;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    justify-content: center;
+    gap: 0.3125rem;
     min-width: 0;
-}
-#section-style .st-pv-card-img {
-    flex: none;
-    width: 34%;
-    background: #1c1c1e center / cover no-repeat;
 }
 {{-- The month, where Calendar is the layout. --}}
 #section-style .st-pv-month {
@@ -1307,3 +1368,68 @@
     height: 1.25rem;
 }
 
+
+{{-- The 2026-11 redesign: Change as a button and Remove as a quiet word beside it, with a line
+   under them; the font as its sample over a small select; the rows in a box of their own; the
+   preview's label in small capitals over Light and Dark said in words. --}}
+#section-style .st-logo-actions #profile_image_change {
+    padding: 0.5rem 0.875rem;
+    border: 1px solid rgb(var(--ap-border-strong));
+    border-radius: 0.625rem;
+    background: rgb(var(--ap-surface));
+    font-weight: 600;
+    color: rgb(var(--ap-ink));
+    text-decoration: none;
+}
+#section-style .st-logo-actions .event-link.is-danger {
+    color: rgb(var(--ap-ink-2));
+    font-weight: 500;
+}
+#section-style .st-logo-hint {
+    flex-basis: 100%;
+    font-size: 0.8125rem;
+    color: rgb(var(--ap-ink-3));
+}
+#section-style button.st-font-btn {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.875rem;
+}
+#section-style button.st-font-btn > .st-font-sample {
+    flex: 1 1 100%;
+}
+#section-style button.st-font-btn > .st-font-name {
+    max-width: 100%;
+    padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+    border: 1px solid rgb(var(--ap-border-strong));
+    border-radius: 0.625rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: rgb(var(--ap-ink));
+}
+#section-style button.st-font-btn > .st-chev {
+    margin-inline-start: -2.75rem;
+    color: rgb(var(--ap-ink-2));
+}
+#section-style .st-main > .event-subrows {
+    padding: 0 1rem;
+    border: 1px solid rgb(var(--ap-border));
+    border-radius: 0.875rem;
+}
+#section-style .st-main > .event-subrows > button.event-subrow:last-of-type {
+    border-bottom-color: transparent;
+}
+#section-style .st-pv-title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(var(--ap-ink-3));
+}
+#section-style .st-seg button {
+    width: auto;
+    height: 1.875rem;
+    padding: 0 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}

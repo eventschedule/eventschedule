@@ -1,5 +1,14 @@
+@php
+    // Nothing connected yet, on an install that offers Stripe Connect: Stripe is the one way most
+    // organizers get paid, so it is offered on its own, with its button, and the others are
+    // listed under it (the 2026-11 redesign). Its row and pane stay in the page, folded away, for
+    // the Help link and for the pane's own messages.
+    $nothingConnected = ! collect($paymentStates)->contains(fn ($state) => $state['on'] || $state['warn']);
+    $stripeHero = $nothingConnected && config('app.hosted') && isset($settingsGateways['stripe'])
+        && ! $user->stripe_account_id && ! is_demo_mode();
+@endphp
 <section>
-    @include('profile.partials.heading')
+    @include('profile.partials.heading', ['headingPill' => $nothingConnected ? __('messages.settings_none_connected') : null])
     {{-- Which of these a buyer pays through is chosen on each event (its Tickets tab), so more
          than one can be connected: said here, where five rows gave no hint of it. --}}
     <p class="form-kit-lead">{{ __('messages.ticket_payment_methods_help') }}. {{ __('messages.settings_payment_per_event') }}</p>
@@ -12,14 +21,33 @@
          new gateway appears here by existing rather than by having a row added. Cash has nothing
          to configure and is filtered out by withSettings(). The pane ids are what the Help link
          and PaymentGatewayRoutesTest read. --}}
-    <div class="event-subrows">
+    @if ($stripeHero)
+    <div class="payment-hero">
+        <div class="min-w-0">
+            <p class="payment-hero-title">{{ $settingsGateways['stripe']->label(null) }}</p>
+            <p class="payment-hero-help">{{ $paymentStates['stripe']['text'] }}</p>
+        </div>
+        <x-brand-link href="{{ route('stripe.link') }}" class="gap-2 flex-none">
+            {{ __('messages.connect_stripe') }}
+            <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+        </x-brand-link>
+    </div>
+    <p class="payment-other-label">{{ __('messages.other_ways_to_get_paid') }}</p>
+    @endif
+
+    <div class="event-subrows payment-rows">
         @foreach ($settingsGateways as $gatewayKey => $gateway)
-            @php $gatewayTab = str_replace('_', '-', $gatewayKey); @endphp
-            <x-form-row group="payment" :tab="$gatewayTab" class="payment-tab"
+            @php
+                $gatewayTab = str_replace('_', '-', $gatewayKey);
+                $gatewayOff = ! $paymentStates[$gatewayKey]['on'] && ! $paymentStates[$gatewayKey]['warn'];
+            @endphp
+            <x-form-row group="payment" :tab="$gatewayTab"
+                :class="'payment-tab'.($stripeHero && $gatewayKey === 'stripe' ? ' is-hero-twin' : '')"
                 :title="$gateway->label(null)"
                 :summary="$paymentStates[$gatewayKey]['text']"
                 :warn="$paymentStates[$gatewayKey]['warn']"
-                :muted="! $paymentStates[$gatewayKey]['on'] && ! $paymentStates[$gatewayKey]['warn']" />
+                :muted="$gatewayOff"
+                :data-row-action="$gatewayOff ? __('messages.row_action_set_up') : null" />
             <div id="payment-tab-{{ $gatewayTab }}" class="event-subrow-body" hidden>
                 <div class="form-kit-fields">
                     @if ($gateway->settingsView())
@@ -56,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    @if (! collect($paymentStates)->contains(fn ($state) => $state['on'] || $state['warn']))
+    @if ($nothingConnected && ! $stripeHero)
         // Nothing is connected yet: the first method opens by itself, as its tab used to, so
         // "Connect" is on the page and five closed rows are not all there is. After everything
         // else has had its say about which row to open (a refused form, the row just acted on).

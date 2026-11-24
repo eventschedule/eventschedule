@@ -58,9 +58,9 @@ class EmailThemeTest extends TestCase
 
     public function test_our_own_blue_buttons_use_the_admin_portals_darker_button_blue(): void
     {
-        // White on #4E81FA is 3.59:1. #3D6FE8 is the AP's --brand-blue-dark, already in the product.
+        // White on #4E81FA is 3.59:1. #2456E6 is the AP's button blue (--brand-button-bg), already in the product.
         foreach ([EmailTheme::account(), EmailTheme::guest(null), EmailTheme::guest($this->schedule('#4E81FA'))] as $t) {
-            $this->assertSame('#3d6fe8', $t->accent);
+            $this->assertSame('#2456e6', $t->accent);
             $this->assertSame('#ffffff', $t->onAccent);
         }
     }
@@ -127,7 +127,7 @@ class EmailThemeTest extends TestCase
         $this->assertSame('The Blue Note', $owner->senderName);
         $this->assertSame(config('app.name'), $owner->appName);
         // The schedule identifies the mail; the colours stay the platform's.
-        $this->assertSame('#3d6fe8', $owner->accent);
+        $this->assertSame('#2456e6', $owner->accent);
 
         $account = EmailTheme::account();
         $this->assertSame(config('app.name'), $account->senderName);

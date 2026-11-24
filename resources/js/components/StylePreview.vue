@@ -3,16 +3,8 @@
         <span class="st-pv-title">{{ labels.preview }}</span>
         <span class="st-pv-tools">
             <span class="st-seg" role="group">
-                <button type="button" :title="labels.light" :aria-label="labels.light" :aria-pressed="mode === 'light' ? 'true' : 'false'" @click="state.previewMode = 'light'">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-                    </svg>
-                </button>
-                <button type="button" :title="labels.dark" :aria-label="labels.dark" :aria-pressed="mode === 'dark' ? 'true' : 'false'" @click="state.previewMode = 'dark'">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                    </svg>
-                </button>
+                <button type="button" :title="labels.light" :aria-label="labels.light" :aria-pressed="mode === 'light' ? 'true' : 'false'" @click="state.previewMode = 'light'">{{ labels.light }}</button>
+                <button type="button" :title="labels.dark" :aria-label="labels.dark" :aria-pressed="mode === 'dark' ? 'true' : 'false'" @click="state.previewMode = 'dark'">{{ labels.dark }}</button>
             </span>
             <button type="button" class="st-pv-toggle" :aria-label="labels.preview" :aria-expanded="opened ? 'true' : 'false'" @click="opened = ! opened">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
@@ -50,7 +42,7 @@
             <div v-if="state.headerStyle !== 'banner'" class="st-pv-bar st-pv-first">
                 <img v-if="state.logo" class="st-pv-logo" :src="state.logo" alt="" />
                 <div class="st-pv-name" :style="{ fontFamily: nameFont }">{{ name }}</div>
-                <span class="st-pv-follow" :style="followStyle">{{ follow }}</span>
+                <span class="st-pv-acts"><span class="st-pv-follow" :style="followStyle">{{ follow }}</span><span class="st-pv-share" :title="words.share"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L8 7m4-4l4 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" /></svg></span></span>
             </div>
             <div v-else class="st-pv-head st-pv-first" :class="{ 'has-stage': !! picture || wall.length > 0 }">
                 <div v-if="picture" class="st-pv-stage" :style="{ backgroundImage: cssUrl(picture) }"></div>
@@ -62,11 +54,18 @@
                     <div class="st-pv-row">
                         <img v-if="state.logo" class="st-pv-logo" :src="state.logo" alt="" />
                         <span v-else></span>
-                        <span class="st-pv-follow" :style="followStyle">{{ follow }}</span>
+                        <span class="st-pv-acts"><span class="st-pv-follow" :style="followStyle">{{ follow }}</span><span class="st-pv-share" :title="words.share"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15V3m0 0L8 7m4-4l4 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" /></svg></span></span>
                     </div>
                     <div class="st-pv-name" :style="{ fontFamily: nameFont }">{{ name }}</div>
-                    <div class="st-pv-facts"><i style="width: 34%"></i><i style="width: 22%"></i></div>
                 </div>
+            </div>
+
+            <!-- The list's heading, as the page has it (the 2026-11 redesign): "Upcoming events" and
+                 how many, then the List or Calendar switch (the page's Filter is left out: the drawing is
+                 too narrow for it). -->
+            <div class="st-pv-listhead st-pv-tools-row">
+                <span class="st-pv-listname">{{ words.upcoming }}<small v-if="events.length">{{ events.length }}</small></span>
+                <span class="st-pv-switch"><i :class="{ 'is-on': state.layout !== 'calendar' }">{{ words.list }}</i><i :class="{ 'is-on': state.layout === 'calendar' }">{{ words.calendar }}</i></span>
             </div>
 
             <div class="st-pv-list" :class="{ 'is-cards': state.layout !== 'calendar' }">
@@ -79,22 +78,26 @@
                     </div>
                 </div>
                 <template v-else>
-                    <div v-if="cards[0].name" class="st-pv-day">{{ cards[0].month }} {{ cards[0].day }}</div>
-                    <div v-for="(card, index) in cards" :key="index" class="st-pv-card">
-                        <div class="st-pv-card-text">
-                            <div v-if="card.name" class="st-pv-card-title">{{ card.name }}</div>
-                            <span v-else class="st-pv-lines"><i style="width: 70%"></i><i style="width: 45%"></i></span>
-                            <div class="st-pv-when">
-                                <span class="st-pv-date"><small>{{ card.month }}</small><b>{{ card.day }}</b></span>
-                                <span class="st-pv-icon" :style="{ color: colors.readable }">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3zM6 6h.008v.008H6V6z" />
-                                    </svg>
-                                </span>
-                                <span class="st-pv-lines"><i style="width: 80%"></i><i style="width: 50%"></i></span>
+                    <!-- The schedule's list as the public page draws it: each day under a heading of
+                         its own, then a card an event with its time, its picture, its name and an
+                         outlined button in the accent. A card with no event yet keeps grey bars
+                         where its words would be. -->
+                    <div v-for="(card, index) in cards" :key="index" class="st-pv-each">
+                        <div v-if="card.name && (index === 0 || cards[index - 1].date !== card.date)" class="st-pv-day">
+                            <span v-if="card.weekday" :style="{ color: colors.readable }">{{ card.weekday }}</span>
+                            {{ card.month }} {{ card.day }}
+                        </div>
+                        <div class="st-pv-card">
+                            <bdi v-if="card.time" class="st-pv-clock" dir="ltr">{{ card.time }}</bdi>
+                            <div v-if="card.image" class="st-pv-card-img" :style="{ backgroundImage: cssUrl(card.image) }"></div>
+                            <div class="st-pv-card-text">
+                                <template v-if="card.name">
+                                    <div class="st-pv-card-title">{{ card.name }}</div>
+                                    <span class="st-pv-go" :style="{ color: colors.readable, borderColor: colors.readable }">{{ words.details }}</span>
+                                </template>
+                                <span v-else class="st-pv-lines"><i style="width: 70%"></i><i style="width: 45%"></i></span>
                             </div>
                         </div>
-                        <div v-if="card.image" class="st-pv-card-img" :style="{ backgroundImage: cssUrl(card.image) }"></div>
                     </div>
                 </template>
             </div>
@@ -134,6 +137,8 @@ import { auroraVars, lightStyles, writeKeyframes, triplet, decode } from '../sty
 const props = defineProps({
     events: { type: Array, default: () => [] },
     followWords: { type: Object, default: () => ({}) },
+    // The page's other words (Share, Details, Upcoming events, List, Calendar) per language.
+    pageWords: { type: Object, default: () => ({}) },
     guestUrl: { type: String, default: '' },
     labels: { type: Object, required: true },
 });
@@ -148,6 +153,11 @@ const rtl = computed(() => state.lang === 'he' || state.lang === 'ar');
 const name = computed(() => state.name || props.labels.preview);
 const nameFont = computed(() => fontStack(state.fontLabel));
 const follow = computed(() => props.followWords[state.lang] || props.followWords.en || 'Follow');
+const words = computed(() => ({
+    share: 'Share', details: 'Details', upcoming: 'Upcoming events', list: 'List', calendar: 'Calendar',
+    ...(props.pageWords.en || {}),
+    ...(props.pageWords[state.lang] || {}),
+}));
 
 const colors = computed(() => {
     const worked = theme(state.accent);
@@ -261,7 +271,7 @@ const view = computed(() => (state.openRow === 'animation' ? 'events' : (state.o
 const cards = computed(() => {
     const own = props.events.slice(0, 3);
 
-    return own.length ? own : [{ name: '', image: null, month: '', day: '' }, { name: '', image: null, month: '', day: '' }];
+    return own.length ? own : [{ name: '', image: null, month: '', day: '', weekday: '', time: '' }, { name: '', image: null, month: '', day: '', weekday: '', time: '' }];
 });
 
 // The month the first event is in (this month where there is none), as it falls, with the

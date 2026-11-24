@@ -1,19 +1,14 @@
-{{ __('messages.your_verification_code') }}: {{ $code }}
+{{ __('messages.signup_verification_code_heading') }}: {{ $code }}
 
-{{ __('messages.signup_verification_code_heading') }}
+{{ ! empty($continueUrl) ? __('messages.signup_verification_code_intro') : __('messages.signup_verification_code_intro_any') }}
 
-{{ __('messages.hello') }},
-
-{{ __('messages.signup_verification_code_intro') }}
-
-{{ __('messages.your_verification_code') }}: {{ $code }}
-
-{{ __('messages.signup_verification_code_expiry') }}
+{{ $code }}
+{{ __('messages.signup_code_expires_short') }}
 @if (! empty($continueUrl))
 
 {{ __('messages.continue_signup') }}: {!! $continueUrl !!}
 @endif
 
-{{ __('messages.signup_verification_code_security_notice') }}
+{{ __('messages.signup_code_never_share') }} {{ __('messages.signup_code_never_asked') }}
 
-{{ __('messages.thank_you_for_using') }}
+{{ __('messages.signup_code_not_you', ['app' => config('app.name')]) }}

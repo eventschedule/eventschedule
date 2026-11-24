@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Event;
+use App\Models\Group;
 use App\Models\Role;
 use App\Models\User;
 use App\Utils\UrlUtils;
@@ -138,7 +139,7 @@ class EventFormSectionsTest extends TestCase
             $html = $this->page($url);
             $form = $this->slice($html, 'id="edit-form"', '</form>');
 
-            $this->assertSame(1, substr_count($form, 'class="event-save-bar"'));
+            $this->assertSame(1, preg_match_all('/class="event-save-bar( is-stacked)?"/', $form));
             // The only button that submits the event form; every other submit names another form.
             $this->assertSame(1, preg_match_all('/<button(?![^>]*\sform=)[^>]*type="submit"/', $form));
             $this->assertSame(1, substr_count($form, 'id="event-cancel-real"'));
@@ -186,7 +187,8 @@ class EventFormSectionsTest extends TestCase
         $this->assertStringContainsString('var onError = "sponsors";', $this->pageWithErrors($url, ['event_sponsor_logos.0']));
         $this->assertStringContainsString('var onError = "";', $this->pageWithErrors($url, ['slug']));
         $this->assertStringContainsString('activeTicketTab: "payment",', $this->pageWithErrors($url, ['ticket_currency_code']));
-        $this->assertStringContainsString('activeTicketTab: "tickets",', $this->pageWithErrors($url, ['seating_plan_id']));
+        // The seating plan is a row of its own since the 2026-11 review (a venue with plans).
+        $this->assertStringContainsString('activeTicketTab: "seating",', $this->pageWithErrors($url, ['seating_plan_id']));
     }
 
     public function test_an_event_that_exists_opens_on_its_fields(): void
@@ -243,9 +245,13 @@ class EventFormSectionsTest extends TestCase
 
             $what = substr($tab, $basics, $location - $basics);
             $where = substr($tab, $location, $about - $location);
-            foreach (['id="event_name"', 'id="event_date"', 'id="start_time"', 'id="flyer_image"'] as $field) {
+            foreach (['id="event_name"', 'id="event_date"', 'id="start_time"'] as $field) {
                 $this->assertStringContainsString($field, $what, "{$field} is in the first section ({$name})");
             }
+            // The flyer is beside the name on a later event, new or existing; only a first event
+            // has it as the first row of "Optional", after the place
+            // (test_a_first_event_is_one_column_and_a_later_one_has_the_tabs).
+            $this->assertTrue(str_contains($what, 'id="flyer_image"'), "where the flyer is ({$name})");
             $this->assertStringNotContainsString('id="in_person"', $what);
             foreach (['id="in_person"', 'id="online"', 'name="venue_id"', 'name="venue_submitted"'] as $field) {
                 $this->assertStringContainsString($field, $where, "{$field} is in the location section ({$name})");
@@ -288,8 +294,9 @@ class EventFormSectionsTest extends TestCase
         $this->assertMatchesRegularExpression('/<template v-if="ticketChoice !== \'external\'">\s*<input type="hidden" name="registration_url" :value="event\.registration_url \|\| \'\'">/', $panel);
         $this->assertStringContainsString('v-model="event.rsvp_limit" v-bind:disabled="ticketChoice !== \'rsvp\'"', $panel);
         $this->assertStringContainsString('<input type="hidden" name="rsvp_limit" v-if="ticketChoice !== \'rsvp\'"', $panel);
-        // "Not needed" is always there, and says when it is the one in force.
-        $this->assertStringContainsString(':class="{ \'is-current\': ! ticketChoice }"', $panel);
+        // "No tickets" is always there (a tile since the 2026-11 redesign), and says when it is the
+        // one in force.
+        $this->assertStringContainsString(':class="{ \'is-on\': ! ticketChoice, \'is-current\': ! ticketChoice }"', $panel);
         $this->assertStringNotContainsString('quick_', $html);
     }
 
@@ -336,8 +343,8 @@ class EventFormSectionsTest extends TestCase
         }
 
         // The price says what it is in, and tickets with no way to be paid say so under the tiles.
-        $this->assertStringContainsString('<span class="event-tab-aside font-normal" v-cloak v-text="event.ticket_currency_code"></span>', $html);
-        $this->assertStringContainsString('v-show="ticketChoice === \'tickets\' && anyTicketPriced && paymentWarning"', $html);
+        $this->assertStringContainsString(e(__('messages.price')).' (<span v-cloak v-text="event.ticket_currency_code"></span>)', $html);
+        $this->assertStringContainsString('v-show="ticketChoice === \'tickets\' && anyTicketPriced && paymentWarning && ! ticketsNeedPro"', $html);
 
         // Participants are the people on stage; said whether or not anyone is listed.
         $this->assertSame(1, substr_count($html, '<p class="event-hint">'.e(__('messages.participants_help')).'</p>'));
@@ -363,7 +370,7 @@ class EventFormSectionsTest extends TestCase
     /** A sub-schedule is optional, and its empty choice says "None" where it said "Please select". */
     public function test_no_sub_schedule_is_a_choice_that_says_so(): void
     {
-        $group = new \App\Models\Group;
+        $group = new Group;
         $group->role_id = $this->role->id;
         $group->name = 'Late shows';
         $group->slug = 'late-shows';
@@ -469,25 +476,41 @@ class EventFormSectionsTest extends TestCase
     }
 
     /**
-     * A first event is one focused column, which is also what leaves the setup guide's card its
-     * place beside the form; the flyer follows the location so the place stays on the first screen.
+     * A FIRST event is one focused column (the 2026-11 design, "Add your first event"), which is
+     * also what leaves the setup guide's card its place beside it; the flyer follows the location
+     * so the place stays on the first screen. Every later event, new or existing, has the tabs:
+     * adding an event looks like editing one (2026-11-24).
      */
-    public function test_a_first_event_is_one_column_with_the_flyer_after_the_place(): void
+    public function test_a_first_event_is_one_column_and_a_later_one_has_the_tabs(): void
     {
         $first = $this->page($this->createUrl());
-        $this->assertStringContainsString(__('messages.first_event_form_subtitle'), $first, 'sanity check: this is a first event');
+        $this->assertStringContainsString('data-first-event-lead', $first, 'sanity check: this is a first event');
         $this->assertStringContainsString('<div class="event-tab event-tab-first max-w-xl">', $first);
         $this->assertSame(1, substr_count($first, 'id="flyer_image"'), 'the flyer field is rendered exactly once');
         $this->assertGreaterThan(strpos($first, 'id="event-location"'), strpos($first, 'id="flyer_image"'));
         $this->assertStringContainsString('<div class="max-w-xl">', $this->slice($first, '<div id="section-tickets"', 'id="ticket_choice_rsvp"'));
+        $this->assertStringContainsString(e(__('messages.first_event_optional_label')), $first);
+        $this->assertStringContainsString('class="event-first-more"', $first, 'a first event folds the later tabs into More options');
 
-        $this->createEvent($this->role, ['user_id' => $this->owner->id]);
+        $event = $this->createEvent($this->role, ['user_id' => $this->owner->id]);
         $later = $this->page($this->createUrl());
-        $this->assertStringNotContainsString(__('messages.first_event_form_subtitle'), $later);
+        $this->assertStringNotContainsString('data-first-event-lead', $later);
+        $this->assertStringNotContainsString('event-first-stack lg:col-span-12', $later, 'a later new event is not the one column');
+        $this->assertStringContainsString('lg:col-span-9 space-y-6 lg:space-y-0', $later, 'a later new event has the tabs, as editing does');
         $this->assertStringContainsString('<div class="event-tab">', $later);
+        $this->assertStringNotContainsString('<div class="ap-card rounded-xl event-main-card">', $later);
         $this->assertSame(1, substr_count($later, 'id="flyer_image"'));
         $this->assertLessThan(strpos($later, 'id="event-location"'), strpos($later, 'id="flyer_image"'));
-        $this->assertStringContainsString('<div class="event-tickets-wide">', $this->slice($later, '<div id="section-tickets"', 'id="ticket_choice_rsvp"'));
+        $this->assertStringContainsString('class="event-save-bar"', $later);
+        $this->assertStringNotContainsString('class="event-save-bar is-stacked"', $later);
+
+        $edit = $this->page($this->editUrl($event));
+        $this->assertStringContainsString('lg:col-span-9 space-y-6 lg:space-y-0', $edit, 'an event that exists keeps its tabs');
+        $this->assertStringContainsString('<div class="event-tab">', $edit);
+        $this->assertStringNotContainsString('<div class="ap-card rounded-xl event-main-card">', $edit);
+        $this->assertLessThan(strpos($edit, 'id="event-location"'), strpos($edit, 'id="flyer_image"'));
+        $this->assertStringContainsString('<div class="event-tickets-wide">', $this->slice($edit, '<div id="section-tickets"', 'id="ticket_choice_rsvp"'));
+        $this->assertStringContainsString('class="event-save-bar"', $edit);
     }
 
     public function test_the_recent_venues_are_the_ones_this_schedule_was_last_at(): void

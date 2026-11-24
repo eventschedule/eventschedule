@@ -13,14 +13,16 @@
        - `hidden` on a li.gk-cal-spare (a day's events past the cap) is lifted where the week's
          row has room, and the three parts of "+N more" are said again;
        - classes the script adds (gk-cal-ev-on, gk-cal-kin, gk-cal-name-cut, gk-cal-tight).
-     So the root and a name carry no :class, and no event's text is ever printed as markup. --}}
+     So the root and a name carry no :class, and no event's text is ever printed as markup.
+     The root's static class says which portal page it is on (gk-cal-dash, the dashboard;
+     gk-cal-ap, the Schedule tab), which the admin bridge of partials/month-kit-styles reads. --}}
 @php
     $monthDayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
     $monthDayKeys = array_merge(array_slice($monthDayKeys, $firstDay), array_slice($monthDayKeys, 0, $firstDay));
     // An embed, the admin's pages and the dashboard open an event in a new tab, as they always have.
     $monthNewTab = $route !== 'guest' || $guestEmbed;
 @endphp
-<div v-cloak v-show="!isLoadingEvents" ref="monthRoot" class="gk-cal hidden md:block" data-month role="grid"
+<div v-cloak v-show="!isLoadingEvents" ref="monthRoot" class="gk-cal hidden md:block{{ $route === 'home' ? ' gk-cal-dash' : ($route === 'admin' ? ' gk-cal-ap' : '') }}" data-month role="grid"
      :aria-label="monthYearLabel" :dir="isRtl ? 'rtl' : 'ltr'"
      @pointerover="monthOver" @pointerout="monthOut" @focusin="monthFocusIn" @focusout="monthFocusOut" @click="monthClick" @keydown="monthKey">
     <div class="gk-cal-head" role="row">

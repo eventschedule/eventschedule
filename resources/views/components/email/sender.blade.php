@@ -11,8 +11,21 @@
 @props(['theme'])
 @php($t = $theme)
 @php($nameStyle = 'font-size: 15px; line-height: 20px; font-weight: 600; color: #0f172a; font-family: '.\App\Utils\EmailTheme::FONT.';')
-@if ($t->voice === 'account')
-<span class="es-ink" style="font-size: 17px; line-height: 24px; font-weight: 700; letter-spacing: -0.01em; color: #0f172a; font-family: {{ \App\Utils\EmailTheme::FONT }};">{{ $t->senderName }}</span>
+@if ($t->voice === 'account' && $t->senderName === 'Event Schedule')
+{{-- Our own wordmark, as the 2026-11 design draws it: the round ES mark (a white disc, so it
+     stands on a dark ground too, and transparent at its corners, so Outlook needs no rounding)
+     and the name in two inks. Only for our own name: an install that renamed itself gets its
+     name as plain text below, never our mark beside it. --}}
+<table role="presentation" dir="{{ $t->dir }}" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td width="36" valign="middle" style="width: 36px;">
+<img src="{{ asset('images/favicon-96.png') }}" width="36" height="36" alt="" style="display: block; width: 36px; height: 36px; border: 0;">
+</td>
+<td valign="middle" style="padding-{{ $t->start }}: 10px; text-align: {{ $t->start }}; font-size: 19px; line-height: 24px; letter-spacing: -0.01em; font-family: {{ \App\Utils\EmailTheme::FONT }};"><span class="es-ink" style="font-weight: 600; color: #14161a;">Event</span><span class="es-ink-2" style="font-weight: 400; color: #4b5263;">Schedule</span></td>
+</tr>
+</table>
+@elseif ($t->voice === 'account')
+<span class="es-ink" style="font-size: 19px; line-height: 24px; font-weight: 600; letter-spacing: -0.01em; color: #14161a; font-family: {{ \App\Utils\EmailTheme::FONT }};">{{ $t->senderName }}</span>
 @elseif ($t->avatarUrl && $t->avatarWide)
 <!--[if !mso]><!-->
 <table role="presentation" cellpadding="0" cellspacing="0" border="0">

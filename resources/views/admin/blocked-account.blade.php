@@ -67,7 +67,7 @@
                  holds (blocked, an administrator, the demo). Not spam is a bordered button: the
                  action that goes on, on this page, is the block below. --}}
             @if ($spam && $spam['total'] > 0)
-            <x-page-card beside :title="$spamClearance ? __('messages.spam_watch_cleared_title') : __('messages.spam_watch_title')" :lead="__('messages.spam_watch_account_lead')">
+            <x-page-card :title="$spamClearance ? __('messages.spam_watch_cleared_title') : __('messages.spam_watch_title')" :lead="__('messages.spam_watch_account_lead')">
                 <dl class="page-kv block-facts">
                     @foreach ($spam['items'] as $match)
                     <div>
@@ -109,7 +109,7 @@
             @endif
 
             {{-- Who it is. --}}
-            <x-page-card beside :title="__('messages.account')">
+            <x-page-card :title="__('messages.account')">
                 <dl class="page-kv block-facts">
                     <div>
                         <dt>@lang('messages.funnel_signed_up')</dt>
@@ -159,7 +159,7 @@
                  for it back, and the other accounts its card was used on. Pause and Enable are
                  the same actions as on /admin/mail-review. --}}
             @if ($mailCard)
-            <x-page-card beside :title="__('messages.mail_sending_title')" :lead="__('messages.mail_sending_lead')">
+            <x-page-card :title="__('messages.mail_sending_title')" :lead="__('messages.mail_sending_lead')">
                 <dl class="page-kv block-facts">
                     <div>
                         <dt>@lang('messages.status')</dt>
@@ -294,7 +294,7 @@
             {{-- The decision, apart from the rest and in red, as taking a schedule down is on its
                  own page. Once blocked the card is the way back, and says what the block did. --}}
             @if ($user->isBlocked())
-            <x-page-card beside :title="__('messages.blocked')" class="border border-red-200 dark:border-red-800">
+            <x-page-card :title="__('messages.blocked')" class="border border-red-200 dark:border-red-800">
                 <dl class="page-kv block-facts">
                     <div>
                         <dt>@lang('messages.date')</dt>
@@ -338,11 +338,11 @@
                 </div>
             </x-page-card>
             @elseif ($refusal)
-            <x-page-card beside :title="__('messages.block_account')">
+            <x-page-card :title="__('messages.block_account')">
                 <x-page-notice tone="info">{{ __($refusal) }}</x-page-notice>
             </x-page-card>
             @else
-            <x-page-card beside :title="__('messages.block_account')" class="border border-red-200 dark:border-red-800">
+            <x-page-card :title="__('messages.block_account')" class="border border-red-200 dark:border-red-800">
                 <form method="POST" action="{{ route('admin.blocked.block', ['hash' => $hash]) }}">
                     @csrf
 

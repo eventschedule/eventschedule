@@ -86,7 +86,7 @@ class EventFormPlacementTest extends TestCase
         $this->assertStringNotContainsString('show_sales_dates_checkbox', $html);
         $types = $this->slice($html, 'data-ticket-pane="tickets"', 'data-tab="payment"');
         $this->assertStringContainsString(':data-sales-dates-box="ticket.uid"', $types);
-        $this->assertSame(2, substr_count($types, ':data-sales-dates-link="ticket.uid"'), 'on the single-type line of links and the multi-type one');
+        $this->assertSame(1, substr_count($types, ':data-sales-dates-link="ticket.uid"'), 'on the one line of chips every type has');
         $this->assertSame(1, substr_count($html, 'v-bind:name="`tickets[${index}][sales_start_at]`"'), 'the start date is always posted, from one field');
         $this->assertStringNotContainsString('<template v-if="showSalesDates">', $html);
 
@@ -272,8 +272,8 @@ class EventFormPlacementTest extends TestCase
         $this->assertStringContainsString("return !! this.event.individual_tickets && ! this.hasPassTicket\n          && (! this.individualTicketsPlanLocked || this.savedIndividualTicketsSold);", $view);
         $this->assertStringContainsString('if (this.individualTicketsOn) { asked.push(C.individual_tickets); }', $view, 'the Checkout line does not name it either');
 
-        $this->assertSame(2, substr_count($html, '@click="addTicketMaxPerOrder(index)"'), 'sanity check: both + Add Limit links are on the page');
-        $this->assertSame(2, substr_count($html, 'v-if="!ticket.is_pass && (ticket.max_per_order === null || ticket.max_per_order === undefined)"'), '+ Add Limit is not offered on a pass');
+        $this->assertSame(1, substr_count($html, '@click="addTicketMaxPerOrder(index)"'), 'sanity check: the + Limit chip is on the page, once for one type or several');
+        $this->assertSame(1, substr_count($html, 'v-if="!ticket.is_pass && (ticket.max_per_order === null || ticket.max_per_order === undefined)"'), '+ Limit is not offered on a pass');
         $this->assertStringContainsString('<div v-if="!ticket.is_pass && ticket.max_per_order !== null && ticket.max_per_order !== undefined" class="mt-4">', $html);
     }
 

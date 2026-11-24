@@ -490,5 +490,53 @@
     :where(.dark) .gk-peek { --peek-bg: rgb(var(--ap-surface-hover)); }
     :where(.dark) .gk-dayp { --peek-bg: rgb(var(--ap-surface-hover)); }
     :where(.dark) .gk-cal { --cal-out: rgb(var(--ap-bg) / .6); }
+    {{-- The portal's month as the 2026-11 design draws it (only here, in the admin's bridge: the
+       guest page and the embed share the partial and keep their own month).
+       - A white card with the palette's hairlines; other months' days in full ink where they are
+         still to come (only what is over is quieter), and no pictures in the grid (the card
+         that opens beside a day has them).
+       - On the dashboard every week as tall as every other (grid-auto-rows); on the Schedule tab an
+         empty week stays short. Each from a floor of its own per page:
+         the Schedule tab's 52px, the dashboard's 76px. A week that is over is no longer folded.
+       - One rule for every day, this week's and the ones that are over alike (the design review
+         of 2026-11; the script's CAN.portal): an event is its time on one blue line (11px/600,
+         with Draft, Internal or Cancelled where a member is told one), then its name at 12px/600
+         on two lines at most; two events a day, then "+N more" with no hours beside it. The time
+         under the name and at the end of its line are not used here, and no event sits on a chip.
+       - A day that is over is quieter: its number, its times, its names and its "+N more" in the
+         third ink. Today keeps its filled number and the word Today beside it, which the narrow
+         month elsewhere has no room for.
+       The Availability tab's grid (.gk-cal-pick) keeps its own sizes, so the rules skip it. --}}
+    .gk-cal { --cal-line: rgb(var(--ap-border)); --cal-out: transparent; --cal-blue: var(--es-accent-readable); background: rgb(var(--ap-surface)); border-color: rgb(var(--ap-border)); border-radius: 1rem; box-shadow: 0 1px 2px rgba(20, 22, 26, .06); }
+    :where(.dark) .gk-cal { --cal-out: transparent; }
+    .gk-cal-dash.gk-cal:not(.gk-cal-pick) .gk-cal-weeks { grid-auto-rows: 1fr; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-week, .gk-cal:not(.gk-cal-pick) .gk-cal-week-past, .gk-cal:not(.gk-cal-pick) .gk-cal-bare .gk-cal-week { min-height: 3.25rem; }
+    .gk-cal-dash.gk-cal:not(.gk-cal-pick) .gk-cal-week, .gk-cal-dash.gk-cal:not(.gk-cal-pick) .gk-cal-week-past, .gk-cal-dash.gk-cal:not(.gk-cal-pick) .gk-cal-bare .gk-cal-week { min-height: 4.75rem; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-wd { padding: .625rem .5rem; font-size: .6875rem; font-weight: 600; letter-spacing: .06em; color: var(--gk-ink-3); }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-wd-now { color: var(--cal-blue); }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-day { padding: .5rem .3125rem .625rem; gap: .375rem; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-dayhead { margin-bottom: 0; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-num { min-width: 0; height: auto; padding: .125rem 0; font-size: .8125rem; font-weight: 500; color: var(--gk-ink); }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-day-out .gk-cal-num { color: var(--gk-ink); font-weight: 500; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-day-past .gk-cal-num { color: var(--gk-ink-3); font-weight: 400; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-day-today .gk-cal-num { min-width: 1.625rem; padding: .125rem .4375rem; font-weight: 700; color: var(--es-accent-text); }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-word { display: inline; font-size: .625rem; font-weight: 700; color: var(--cal-blue); }
+    .gk-cal-art { display: none; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-list { gap: .375rem; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev { display: flex; flex-direction: column; gap: .0625rem; padding: .125rem .1875rem; border-radius: .375rem; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-name, .gk-cal:not(.gk-cal-pick) .gk-cal-list-1 .gk-cal-ev .gk-cal-name, .gk-cal:not(.gk-cal-pick) .gk-cal-list-wrap .gk-cal-ev .gk-cal-name { display: block; max-height: 2.6em; max-height: 2lh; font-size: .75rem; font-weight: 600; line-height: 1.3; white-space: normal; overflow-wrap: break-word; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev-feat .gk-cal-name, .gk-cal:not(.gk-cal-pick) .gk-cal-ev-bare .gk-cal-name { font-size: .75rem; font-weight: 600; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-end { float: none; margin-inline-start: .25rem; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-end .gk-cal-time { display: none; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-sub, .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-sub-bare { display: flex; flex-wrap: wrap; order: -1; column-gap: .25rem; margin: 0; padding: 0; font-size: .6875rem; font-weight: 600; line-height: 1.3; color: var(--cal-blue); }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-time-under { display: inline; order: 0; margin: 0; font-size: inherit; font-weight: inherit; color: inherit; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-note { font-weight: 600; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-note-ok, .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-note-price { display: inline; color: inherit; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-time-under + .gk-cal-note::before, .gk-cal:not(.gk-cal-pick) .gk-cal-ev .gk-cal-note + .gk-cal-note:not(.gk-cal-now)::before { content: '\00B7'; margin-inline-end: .25rem; color: inherit; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-ev-past .gk-cal-sub { color: var(--gk-ink-3); }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-more { padding: 0 .1875rem; height: 1.25rem; font-size: .6875rem; font-weight: 600; color: var(--gk-ink-2); }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-more-from { display: none; }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-day-past .gk-cal-ev .gk-cal-name, .gk-cal:not(.gk-cal-pick) .gk-cal-day-past .gk-cal-ev .gk-cal-sub, .gk-cal:not(.gk-cal-pick) .gk-cal-day-past .gk-cal-more { color: var(--gk-ink-3); }
+    .gk-cal:not(.gk-cal-pick) .gk-cal-day-past .gk-cal-ev .gk-cal-name { font-weight: 500; }
     @endif
 </style>

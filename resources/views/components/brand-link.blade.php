@@ -1,5 +1,5 @@
 @props(['href'])
 
-<a href="{{ $href }}" {{ $attributes->merge(['class' => 'inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800']) }}>
+<a href="{{ $href }}" {{ $attributes->merge(['class' => 'ap-btn inline-flex items-center justify-center px-4 py-3 bg-gradient-to-b from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] border border-transparent rounded-xl font-semibold text-base text-white shadow-sm transition-all duration-200 hover:from-[var(--brand-button-bg-hover)] hover:to-[var(--brand-button-bg-hover)] hover:shadow-md focus:outline-none']) }}>
     {{ $slot }}
 </a>

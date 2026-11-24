@@ -1,13 +1,8 @@
-{{-- The newest events an admin can be shown, with the flyer (or the schedule's photo standing in
-     for one). A draft, a guest submission and an import carry a flag; a burst from one schedule is
-     one row with "+N". On a phone the date gets a line of its own so it is never the part cut. --}}
+{{-- The newest events an admin can be shown. A row is words only (2026-11, as the main
+     dashboard's lists): no flyer or icon tile, and the flag (a draft, a guest submission, an
+     import) and a burst from one schedule ("+N", one row for the lot) are grey words, not chips.
+     On a phone the date gets a line of its own so it is never the part cut. --}}
 @php
-    $modeDots = [
-        'in_person' => 'bg-cyan-600',
-        'online' => 'bg-purple-600 dark:bg-purple-500',
-        'hybrid' => 'bg-pink-600',
-        'no_location' => 'bg-gray-400 dark:bg-gray-500',
-    ];
     $modeLabels = [
         'in_person' => __('messages.in_person'),
         'online' => __('messages.online'),
@@ -51,17 +46,9 @@
                     $chip = trim(($flag ?? '').($row['more'] > 0 ? ($flag ? ', ' : '').'+'.number_format($row['more']) : ''));
                     $when = $row['series'] ? __('messages.recurring') : $row['when'];
                 @endphp
-                <li class="flex items-center gap-3 px-4 sm:px-5 py-2.5 hover:bg-gray-50 dark:hover:bg-black/10 transition-all duration-200 {{ $index >= \App\Services\AdminDashboard::LIST_VISIBLE ? 'hidden' : '' }}"
+                <li class="flex items-center gap-3 px-4 sm:px-5 py-3 hover:bg-gray-50 dark:hover:bg-black/10 transition-all duration-200 {{ $index >= \App\Services\AdminDashboard::LIST_VISIBLE ? 'hidden' : '' }}"
                     data-created="{{ $row['created_at']?->getTimestamp() }}"
                     @if ($index >= \App\Services\AdminDashboard::LIST_VISIBLE) data-more-row @endif>
-                    @if ($row['image'])
-                        <img src="{{ $row['image'] }}" alt="" width="56" height="56" loading="lazy" class="w-14 h-14 rounded-xl object-cover shrink-0">
-                    @else
-                        <span class="w-14 h-14 rounded-xl shrink-0 flex items-center justify-center text-gray-500 dark:text-gray-400" style="background: var(--ap-tint-2)" aria-hidden="true">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ \App\Utils\RealtimeIcons::PATHS['schedule'] }}" /></svg>
-                        </span>
-                    @endif
-
                     <div class="min-w-0 flex-1">
                         <p class="flex items-center gap-2 min-w-0">
                             @if ($row['url'] && $row['public'])
@@ -75,7 +62,7 @@
                                 <span class="truncate text-sm font-medium text-gray-900 dark:text-white"><bdi>{{ $row['name'] }}</bdi></span>
                             @endif
                             @if ($chip !== '')
-                                <span class="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-medium leading-4 whitespace-nowrap bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">{{ $chip }}</span>
+                                <span class="hidden sm:inline text-xs whitespace-nowrap text-gray-500 dark:text-gray-400">{{ $chip }}</span>
                             @endif
                         </p>
                         <p class="truncate text-xs text-gray-500 dark:text-gray-400">
@@ -97,7 +84,7 @@
                                 <span class="whitespace-nowrap">{{ $when }}</span>
                             @endif
                             @if ($chip !== '')
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-medium leading-4 whitespace-nowrap bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">{{ $chip }}</span>
+                                <span class="whitespace-nowrap text-gray-500 dark:text-gray-400">{{ $chip }}</span>
                             @endif
                         </p>
                     </div>
@@ -107,10 +94,7 @@
                             <span data-new-dot role="img" aria-label="{{ __('messages.admin_dash_new_since_visit') }}" class="hidden w-1.5 h-1.5 rounded-full bg-[var(--brand-blue)] shrink-0"></span>
                             {{ $row['created_at']?->shortRelativeDiffForHumans() }}
                         </p>
-                        {{-- The dot carries which, the text stays in the page's ink. --}}
-                        <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-end gap-1.5 whitespace-nowrap">
-                            <span class="w-2 h-2 rounded-full {{ $modeDots[$row['mode']] }}" aria-hidden="true"></span>{{ $modeLabels[$row['mode']] }}
-                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $modeLabels[$row['mode']] }}</p>
                     </div>
                 </li>
             @endforeach

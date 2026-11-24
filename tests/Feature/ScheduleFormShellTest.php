@@ -426,7 +426,7 @@ class ScheduleFormShellTest extends TestCase
 
         // Connecting a calendar is a button, and the two colours of a gradient are named. The
         // owner's goes straight to Google and back to this row, in the same tab.
-        $this->assertMatchesRegularExpression('/<a href="[^"]*\/google-calendar\/redirect\?from=settings[^"]*" class="ap-secondary-btn[^"]*"[^>]*>\s*'.preg_quote(__('messages.connect_google_calendar'), '/').'/', $html);
+        $this->assertMatchesRegularExpression('/<a href="[^"]*\/google-calendar\/redirect\?from=settings[^"]*" class="[^"]*ap-secondary-btn[^"]*"[^>]*>\s*'.preg_quote(__('messages.connect_google_calendar'), '/').'/', $html);
         $this->assertMatchesRegularExpression('/<label[^>]*for="custom_color1"[^>]*>\s*'.preg_quote(__('messages.color'), '/').' 1/', $html);
         $this->assertMatchesRegularExpression('/<label[^>]*for="custom_color2"[^>]*>\s*'.preg_quote(__('messages.color'), '/').' 2/', $html);
 

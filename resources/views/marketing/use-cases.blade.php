@@ -91,7 +91,7 @@
                         'tickets' => ['price', $ucPrice, $ucWhen],
                         'free', 'rsvp' => ['free', 'Free entry', $ucWhen],
                         'few' => ['few', 'Few left', $ucWhen . ($ucPrice !== '' ? ' · ' . $ucPrice : '')],
-                        'sold' => ['sold', 'Sold Out', $ucWhen . ($ucPrice !== '' ? ' · ' . $ucPrice : '')],
+                        'sold' => ['sold', 'Sold out', $ucWhen . ($ucPrice !== '' ? ' · ' . $ucPrice : '')],
                         default => ['', '', $ucWhen],
                     };
                     $ucRows[] = [
@@ -1041,7 +1041,7 @@
                                 <div class="uc-types">
                                     <div class="uc-type"><span>In the room</span><b>$25</b><span class="uc-qty"><i>-</i>2<i>+</i></span></div>
                                     <div class="uc-type"><span>Livestream<small>Watch from home</small></span><b>$10</b><span class="uc-qty"><i>-</i>0<i>+</i></span></div>
-                                    <div class="uc-pay">Buy Tickets</div>
+                                    <div class="uc-pay">Buy tickets</div>
                                 </div>
                             </div>
                             <div class="uc-card uc-door">
@@ -1142,7 +1142,7 @@
                         <div class="uc-obj" data-uc-face="the-town" data-accent="teal" aria-hidden="true">
                             <div class="uc-card uc-cal">
                                 <div class="uc-cal-head"><span class="uc-ava is-small">R</span><div><strong>Riverside Community Calendar</strong><span>What's on in Riverside</span></div><span class="uc-follow">Follow</span></div>
-                                <p class="uc-strands"><span class="is-on">Show All</span><span><i style="background: #3b82f6;"></i>Music</span><span><i style="background: #f59e0b;"></i>Family</span><span><i style="background: #10b981;"></i>Sport</span><span><i style="background: #f97316;"></i>Faith</span></p>
+                                <p class="uc-strands"><span class="is-on">Show all</span><span><i style="background: #3b82f6;"></i>Music</span><span><i style="background: #f59e0b;"></i>Family</span><span><i style="background: #10b981;"></i>Sport</span><span><i style="background: #f97316;"></i>Faith</span></p>
                                 <div class="uc-week">
                                     @foreach (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $ucDayName)
                                         <b>{{ $ucDayName }}</b>

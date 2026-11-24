@@ -20,15 +20,12 @@
     $locale = app()->getLocale();
 @endphp
 
-<section class="ap-card rounded-xl an-hero" aria-labelledby="an-checkins-title">
+<section class="ap-card rounded-xl ap-hero an-hero" aria-labelledby="an-checkins-title">
     <div class="an-hero-head">
         <div class="an-figs">
             @if ($hasPast)
             <div class="an-fig is-lead">
                 <p class="an-fig-label" id="an-checkins-title">
-                    <span class="dashboard-icon p-1.5 rounded-lg bg-green-50 dark:bg-green-500/10" style="--icon-glow: rgba(34, 197, 94, 0.15)">
-                        <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </span>
                     {{ __('messages.attendance_rate') }}
                 </p>
                 <p class="an-fig-value">{{ $checkinStats['attendance_rate'] }}%</p>

@@ -13,14 +13,18 @@
        a laptop "Plan" was not on the page at all and "Team" read "Tea". The strip still scrolls
        when it must, but it says so: it fades where it runs on, and the tab you are on is brought
        into view. */
+    /* 2026-11 redesign (zip 17): plain words at 13px/600 on the page's own ground, no track, the
+       tab you are on a white pill with its words in the deep brand blue (--brand-blue-dark,
+       #1a3fb0, a lighter blue in dark mode); a tab pointed at takes the pill in plain ink. */
     .ap-tabs-wrap {
       position: relative;
+      max-width: 100%;
+      width: fit-content;
       margin: 1.25rem 0 1.5rem;
-      border-bottom: 1px solid rgb(var(--ap-border));
     }
     .ap-tabs {
       display: flex;
-      gap: 1.5rem;
+      gap: 0.125rem;
       overflow-x: auto;
       scrollbar-width: none;
     }
@@ -31,45 +35,47 @@
       display: inline-flex;
       flex: none;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.75rem 0.125rem;
-      font-size: 0.9375rem;
-      font-weight: 500;
+      gap: 0.375rem;
+      min-height: 2.5rem;
+      padding: 0 0.625rem;
+      border-radius: 0.625rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
       white-space: nowrap;
-      color: rgb(var(--ap-ink-3));
-      transition: color 0.2s, border-color 0.2s;
+      color: rgb(var(--ap-ink-2));
+      transition: color 0.2s, background-color 0.2s;
     }
     .ap-tab:hover {
-      box-shadow: inset 0 -2px 0 rgb(var(--ap-border-strong));
+      background: rgb(var(--ap-surface));
       color: rgb(var(--ap-ink));
     }
     .ap-tab[aria-current="page"] {
-      box-shadow: inset 0 -2px 0 var(--brand-blue);
-      color: var(--brand-blue);
+      background: rgb(var(--ap-surface));
+      color: var(--brand-blue-dark);
     }
     /* Drawn inside the tab: the strip's own overflow would cut a ring drawn around it. */
     .ap-tab:focus-visible {
       outline: 2px solid var(--brand-blue);
       outline-offset: -2px;
-      border-radius: 0.25rem;
     }
     .ap-tabs-select {
       margin: 1.25rem 0;
     }
+    /* A count is a quiet figure beside the name ("Gift cards 1"), not a pill. */
     .ap-tab-count {
+      font-weight: 500;
+      color: rgb(var(--ap-ink-3));
+    }
+    /* Something is waiting for an answer (requests, bookings to confirm): then it is a pill. */
+    .ap-tab-count.is-waiting {
       min-width: 1.25rem;
       border-radius: 999px;
       padding: 0 0.375rem;
-      background: var(--ap-tint-2);
+      background: var(--brand-button-bg);
       font-size: 0.75rem;
       font-weight: 600;
       line-height: 1.25rem;
       text-align: center;
-      color: rgb(var(--ap-ink-2));
-    }
-    /* Something is waiting for an answer: requests, bookings to confirm. */
-    .ap-tab-count.is-waiting {
-      background: var(--brand-button-bg);
       color: #fff;
     }
     .ap-tabs-wrap::before,
@@ -102,23 +108,35 @@
       opacity: 1;
     }
 
-    /* One frame for every page of the portal (layouts/app-admin puts it on <main> and on the
+    /* One column for every page of the portal (layouts/app-admin puts it on <main> and on the
        line under it): the header, the tabs and what the page shows share both edges, at any
-       width. It is 80rem of content plus the layout's own 2rem gutters; on a screen with more
-       room than that the frame sits in the middle, never against the sidebar. The old rule held
-       lists and cards to a 64rem column on the left while the header and the calendars ran the
-       full width, so on a large window half the pages looked pushed to one side. */
+       width. It is the 2026-11 redesign's column, 1040px with the layout's gutters (2rem from a
+       laptop up, so 976px of content beside the 18rem rail), in the middle of the room beside
+       the sidebar. It replaced an 80rem frame, which on a laptop spread every card, list and
+       calendar some 15% wider than the designs and left a short page looking sparse. */
     .ap-frame {
       width: 100%;
-      max-width: 84rem;
+      max-width: 65rem;
       margin-inline: auto;
     }
-    /* The bar above the page keeps its full-width ground and brings what it holds in to the
-       frame's edges, so the account menu stands over the page's own last button. */
-    @media (min-width: 1024px) {
-      .ap-frame-bar {
-        padding-inline: max(2rem, calc((100% - 80rem) / 2));
-      }
+    /* The line under the page (the designs' "Questions or suggestions? Email ..."). */
+    .ap-foot-line {
+      font-size: 0.8125rem;
+      color: rgb(var(--ap-ink-2));
+    }
+    /* Where the support chat's launcher is drawn (partials/support-chat-widget: a 56px button
+       fixed 24px above the window's foot, at the end of the line), the line keeps clear of it at
+       the bottom of the scroll, so the button never sits on "Questions or suggestions?". */
+    body:has(#support-chat-widget) .ap-foot-line {
+      padding-bottom: 6.5rem;
+    }
+    /* The bar above the page is the page's own ground, with no rule or shadow under it, and runs
+       the room: the account name and Upgrade stand at the room's end, as in the designs, not over
+       the column's. */
+    .ap-frame-bar.header-gradient {
+      background: rgb(var(--ap-bg));
+      border-bottom-color: transparent;
+      box-shadow: none;
     }
     /* A bar fixed to the foot of the page's room, not of the window: it starts where the sidebar
        ends, so what it holds is centred on the page. Fixed to the window, a bar's buttons stood
@@ -134,25 +152,21 @@
       }
     }
     /* A canvas (the seating designer, the box office) takes the window: a room plan held to the
-       frame is only a smaller room plan. The page asks for it with the layout's `wide`
+       column is only a smaller room plan. The page asks for it with the layout's `wide`
        attribute (x-app-admin-layout wide; no angle brackets here, a tag in a comment of this
        partial is compiled). */
     .ap-frame.is-wide {
       max-width: none;
     }
-    @media (min-width: 1024px) {
-      .ap-frame-bar.is-wide {
-        padding-inline: 2rem;
-      }
-    }
-    /* A bar that reaches past the page's gutters to the edges of the room (a sticky toolbar
+    /* A bar that reaches past the page's gutters to the edges of the column (a sticky toolbar
        with negative margins the size of the gutter) keeps reaching, because that is what covers
-       a card, shadow and all, as it scrolls under the bar. Its LINE is another matter: from 84rem
-       beside the 18rem sidebar the frame stops growing, and a line that runs a gutter past the
-       page on each side and still falls short of the window is neither the page's nor the
-       room's. So from there the bar's own border goes clear and the line is drawn at the frame's
-       width. The selector is doubled to outrank a `dark:border-*` utility on the same element. */
-    @media (min-width: 102rem) {
+       a card, shadow and all, as it scrolls under the bar. Its LINE is another matter: from 83rem
+       (the 1040px column beside the 18rem sidebar) the column stops growing, and a line that runs
+       a gutter past the page on each side and still falls short of the window is neither the
+       page's nor the room's. So from there the bar's own border goes clear and the line is drawn
+       at the content's width. The selector is doubled to outrank a `dark:border-*` utility on the
+       same element. */
+    @media (min-width: 83rem) {
       .ap-frame .ap-frame-bleed {
         border-color: transparent;
       }
@@ -180,7 +194,7 @@
       max-width: 44rem;
       margin: 0;
       font-size: 0.9375rem;
-      color: rgb(var(--ap-ink-3));
+      color: rgb(var(--ap-ink-2));
     }
     .page-actions {
       display: flex;
@@ -215,7 +229,12 @@
     }
 
     /* A list of people or things, as a table that becomes a stack of rows on a phone: it used to
-       scroll sideways there, with the action that mattered (a member's role, Remove) off the edge. */
+       scroll sideways there, with the action that mattered (a member's role, Remove) off the edge.
+       From a tablet up it reads as the design-language review's rows, not a grid: no band behind
+       the headings (they stay, small capitals labels, because a list sorts by them and a screen
+       reader names a cell by them), no rules between columns, a hairline between rows, the first
+       cell a name in full ink over one grey line (.c-sub, or .page-person's), a figure at the end
+       of its cell (.c-num) and the row's action last (.c-actions). */
     .page-table {
       width: 100%;
       border-collapse: collapse;
@@ -226,7 +245,7 @@
       padding: 0.625rem 1rem;
       font-size: 0.75rem;
       font-weight: 600;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.06em;
       text-align: start;
       text-transform: uppercase;
       white-space: nowrap;
@@ -267,6 +286,23 @@
     }
     .page-table tbody tr:first-child td {
       border-top: 0;
+    }
+    /* No header band and no column rules: the portal's table look (.ap-card thead th, a sunken
+       tint, and any border a page's markup gives a cell's side) is undone for the kit's lists. */
+    .ap-card .page-table thead th,
+    .page-table thead th {
+      background: none;
+      border-inline: 0;
+    }
+    .page-table td {
+      border-inline: 0;
+    }
+    .page-table tbody td:first-child {
+      color: rgb(var(--ap-ink));
+    }
+    .page-table tbody td:first-child > .c-strong:first-child,
+    .page-table tbody td:first-child .page-person-text > :first-child {
+      font-weight: 600;
     }
     .page-person {
       display: flex;
@@ -625,29 +661,47 @@
        open nine different ways, half of them with no name at all and a "Back" button where the
        page's own action belongs.
        ------------------------------------------------------------------------------------------ */
+    /* The header of the design-language review: a large title at the start, one grey line
+       under it (16px in the muted ink, #4b5263 on Mist), an optional blue eyebrow over it, and
+       the actions at the end of the same row, 44px tall (the page's one filled button and quiet
+       words beside it). */
     .page-top {
       display: flex;
       flex-wrap: wrap;
       align-items: flex-end;
       justify-content: space-between;
-      gap: 0.75rem 1.5rem;
-      margin: 0 0 1.25rem;
+      gap: 0.875rem 1.5rem;
+      margin: 0 0 1.5rem;
     }
     .page-top-text {
       flex: 1 1 16rem;
       min-width: 0;
     }
+    /* A page's name, as the 2026-11 redesign sets it: large, bold and tight. */
     .page-title {
       margin: 0;
-      font-size: 1.5rem;
-      font-weight: 600;
-      line-height: 2rem;
+      font-size: clamp(1.75rem, 4vw, 2.375rem);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
       color: rgb(var(--ap-ink));
       overflow-wrap: anywhere;
     }
     .page-top .page-lead {
       max-width: 44rem;
-      margin-top: 0.25rem;
+      margin-top: 0.625rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: rgb(var(--ap-ink-2));
+    }
+    .page-top .event-eyebrow {
+      margin-bottom: 0.5rem;
+    }
+    /* The header's actions are 44px: the filled one keeps its blue, the rest are words. */
+    .page-top > .page-actions :is(.ap-btn, .ap-secondary-btn, .ap-text-action),
+    .ap-btn.ap-head-btn {
+      min-height: 2.75rem;
+      padding-block: 0.5625rem;
     }
     /* The way back: the name of the page this one hangs from, never the word "Back". */
     .page-back {
@@ -656,7 +710,7 @@
       gap: 0.25rem;
       max-width: 100%;
       margin-bottom: 0.25rem;
-      font-size: 0.8125rem;
+      font-size: 0.875rem;
       font-weight: 500;
       color: rgb(var(--ap-ink-3));
       transition: color 0.2s;
@@ -700,8 +754,8 @@
     }
     @media (max-width: 639.98px) {
       .page-title {
-        font-size: 1.25rem;
-        line-height: 1.75rem;
+        font-size: 1.75rem;
+        line-height: 1.15;
       }
       /* The actions take the row under the title (or under the lead), and a lone button takes
          the width. */
@@ -717,6 +771,188 @@
       }
     }
 
+    /* The Plan tab's headline (the 2026-11 redesign): the plan large, the date on the far side. */
+    .plan-hero {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 0.75rem 2rem;
+    }
+    /* What the plan says beyond its name and date (a status, a trial, a cancel), under a rule only
+       when there is any: on a plain paid plan the block is empty and the usage's own rule follows. */
+    .plan-details:has(> *) {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgb(var(--ap-border));
+    }
+    .plan-hero-kicker {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
+    }
+    .plan-hero-name {
+      margin-top: 0.125rem;
+      font-size: 2.125rem;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: rgb(var(--ap-ink));
+    }
+    .plan-hero-term {
+      margin-inline-start: 0.375rem;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      letter-spacing: 0;
+      color: rgb(var(--ap-ink-2));
+    }
+    .plan-hero-side {
+      text-align: end;
+    }
+    .plan-hero-date {
+      margin-top: 0.125rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: rgb(var(--ap-ink));
+    }
+    .plan-usage {
+      display: grid;
+      gap: 1.5rem;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgb(var(--ap-border));
+    }
+    @media (min-width: 768px) {
+      .plan-usage {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    .plan-usage h5 {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
+    }
+
+    /* Your tickets (the 2026-11 redesign): the next one on its own, then the rest by day. */
+    .tickets-next {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem 1.5rem;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 1px 2px rgba(20, 22, 26, 0.06), 0 8px 24px rgba(20, 22, 26, 0.08);
+    }
+    .tickets-next-kicker {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+    }
+    .tickets-next-name {
+      margin-top: 0.125rem;
+      font-size: 1.625rem;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+      color: rgb(var(--ap-ink));
+    }
+    .tickets-next-meta,
+    .tickets-row-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem 0.625rem;
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      color: rgb(var(--ap-ink-2));
+    }
+    .tickets-label {
+      margin: 1.75rem 0 0.625rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
+    }
+    .tickets-day {
+      display: grid;
+      gap: 0 1rem;
+      padding: 0.75rem 1.25rem;
+    }
+    .tickets-day + .tickets-day {
+      border-top: 1px solid rgb(var(--ap-border));
+    }
+    @media (min-width: 640px) {
+      .tickets-day {
+        grid-template-columns: 7.5rem minmax(0, 1fr);
+      }
+    }
+    .tickets-day-label {
+      padding-top: 0.625rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    .tickets-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem 0;
+    }
+    .tickets-row-time {
+      flex: none;
+      width: 4.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+    }
+    .tickets-row-name {
+      display: block;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    .tickets-row-name:hover {
+      text-decoration: underline;
+    }
+    .tickets-row-meta {
+      margin-top: 0;
+      font-size: 0.8125rem;
+    }
+
+    /* A page's quieter actions as words beside its one filled button (the 2026-11 redesign):
+       "Actions", "Edit schedule", "Customize". */
+    .ap-text-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      min-height: 2.75rem;
+      padding: 0.5rem 0.625rem;
+      border-radius: 0.625rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      white-space: nowrap;
+      color: rgb(var(--ap-ink));
+      transition: background-color 0.2s;
+    }
+    .ap-text-action:hover {
+      background: rgb(var(--ap-surface-hover));
+    }
+    .ap-text-action:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px var(--ap-focus-ring);
+    }
+    .ap-text-action svg {
+      width: 1.125rem;
+      height: 1.125rem;
+      margin: 0;
+      color: rgb(var(--ap-ink-3));
+    }
+
     /* A tab that is a button on the page (it shows a pane, it does not go anywhere) says it is the
        one showing with aria-selected, where a link says aria-current. */
     button.ap-tab {
@@ -725,8 +961,15 @@
       cursor: pointer;
     }
     .ap-tab[aria-selected="true"] {
-      box-shadow: inset 0 -2px 0 var(--brand-blue);
-      color: var(--brand-blue);
+      background: rgb(var(--ap-surface));
+      color: var(--brand-blue-dark);
+    }
+    /* A strip inside a card (the attendee import's Form entry / Upload CSV): the white pill would
+       vanish on the card, so there the tab you are on is the card's own step deeper. */
+    .ap-card .ap-tab[aria-selected="true"],
+    .ap-card .ap-tab[aria-current="page"],
+    .ap-card .ap-tab:hover {
+      background: rgb(var(--ap-surface-active));
     }
     /* The second row of a section with groups (the platform admin's): the pages of the group you
        are in, all of them in sight. They used to sit in a menu behind the tab. */
@@ -835,12 +1078,17 @@
       gap: 0.5rem 1rem;
       margin-bottom: 1rem;
     }
+    /* A card's name as a small capitals label (the 2026-11 redesign: "Recent check-ins",
+       "Sources", "Coming up"): 12px/600, +0.06em, in the label ink (#6a7183 on Mist), no icon,
+       and a count said in the label ("Coming up · 56"). */
     .page-card-title {
       margin: 0;
-      font-size: 1rem;
+      font-size: 0.75rem;
       font-weight: 600;
-      line-height: 1.5rem;
-      color: rgb(var(--ap-ink));
+      line-height: 1.25rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
     }
     .page-card-lead {
       max-width: 44rem;
@@ -942,7 +1190,7 @@
     .page-filters input[type="number"],
     .page-filters input[type="email"],
     .page-filters select {
-      padding-block: 0.5rem !important;
+      padding-block: 0.6875rem !important;
       padding-inline: 0.75rem !important;
       font-size: 0.875rem !important;
       line-height: 1.25rem !important;
@@ -956,14 +1204,16 @@
        filter. Beside a page's TITLE it keeps the layout's size, where it stands among buttons. */
     .page-head .page-actions select,
     .page-card-head select {
-      padding-block: 0.5rem !important;
+      padding-block: 0.6875rem !important;
       padding-inline-start: 0.75rem !important;
       font-size: 0.875rem !important;
       line-height: 1.25rem !important;
     }
-    /* The buttons at the end of the row are the height of its fields. */
+    /* The buttons at the end of the row are the height of its fields: 44px, the least the
+       review allows anything pressed (the fields above are 44px too). */
     .page-filters > .is-end > a,
     .page-filters > .is-end > button {
+      min-height: 2.75rem;
       padding: 0.5rem 0.875rem;
       font-size: 0.875rem;
       line-height: 1.25rem;
@@ -1277,76 +1527,15 @@
       display: grid;
       gap: 1.25rem;
     }
-    /* A form keeps the measure the three tabbed forms use (48rem), at every width, whatever the
-       width of the card it is in; a button row that follows capped fields stops where they do,
-       and pairs (a name and its figure) that are a card's own body read across a column, not
-       across the screen. At every width, and not from some wide one: the frame is already wider
-       than the 64rem column these pages had from a 1377px window, so a cap that began at 1536px
-       left a 1440px laptop with inputs 1048px wide, and a wider window with a narrower form.
-       Only these three: a button row or a list of pairs inside a card that is NOT capped (Merge
-       under a full-width list of venues, the counts above the Queue's table) stays where the
-       rest of its card ends. */
-    .page-form-fields,
-    .page-form-fields + .page-form-actions,
-    .page-card > .page-kv {
-      max-width: 48rem;
-    }
-    /* A card set `beside` holds its body to the same measure while it is still stacked, so the
-       cards of one page end on one line below 90rem as they do beside their titles above it: a
-       form that stopped at 48rem over a row of fields that ran the card was two right edges. */
-    .page-card.is-beside > :not(.page-card-head) {
-      max-width: 48rem;
-    }
-    /* The row that closes a stack of form cards (a post's Save) stands under the fields, which
-       end a card's padding inside the card: left alone it sat at the far edge of the frame. */
-    form.page-stack > .page-form-actions {
-      max-width: 50.5rem;
-    }
+    /* A form runs the width of its card. The column is the measure now (1040px with its
+       gutters): the 48rem caps on fields, pairs and button rows, and the cards that set their
+       title beside their body on a wide window, were there to keep an 80rem frame from looking
+       stretched, and in the narrower column they only left two right edges in one card. */
     /* In a filter row that is sent with a button, the search takes the room that is left, so
        the button stands beside its last field and not at the far end of the frame. A row that
        filters as you type (Following, Sales) has no button to strand and keeps its small box. */
     form.page-filters > .is-grow {
       max-width: none;
-    }
-    /* From a 1440px window a card set `beside` has room for its title next to 48rem of form
-       (14rem at the least: without that floor the title's column is whatever the form leaves,
-       which in a narrow container is nothing). The card then runs to the frame's edges with
-       neither a stretched form nor an empty half. Below that it stacks, with the form at its
-       measure. */
-    @media (min-width: 90rem) {
-      .page-card.is-beside {
-        display: grid;
-        grid-template-columns: minmax(14rem, 1fr) minmax(0, 48rem);
-        column-gap: 3rem;
-        align-items: start;
-      }
-      /* The title's side: its parts one under the other (a status mark at the far end of that
-         column stood in the middle of the card, belonging to nothing), and in view while a tall
-         form is scrolled, so the column beside the form is never an empty strip. */
-      .page-card.is-beside > .page-card-head {
-        grid-column: 1;
-        grid-row: 1 / span 12;
-        flex-direction: column;
-        align-items: flex-start;
-        margin-bottom: 0;
-        position: sticky;
-        top: 5.5rem;
-      }
-      .page-card.is-beside > :not(.page-card-head) {
-        grid-column: 2;
-        min-width: 0;
-      }
-      /* Not in a page that is one form: its column is the form's own measure, with no room
-         beside it. */
-      .page-col.is-narrow .page-card.is-beside {
-        display: block;
-      }
-      .page-col.is-narrow .page-card.is-beside > .page-card-head {
-        position: static;
-        flex-direction: row;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
     }
     .page-form-actions {
       display: flex;
@@ -1375,31 +1564,37 @@
       }
     }
 
-    /* A small quiet button for a list's own tools (Export, Refresh, Download): the weight of a
-       link, the shape of a button. Buttons that do the page's main thing are x-brand-button. */
+    /* A small bordered button for a list's own tools (Export, Refresh, View ticket, Check-in),
+       as the 2026-11 redesign draws them: 13px/600 in plain ink, the field border, 44px tall
+       (the review's least height for anything pressed),
+       and the brand blue on its border and words when pointed at. Buttons that do the page's
+       main thing are x-brand-button. */
     .page-tool {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.375rem;
+      min-height: 2.75rem;
       border: 1px solid rgb(var(--ap-border-strong));
-      border-radius: 0.5rem;
-      padding: 0.4375rem 0.75rem;
+      border-radius: 0.625rem;
+      padding: 0 0.75rem;
       background: rgb(var(--ap-surface));
-      font-size: 0.875rem;
-      font-weight: 500;
+      font-size: 0.8125rem;
+      font-weight: 600;
       line-height: 1.25rem;
       white-space: nowrap;
-      color: rgb(var(--ap-ink-2));
+      color: rgb(var(--ap-ink));
       cursor: pointer;
       transition: background-color 0.2s, color 0.2s, border-color 0.2s;
     }
     .page-tool:hover {
-      background: rgb(var(--ap-surface-hover));
-      color: rgb(var(--ap-ink));
+      border-color: var(--brand-blue);
+      color: var(--brand-blue);
     }
     .page-tool:focus-visible {
-      outline: 2px solid var(--brand-blue);
-      outline-offset: 2px;
+      outline: none;
+      border-color: var(--brand-blue);
+      box-shadow: 0 0 0 3px var(--ap-focus-ring);
     }
     .page-tool svg {
       flex: none;
@@ -1446,5 +1641,194 @@
     .dark .spam-word {
       background: rgb(120 53 15 / 0.55);
       color: rgb(253 230 138);
+    }
+
+    /* The 2026-11 redesign: a row's own tools in a list are quiet words, not boxed buttons; a stat
+       tile's figure starts where its label does. */
+    .page-table td .page-tool,
+    .page-table td button.page-tool {
+      border-color: transparent;
+      background: none;
+      box-shadow: none;
+      font-weight: 600;
+    }
+    .page-table td .page-tool:hover {
+      background: rgb(var(--ap-surface-hover));
+    }
+    .admin-stat-figure .items-center {
+      align-items: flex-start;
+    }
+    .admin-stat-figure .text-center {
+      text-align: start;
+    }
+    .admin-stat-figure .justify-center {
+      justify-content: flex-start;
+    }
+    /* A card's own heading reads as the design's small capitals label, wherever a card names
+       itself with the old bold line. */
+    .ap-card h2.text-base.font-semibold,
+    .ap-card h3.text-base.font-semibold {
+      font-size: 0.75rem;
+      line-height: 1.25rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
+    }
+    /* Decoration: no icon chips (the design-language review). A card names itself in words, so
+       the tinted icon tile beside a card's heading (.dashboard-icon, the stat panels' old chip)
+       and an icon opening the heading itself are put away wherever a card or a page of the kit
+       still draws one. The icons are aria-hidden, so nothing is lost to a screen reader. */
+    .ap-card .dashboard-icon,
+    .page-shell .dashboard-icon,
+    .ap-card :is(h2, h3).text-base.font-semibold > svg:first-child,
+    .page-card-title > svg {
+      display: none;
+    }
+    /* A page's title stands alone (the 2026-11 redesign): no schedule picture beside it. */
+    .page-top-figure {
+      display: none;
+    }
+    .page-top-text.has-figure {
+      display: block;
+    }
+    /* The sidebar, as the 2026-11 design-language review draws it: the cool rail, 18rem (288px)
+       wide (layouts/app-admin, lg:w-72), rows 40px with 15px/600 names, 10px corners and 28px
+       icons, a schedule's letter in a 22px tile, the group names as small capitals labels
+       (11px/600, +0.08em) in the rail's second ink, the open row a flat step lighter, the footer
+       a 52px band of its own. Sizes only: the colours are the palette's --ap-rail* tokens (the
+       default Mist palette carries the review's #14161a and #262a33; the others keep their own
+       hue). It replaced round 1's warm #12110d rail with 48px rows and 18px names. */
+    .sidebar-gradient {
+      background: rgb(var(--ap-rail)) !important;
+    }
+    .sidebar-gradient > div:first-child {
+      padding-inline: 1.25rem;
+    }
+    /* The logo stays put while the list under it scrolls (the rail is scrolled to the schedule in
+       use on load, which used to take the logo off the top). */
+    .sidebar-gradient > div:first-child > a:first-child {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: rgb(var(--ap-rail));
+    }
+    .sidebar-gradient > div:first-child > a:first-child > div {
+      height: auto;
+      padding: 1rem 0 0.625rem;
+    }
+    .sidebar-gradient > div:first-child > a:first-child img {
+      height: 2.25rem;
+    }
+    .sidebar-gradient nav {
+      margin-top: 0.25rem;
+    }
+    .sidebar-gradient nav > ul {
+      row-gap: 0.125rem;
+    }
+    /* The list after the schedules (Following, Tickets, Sales ...) stands a little apart. */
+    .sidebar-gradient nav > ul > li:last-child:not(:first-child) {
+      margin-top: 0.75rem;
+    }
+    .sidebar-gradient nav ul ul {
+      margin-inline: -0.5rem;
+    }
+    .sidebar-gradient nav ul ul > li + li {
+      margin-top: 0.125rem !important;
+    }
+    .sidebar-gradient .dark-nav-hover {
+      min-height: 2.5rem;
+      padding: 0 0.5rem;
+      gap: 0.625rem;
+      border-radius: 0.625rem;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      line-height: 1.25rem;
+      color: rgb(var(--ap-rail-ink));
+    }
+    .sidebar-gradient .dark-nav-hover > a,
+    .sidebar-gradient .dark-nav-hover.flex {
+      column-gap: 0.625rem;
+    }
+    .sidebar-gradient .dark-nav-hover svg.h-8 {
+      width: 1.75rem;
+      height: 1.75rem;
+      margin: 0;
+    }
+    /* The row's own tools (edit, open the guest page), shown when it is pointed at: 32px each,
+       inside the 40px row. */
+    .sidebar-gradient .dark-nav-hover a.p-2 {
+      padding: 0.375rem;
+    }
+    .sidebar-gradient .dark-nav-hover:hover,
+    .sidebar-gradient .dark-nav-active {
+      background: rgb(var(--ap-rail-active)) !important;
+      color: #fff;
+    }
+    .sidebar-gradient .schedule-badge {
+      width: 1.375rem;
+      height: 1.375rem;
+      margin: 0.1875rem;
+      border: 0;
+      border-radius: 0.375rem;
+      background: rgb(var(--ap-rail-hover));
+      font-size: 0.625rem;
+      font-weight: 600;
+      color: rgb(var(--ap-rail-ink));
+    }
+    .sidebar-gradient .dark-nav-hover:hover .schedule-badge,
+    .sidebar-gradient .dark-nav-active .schedule-badge {
+      background: color-mix(in srgb, rgb(var(--ap-rail-active)) 80%, #fff);
+    }
+    .sidebar-gradient nav > ul > li > .text-sm.font-semibold {
+      padding: 1rem 0 0.25rem;
+      font-size: 0.6875rem;
+      line-height: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-rail-ink-2));
+    }
+    .sidebar-gradient nav > ul > li > ul.mt-2 {
+      margin-top: 0;
+    }
+    .sidebar-gradient .sidebar-footer-bar {
+      align-items: center;
+      justify-content: space-around;
+      min-height: 3.25rem;
+      padding: 0.25rem 0.5rem;
+      background: color-mix(in srgb, rgb(var(--ap-rail-hover)) 70%, rgb(var(--ap-rail)));
+    }
+    /* Help, Contact, About and the theme: 44px to press, the least the review allows. */
+    .sidebar-gradient .sidebar-footer-bar .theme-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.75rem;
+    }
+
+    {{-- Builder D (2026-11-24): the hero card lift. The one card a page is about (an appointment
+         type, the Plan card, the Next up ticket, the check-in count, the Analytics hero, the
+         dashboard's setup guide)
+         stands a little higher than the cards around it: a 20px corner and a soft blue-tinted
+         shadow, from the designs. Put .ap-hero beside .ap-card (or on <x-page-card class="ap-hero">).
+         Dark mode keeps the shape and trades the blue glow for a deeper plain shadow, which is what
+         reads as lift on a dark surface. Kept to tokens so every palette follows. --}}
+    :root {
+      --ap-hero-radius: 1.25rem;
+      --ap-hero-shadow: 0 2px 4px rgba(20, 22, 26, 0.05), 0 12px 32px rgba(36, 86, 230, 0.10);
+    }
+    .dark {
+      --ap-hero-shadow: 0 2px 4px rgba(0, 0, 0, 0.30), 0 12px 32px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(120, 150, 255, 0.06);
+    }
+    .ap-card.ap-hero,
+    .ap-card.rounded-xl.ap-hero,
+    .ap-card.rounded-2xl.ap-hero,
+    .ap-hero {
+      border-radius: var(--ap-hero-radius);
+      box-shadow: var(--ap-hero-shadow);
+    }
+    /* The dashboard's setup guide card (SetupGuide.vue's .sg-section) is the design's other hero. */
+    .sg-section.sg-surface {
+      border-radius: var(--ap-hero-radius);
+      box-shadow: var(--ap-hero-shadow);
     }
 </style>

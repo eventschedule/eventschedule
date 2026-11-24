@@ -65,15 +65,56 @@
             flex: 1;
             min-width: 0;
         }
+        /* The Profile card's save bar stays sticky in the cards' column: its wrapper only says
+           when it is shown, and takes no box of its own (a box the bar's height would hold it). */
+        #profile-save-bar-wrap:not([hidden]) {
+            display: contents;
+        }
+        /* A rule between who you are and what you prefer (the 2026-11 redesign). The rows under
+           it (Localization, Appearance) stand in the kit's box, as every list of rows does. */
+        #section-profile #profile-preferences {
+            padding-top: 1.5rem;
+            border-top: 1px solid rgb(var(--ap-border));
+        }
         /* A section's Save: the last thing in it, at the end of its own line, the size the save
-           bar's is on the other two forms. Each section is its own form, so there is no one bar. */
+           bar's is on the other two forms. Each section is its own form, so there is no one bar
+           for the page; Profile, the form people change most, has the floating bar under its
+           card (partials/form-save-bar, scoped to it). */
+        /* As the other forms' save bar (the 2026-11 redesign): a card that floats at the foot of
+           the section while it scrolls. */
         .settings-save {
+            position: sticky;
+            bottom: 0.75rem;
+            z-index: 20;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
+            margin-top: 1.5rem;
+            padding: 0.875rem 0 0;
             border-top: 1px solid rgb(var(--ap-border));
-            padding-top: 1rem;
+            background: rgb(var(--ap-surface));
+        }
+        /* The ways to get paid other than Stripe (the 2026-11 redesign): each name at 15px, what it
+           is right after it on the same line, and the row's word at the end. The schedule form's
+           rows keep their values in a column of their own; these read as a sentence. */
+        .section-content .event-subrows.payment-rows > button.event-subrow {
+            display: flex;
+            column-gap: 0.5rem;
+            min-height: 3.25rem;
+            padding-block: 0.75rem;
+        }
+        .section-content .event-subrows.payment-rows {
+            display: block;
+        }
+        .section-content .event-subrows.payment-rows > button.event-subrow > .event-row-title {
+            min-width: 0;
+            font-size: 0.9375rem;
+            font-weight: 600;
+        }
+        .section-content .event-subrows.payment-rows > button.event-subrow > .event-row-summary {
+            flex: 0 1 auto;
+            margin-inline-start: 0;
         }
         /* A row that is not set up yet describes itself on its line. Opened, the pane under it says
            the same thing in full, so the line steps aside (it still holds its place). */
@@ -472,7 +513,7 @@
         }
     @endphp
 
-    <h2 class="pb-4 text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
+    <h2 class="pb-4 page-title">
         {{ __('messages.settings') }}
     </h2>
 
@@ -508,6 +549,12 @@
                     <div class="form-kit-col">
                         @include('profile.partials.update-profile-information-form', ['settingsSection' => 'section-profile'])
                     </div>
+                </div>
+                {{-- The Profile card's save bar, under the card as the other forms have theirs. The
+                     other sections each save on their own, so it is shown with Profile alone
+                     (showSection below) and saves only its form. --}}
+                <div id="profile-save-bar-wrap">
+                    @include('partials.form-save-bar', ['saveBarForm' => 'profile-info-form', 'saveBarStays' => true, 'saveBarSaved' => session('status') === 'profile-updated', 'saveBarDemo' => is_demo_mode()])
                 </div>
                 @endif
 
@@ -640,6 +687,9 @@
     </div>
 
     @include('partials.form-kit-script')
+    @if (isset($settingsTabs['section-profile']))
+    @include('partials.form-save-bar-script', ['tabs' => ['section-profile' => $settingsTabs['section-profile']['label']], 'scoped' => true])
+    @endif
 
     <script {!! nonce_attr() !!}>
     var _scrollGuard = function() { window.scrollTo(0, 0); };
@@ -676,6 +726,12 @@
                     section.style.display = 'none';
                 }
             });
+
+            // The save bar belongs to the Profile card and is shown with it.
+            const profileBar = document.getElementById('profile-save-bar-wrap');
+            if (profileBar) {
+                profileBar.hidden = sectionId !== 'section-profile';
+            }
 
             // Update active link
             sectionLinks.forEach(link => {
@@ -802,7 +858,7 @@
         // once, so the result of connecting or unlinking is where the person was looking.
         const REOPEN = 'settingsOpenRow';
         document.addEventListener('submit', function(event) {
-            // Not a submit that was called off: "Unlink account" answered with Cancel used to be
+            // Not a submit that was called off: the old unlink button, answered with Cancel, used to be
             // remembered, and the row opened by itself on the next visit.
             if (event.defaultPrevented) {
                 return;

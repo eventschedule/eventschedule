@@ -7,22 +7,32 @@
      two had drifted: the cards said "Refund" where the table said "Refund ticket", and "Cancel"
      where the table said "Cancel ticket". --}}
 @php
+    // The page draws the rows inside the card it shares with the filters, and the pager under that
+    // card ($salesPart 'rows' then 'pager'); a fetch asks for both at once and the page's script
+    // moves the [data-sales-pager] block out of the card (updateResults in ticket/sales).
+    $salesPart = $salesPart ?? 'all';
     $salesMenuItem = 'flex w-full items-center px-4 py-2.5 text-sm text-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-gray-100 dark:focus:bg-gray-700 focus:outline-none transition-colors';
     $salesMenuDanger = 'flex w-full items-center px-4 py-2.5 text-sm text-start text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 focus:bg-red-50 dark:focus:bg-red-900/20 focus:outline-none transition-colors';
 @endphp
 
+@if ($salesPart !== 'pager')
 @if ($sales->count() > 0)
-<div class="ap-card rounded-xl overflow-hidden">
+<div class="sales-rows">
     <div class="page-scroll">
         <table class="page-table is-wide is-hover sales-list">
+            {{-- Fixed widths from a tablet up (the design review of 2026-11): the amount keeps to
+                 its own column at every width instead of drifting to the far edge of the card. --}}
+            <colgroup>
+                <col class="sales-col-who">
+                <col class="sales-col-event">
+                <col class="sales-col-total">
+                <col class="sales-col-menu">
+            </colgroup>
             <thead>
                 <tr>
                     <x-page-sort column="name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.customer') }}</x-page-sort>
                     <x-page-sort column="event_name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.event') }}</x-page-sort>
                     <x-page-sort column="payment_amount" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.total') }}</x-page-sort>
-                    <x-page-sort column="transaction_reference" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.transaction_reference') }}</x-page-sort>
-                    <x-page-sort column="status" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.status') }}</x-page-sort>
-                    <x-page-sort column="created_at" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.date') }}</x-page-sort>
                     <th scope="col"><span class="sr-only">{{ __('messages.actions') }}</span></th>
                 </tr>
             </thead>
@@ -123,7 +133,7 @@
                                 <span class="event-chip">+ {{ $guestCount }} {{ __('messages.guests') }}</span>
                                 @endif
                                 <span class="c-sub">
-                                    <a href="mailto:{{ $sale->email }}" class="event-link" dir="ltr" title="{{ $sale->email }}">{{ $sale->email }}</a>
+                                    <a href="mailto:{{ $sale->email }}" class="sales-email" dir="ltr" title="{{ $sale->email }}">{{ $sale->email }}</a>
                                     @if ($sale->phone)
                                     <a href="tel:{{ $sale->phone }}" class="event-link" dir="ltr">{{ $sale->phone }}</a>
                                     @endif
@@ -131,25 +141,11 @@
                             </div>
                         </div>
                     </td>
+                    {{-- 2026-11 redesign: three columns. The event with how it was paid under it, and the
+                         amount with what became of the order and its day under that. --}}
                     <td class="c-wrap c-event">
-                        <a href="{{ $sale->getEventUrl() }}" target="_blank" rel="noopener" class="event-link"><bdi>{{ $sale->event->name }}</bdi></a>
-                    </td>
-                    <td class="c-total" @unless ($sale->isRsvp()) data-label="{{ __('messages.total') }}" @endunless>
-                        @if ($sale->isRsvp())
-                        <span class="c-strong">{{ __('messages.registered') }}</span>
-                        @else
-                        <span class="c-strong">{{ number_format($rowAmount, 2, '.', ',') }}</span>
-                        <span class="c-quiet">{{ $sale->event->ticket_currency_code }}</span>
-                        @endif
-                        @if ($sale->promo_code_id && $sale->promoCode)
-                        <span class="event-chip">{{ $sale->promoCode->code }} -{{ number_format($rowDiscount, 2, '.', ',') }}</span>
-                        @endif
-                        @if ($rowGiftCard > 0)
-                        <span class="event-chip">{{ __('messages.gift_card') }} -{{ number_format($rowGiftCard, 2, '.', ',') }}</span>
-                        @endif
-                    </td>
-                    <td class="c-quiet c-wrap c-reference">
-                        @if ($sale->transaction_reference == __('messages.manual_payment'))
+                        <a href="{{ $sale->getEventUrl() }}" target="_blank" rel="noopener" class="sales-event"><bdi>{{ $sale->event->name }}</bdi></a>
+                        <span class="c-sub c-reference">@if (mb_strtolower((string) $sale->transaction_reference) === mb_strtolower(__('messages.manual_payment')))
                             {{ __('messages.manual_payment') }}
                         @elseif ($sale->payment_method == 'import')
                             {{ __('messages.manual_import') }}
@@ -159,10 +155,22 @@
                             <a href="{{ $referenceUrl }}" target="_blank" rel="noopener" class="event-link c-mono c-clip" dir="ltr" title="{{ $sale->transaction_reference }}">{{ $sale->transaction_reference }}</a>
                         @elseif ($sale->transaction_reference)
                             <span class="c-mono c-clip" dir="ltr" title="{{ $sale->transaction_reference }}">{{ $sale->transaction_reference }}</span>
-                        @endif
+                        @endif</span>
                     </td>
-                    <td class="c-status">
-                        <x-sale-status :status="$sale->status" />
+                    <td class="c-total" @unless ($sale->isRsvp()) data-label="{{ __('messages.total') }}" @endunless>
+                        @if ($sale->isRsvp())
+                        <span class="sales-amount">{{ __('messages.registered') }}</span>
+                        @else
+                        <span class="sales-amount">{{ \App\Utils\MoneyUtils::format($rowAmount, $sale->event->ticket_currency_code, keepCents: true) }}</span>
+                        @endif
+                        <span class="sales-when"><x-sale-status :status="$sale->status" /> &middot; {{ $sale->created_at->translatedFormat('M j') }}</span>
+                        @if ($sale->promo_code_id && $sale->promoCode)
+                        <span class="event-chip">{{ $sale->promoCode->code }} -{{ number_format($rowDiscount, 2, '.', ',') }}</span>
+                        @endif
+                        @if ($rowGiftCard > 0)
+                        <span class="event-chip">{{ __('messages.gift_card') }} -{{ number_format($rowGiftCard, 2, '.', ',') }}</span>
+                        @endif
+                    
                         @if ($sale->feedback)
                         <span class="sales-rating" title="{{ __('messages.feedback') }}: {{ $sale->feedback->rating }}/5">
                             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" /></svg>
@@ -186,13 +194,13 @@
                         </div>
                         @endif
                     </td>
-                    <td class="c-date">{{ $sale->created_at->translatedFormat('M j, Y') }}</td>
                     <td class="c-actions">
-                        {{-- Three dots, named for a screen reader: the word "Actions" on every
-                             row cost the list a column's width on a laptop. --}}
+                        {{-- Three dots across (the 2026-11-24 design), right after the amount, named
+                             for a screen reader: the word "Actions" on every row cost the list a
+                             column's width on a laptop. --}}
                         <button type="button" class="page-tool sales-menu" data-popup-toggle="sale-actions-pop-up-menu-{{ $encodedSaleId }}" id="sale-actions-menu-button-{{ $encodedSaleId }}" aria-expanded="false" aria-haspopup="true" title="{{ __('messages.actions') }}">
                             <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
                             </svg>
                             <span class="sr-only">{{ __('messages.actions') }}</span>
                         </button>
@@ -235,7 +243,7 @@
                 </tr>
                 @if ($hasAnyCustomValues)
                 <tr class="custom-fields-row detail-row-{{ $encodedSaleId }} sales-detail hidden">
-                    <td colspan="7" class="c-main">
+                    <td colspan="4" class="c-main">
                         <dl class="sales-fields sales-detail-body">
                             {{-- What the buyer answered on the event's own questions. --}}
                             @if ($hasEventCustomFields)
@@ -299,12 +307,11 @@
                         {{-- A guest has no event, total or reference of their own, so what can be
                              done for them takes that room: at the end of the row, beside the
                              menu's column, two links ran off the card. --}}
-                        <td colspan="3" class="c-guest-actions">
+                        <td class="c-guest-actions">
                             <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($guest->event_id), 'secret' => $guest->secret]) }}" target="_blank" rel="noopener" class="event-link">{{ __('messages.view_ticket') }}</a>
                             <button type="button" data-id="{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="event-link js-resend-email">{{ __('messages.send_email') }}</button>
                         </td>
-                        <td class="c-status"><x-sale-status :status="$guest->status" /></td>
-                        <td class="c-date">{{ $guest->created_at->translatedFormat('M j, Y') }}</td>
+                        <td class="c-total"><span class="sales-when"><x-sale-status :status="$guest->status" /> &middot; {{ $guest->created_at->translatedFormat('M j') }}</span></td>
                         <td></td>
                     </tr>
                     @endforeach
@@ -315,11 +322,6 @@
     </div>
 </div>
 
-@if ($sales->hasPages())
-<div class="page-pager">
-    {{ $sales->links() }}
-</div>
-@endif
 @elseif (($planBlockedRoles ?? collect())->isNotEmpty())
 {{-- The notice above already explains the empty table. Falling through to the ordinary empty
      state here would contradict it: "No sales found. Create events to start selling tickets."
@@ -328,7 +330,7 @@
 {{-- Three ways to have nothing here, and the old page gave the first one's advice for all of
      them: nothing matches what was typed, nothing is coming up (earlier orders are a switch
      away), or nothing has been sold at all. --}}
-<div class="ap-card rounded-xl">
+<div class="sales-rows">
     @if (filled(request()->query('filter')))
     <x-page-empty :title="__('messages.no_results_found')" icon="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
     @elseif (request()->query('include_past') != 1)
@@ -336,5 +338,12 @@
     @else
     <x-page-empty :title="__('messages.no_sales')" :text="__('messages.no_sales_description')" icon="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z" />
     @endif
+</div>
+@endif
+@endif
+
+@if ($salesPart !== 'rows' && $sales->hasPages())
+<div class="page-pager" data-sales-pager>
+    {{ $sales->links('ticket.partials.sales-pager') }}
 </div>
 @endif

@@ -4,30 +4,37 @@
 
     @include('profile.partials.notice', ['noticeDemo' => true])
 
-    <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+    {{-- Saved by the floating bar under this card (partials/form-save-bar, placed by profile/edit
+         beside the card and tied to this form by its id), as the other forms are. --}}
+    <form id="profile-info-form" method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
         {{-- Always on the page: these used to be the General tab. A link that points at one of
              them (the unsubscribe page, the boost form's "add a phone") needs no tab opened. --}}
         <div id="profile-tab-general" class="form-kit-fields space-y-6">
+            {{-- 2026-11 redesign: who you are as two fields to a row from a tablet up. --}}
+            <div class="grid gap-6 sm:grid-cols-2">
             <div>
-                <x-input-label for="name" :value="__('messages.name') . ' *'" />
+                <x-input-label for="name" :value="__('messages.name')" />
                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" :value="old('name', $user->name)"
                     required autofocus autocomplete="name" :disabled="is_demo_mode()" />
                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
             </div>
 
             <div>
-                <x-input-label for="email" :value="__('messages.email') . ' *'" />
+                <x-input-label for="email" :value="__('messages.email')" />
                 <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                     :value="old('email', $user->email)" required autocomplete="username" :disabled="is_demo_mode()" />
                 <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             </div>
+            </div>
+
+            <div class="grid gap-6 sm:grid-cols-2">
 
             <div id="phone-field">
-                <x-input-label for="phone" :value="__('messages.phone_number')" />
+                <x-input-label for="phone" :value="__('messages.phone_number')" optional />
                 <x-phone-input name="phone" :value="old('phone', $user->phone)" :disabled="is_demo_mode()" />
                 <x-input-error class="mt-2" :messages="$errors->get('phone')" />
 
@@ -46,7 +53,7 @@
                                 <input type="text" id="phone-verification-code" maxlength="6" placeholder="000000" inputmode="numeric" autocomplete="one-time-code"
                                     aria-label="{{ __('messages.verify') }}"
                                     class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-center tracking-widest" />
-                                <x-brand-button size="sm" id="phone-verify-code-btn">{{ __('messages.verify') }}</x-brand-button>
+                                <x-secondary-button id="phone-verify-code-btn">{{ __('messages.verify') }}</x-secondary-button>
                             </div>
 
                             <p id="phone-verify-message" class="mt-2 text-sm" style="display: none;" role="status"></p>
@@ -73,21 +80,28 @@
                 <x-input-error class="mt-2" :messages="$errors->get('default_role_id')" />
             </div>
             @endif
+            </div>
 
             <div>
-                <x-input-label :value="__('messages.square_profile_image')" />
+                <x-input-label :value="__('messages.profile_image')" />
                 <input id="profile_image" name="profile_image" type="file" class="hidden"
                     accept="image/png, image/jpeg" data-file-trigger="profile_image" data-filename-target="profile_image_filename" data-preview-target="profile_image_preview" />
                 <div id="profile_image_choose" style="{{ $user->profile_image_url ? 'display:none' : '' }}">
-                    <div class="mt-1 flex items-center gap-3">
+                    @php
+                        // The person's initials stand in for a picture not chosen yet (the 2026-11 redesign).
+                        $initials = collect(preg_split('/\s+/u', trim((string) $user->name)))->filter()->take(2)
+                            ->map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)))->implode('');
+                    @endphp
+                    <div class="mt-2 flex items-center gap-4">
+                        <span class="flex h-14 w-14 flex-none items-center justify-center rounded-xl bg-[var(--brand-blue-a20)] text-lg font-bold text-[var(--brand-blue)]" aria-hidden="true" v-pre>{{ $initials }}</span>
+                        <div class="min-w-0">
                         <button type="button" data-trigger-file-input="profile_image"
-                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
-                            <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
+                            class="form-kit-file focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
                             {{ __('messages.choose_file') }}
                         </button>
                         <span id="profile_image_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.square_images_work_best') }}</p>
+                        </div>
                     </div>
                     <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
                     @include('profile.partials.notice', ['noticeId' => 'profile_image_size_warning', 'noticeClass' => 'mt-3 mb-0', 'noticeHidden' => true, 'noticeText' => ''])
@@ -125,7 +139,7 @@
             {{-- The three switches about what the app sends you and asks you, together under one
                  heading and after the fields that say who you are. Two of them used to sit between
                  Email and Phone, and the third in Localization, which it has nothing to do with. --}}
-            <div id="profile-preferences" class="space-y-6">
+            <div id="profile-preferences" class="space-y-6 toggles-end">
                 <p class="event-group-label">{{ __('messages.settings_preferences') }}</p>
             {{-- users.is_subscribed: the account-wide opt-out the signed unsubscribe link in our
                  emails sets. Without this there was no way back once somebody clicked it. Always
@@ -214,11 +228,9 @@
             <x-form-row group="profile" tab="accessibility" id="profile-tab-nav-accessibility" class="profile-tab" hidden
                 :title="__('accessibility.footer_link')" :summary="__('accessibility.settings_widget_hidden_note')" />
             <div id="profile-tab-accessibility" class="event-subrow-body" hidden data-no-dirty>
-                <x-brand-button size="sm" id="accessibility-widget-show">{{ __('accessibility.settings_show_widget') }}</x-brand-button>
+                <x-secondary-button id="accessibility-widget-show">{{ __('accessibility.settings_show_widget') }}</x-secondary-button>
             </div>
         </div>
-
-        @include('profile.partials.save', ['saveRowId' => 'profile-save-row', 'saveShown' => session('status') === 'profile-updated'])
     </form>
 </section>
 

@@ -34,7 +34,7 @@
                     </x-page-notice>
 
                     <div>
-                        <x-input-label for="email" :value="__('messages.email') . ' *'" />
+                        <x-input-label for="email" :value="__('messages.email')" />
                         <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                             :value="old('email')" required autofocus autocomplete="off" />
                         <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -53,11 +53,12 @@
                     </div>
                     @endif
                 </div>
-            </div>
 
-            <div class="page-form-actions">
-                <x-secondary-link :href="$teamUrl">{{ __('messages.cancel') }}</x-secondary-link>
-                <x-danger-button>{{ __('messages.transfer_ownership_send') }}</x-danger-button>
+                {{-- Inside the card, as on every short form; a long one has the save bar. --}}
+                <div class="page-form-actions">
+                    <x-secondary-link :href="$teamUrl">{{ __('messages.cancel') }}</x-secondary-link>
+                    <x-danger-button>{{ __('messages.transfer_ownership_send') }}</x-danger-button>
+                </div>
             </div>
         </form>
     </div>

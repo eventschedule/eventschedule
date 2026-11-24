@@ -373,7 +373,7 @@ class GuestTitleDescriptionTest extends TestCase
 
         $this->event($talent, 'Jazz Night');
 
-        $this->assertSame('Late Show - Upcoming Events', $this->title($this->get('/'.$talent->subdomain)->assertOk()->getContent()));
+        $this->assertSame('Late Show - Upcoming events', $this->title($this->get('/'.$talent->subdomain)->assertOk()->getContent()));
     }
 
     public function test_a_past_draft_or_unlisted_event_does_not_count_as_upcoming(): void
@@ -395,7 +395,7 @@ class GuestTitleDescriptionTest extends TestCase
         $venue = $this->venue();
         $this->event($venue, 'Jazz Night');
 
-        $this->assertSame('Blue Note, New York - Upcoming Events', $this->title($this->get('/'.$venue->subdomain)->assertOk()->getContent()));
+        $this->assertSame('Blue Note, New York - Upcoming events', $this->title($this->get('/'.$venue->subdomain)->assertOk()->getContent()));
 
         $named = $this->venue(['name' => 'New York Jazz Club']);
         $this->assertSame('New York Jazz Club - Events', $this->title($this->get('/'.$named->subdomain)->assertOk()->getContent()));

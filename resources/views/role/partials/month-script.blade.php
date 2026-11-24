@@ -61,8 +61,15 @@
         'calendar' => $route === 'guest' && ! $guestEmbed,
         'share' => ! $guestEmbed,
         'guest' => $route === 'guest',
-        'add' => $monthAdd,
-    ];
+    ]
+        // The portal's month (the dashboard and the Schedule tab, the 2026-11 design review):
+        // one rule for every day, whatever its week. The time above the name, at most two
+        // events, then "+N more" with no hours beside it; no week written small, no picture,
+        // no price or ticket state (Free entry, Sold out) and no spare events let in where a
+        // row has room. What a member is told (Draft, Internal, Cancelled) is still said, and a
+        // day that is over is drawn quieter by partials/month-kit-styles. Only said where true.
+        + (in_array($route, ['home', 'admin'], true) ? ['portal' => true] : [])
+        + ['add' => $monthAdd];
 @endphp
 <script {!! nonce_attr() !!}>
 window.monthMixin = (function () {
@@ -122,7 +129,7 @@ return {
                 const runs = this.monthLanes(cells);
                 // Written small: a week that is wholly over, and only in the month that holds
                 // today. Today's week, and a month somebody went back to, keep their size.
-                const small = inThisMonth && cells.every((c) => c.past);
+                const small = !CAN.portal && inThisMonth && cells.every((c) => c.past);
                 weeks.push({ key: cells[0].date, small, days: cells.map((c, col) => this.monthDay(c, runs, col, small)) });
             }
             return weeks;
@@ -326,7 +333,7 @@ return {
             return {
                 words: lateN ? say(L.more, { count: lateN + goneN }) : say(L.earlier, { count: goneN }),
                 drafts: drafts ? say(L.drafts, { count: drafts }) : '',
-                hours: past ? '' : span,
+                hours: past || CAN.portal ? '' : span,
             };
         },
 
@@ -378,19 +385,21 @@ return {
                 art = n === 1;
                 sub = cell.past ? 'none' : (n <= 2 ? 'all' : 'state');
             }
-            // "+1 more" would take the line the one event could have had.
-            const shown = n <= keep + 1 ? live : live.slice(0, keep);
+            if (CAN.portal) { lines = 2; sub = 'none'; keep = 2; art = false; }
+            // "+1 more" would take the line the one event could have had (in the portal two
+            // is the most a day shows, so a third is always behind "+1 more").
+            const shown = n <= keep + (CAN.portal ? 0 : 1) ? live : live.slice(0, keep);
             const late = live.filter((e) => !shown.includes(e));
             const hidden = late.concat(gone);
             // Today leads with the picture of what is on now or next: on the busiest schedule
             // there is then one thing to look at before anything is hovered.
-            const lead = cell.today && !small && n > 1 && !this.monthFacts(shown[0], cell.date).ended ? shown[0] : null;
+            const lead = !CAN.portal && cell.today && !small && n > 1 && !this.monthFacts(shown[0], cell.date).ended ? shown[0] : null;
             const chips = shown.map((e) => this.monthChip(e, cell.date, { sub, art: art || e === lead, lead: e === lead, small }));
             let more = null;
             if (hidden.length) {
                 // A coming day's other events are in the page too, out of sight: monthFill()
                 // shows as many as the week's row already has room for.
-                if (!small && !cell.past) late.forEach((e) => chips.push(this.monthChip(e, cell.date, { sub, small, spare: true })));
+                if (!small && !cell.past && !CAN.portal) late.forEach((e) => chips.push(this.monthChip(e, cell.date, { sub, small, spare: true })));
                 more = this.monthMore(late.length, gone.length, late.map((e) => (e.local_starts_at || '').slice(11, 16)), hidden.filter((e) => e.is_draft).length, cell.past);
                 more.gone = gone.length;
                 more.goneDrafts = gone.filter((e) => e.is_draft).length;
@@ -488,7 +497,8 @@ return {
                 return tops.length > 1 && Math.max.apply(null, tops) - Math.min.apply(null, tops) > 6;
             }));
             const rowH = new Map();
-            seen.filter((p) => p.name.scrollHeight > p.name.clientHeight + 1 && !p.a.closest('.gk-cal-week-past')).forEach((p) => {
+            {{-- Not in the portal, where a name keeps to its two lines on every day. --}}
+            seen.filter((p) => !CAN.portal && p.name.scrollHeight > p.name.clientHeight + 1 && !p.a.closest('.gk-cal-week-past')).forEach((p) => {
                 const week = p.a.closest('.gk-cal-week');
                 if (!week) return;
                 if (!rowH.has(week)) rowH.set(week, week.getBoundingClientRect().height);

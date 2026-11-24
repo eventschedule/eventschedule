@@ -6,7 +6,10 @@ use App\Models\FederatedInstance;
 use App\Models\LegalDocument;
 use App\Models\User;
 use App\Services\AdminAlertService;
+use App\Services\AppUpdateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -37,7 +40,7 @@ class ApAdminSystemPagesTest extends TestCase
         // No page here may reach the network: the suite loads the developer's .env, where real
         // tokens live, and a page that asks an outside service (the Domains page asked
         // DigitalOcean) would do it for real on every run. A request nothing faked throws.
-        \Illuminate\Support\Facades\Http::preventStrayRequests();
+        Http::preventStrayRequests();
 
         config(['app.hosted' => true, 'app.is_nexus' => true]);
         $this->admin = $this->createOwner(true);
@@ -134,7 +137,7 @@ class ApAdminSystemPagesTest extends TestCase
 
         $this->assertSame(1, preg_match('/<span class="event-status sys-verdict is-bad">\s*'.preg_quote(__('messages.scheduler_never_ran'), '/').'\s*<\/span>/', $html));
         $this->assertSame(1, substr_count($html, e(__('messages.queue_health_issues'))), 'the health notice');
-        $this->assertSame(1, preg_match('/<div class="flex items-start gap-3 border rounded-lg p-3 bg-red-50[^"]*">/', $html), 'which is the kit\'s error notice');
+        $this->assertSame(1, preg_match('/<div class="[^"]*rounded-2xl[^"]*bg-red-50[^"]*">/', $html), 'which is the kit\'s error notice');
         // It is part of the page, there on every load, so it is not a live region: as role="alert"
         // a screen reader read it out each time the page opened.
         $this->assertSame(0, substr_count($html, 'role="alert"'));
@@ -188,7 +191,7 @@ class ApAdminSystemPagesTest extends TestCase
 
         foreach (['plan-pricing', 'currency', 'realtime'] as $id) {
             // Side by side on a wide window, like every titled card of this page (AdminPortalKitTest).
-            $this->assertSame(1, substr_count($html, '<section class="ap-card rounded-xl page-card is-beside scroll-mt-24" id="'.$id.'">'), "#{$id}");
+            $this->assertSame(1, substr_count($html, '<section class="ap-card rounded-xl page-card scroll-mt-24" id="'.$id.'">'), "#{$id}");
         }
 
         preg_match_all('/<form method="POST" action="[^"]*\/admin\/settings[^"]*"/', $html, $forms);
@@ -199,7 +202,7 @@ class ApAdminSystemPagesTest extends TestCase
         config(['app.hosted' => false, 'app.is_nexus' => false, 'app.url' => config('app.url') ?: 'http://localhost']);
         AdminAlertService::flush();
         $selfhost = $this->page(route('admin.settings'));
-        $this->assertSame(1, substr_count($selfhost, '<section class="ap-card rounded-xl page-card is-beside scroll-mt-24" id="federation">'));
+        $this->assertSame(1, substr_count($selfhost, '<section class="ap-card rounded-xl page-card scroll-mt-24" id="federation">'));
     }
 
     /** The four states are the kit's tabs, kept as a strip on a phone too. */
@@ -261,7 +264,7 @@ class ApAdminSystemPagesTest extends TestCase
             'self-update.version_installed' => 'v1.0.100',
         ]);
         AdminAlertService::flush();
-        \Illuminate\Support\Facades\Cache::put(\App\Services\AppUpdateService::CACHE_KEY, 'v1.0.101', 600);
+        Cache::put(AppUpdateService::CACHE_KEY, 'v1.0.101', 600);
 
         $html = $this->page(route('admin.app_update'));
 

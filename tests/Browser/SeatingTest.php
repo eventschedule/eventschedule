@@ -2,6 +2,7 @@
 
 namespace Tests\Browser;
 
+use App\Models\Event;
 use App\Models\EventSeatingMap;
 use App\Models\Role;
 use App\Models\Sale;
@@ -11,6 +12,7 @@ use App\Models\SeatingSeat;
 use App\Models\SeatingSection;
 use App\Services\SeatingMapService;
 use App\Utils\UrlUtils;
+use Facebook\WebDriver\WebDriverBy;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
@@ -97,7 +99,7 @@ class SeatingTest extends DuskTestCase
      * The band on the ticket is what makes it allocated - without it the form renders the ordinary
      * quantity select and the picker never mounts.
      *
-     * @return array{0: \App\Models\Event, 1: SeatingPlan}
+     * @return array{0: Event, 1: SeatingPlan}
      */
     private function makeSeated(string $slug = 'talent', int $rows = 1, bool $withCircle = false): array
     {
@@ -239,7 +241,7 @@ class SeatingTest extends DuskTestCase
             $before = $browser->script($read)[0];
 
             $rect = $browser->driver->findElement(
-                \Facebook\WebDriver\WebDriverBy::cssSelector('#seating-designer svg > g > g > rect')
+                WebDriverBy::cssSelector('#seating-designer svg > g > g > rect')
             );
             // A real WebDriver drag, so the browser emits the pointer and mouse events itself in
             // the order it really would - which is the whole point.
@@ -280,7 +282,7 @@ class SeatingTest extends DuskTestCase
             [$event] = $this->makeSeated();
 
             $browser->visit('/talent/venue')
-                ->waitForText('Buy Tickets', 15)
+                ->waitForText('Buy tickets', 15)
                 ->pause(500);
             $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
 
@@ -356,7 +358,7 @@ class SeatingTest extends DuskTestCase
             [$event] = $this->makeSeated('talent', 2);
 
             $browser->visit('/talent/venue')
-                ->waitForText('Buy Tickets', 15)
+                ->waitForText('Buy tickets', 15)
                 ->pause(500);
             $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
 
@@ -663,7 +665,7 @@ class SeatingTest extends DuskTestCase
     private function openSeatedForm(Browser $browser): void
     {
         $browser->visit('/talent/venue')
-            ->waitForText('Buy Tickets', 15)
+            ->waitForText('Buy tickets', 15)
             ->pause(500);
         $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
         $browser->waitFor('.seating-picker-mount svg circle[role="button"]', 20)->pause(1200);

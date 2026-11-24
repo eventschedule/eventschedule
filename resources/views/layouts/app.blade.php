@@ -497,7 +497,11 @@
             orderedList: @json(__('messages.editor_ordered_list')),
             preview: @json(__('messages.editor_preview')),
             guide: @json(__('messages.editor_guide')),
-            textDirection: @json(__('messages.editor_text_direction'))
+            textDirection: @json(__('messages.editor_text_direction')),
+            write: @json(__('messages.editor_write')),
+            previewTab: @json(__('messages.preview')),
+            markdownNote: @json(__('messages.editor_markdown_note')),
+            formattingHelp: @json(__('messages.editor_formatting_help'))
         };
     </script>
 
@@ -762,6 +766,11 @@
             text-align: right;
         }
 
+        /* Fields as the 2026-11 redesign draws them: 16px type, 52px tall, 12px corners, the
+           palette's strong border, and on focus the design-language review's blue border and
+           3px ring (--ap-focus-ring, which the buttons share). The corners and the border are
+           said without !important, so a field that is meant to be a pill (rounded-full) or
+           borderless keeps its own. */
         input[type="text"],
         input[type="email"],
         input[type="password"],
@@ -770,10 +779,22 @@
         select,
         textarea {
             transition: border-color 0.2s, box-shadow 0.2s;
-            font-size: 1.15rem !important;
+            font-size: 1rem !important;
             line-height: 1.5 !important;
-            padding: 0.75rem 1rem !important;
+            padding: 0.8125rem 0.875rem !important;
             font-family: inherit !important;
+        }
+        input:is([type="text"], [type="email"], [type="password"], [type="number"], [type="url"], [type="tel"], [type="search"]):not(.rounded-full):not(.rounded-none),
+        select:not(.rounded-full),
+        textarea:not(.rounded-none) {
+            border-radius: 0.75rem;
+        }
+        input:is([type="text"], [type="email"], [type="password"], [type="number"], [type="url"], [type="tel"], [type="search"]):focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--brand-blue);
+            box-shadow: 0 0 0 3px var(--ap-focus-ring, rgba(36, 86, 230, 0.18));
         }
 
         /* A phone field is the size of the fields beside it. It has a rule of its own because the
@@ -782,15 +803,15 @@
            would be typed under the flag. So only top and bottom are said firmly. */
         input[type="tel"] {
             transition: border-color 0.2s, box-shadow 0.2s;
-            font-size: 1.15rem !important;
+            font-size: 1rem !important;
             line-height: 1.5 !important;
-            padding-block: 0.75rem !important;
+            padding-block: 0.8125rem !important;
             padding-inline: 1rem;
             font-family: inherit !important;
         }
         /* The dial code is read as part of the number, so it is the number's size. */
         .iti__selected-dial-code {
-            font-size: 1.15rem;
+            font-size: 1rem;
             line-height: 1.5;
         }
         /* The flag is a button, and a page's own rule for its buttons (the event form's

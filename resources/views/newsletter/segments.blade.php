@@ -66,7 +66,7 @@
 
         {{-- The form is a Vue island of its own: the type decides which of its fields show, and
              the event picker inside it is a Vue component. --}}
-        <x-page-card beside class="news-block" :title="__('messages.create_segment')">
+        <x-page-card class="news-block" :title="__('messages.create_segment')">
             <div id="create-segment-app">
                 <form method="POST" action="{{ route('newsletter.segment.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
                     @csrf

@@ -1509,7 +1509,7 @@
                                     <div class="sh-wiz-part">
                                         <div class="sh-wiz-cap"><span>Your database</span><span>1 of 2</span></div>
                                         <div class="sh-wiz-grid" dir="ltr">
-                                            @foreach ([['MySQL Host', 'localhost', false], ['Port', '3306', false], ['Database', 'eventschedule', false], ['Username', 'eventschedule', false], ['Password', '••••••••••••', true]] as $fIndex => [$fLabel, $fValue, $fWide])
+                                            @foreach ([['MySQL host', 'localhost', false], ['Port', '3306', false], ['Database', 'eventschedule', false], ['Username', 'eventschedule', false], ['Password', '••••••••••••', true]] as $fIndex => [$fLabel, $fValue, $fWide])
                                                 <div class="sh-f{{ $fWide ? ' is-wide' : '' }}">
                                                     <span class="sh-f-label">{{ $fLabel }}</span>
                                                     <span class="sh-f-box"><span style="--i: {{ $fIndex }};">{{ $fValue }}</span></span>
@@ -1532,7 +1532,7 @@
                                                 <span class="sh-f-box"><span style="--i: 9;">you@<span class="sh-dom" data-sh-domain>{{ $placeDomain }}</span></span></span>
                                             </div>
                                             <div class="sh-f">
-                                                <span class="sh-f-label">Full Name</span>
+                                                <span class="sh-f-label">Full name</span>
                                                 <span class="sh-f-box"><span style="--i: 10;">Your name</span></span>
                                             </div>
                                             <div class="sh-f">
@@ -1544,11 +1544,11 @@
                                             <i><svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $checkPath }}" /></svg></i>
                                             I accept the Terms of Service
                                         </div>
-                                        <span class="sh-wiz-btn is-go" style="--i: 13;">Sign Up</span>
+                                        <span class="sh-wiz-btn is-go" style="--i: 13;">Sign up</span>
                                     </div>
                                 </div>
                             </div>
-                            <p class="sr-only">The wizard asks for five database values (MySQL Host, Port, Database, Username and Password) and tests them. Once the connection succeeds it asks for your email, full name and a password, then runs the migrations and writes the configuration.</p>
+                            <p class="sr-only">The wizard asks for five database values (MySQL host, Port, Database, Username and Password) and tests them. Once the connection succeeds it asks for your email, full name and a password, then runs the migrations and writes the configuration.</p>
                         </div>
 
                         {{-- Scene 3: the cron entry. Amber: the one step that is yours. --}}
@@ -1701,7 +1701,7 @@
                 'points' => [
                     'One crontab line runs the scheduler. The queue ships as <code class="sh-k">sync</code>, so mail and webhooks go out inside the request and there is no worker to babysit.',
                     'The web-server user needs to write to <code class="sh-k">storage</code>, <code class="sh-k">bootstrap</code>, <code class="sh-k">public</code> and the <code class="sh-k">.env</code> file, and nothing else. Locked down like that, the Update button cannot replace the app\'s files, so you update with <code class="sh-k">sudo php artisan app:update</code> and hand storage back afterwards.',
-                    'Put a certificate on the domain before you open the wizard. Session cookies are secure-only, so over plain HTTP the wizard\'s Sign Up answers Page Expired and a login never sticks.',
+                    'Put a certificate on the domain before you open the wizard. Session cookies are secure-only, so over plain HTTP the wizard\'s Sign up answers Page Expired and a login never sticks.',
                 ],
                 'fit' => 'Someone who already looks after a Linux server, or wants the install beside other sites on one.',
                 'link' => ['Read the installation guide', route('marketing.docs.selfhost.installation'), false],
@@ -2014,12 +2014,12 @@
                     <div class="sh-app-push"></div>
                     <div class="sh-app sh-up" data-sh-update data-state="ready">
                         <div class="sh-up-stats" dir="ltr">
-                            <div><b class="is-before">{{ $installedVersion }}</b><b class="is-after">{{ $nextVersion }}</b><span>Installed Version</span></div>
-                            <div><b>{{ $nextVersion }}</b><span>Latest Version</span></div>
-                            <div><b class="is-before" data-sh-update-checked>2 minutes ago</b><b class="is-after">just now</b><span>Last Checked</span></div>
+                            <div><b class="is-before">{{ $installedVersion }}</b><b class="is-after">{{ $nextVersion }}</b><span>Installed version</span></div>
+                            <div><b>{{ $nextVersion }}</b><span>Latest version</span></div>
+                            <div><b class="is-before" data-sh-update-checked>2 minutes ago</b><b class="is-after">just now</b><span>Last checked</span></div>
                         </div>
                         <div class="sh-app-top">
-                            <strong>App Update</strong>
+                            <strong>App update</strong>
                             <span class="sh-up-mark"><span class="is-before">Update available</span><span class="is-after">You're up to date!</span></span>
                         </div>
                         <div class="sh-app-body">
@@ -2033,14 +2033,14 @@
                                 <span>Release installed, migrations run. That was the whole update.</span>
                             </div>
                             <div class="sh-up-actions">
-                                <button type="button" class="sh-app-btn is-before" data-sh-update-check>Check for Updates</button>
+                                <button type="button" class="sh-app-btn is-before" data-sh-update-check>Check for updates</button>
                                 <button type="button" class="sh-up-go is-before" data-sh-update-go><span class="is-idle">Update</span><span class="is-busy">Updating</span><i aria-hidden="true"></i></button>
                                 <button type="button" class="sh-up-again is-after" data-sh-update-reset>Press it again</button>
                                 <span class="sh-up-hint is-before">Go on, press it.</span>
                             </div>
                         </div>
                     </div>
-                    <p class="sh-cap">The App Update screen, with the installed version live from this release. The real button asks before it runs.</p>
+                    <p class="sh-cap">The App update screen, with the installed version live from this release. The real button asks before it runs.</p>
                 </article>
             </div>
         </div>
@@ -2266,7 +2266,7 @@
             [
                 'tag' => 'Updates',
                 'title' => 'What the Update button checks',
-                'lead' => 'Once a day the scheduler asks GitHub for the latest release, and Settings > App Update shows it beside your installed version. Update downloads it, replaces the app\'s files, runs any new migrations and clears the cached config, routes and views.',
+                'lead' => 'Once a day the scheduler asks GitHub for the latest release, and Settings > App update shows it beside your installed version. Update downloads it, replaces the app\'s files, runs any new migrations and clears the cached config, routes and views.',
                 'points' => [
                     'It reads which PHP the new release needs, and stops before changing a single file if the web server\'s PHP, or the command-line PHP your cron job runs on, is older. Upgrade both, then update again.',
                     'It also stops untouched when the web-server user cannot write every file of the app. Run <code class="sh-k">sudo php artisan app:update</code> on the server then. The command has no time limit, so it is also the way past an update that outruns PHP\'s max_execution_time.',
@@ -2596,7 +2596,7 @@
             ['q' => 'How do I back up a selfhosted install?', 'a' => 'Back up three things: the database (mysqldump, or mariadb-dump in the Docker stack), the storage directory with the uploaded images, and the .env file, whose APP_KEY is needed to read the credentials saved in the database. Nothing does this for you, so put it on a timer and keep the copies off the server. To move a single schedule, Settings > Backup & Restore exports it as a .zip and imports it as a new schedule on any install.'],
             ['q' => 'What are the selfhosting terms?', 'a' => 'Two things govern a selfhosted install. The code is under the Attribution Assurance License, which asks that the original attribution stays in place. The selfhosting terms, which you accept when you create the first account, cover your relationship with Event Schedule: you take the software as is, you own your data and are responsible for it, and you support your own customers. Event Schedule cannot access, change or remove data on your server.'],
             ['q' => 'Can I install it on shared hosting?', 'a' => 'Yes. If your host offers Softaculous, Event Schedule installs in one click with the database and configuration set up for you. Otherwise upload the release zip and point your document root at the public directory.'],
-            ['q' => 'How do updates work?', 'a' => 'Once a day the scheduler asks GitHub for the latest release, and Settings > App Update shows it beside your installed version. One click downloads it, replaces the files and runs the database migrations, with no terminal needed. Before it changes anything it checks that your PHP is new enough for that release and that the web-server user can write every file of the app; if either fails, nothing is touched and the screen says why, and php artisan app:update on the server does the same job. A Docker install updates by rebuilding its image instead. Take a backup first.'],
+            ['q' => 'How do updates work?', 'a' => 'Once a day the scheduler asks GitHub for the latest release, and Settings > App update shows it beside your installed version. One click downloads it, replaces the files and runs the database migrations, with no terminal needed. Before it changes anything it checks that your PHP is new enough for that release and that the web-server user can write every file of the app; if either fails, nothing is touched and the screen says why, and php artisan app:update on the server does the same job. A Docker install updates by rebuilding its image instead. Take a backup first.'],
             ['q' => 'Do I have to set up a cron job?', 'a' => 'Yes, one line: "* * * * * php /path/to/eventschedule/artisan schedule:run". It drives reminder emails, scheduled newsletters, calendar sync and the release of expired ticket reservations. Without it those stop running, while the site itself looks perfectly healthy.'],
             ['q' => 'Can I run it without a crontab?', 'a' => 'Yes. Set APP_CRON_SECRET in .env to a long random string, then have your control panel or any outside cron service request https://your-domain.com/translate_data?secret=YOUR_SECRET once a minute. It runs the same schedule as the cron entry. Use one or the other, never both, because each is a complete copy of the schedule. The Docker stack needs neither: its scheduler container does the job.'],
             ['q' => 'Which payment methods work on a selfhosted install?', 'a' => 'Stripe, PayPal, Payfast (for rand), Razorpay (for Indian rupees), Invoice Ninja, a payment link and cash, with no platform fee on any of them. Stripe runs on the platform keys in your .env, which is the only Stripe rail a selfhost has. PayPal and Razorpay can each be one account for the whole install, set with PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET or RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET, or each schedule owner can connect their own in Settings > Payment Methods. Neither has to call your server for an ordinary sale, so only their optional webhooks need a public address. A Stripe, PayPal or Razorpay sale can be refunded from the Sales page, in full or in part, and the money goes back through the provider.'],

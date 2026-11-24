@@ -176,8 +176,8 @@ class ApAdminManagePagesTest extends TestCase
         // Two forms (details, plan), each ending Cancel then Save, and one red button on the page.
         $this->assertSame(2, substr_count($html, 'class="page-form-actions"'));
         $this->assertSame(2, substr_count($html, __('messages.save_changes')));
-        $this->assertSame(1, substr_count($html, 'from-red-500'));
-        $this->assertLessThan(strpos($html, 'from-red-500'), strrpos($html, __('messages.save_changes')));
+        $this->assertSame(1, substr_count($html, 'bg-red-600 border border-transparent'));
+        $this->assertLessThan(strpos($html, 'bg-red-600 border border-transparent'), strrpos($html, __('messages.save_changes')));
 
         // The subscription is pairs down a card, not a blue box, and its state is translated.
         $this->assertStringContainsString('<dl class="page-kv">', $html);

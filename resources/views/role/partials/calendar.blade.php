@@ -415,7 +415,7 @@
              The #month-year-title id is unchanged; it is a documented custom-CSS hook
              (marketing/custom-css.blade.php) and show-guest.blade.php targets it by id. --}}
         @php $calendarHeadingTag = ($calendarHeadingTag ?? 'h2') === 'h1' ? 'h1' : 'h2'; @endphp
-        <{{ $calendarHeadingTag }} id="month-year-title" v-show="currentView === 'calendar'" class="text-2xl font-semibold leading-6 flex-shrink-0 {{ $guestRows && ! $guestEmbed ? 'gk-month-name' : '' }} {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} text-gray-900 dark:text-gray-100" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
+        <{{ $calendarHeadingTag }} id="month-year-title" v-show="currentView === 'calendar'" class="{{ $route === 'guest' ? 'text-2xl font-semibold' : 'text-[1.375rem] font-bold tracking-[-0.02em]' }} leading-6 flex-shrink-0 {{ $guestRows && ! $guestEmbed ? 'gk-month-name' : '' }} {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:block' }} text-gray-900 dark:text-gray-100" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
             @if ($route === 'guest' && !request()->graphic)
             <time :datetime="monthYearDatetime" v-text="monthYearLabel"></time>
             @else
@@ -434,7 +434,7 @@
         <div class="flex {{ ($tab ?? '') == 'availability' ? 'flex-row flex-wrap items-center' : 'flex-col' }} md:flex-row md:flex-nowrap md:items-center md:ms-auto gap-3">
 
             {{-- Month Navigation Controls --}}
-            <div id="month-nav-controls" v-show="currentView === 'calendar'" class="flex items-center shadow-sm {{ $route === 'guest' ? 'gk-phone-off gp-month-nav rounded-xl' : 'bg-white/95 dark:bg-gray-900/95 rounded-md' }} {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:flex' }}" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
+            <div id="month-nav-controls" v-show="currentView === 'calendar'" class="flex items-center {{ $route === 'guest' ? 'shadow-sm gk-phone-off gp-month-nav rounded-xl' : 'gap-0.5 p-0.5 rounded-[0.625rem] border border-[rgb(var(--ap-border-strong))] bg-[rgb(var(--ap-surface))]'.(($tab ?? '') == 'availability' ? '' : ' md:order-last') }} {{ ($tab ?? '') == 'availability' ? '' : 'hidden md:flex' }}" {!! ($eventLayout ?? 'calendar') === 'list' ? 'style="display:none"' : '' !!}>
                 @if ($route === 'guest' && !request()->graphic)
                 <button @click="navigateMonth(-1)" class="flex h-11 w-14 items-center justify-center rounded-s-xl border-transparent pe-1 text-gray-400 hover:text-gray-500 focus:relative md:w-11 md:pe-0 transition-all duration-200 gp-month-btn">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
@@ -454,20 +454,16 @@
                     </svg>
                 </button>
                 @else
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-s-md border-s border-y border-gray-300 dark:border-gray-600 pe-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:pe-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
+                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->subMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->subMonth()->month]) }}" class="flex h-10 w-10 items-center justify-center rounded-lg text-[15px] text-gray-900 dark:text-gray-100 hover:bg-[rgb(var(--ap-surface-hover))] focus:relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] transition-all duration-200" rel="nofollow">
                     <span class="sr-only">{{ __('messages.previous_month') }}</span>
-                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" clip-rule="evenodd" />
-                    </svg>
+                    <span aria-hidden="true">{{ is_rtl() ? '→' : '←' }}</span>
                 </a>
-                <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => now()->year, 'month' => now()->month]) }}" class="flex h-11 items-center justify-center border-y border-gray-300 dark:border-gray-600 px-4 text-base font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:relative">
+                <a href="{{ $route == 'home' ? route('home') : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => now()->year, 'month' => now()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => now()->year, 'month' => now()->month]) }}" class="flex h-10 items-center justify-center rounded-lg px-2.5 text-sm font-semibold whitespace-nowrap text-gray-900 dark:text-gray-100 hover:bg-[rgb(var(--ap-surface-hover))] focus:relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] transition-all duration-200">
                     <span class="h-6 flex items-center">{{ __('messages.this_month') }}</span>
                 </a>
-                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-11 w-14 items-center justify-center rounded-e-md border-e border-y border-gray-300 dark:border-gray-600 ps-1 text-gray-400 dark:text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:relative md:w-11 md:ps-0 md:hover:bg-gray-50 dark:md:hover:bg-gray-700" rel="nofollow">
+                <a href="{{ $route == 'home' ? route('home', ['year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) : route('role.view_' . $route, $route == 'guest' ? ['subdomain' => $role->subdomain, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month, 'embed' => isset($embed) && $embed] : ['subdomain' => $role->subdomain, 'tab' => $tab, 'year' => Carbon\Carbon::create($year, $month, 1)->addMonth()->year, 'month' => Carbon\Carbon::create($year, $month, 1)->addMonth()->month]) }}" class="flex h-10 w-10 items-center justify-center rounded-lg text-[15px] text-gray-900 dark:text-gray-100 hover:bg-[rgb(var(--ap-surface-hover))] focus:relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] transition-all duration-200" rel="nofollow">
                     <span class="sr-only">{{ __('messages.next_month') }}</span>
-                    <svg class="h-6 w-6 {{ is_rtl() ? 'rotate-180' : '' }}" viewBox="0 0 24 24" fill="currentColor">
-                        <path fill-rule="evenodd" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" clip-rule="evenodd" />
-                    </svg>
+                    <span aria-hidden="true">{{ is_rtl() ? '←' : '→' }}</span>
                 </a>
                 @endif
             </div>
@@ -529,21 +525,18 @@
             </div>
             @endif
 
-            {{-- Desktop: Filters Button with label - AP only --}}
+            {{-- Desktop: Filter as a word, then Month or List (the 2026-11 redesign) - AP only --}}
             @if ($route == 'admin' && ($tab ?? '') != 'availability')
             <template v-if="{!! $alwaysShowFilters ? 'true' : 'dynamicFilterCount > 0' !!}">
                 <button @click="showDesktopFiltersModal = true"
                         :class="currentView === 'list' ? 'md:!inline-flex' : ''"
                         :style="activeFilterCount > 0 ? 'background-color: var(--brand-button-bg); color: #fff; border-color: var(--brand-button-bg);' : ''"
-                        class="hidden md:inline-flex items-center justify-center gap-2 px-4 py-2.5
-                               border border-gray-300 dark:border-gray-600 rounded-md transition-all duration-200
-                               bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                               text-base font-semibold hover:bg-gray-50 dark:hover:bg-gray-700
+                        class="hidden md:inline-flex items-center justify-center gap-2 px-1.5 min-h-[2.75rem]
+                               rounded-[0.625rem] transition-all duration-200
+                               text-gray-900 dark:text-gray-100
+                               text-sm font-semibold hover:bg-[rgb(var(--ap-surface-hover))]
                                relative">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M14,12V19.88C14.04,20.18 13.94,20.5 13.71,20.71C13.32,21.1 12.69,21.1 12.3,20.71L10.29,18.7C10.06,18.47 9.96,18.16 10,17.87V12H9.97L4.21,4.62C3.87,4.19 3.95,3.56 4.38,3.22C4.57,3.08 4.78,3 5,3H19C19.22,3 19.43,3.08 19.62,3.22C20.05,3.56 20.13,4.19 19.79,4.62L14.03,12H14Z"/>
-                    </svg>
-                    {{ $label('filters') }}
+                    {{ __('messages.filter') }}
                     {{-- Active filter count badge --}}
                     <span v-if="activeFilterCount > 0"
                           class="ms-1 px-1.5 py-0.5 text-xs bg-white rounded-full"
@@ -554,21 +547,19 @@
             </template>
             @endif
 
-            {{-- Desktop Add Event Button --}}
-            @if ($route == 'admin' && $role->email_verified_at && $tab == 'schedule' && !(auth()->check() && auth()->user()->isViewer($role->subdomain)))
-                @if ($headerTemplates->isNotEmpty())
-                <button type="button" class="js-template-picker-open hidden md:inline-flex items-center justify-center gap-1.5 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-base font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z" /></svg>
-                    {{ __('messages.use_a_template') }}
-                </button>
-                @endif
-                <x-brand-link href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="hidden md:inline-flex w-auto">
-                    <svg class="-ms-0.5 me-1.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                    </svg>
-                    {{ __('messages.add_event') }}
-                </x-brand-link>
+            @if ($route == 'admin' && ($tab ?? '') == 'schedule')
+            <div class="hidden md:inline-flex items-center gap-0.5 rounded-[0.625rem] bg-[rgb(var(--ap-surface-active))] p-[3px]" role="group">
+                <button type="button" @click="toggleView('calendar')" :aria-pressed="currentView === 'calendar' ? 'true' : 'false'"
+                        :class="currentView === 'calendar' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                        class="rounded-lg px-3 min-h-[2.375rem] text-[13px] font-semibold transition-all duration-200">{{ __('messages.view_month') }}</button>
+                <button type="button" @click="toggleView('list')" :aria-pressed="currentView === 'list' ? 'true' : 'false'"
+                        :class="currentView === 'list' ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                        class="rounded-lg px-3 min-h-[2.375rem] text-[13px] font-semibold transition-all duration-200">{{ __('messages.list') }}</button>
+            </div>
             @endif
+
+            {{-- Desktop Add Event: in the Schedule tab's page header now (role/show-admin, the
+                 2026-11 design), with "Use a template" beside it. A phone keeps its own above. --}}
         </div>
     </div>
 

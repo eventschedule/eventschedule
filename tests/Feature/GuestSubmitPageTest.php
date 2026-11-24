@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -44,7 +45,7 @@ class GuestSubmitPageTest extends TestCase
     {
         $html = $this->page($this->curator(['request_terms' => "Events inside city limits only.\nNo resale listings."]));
 
-        $this->assertStringContainsString('Request Terms', $html);
+        $this->assertStringContainsString('Request terms', $html);
         $this->assertStringContainsString("Events inside city limits only.<br />\nNo resale listings.", $html);
 
         // And a schedule that wrote none shows no empty panel.
@@ -310,9 +311,9 @@ class GuestSubmitPageTest extends TestCase
         $url = route('event.guest_import.store', ['subdomain' => $curator->subdomain]);
 
         $this->postJson($url, $body)->assertStatus(422)->assertJsonValidationErrors('terms');
-        $this->assertSame(0, \App\Models\User::where('email', $body['account_email'])->count());
+        $this->assertSame(0, User::where('email', $body['account_email'])->count());
 
         $this->postJson($url, $body + ['terms' => true])->assertOk()->assertJsonPath('success', true);
-        $this->assertNotNull(\App\Models\User::where('email', $body['account_email'])->firstOrFail()->terms_accepted_at);
+        $this->assertNotNull(User::where('email', $body['account_email'])->firstOrFail()->terms_accepted_at);
     }
 }

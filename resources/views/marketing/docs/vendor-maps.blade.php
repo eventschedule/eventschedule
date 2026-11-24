@@ -37,7 +37,7 @@
         <h3 class="doc-subheading">Starting a map</h3>
 
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">With a new schedule.</strong> Where you choose what kind of schedule to make, choose <strong class="text-gray-900 dark:text-white">Running a market, fair or expo?</strong>. It opens the form for a venue schedule, and once you save it you land on the schedule's <strong class="text-gray-900 dark:text-white">Vendor map</strong> tab, ready to set the map up.</li>
+            <li><strong class="text-gray-900 dark:text-white">With a new schedule.</strong> Where you choose what kind of schedule to make, choose <strong class="text-gray-900 dark:text-white">Venue</strong>, turn on <strong class="text-gray-900 dark:text-white">Running a market, fair or expo?</strong> under it and press <strong class="text-gray-900 dark:text-white">Continue with venue</strong>. It opens the form for a venue schedule, and once you save it you land on the schedule's <strong class="text-gray-900 dark:text-white">Vendor map</strong> tab, ready to set the map up.</li>
             <li><strong class="text-gray-900 dark:text-white">With a schedule you already have.</strong> A venue or curator schedule lists the Vendor map tab once it has a map. To start its first one, open the schedule in the admin panel and choose <strong>Actions</strong> &gt; <strong>Set up a vendor map</strong>.</li>
         </ul>
 

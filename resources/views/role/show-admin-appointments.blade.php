@@ -97,27 +97,44 @@
     $secondaryBtnClass = 'ap-secondary-btn inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]';
 @endphp
 
+{{-- The days a type can be booked (2026-11-24 design): every day a 26px key, the open ones blue
+     on a blue tint, the closed ones grey on grey, so a closed day still reads as a day. --}}
+<style {!! nonce_attr() !!}>
+    .appt-day {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.625rem;
+      height: 1.625rem;
+      border-radius: 0.4375rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgb(var(--ap-surface-active));
+      color: rgb(var(--ap-ink-3));
+    }
+    .appt-day.is-open {
+      background: var(--brand-blue-a20);
+      color: var(--brand-blue);
+    }
+</style>
+
 <div class="space-y-4">
 
         {{-- Warnings --}}
         @if (! $role->timezone)
-            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
-                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                <div class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.appointments_set_timezone_warning', ['tz' => config('app.timezone')]) }}
-                    <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#section-details" class="underline">{{ __('messages.edit') }}</a>
-                </div>
-            </div>
+            <x-page-notice>
+                {{ __('messages.appointments_set_timezone_warning', ['tz' => config('app.timezone')]) }}
+                <x-slot:action><a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#section-details" class="hover:underline">{{ __('messages.edit') }} <span aria-hidden="true">&rarr;</span></a></x-slot:action>
+            </x-page-notice>
         @endif
         @if (config('app.hosted') && ! $role->hasEmailSettings())
-            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
-                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                <div class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.appointments_no_email_warning') }}
-                    {{-- Where to fix it: the notice named a problem and left the reader to find the page. --}}
-                    @if (! $isViewer)
-                    <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#integration-tab-email" class="underline">{{ __('messages.edit') }}</a>
-                    @endif
-                </div>
-            </div>
+            <x-page-notice>
+                {{ __('messages.appointments_no_email_warning') }}
+                {{-- Where to fix it: the notice named a problem and left the reader to find the page. --}}
+                @if (! $isViewer)
+                <x-slot:action><a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}#integration-tab-email" class="hover:underline">{{ __('messages.set_up_email') }} <span aria-hidden="true">&rarr;</span></a></x-slot:action>
+                @endif
+            </x-page-notice>
         @endif
 
         {{-- One header row instead of three stacked ones. The sub-view switcher is the same segmented
@@ -125,13 +142,37 @@
              item, red count badge for things awaiting a decision); the allowance meter now sits
              beside the button it gates rather than below the list. --}}
         @if (! $editorOpen)
+            @if ($types->where('is_active', true)->count() && $role->hasBookableAppointments())
+                @php $bookUrl = route('appointments.book', ['subdomain' => $role->subdomain]); @endphp
+                {{-- 2026-11 redesign: the booking page's address as a card of its own, a small
+                     capitals label over the address, with Copy and Preview at its end. The input
+                     is kept (read only, out of sight) for the copy script and a screen reader. --}}
+                <div class="ap-card rounded-xl px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <label for="appt-book-url" class="block text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500 dark:text-gray-400">{{ __('messages.appointments_share_link') }}</label>
+                        <p class="mt-0.5 truncate text-[15px] font-semibold text-gray-900 dark:text-gray-100" dir="ltr">{{ preg_replace('#^https?://#', '', $bookUrl) }}</p>
+                        <input type="text" id="appt-book-url" readonly dir="ltr" value="{{ $bookUrl }}" class="sr-only" tabindex="-1">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" data-appt-copy="{{ $bookUrl }}" title="{{ __('messages.copy_link') }}"
+                                class="{{ $secondaryBtnClass }} min-h-[44px] gap-1.5 px-3.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            <span>{{ __('messages.copy_link') }}</span>
+                        </button>
+                        <a href="{{ $bookUrl }}" target="_blank" rel="noopener"
+                           class="{{ $secondaryBtnClass }} min-h-[44px] gap-1.5 px-3.5 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.preview') }} <span aria-hidden="true">&nearr;</span></a>
+                    </div>
+                </div>
+            @endif
+
             <div class="flex flex-wrap items-center gap-3">
-                <div class="inline-flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1">
-                    @foreach ([['types', __('messages.appointment_types'), 0], ['bookings', __('messages.bookings'), $pendingBookingCount]] as [$key, $label, $badge])
+                {{-- 2026-11-24 design: a grey track with 3px round its keys, the one you are on
+                     white, and the count in the label's own ink and weight. --}}
+                <div class="appt-switch inline-flex items-center gap-0.5 rounded-xl bg-[rgb(var(--ap-surface-active))] p-[3px]">
+                    @foreach ([['types', __('messages.appointment_types'), 0, $types->count()], ['bookings', __('messages.bookings'), $pendingBookingCount, array_sum($appointmentBookingCounts ?? [])]] as [$key, $label, $badge, $count])
                         <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments'] + ($key === 'bookings' ? ['view' => 'bookings'] : [])) }}"
-                           @if ($view === $key) aria-current="page" style="box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);" @endif
-                           class="rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200 {{ $view === $key ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
-                            {{ $label }}
+                           @if ($view === $key) aria-current="page" @endif
+                           class="inline-flex min-h-[38px] items-center whitespace-nowrap rounded-[9px] px-3.5 text-sm font-semibold transition-all duration-200 {{ $view === $key ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200' }}">
+                            {{ $label }}&nbsp;&middot;&nbsp;{{ $count }}
                             @if ($badge > 0)
                                 <span class="ms-1 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $badge }}</span>
                             @endif
@@ -162,7 +203,7 @@
                                 <x-lock-badge tier="pro" />
                             </button>
                         @else
-                            <x-brand-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}?new=1">{{ __('messages.appointments_new_type') }}</x-brand-link>
+                            <x-brand-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}?new=1" class="gap-2"><span aria-hidden="true">+</span> {{ __('messages.appointments_new_type') }}</x-brand-link>
                         @endif
                     </div>
                 @endif
@@ -186,25 +227,6 @@
                     :title="__('messages.appointments_nothing_bookable_title')">
                     {{ __('messages.appointments_nothing_bookable_body') }}
                 </x-plan-gate>
-            @endif
-
-            @if ($types->where('is_active', true)->count() && $role->hasBookableAppointments())
-                @php $bookUrl = route('appointments.book', ['subdomain' => $role->subdomain]); @endphp
-                <div class="ap-card rounded-xl p-3 flex flex-wrap items-center gap-2">
-                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.appointments_share_link') }}</span>
-                    <label for="appt-book-url" class="sr-only">{{ __('messages.appointments_share_link') }}</label>
-                    {{-- A floor on its width: on a phone it was squeezed to "http:/" beside its own
-                         label and buttons. Below the floor it takes a line to itself. --}}
-                    <input type="text" id="appt-book-url" readonly dir="ltr" value="{{ $bookUrl }}"
-                           class="appt-book-url min-w-0 text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                    <button type="button" data-appt-copy="{{ $bookUrl }}" title="{{ __('messages.copy_link') }}"
-                            class="{{ $secondaryBtnClass }} gap-1.5 px-3 py-2 text-sm">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                        <span>{{ __('messages.copy_link') }}</span>
-                    </button>
-                    <a href="{{ $bookUrl }}" target="_blank" rel="noopener"
-                       class="{{ $secondaryBtnClass }} px-3 py-2 text-sm">{{ __('messages.preview') }}</a>
-                </div>
             @endif
 
             {{-- Types list --}}
@@ -265,6 +287,17 @@
                             $week = $weekSummary($type);
                             $hasHours = collect($week['open'])->contains(true);
                             $openDayNames = collect($days)->filter(fn ($l, $n) => $week['open'][$n])->values()->implode(', ');
+                            // The open days said short, a run of them as its two ends: "Tue-Sat".
+                            $shortDay = fn ($n) => \Carbon\Carbon::now()->startOfWeek(\Carbon\Carbon::SUNDAY)->addDays((int) $n)->translatedFormat('D');
+                            $openNums = collect(array_keys($days))->filter(fn ($n) => $week['open'][$n])->values();
+                            $orderNums = array_keys($days);
+                            $runs = (function () use ($openNums, $orderNums) {
+                                $at = $openNums->map(fn ($n) => array_search($n, $orderNums, true))->all();
+                                return $at === [] ? false : (max($at) - min($at) + 1 === count($at));
+                            })();
+                            $openDaysShort = $openNums->isEmpty() ? '' : ($runs && $openNums->count() > 2
+                                ? $shortDay($openNums->first()).'–'.$shortDay($openNums->last())
+                                : $openNums->map($shortDay)->implode(', '));
                             // The team member it is booked with, and whether they have since left (the
                             // type was switched off by AppointmentHostService::releaseHost()).
                             $typeHostName = $type->host_user_id ? ($type->host?->name ?: __('messages.appointments_host_former')) : null;
@@ -277,115 +310,77 @@
                         {{-- items-start, not items-center: a row carrying two warning panels is much
                              taller than the other two zones, and centring left the name floating in
                              the middle of an otherwise empty column. --}}
-                        <div class="ap-card rounded-xl p-4 flex flex-col gap-3
-                                    lg:grid lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] lg:items-start lg:gap-4">
-
-                            {{-- Identity --}}
-                            <div class="min-w-0">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="font-semibold {{ $type->is_active ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400' }}">{{ $type->name }}</span>
-                                    @if ($hostLeft)
-                                        {{-- Says why it is off, which "Inactive" would not: the owner did not switch it off. --}}
-                                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">{{ __('messages.appointments_host_left') }}</span>
-                                    @elseif (! $type->is_active)
-                                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">{{ __('messages.inactive') }}</span>
+                        {{-- 2026-11 redesign: the type's name and one line of what it is, its switch at
+                             the end; then what can be booked and what has been, side by side in one
+                             box; then Edit and More. No opacity dimming for an inactive type: a muted
+                             name plus its pill carries it. --}}
+                        <div class="ap-card ap-hero rounded-2xl p-5 sm:p-6">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="text-xl font-bold tracking-tight {{ $type->is_active ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400' }}" v-pre>{{ $type->name }}</span>
+                                        @if ($hostLeft)
+                                            {{-- Says why it is off, which "Inactive" would not: the owner did not switch it off. --}}
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">{{ __('messages.appointments_host_left') }}</span>
+                                        @elseif (! $type->is_active)
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">{{ __('messages.inactive') }}</span>
+                                        @endif
+                                    </div>
+                                    <p class="mt-1 text-[15px] text-gray-600 dark:text-gray-300">
+                                        @if ($typeHostName && ! $hostLeft)
+                                            <bdi v-pre>{{ __('messages.appointments_with_host', ['name' => $typeHostName]) }}</bdi> &middot;
+                                        @endif
+                                        {{ $type->duration_minutes }} {{ __('messages.minutes') }}
+                                        &middot; {{ $type->isFree() ? __('messages.free') : \App\Utils\MoneyUtils::format((float) $type->price, $type->currency_code) }}
+                                        &middot; <bdi v-pre>{{ $locationLabel($type) }}</bdi>
+                                        @if ($type->requires_approval)
+                                            &middot; {{ __('messages.appointments_requires_confirmation') }}
+                                        @endif
+                                    </p>
+                                    @if ($hostLeft && ! $isViewer)
+                                        @php
+                                            // Two counts, each the length of the list its link opens: Upcoming
+                                            // leaves out what still waits for approval, which is under Pending.
+                                            $hostBookings = \App\Services\AppointmentHostService::futureBookingCount($role, (int) $type->host_user_id);
+                                            $hostPending = \App\Services\AppointmentHostService::futureBookingCount($role, (int) $type->host_user_id, pending: true);
+                                        @endphp
+                                        <div class="{{ $warnClass }} mt-2">
+                                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                                            <span>
+                                                <bdi v-pre>{{ __('messages.appointments_host_left_notice', ['name' => $typeHostName]) }}</bdi>
+                                                <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'edit' => $type->hashedId()]) }}">{{ __('messages.appointments_choose_host') }}</x-link>
+                                                @if ($hostBookings > 0)
+                                                    &middot;
+                                                    <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings', 'host' => \App\Utils\UrlUtils::encodeId($type->host_user_id)]) }}">{{ trans_choice('messages.appointments_booking_count', $hostBookings, ['count' => $hostBookings]) }}</x-link>
+                                                @endif
+                                                @if ($hostPending > 0)
+                                                    &middot;
+                                                    <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings', 'filter' => 'pending', 'host' => \App\Utils\UrlUtils::encodeId($type->host_user_id)]) }}">{{ __('messages.appointments_filter_pending') }} ({{ $hostPending }})</x-link>
+                                                @endif
+                                            </span>
+                                        </div>
+                                    @endif
+                                    @if (! $hasHours)
+                                        <div class="{{ $warnClass }} mt-2">
+                                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                                            <span>{{ __('messages.appointments_no_hours_warning') }}</span>
+                                        </div>
+                                    @endif
+                                    @if (! $type->isFree() && ! $type->paymentMethodAvailable())
+                                        <div class="{{ $warnClass }} mt-2">
+                                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                                            <span>{{ __('messages.appointments_payment_not_set') }}@if (auth()->id() === $role->user_id) <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">{{ __('messages.manage_payment_methods') }}</x-link>@endif</span>
+                                        </div>
+                                    @endif
+                                    {{-- Independent of the one above: a type can be both unpayable by
+                                         plan and missing its method, and each is fixed differently. --}}
+                                    @if (! $type->isFree() && ! $type->canTakePayment())
+                                        <div class="{{ $warnClass }} mt-2">
+                                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
+                                            <span>{{ __('messages.appointments_paid_needs_pro_row') }}</span>
+                                        </div>
                                     @endif
                                 </div>
-                                <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
-                                    @if ($typeHostName && ! $hostLeft)
-                                        <span class="{{ $chipClass }}"><bdi v-pre>{{ __('messages.appointments_with_host', ['name' => $typeHostName]) }}</bdi></span>
-                                    @endif
-                                    <span class="{{ $chipClass }}">{{ $type->duration_minutes }} {{ __('messages.minutes') }}</span>
-                                    <span class="{{ $chipClass }}">{{ $type->isFree() ? __('messages.free') : \App\Utils\MoneyUtils::format((float) $type->price, $type->currency_code) }}</span>
-                                    @if ($type->requires_approval)
-                                        <span class="{{ $chipClass }}">{{ __('messages.appointments_requires_confirmation') }}</span>
-                                    @endif
-                                    <span class="{{ $chipClass }}">{{ trans_choice('messages.appointments_booking_count', $bookingCount, ['count' => $bookingCount]) }}</span>
-                                </div>
-
-                                {{-- Warnings live with the identity, not in the at-a-glance column: that
-                                     column is hidden on a phone, and an always-rendered wrapper holding
-                                     only hidden children is still a flex child, so it was spending the
-                                     parent's gap twice on every row that had nothing to say.
-                                     Independent checks: a paid type with no payment method can ALSO
-                                     have no hours, and an @elseif hid whichever came second. --}}
-                                @if ($hostLeft && ! $isViewer)
-                                    @php
-                                        // Two counts, each the length of the list its link opens: Upcoming
-                                        // leaves out what still waits for approval, which is under Pending.
-                                        $hostBookings = \App\Services\AppointmentHostService::futureBookingCount($role, (int) $type->host_user_id);
-                                        $hostPending = \App\Services\AppointmentHostService::futureBookingCount($role, (int) $type->host_user_id, pending: true);
-                                    @endphp
-                                    <div class="{{ $warnClass }} mt-2">
-                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                                        <span>
-                                            <bdi v-pre>{{ __('messages.appointments_host_left_notice', ['name' => $typeHostName]) }}</bdi>
-                                            <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'edit' => $type->hashedId()]) }}">{{ __('messages.appointments_choose_host') }}</x-link>
-                                            @if ($hostBookings > 0)
-                                                &middot;
-                                                <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings', 'host' => \App\Utils\UrlUtils::encodeId($type->host_user_id)]) }}">{{ trans_choice('messages.appointments_booking_count', $hostBookings, ['count' => $hostBookings]) }}</x-link>
-                                            @endif
-                                            @if ($hostPending > 0)
-                                                &middot;
-                                                <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings', 'filter' => 'pending', 'host' => \App\Utils\UrlUtils::encodeId($type->host_user_id)]) }}">{{ __('messages.appointments_filter_pending') }} ({{ $hostPending }})</x-link>
-                                            @endif
-                                        </span>
-                                    </div>
-                                @endif
-                                @if (! $hasHours)
-                                    <div class="{{ $warnClass }} mt-2">
-                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                                        <span>{{ __('messages.appointments_no_hours_warning') }}</span>
-                                    </div>
-                                @endif
-                                @if (! $type->isFree() && ! $type->paymentMethodAvailable())
-                                    <div class="{{ $warnClass }} mt-2">
-                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                                        <span>{{ __('messages.appointments_payment_not_set') }}@if (auth()->id() === $role->user_id) <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">{{ __('messages.manage_payment_methods') }}</x-link>@endif</span>
-                                    </div>
-                                @endif
-                                {{-- Independent of the one above: a type can be both unpayable by
-                                     plan and missing its method, and each is fixed differently. --}}
-                                @if (! $type->isFree() && ! $type->canTakePayment())
-                                    <div class="{{ $warnClass }} mt-2">
-                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.5 0L3.16 16.25A2 2 0 005 19z" /></svg>
-                                        <span>{{ __('messages.appointments_paid_needs_pro_row') }}</span>
-                                    </div>
-                                @endif
-                            </div>
-
-                            {{-- At a glance. display:none rather than empty on a phone, so it costs no
-                                 gap there: the strip plus its hours line adds ~40px to every row, which
-                                 measured LONGER than the list it replaced. It earns the space from sm
-                                 up, where it is filling a column that was otherwise empty. --}}
-                            <div class="hidden sm:block min-w-0 space-y-2">
-                                {{-- Open and closed differ by fill and weight, not by colour alone, and
-                                     both pairs clear 4.5:1 - a tinted letter on a tinted chip does not
-                                     at this size. --brand-blue-a20 is the pre-mixed alpha the app keeps
-                                     for exactly this; an opacity modifier on an arbitrary var() cannot
-                                     be resolved by Tailwind. --}}
-                                <div class="flex items-center gap-1" aria-hidden="true">
-                                    @foreach ($days as $dayNum => $dayLabel)
-                                        <span title="{{ $dayLabel }}"
-                                              class="inline-flex h-6 w-6 items-center justify-center rounded-md text-[11px] {{ $week['open'][$dayNum] ? 'bg-[var(--brand-blue-a20)] font-semibold text-gray-900 dark:text-white' : 'border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400' }}">{{ mb_substr($dayLabel, 0, 1) }}</span>
-                                    @endforeach
-                                </div>
-                                {{-- The strip is colour-only, so the open days are also spelled out for
-                                     anything that is not looking at it. --}}
-                                <span class="sr-only">{{ $hasHours ? $openDayNames : __('messages.appointments_no_hours_warning') }}</span>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">
-                                    @if ($week['start'] && $week['end'])
-                                        {{ $timeLabel($week['start']) }} - {{ $timeLabel($week['end']) }}
-                                        <span aria-hidden="true">&middot;</span>
-                                    @endif
-                                    {{ $locationLabel($type) }}
-                                </div>
-                            </div>
-
-                            {{-- Actions. Rendered even for a viewer so the three-column template cannot
-                                 collapse to two children and stretch the middle one - but hidden below
-                                 lg in that case, where an empty cluster would only cost a gap. --}}
-                            <div class="{{ $isViewer ? 'hidden lg:flex' : 'flex' }} flex-wrap items-center justify-end gap-2">
                                 @if (! $isViewer)
                                     <form method="POST" action="{{ route('appointments.toggle', ['subdomain' => $role->subdomain, 'hash' => $type->hashedId()]) }}">
                                         @csrf
@@ -394,20 +389,47 @@
                                              id is per-type: several of these render on one page. --}}
                                         <x-toggle name="is_active" :label="__('messages.active')" :checked="$type->is_active" :id="'active-'.$type->hashedId()" data-auto-submit />
                                     </form>
-                                    <x-secondary-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'edit' => $type->hashedId()]) }}">{{ __('messages.edit') }}</x-secondary-link>
+                                @endif
+                            </div>
 
-                                    {{-- Five controls in a row wrapped onto three lines on a phone; the
-                                         rest now live behind a menu. <details> rather than x-dropdown:
-                                         that component is Alpine, which this codebase is migrating away
-                                         from, and appointment-add-to-calendar set the precedent. --}}
+                            <div class="mt-4 grid rounded-xl border border-gray-200 dark:border-gray-700 sm:grid-cols-2">
+                                <div class="min-w-0 p-4">
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500 dark:text-gray-400">{{ __('messages.appointments_available') }}</p>
+                                    {{-- Open and closed differ by fill and weight, not by colour alone. The
+                                         strip is colour-only, so the open days are also spelled out. --}}
+                                    <div class="mt-2 flex items-center gap-1" aria-hidden="true">
+                                        @foreach ($days as $dayNum => $dayLabel)
+                                            <span title="{{ $dayLabel }}"
+                                                  class="appt-day {{ $week['open'][$dayNum] ? 'is-open' : '' }}">{{ mb_substr($dayLabel, 0, 1) }}</span>
+                                        @endforeach
+                                    </div>
+                                    <span class="sr-only">{{ $hasHours ? $openDayNames : __('messages.appointments_no_hours_warning') }}</span>
+                                    @if ($week['start'] && $week['end'])
+                                        <p class="mt-2 text-[15px] font-medium text-gray-900 dark:text-gray-100">@if ($openDaysShort){{ $openDaysShort }}, @endif<span dir="ltr">{{ $timeLabel($week['start']) }} – {{ $timeLabel($week['end']) }}</span></p>
+                                    @endif
+                                </div>
+                                <div class="min-w-0 p-4 border-t sm:border-t-0 sm:border-s border-gray-200 dark:border-gray-700">
+                                    <p class="text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500 dark:text-gray-400">{{ __('messages.bookings') }}</p>
+                                    <p class="mt-2 text-[15px] font-medium text-gray-900 dark:text-gray-100">
+                                        @if ($bookingCount > 0)
+                                            <x-link href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings']) }}">{{ trans_choice('messages.appointments_booking_count', $bookingCount, ['count' => $bookingCount]) }}</x-link>
+                                        @else
+                                            {{ trans_choice('messages.appointments_booking_count', 0, ['count' => 0]) }}
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if (! $isViewer)
+                                <div class="mt-4 flex flex-wrap items-center gap-2">
+                                    <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'edit' => $type->hashedId()]) }}"
+                                       class="{{ $secondaryBtnClass }} px-4 py-2.5 text-[15px] font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.edit') }}</a>
                                     <details class="appt-menu relative">
                                         {{-- px-3 py-3 with a 24px icon is 50px tall, the same as the
                                              px-4 py-3 text-base Edit link beside it. --}}
-                                        <summary class="{{ $secondaryBtnClass }} list-none cursor-pointer px-3 py-3"
-                                                 aria-label="{{ __('messages.actions') }}" title="{{ __('messages.actions') }}">
-                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM18 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                                        </summary>
-                                        <div class="absolute z-20 mt-2 end-0 w-52 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
+                                        <summary class="list-none cursor-pointer rounded-lg px-3 py-2.5 text-[15px] font-semibold text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]"
+                                                 title="{{ __('messages.actions') }}">{{ __('messages.more_actions') }}</summary>
+                                        <div class="absolute z-20 mt-2 start-0 w-52 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
                                             @if ($type->isBookable())
                                                 <a href="{{ $typeUrl }}" target="_blank" rel="noopener" class="{{ $menuItemClass }}">
                                                     <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -436,8 +458,8 @@
                                             </form>
                                         </div>
                                     </details>
-                                @endif
-                            </div>
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 </div>

@@ -13,6 +13,10 @@
             @endforeach
         </svg>
         {{ $heading['heading'] ?? $heading['label'] }}
+        @if (! empty($headingPill))
+        {{-- A short state beside the name ("None connected"), as the 2026-11 redesign shows it. --}}
+        <span class="settings-title-pill">{{ $headingPill }}</span>
+        @endif
     </span>
     @if (! empty($asideUrl))
     <span class="settings-title-aside"><x-link href="{{ $asideUrl }}" target="_blank">{{ $asideLabel }}</x-link></span>

@@ -171,12 +171,12 @@ class ImportPageRenderTest extends TestCase
         $this->assertStringNotContainsString('are read by an AI service', $html);
         // Setting a key up is for whoever runs the install, and it is not "required" here.
         $this->assertStringNotContainsString('Setup Required', $html);
-        $this->assertStringNotContainsString('Get API Key', $html);
+        $this->assertStringNotContainsString('Get API key', $html);
 
         $admin = $this->createOwner(admin: true);
         $this->followRole($admin, $this->role, 'admin');
         $asAdmin = $this->importPage($admin);
-        $this->assertStringContainsString('Get API Key', $asAdmin);
+        $this->assertStringContainsString('Get API key', $asAdmin);
         $this->assertStringContainsString('Optional', $asAdmin);
         $this->assertStringNotContainsString('Setup Required', $asAdmin);
     }

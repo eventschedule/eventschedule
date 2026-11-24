@@ -50,20 +50,22 @@ class MoneyUtils
      * array or a Money-like object becomes '1'. Deliberate, since this is called from more
      * places now, but pass it a number - do not read it as a pure refactor.
      */
-    public static function formatNumber($amount, $currencyCode): string
+    public static function formatNumber($amount, $currencyCode, bool $keepCents = false): string
     {
         $decimals = self::decimalsFor($currencyCode);
 
         $formatted = number_format((float) $amount, $decimals, '.', ',');
 
-        if ($decimals === 2 && str_ends_with($formatted, '.00')) {
+        // A column of amounts (the Sales list) keeps every one at the currency's own places, so
+        // $100.00 sits over $75.50 and the figures line up; everywhere else drops the '.00'.
+        if (! $keepCents && $decimals === 2 && str_ends_with($formatted, '.00')) {
             $formatted = substr($formatted, 0, -3);
         }
 
         return $formatted;
     }
 
-    public static function format($amount, $currencyCode)
+    public static function format($amount, $currencyCode, bool $keepCents = false)
     {
         // Null-safe, because plenty of callers read the code off a nullable relation
         // ($sale->event?->ticket_currency_code). Without this, strtoupper(null) is deprecated
@@ -75,7 +77,7 @@ class MoneyUtils
             $upper = 'USD';
             $currencyCode = 'USD';
         }
-        $formatted = self::formatNumber($amount, $upper);
+        $formatted = self::formatNumber($amount, $upper, $keepCents);
 
         if (isset(self::$displaySymbols[$upper])) {
             return self::$displaySymbols[$upper].$formatted;

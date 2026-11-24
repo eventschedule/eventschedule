@@ -339,6 +339,37 @@ class MonthGridTest extends TestCase
     }
 
     /**
+     * The portal's month (the dashboard and the Schedule tab) writes every day by one rule, the
+     * design review of 2026-11: this week and the weeks that are over alike, the time above the
+     * name, at most two events and then "+N more" with no hours beside it, and no price or ticket
+     * state ("Free entry") under one event and not another. The guest page and the embed keep
+     * their own month, so only the portal's two pages are told.
+     */
+    public function test_the_portals_month_writes_every_day_by_one_rule(): void
+    {
+        $owner = $this->role->users()->first();
+        $dashboard = $this->actingAs($owner)->get(route('home'))->assertOk()->getContent();
+        $tab = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
+        foreach (['the dashboard' => $dashboard, 'the Schedule tab' => $tab] as $page => $html) {
+            $this->assertSame(1, preg_match('/const CAN = \{[^\n]*"portal":true/', $html), $page.' is told it is the portal');
+            // No week is written small, and a day never shows more than its two.
+            $this->assertStringContainsString('const small = !CAN.portal && inThisMonth', $html);
+            $this->assertStringContainsString("if (CAN.portal) { lines = 2; sub = 'none'; keep = 2; art = false; }", $html);
+            $this->assertStringContainsString('if (!small && !cell.past && !CAN.portal) late.forEach', $html);
+            $this->assertStringContainsString("hours: past || CAN.portal ? '' : span,", $html);
+            // The day that is over is quieter, and today says so in a word.
+            $this->assertStringContainsString('.gk-cal:not(.gk-cal-pick) .gk-cal-day-past .gk-cal-more { color: var(--gk-ink-3); }', $html);
+            $this->assertStringContainsString('.gk-cal:not(.gk-cal-pick) .gk-cal-word { display: inline;', $html);
+        }
+
+        auth()->logout();
+        foreach (['the guest page' => '?layout=calendar', 'the embed' => '?embed=true&layout=calendar'] as $page => $query) {
+            $html = $this->get('/'.$this->role->subdomain.$query)->assertOk()->getContent();
+            $this->assertStringNotContainsString('"portal":true', $html, $page.' keeps its own month');
+        }
+    }
+
+    /**
      * The month is inside the calendar's Vue mount, where anything printed as a text node is
      * compiled as a template. Nothing in it prints an event's own text that way: a name is set
      * by the v-clamp directive (as text, at run time), everything else by v-text, and the

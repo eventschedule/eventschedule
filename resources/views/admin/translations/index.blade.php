@@ -71,12 +71,13 @@
               box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
             }
             @media (min-width: 1024px) {
-              /* What the bar holds keeps to the page's frame (layouts/app-admin: 80rem in the
-                 middle of the room beside the 18rem sidebar); the bar itself runs the room. A percentage here is of the window without its
-                 scrollbar, which is what the frame is laid out in; 100vw is not. */
+              /* What the bar holds keeps to the page's column (layouts/app-admin: 61rem of content
+                 in the middle of the room beside the 18rem sidebar); the bar itself runs the room.
+                 A percentage here is of the window without its scrollbar, which is what the
+                 column is laid out in; 100vw is not. */
               .tr-dock {
                 inset-inline-start: 18rem;
-                padding-inline: max(2rem, calc((100% - 18rem - 80rem) / 2));
+                padding-inline: max(2rem, calc((100% - 18rem - 61rem) / 2));
               }
             }
             .tr-dock-row {

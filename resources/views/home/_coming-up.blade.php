@@ -17,107 +17,148 @@
     $frequency = ['daily' => 'daily', 'weekly' => 'weekly', 'monthly_date' => 'monthly', 'monthly_weekday' => 'monthly', 'yearly' => 'yearly'];
     $pill = 'inline-flex items-center px-1.5 py-0.5 rounded-md text-[11px] font-medium leading-4 whitespace-nowrap bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300';
     // A row's own small action. Compact: on an event day several rows carry one.
-    $rowAction = 'inline-flex items-center gap-1.5 px-2.5 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-xs font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]';
+    $rowAction = 'inline-flex items-center gap-1.5 px-3 min-h-[2.5rem] border border-[rgb(var(--ap-border-strong))] dark:border-gray-600 rounded-[0.625rem] text-[13px] font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]';
     $calendarIcon = 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5';
 @endphp
 
+{{-- 2026-11 redesign: the header is a small capitals label with the count and the link to every
+     event; a row is its time (or its day) first, then the event, then the one action at the door.
+     When every row is on today the label says so ("Today · 5 of 56 upcoming"); otherwise it is
+     "Coming up · 56".
+
+     A brand-new organizer ($tiles true) gets the design's first-event card instead: each row a
+     calendar tile (the month on a blue band over the day), the name, "Thu, Dec 3 · 20:00", and
+     under the first one a two-cell strip of what it has sold and how often it was viewed. The
+     numbers are computed for every organizer (HomeDashboard::coming()), so the strip reads them. --}}
+@php
+    $total = (int) ($coming['total'] ?? 0);
+    $allToday = $rows && collect($rows)->every(fn ($row) => $row['when'] === 'today');
+    $title = $allToday
+        ? __('messages.dash_today_of_upcoming', ['count' => number_format(count($rows)), 'total' => number_format($total)])
+        : __('messages.dash_coming_up').' · '.number_format($total);
+    // Named apart from the page's own $fresh: an include is handed every variable its parent holds.
+    $tiles = ($tiles ?? false) === true;
+    $label = 'text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-500 dark:text-gray-400';
+@endphp
 <section class="ap-card rounded-xl flex flex-col overflow-hidden w-full {{ $stretch ? '' : 'self-start' }}" aria-labelledby="dashboard-coming-up">
-    <div class="px-4 sm:px-5 pt-4 sm:pt-5 pb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <h2 id="dashboard-coming-up" class="text-base font-semibold text-gray-900 dark:text-white">{{ __('messages.dash_coming_up') }}</h2>
-        @if ($numbers && $rows)
-            <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.views') }}: {{ __('messages.last_'.$period.'_days') }}</span>
+    <div class="px-4 sm:px-5 pt-4 sm:pt-5 pb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <h2 id="dashboard-coming-up" class="text-xs font-semibold uppercase tracking-[0.06em] text-gray-500 dark:text-gray-400 tabular-nums">{{ $title }}</h2>
+        @if ($showCalendar)
+            <a href="#dashboard-calendar" class="inline-flex items-center gap-1 text-[13px] font-semibold whitespace-nowrap text-[var(--brand-blue)] hover:underline">
+                {{ __('messages.all_events') }}
+                <svg class="w-3.5 h-3.5 {{ is_rtl() ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+            </a>
         @endif
     </div>
 
-    @if ($rows)
-    <ul class="divide-y divide-gray-100 dark:divide-white/[0.06]" style="border-top: 1px solid var(--ap-hairline)">
+    @if ($rows && $tiles)
+    <ul class="px-4 sm:px-5 pb-4 sm:pb-5 pt-2 flex flex-col gap-4">
         @foreach ($rows as $row)
             @php
                 $tickets = $row['tickets'];
-                $ticketLine = $tickets === null ? null : __('messages.'.($tickets['paid'] ? 'sold' : 'registered')).' '.(
+            @endphp
+            <li class="flex flex-col gap-4">
+                <a href="{{ $row['url'] }}" class="group flex items-center gap-3.5 min-w-0 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                    {{-- The calendar tile. The month is the app's own word, so it is not v-pre;
+                         the day is a number. --}}
+                    <span class="w-12 shrink-0 overflow-hidden rounded-[0.625rem] text-center" style="border: 1px solid rgb(var(--ap-border))" aria-hidden="true">
+                        <span class="block py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] text-white bg-[var(--brand-button-bg)]">{{ $row['month'] }}</span>
+                        <span class="block pt-[3px] pb-1 text-lg font-bold leading-tight text-gray-900 dark:text-white tabular-nums">{{ $row['day'] }}</span>
+                    </span>
+                    <span class="flex flex-col gap-[3px] min-w-0">
+                        <span class="flex items-center gap-2 min-w-0">
+                            <span class="break-words text-base font-semibold tracking-[-0.01em] text-gray-900 dark:text-white group-hover:text-[var(--brand-blue)]" v-pre>{{ $row['name'] }}</span>
+                            @if ($row['visibility'] !== 'public')
+                                <span class="{{ $pill }}">{{ __('messages.'.$row['visibility']) }}</span>
+                            @endif
+                        </span>
+                        <span class="text-[13px] text-gray-600 dark:text-gray-400">{{ $row['date'] }} &middot; <span dir="ltr">{{ $row['time'] }}</span>@if ($row['series']) &middot; {{ __('messages.'.($frequency[$row['frequency'] ?? ''] ?? 'recurring')) }}@endif</span>
+                    </span>
+                </a>
+                @if ($loop->first)
+                    {{-- Sold (or registered) and views, two cells. An event with neither tickets
+                         nor sign-ups has nothing to count there, and shows a dash. --}}
+                    <div class="grid grid-cols-2 rounded-[0.625rem]" style="border: 1px solid rgb(var(--ap-border))">
+                        <div class="px-3 py-2.5 flex flex-col gap-0.5" style="border-inline-end: 1px solid rgb(var(--ap-border))">
+                            <span class="{{ $label }}">{{ __('messages.'.($tickets && ! $tickets['paid'] ? 'registered' : 'sold')) }}</span>
+                            <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-white">
+                                @if ($tickets === null)
+                                    <span class="text-gray-500 dark:text-gray-400" aria-hidden="true">&ndash;</span>
+                                @elseif ($tickets['capacity'])
+                                    {{ __('messages.dash_count_of_total', ['count' => number_format($tickets['sold']), 'total' => number_format($tickets['capacity'])]) }}
+                                @else
+                                    {{ number_format($tickets['sold']) }}
+                                @endif
+                            </span>
+                        </div>
+                        <div class="px-3 py-2.5 flex flex-col gap-0.5">
+                            <span class="{{ $label }}">{{ __('messages.views') }}</span>
+                            <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-white">{{ number_format($row['views'] ?? 0) }}</span>
+                        </div>
+                    </div>
+                @endif
+            </li>
+        @endforeach
+    </ul>
+    @elseif ($rows)
+    <ul class="px-4 sm:px-5 pb-2 divide-y divide-[rgb(var(--ap-border))]">
+        @foreach ($rows as $row)
+            @php
+                $tickets = $row['tickets'];
+                $ticketLine = $tickets === null ? null : (
                     $tickets['capacity']
                         ? __('messages.dash_count_of_total', ['count' => number_format($tickets['sold']), 'total' => number_format($tickets['capacity'])])
                         : number_format($tickets['sold'])
-                );
-                // A draft nobody has seen has no views to report; a public event with none says so.
-                $viewsLine = $row['views'] !== null && ($row['views'] > 0 || $row['visibility'] === 'public')
-                    ? __('messages.views').' '.number_format($row['views'])
-                    : null;
-                $fill = $tickets !== null && $tickets['capacity'] ? min(100, (int) round($tickets['sold'] / $tickets['capacity'] * 100)) : null;
+                ).' '.mb_strtolower(__('messages.'.($tickets['paid'] ? 'sold' : 'registered')));
+                $whenLine = $row['when'] === 'today'
+                    ? null
+                    : ($row['when'] === 'tomorrow' ? __('messages.dash_tomorrow') : $row['date']);
             @endphp
-            <li class="relative flex items-center gap-3 px-4 sm:px-5 py-2.5 hover:bg-gray-50 dark:hover:bg-black/10 transition-all duration-200">
-                @include('home._thumb', ['image' => $row['image'], 'icon' => $calendarIcon])
+            <li class="relative flex items-center gap-3 py-3">
+                {{-- Today's rows lead with the time; any other day leads with the day, and the time
+                     follows it. Either way in the brand colour: a scheduled thing leads with when,
+                     in blue (the design review of 2026-11). --}}
+                <span class="w-[4.25rem] shrink-0 text-[13px] font-semibold leading-tight tabular-nums text-[var(--brand-blue)]" dir="auto">
+                    @if ($whenLine)
+                        <span class="block">{{ $whenLine }}</span>
+                    @endif
+                    <span class="block whitespace-nowrap {{ $whenLine ? 'font-normal text-gray-500 dark:text-gray-400' : '' }}" dir="ltr">{{ $row['time'] }}</span>
+                </span>
 
-                <div class="min-w-0 flex-1">
+                <div class="min-w-0 flex-1 flex flex-col gap-0.5">
                     <p class="flex items-center gap-2 min-w-0">
-                        {{-- The stretched link: the whole row opens the event, and Check in below
-                             stays a control of its own above it (relative z-10). --}}
-                        <a href="{{ $row['url'] }}" class="truncate text-sm font-medium text-gray-900 dark:text-white after:absolute after:inset-0 focus:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-[var(--brand-blue)]">{{ $row['name'] }}</a>
-                        @if ($row['series'])
-                            <span class="{{ $pill }}">{{ __('messages.'.($frequency[$row['frequency'] ?? ''] ?? 'recurring')) }}</span>
-                        @endif
+                        {{-- The whole row is the link; Check-in stays a control of its own above it. --}}
+                        <a href="{{ $row['url'] }}" class="break-words text-[15px] font-semibold tracking-[-0.01em] text-gray-900 dark:text-white after:absolute after:inset-0 focus:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-[var(--brand-blue)]" v-pre>{{ $row['name'] }}</a>
                         @if ($row['visibility'] !== 'public')
                             <span class="{{ $pill }}">{{ __('messages.'.$row['visibility']) }}</span>
                         @endif
                     </p>
-                    {{-- When first, then whose: a long schedule name cuts itself short at the end
-                         of the line, and the time never does. --}}
-                    <p class="truncate text-xs text-gray-500 dark:text-gray-400">
-                        @if ($row['when'] === 'today')
-                            <span class="font-medium text-[var(--brand-blue)]">{{ __('messages.today') }}</span>
-                        @elseif ($row['when'] === 'tomorrow')
-                            <span class="font-medium text-gray-700 dark:text-gray-300">{{ __('messages.dash_tomorrow') }}</span>
-                        @else
-                            {{ $row['date'] }}
+                    {{-- Wraps rather than cuts: "Recurring" at the end of a long venue name used
+                         to be cut to "R…" on the first row. --}}
+                    <p class="text-[13px] leading-snug text-gray-600 dark:text-gray-400">
+                        {{ collect([$row['schedule'] ?? null, $ticketLine])->filter()->implode(' · ') }}
+                        @if ($row['series'])
+                            @if ($row['schedule'] || $ticketLine) &middot; @endif{{ __('messages.'.($frequency[$row['frequency'] ?? ''] ?? 'recurring')) }}
                         @endif
-                        &middot; <span dir="ltr">{{ $row['time'] }}</span>@if ($row['schedule']) &middot; {{ $row['schedule'] }}@endif
                     </p>
-                    @if ($ticketLine || $viewsLine)
-                        <p class="sm:hidden mt-0.5 text-xs text-gray-700 dark:text-gray-300">{{ collect([$ticketLine, $viewsLine])->filter()->implode(' · ') }}</p>
-                    @endif
-                    @if ($row['check_in'])
-                        <a href="{{ $row['check_in'] }}" class="relative z-10 mt-1.5 {{ $rowAction }}">{{ __('messages.checkin_dashboard') }}</a>
-                    @endif
                 </div>
 
-                @if ($ticketLine || $viewsLine)
-                <div class="hidden sm:block shrink-0 text-end">
-                    <p class="text-xs whitespace-nowrap text-gray-700 dark:text-gray-300">{!! $ticketLine ? e($ticketLine) : '&nbsp;' !!}</p>
-                    @if ($fill !== null)
-                        {{-- How full, drawn: a count against a limit is easier to weigh as a bar. --}}
-                        <span class="block my-1 h-1 w-full min-w-[5.5rem] rounded-full bg-gray-200 dark:bg-white/[0.15]" role="img" aria-label="{{ $fill }}%">
-                            <span class="block h-1 rounded-full bg-[var(--brand-button-bg)]" style="width: {{ $fill }}%"></span>
-                        </span>
-                    @endif
-                    <p class="text-xs whitespace-nowrap text-gray-500 dark:text-gray-400">{!! $viewsLine ? e($viewsLine) : '&nbsp;' !!}</p>
-                </div>
+                @if ($row['check_in'])
+                    <a href="{{ $row['check_in'] }}" class="relative z-10 shrink-0 {{ $rowAction }}">{{ __('messages.checkin_dashboard') }}</a>
                 @endif
-
-                <svg class="w-4 h-4 shrink-0 text-gray-400 {{ is_rtl() ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
             </li>
         @endforeach
     </ul>
     @else
-        <div class="px-5 py-8 flex flex-col items-center text-center" style="border-top: 1px solid var(--ap-hairline)">
+        <div class="px-5 py-8 flex flex-col items-center text-center">
             <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $calendarIcon }}" /></svg>
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_upcoming_events') }}</p>
-            {{-- The way to add one, where there is exactly one schedule it could go to. With
-                 several, "Add event" in the header lists them, and that list is not repeated.
-                 Not for a brand-new organizer ($numbers is false there): the setup guide
-                 directly above this card is already asking for exactly that. --}}
+            {{-- A way to add one, where there is exactly one place to add it to. With several, "Add
+                 event" in the header lists them, and that list is not repeated. Not for a brand-new
+                 organizer ($numbers is false there): the setup guide is already asking for it. --}}
             @if ($numbers && count($dashboard['addTargets'] ?? []) === 1)
                 <x-secondary-link :href="$dashboard['addTargets'][0]['add']" class="mt-4">{{ __('messages.add_event') }}</x-secondary-link>
             @endif
         </div>
     @endif
-
-    <div class="mt-auto px-4 sm:px-5 py-3 flex items-center justify-between gap-3" style="border-top: 1px solid var(--ap-hairline)">
-        <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.panel_upcoming_count') }} <span class="tabular-nums">{{ number_format($coming['total'] ?? 0) }}</span></span>
-        @if ($showCalendar)
-            <x-link href="#dashboard-calendar" class="inline-flex items-center gap-1 text-sm font-medium whitespace-nowrap">
-                {{ __('messages.all_events') }}
-                <svg class="w-3.5 h-3.5 {{ is_rtl() ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-            </x-link>
-        @endif
-    </div>
 </section>

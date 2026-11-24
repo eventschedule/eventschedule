@@ -2,6 +2,8 @@
 
 namespace Tests\Browser\Traits;
 
+use App\Models\Role;
+use Illuminate\Support\Facades\DB;
 use Laravel\Dusk\Browser;
 
 trait AccountSetupTrait
@@ -185,10 +187,10 @@ trait AccountSetupTrait
         // a pill in the bottom corner of the schedule's pages for a month. These journeys are not
         // about it and click things that sit in that corner, so it ends here, for this schedule's
         // owner only. Written straight to the database, as upgradeToEnterprise() does.
-        $scheduleId = \App\Models\Role::where('subdomain', $slug)->value('id');
+        $scheduleId = Role::where('subdomain', $slug)->value('id');
 
         if ($scheduleId) {
-            \Illuminate\Support\Facades\DB::table('users')
+            DB::table('users')
                 ->whereRaw("JSON_EXTRACT(setup_guide, '$.role_id') = ?", [$scheduleId])
                 ->update(['setup_guide' => null]);
         }
@@ -387,7 +389,7 @@ trait AccountSetupTrait
      */
     protected function upgradeToEnterprise(string $slug): void
     {
-        \App\Models\Role::where('subdomain', $slug)->update([
+        Role::where('subdomain', $slug)->update([
             'plan_type' => 'enterprise',
             'plan_expires' => now()->addYear()->format('Y-m-d'),
         ]);
@@ -437,8 +439,8 @@ trait AccountSetupTrait
         $browser->visit('/dashboard')
             ->waitForText($name, 5)
             ->press($name)
-            ->waitForText('Log Out', 5)
-            ->clickLink('Log Out')
+            ->waitForText('Log out', 5)
+            ->clickLink('Log out')
             ->waitForLocation('/login', 5)
             ->assertPathIs('/login');
         */

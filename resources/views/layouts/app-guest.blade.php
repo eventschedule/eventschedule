@@ -659,6 +659,23 @@
     @endif
 
     <div id="main-content" tabindex="-1" class="flex-grow relative">
+        {{-- The schedule's own people see a thin bar over their public page that says so, with
+             the way back to managing it (the 2026-11 redesign), in place of the header's Manage
+             button. Never in an embed, and never to a visitor. --}}
+        @if (($bannerBar || ($event && request()->routeIs('event.view_guest', 'event.view_guest_full', 'event.view_guest_with_id'))) && ! request()->embed && auth()->check() && auth()->user()->isMember($role->subdomain))
+            <div class="gk-ownerbar" translate="no">
+                <div class="gk-ownerbar-inner">
+                    <span class="gk-ownerbar-text">{{ $event ? __('messages.owner_bar_event') : __('messages.owner_bar_schedule') }}</span>
+                    <span class="gk-ownerbar-links">
+                        @if ($event && auth()->user()->canEditEvent($event))
+                            <a href="{{ app_url(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)], false)) }}">{{ __('messages.edit_event') }}</a>
+                        @endif
+                        <a href="{{ app_url(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule'], false)) }}">{{ __('messages.manage') }} <span aria-hidden="true">&rarr;</span></a>
+                    </span>
+                </div>
+            </div>
+        @endif
+
         @if ($exampleBar)
             @include('partials.example-schedule-bar')
         @endif
@@ -771,31 +788,37 @@
          eventschedule.com), and it used to sit against the bottom edge of the window there: the
          chip's own padding was the only room under it. --}}
     @if (! request()->embed && ! request()->graphic)
-    {{-- The foot of the page, ONE pill (the 2026-11 redesign): the privacy policy that covers
-         this page, the way back into the cookie banner (GDPR Art. 7(3): withdrawing consent must
-         be as easy as giving it), and, where it is owed, the credit. The privacy link carries a
-         small mark of its own, in colour like the credit's, so the two halves balance, and the
-         links share one hover (partials/guest-stage-styles, .es-foot-link). It is the last thing on the page, so it
-         keeps room under it (and es-credit-chip's lift clear of the phone's bar). --}}
-    <nav aria-label="{{ __('messages.page_footer') }}" data-privacy-pill class="es-credit-chip flex justify-center px-4 pt-8 pb-8 {{ $creditReason && $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}">
-        <p class="es-foot">
-            <a href="{{ policy_url('privacy') }}" class="es-foot-link">
-                <i class="es-foot-dot" aria-hidden="true"></i>
-                <span class="es-foot-word">{{ __('messages.privacy_policy') }}</span>
-            </a>
-            @if (cookie_banner_visible())
-                <button type="button" data-cookie-consent-reopen class="es-foot-link"><span class="es-foot-word">{{ __('messages.cookie_consent_manage') }}</span></button>
-            @endif
+    @php
+        // "Made with Event Schedule", the name in bold. The sentence is the visitor's language
+        // and can be reworded at /admin/translations, but the name is the license credit and not
+        // the operator's to drop (Role::creditChipTitle() says why), so wording without it falls
+        // back to the English.
+        $madeWith = e(__('messages.guest_made_with', ['app' => ':app']));
+        $madeWith = str_contains($madeWith, ':app') ? $madeWith : 'Made with :app';
+        $madeWith = str_replace(':app', '<b class="es-foot-name">Event Schedule</b>', $madeWith);
+    @endphp
+    {{-- The foot of the page (the 2026-11 designs): one row under a hairline, in the page's own
+         column. At its start the privacy policy that covers this page and the way back into the
+         cookie banner (GDPR Art. 7(3): withdrawing consent must be as easy as giving it); at its
+         end, where it is owed, the credit: the ES mark and "Made with Event Schedule". A phone
+         centres the two on lines of their own. It is the last thing on the page, so it keeps room
+         under it (and es-credit-chip's lift clear of the phone's bar). --}}
+    <nav aria-label="{{ __('messages.page_footer') }}" data-privacy-pill class="es-credit-chip es-foot-nav pt-8 pb-8 {{ $creditReason && $role->show_accessibility_widget ? 'es-a11y-credit-clear' : '' }}" style="--gk-col: {{ $upcoming !== null ? '60rem' : '70rem' }}">
+        <div class="es-foot">
+            <p class="es-foot-links">
+                <a href="{{ policy_url('privacy') }}" class="es-foot-link">{{ __('messages.privacy_policy') }}</a>
+                @if (cookie_banner_visible())
+                    <button type="button" data-cookie-consent-reopen class="es-foot-link">{{ __('messages.cookie_consent_manage') }}</button>
+                @endif
+            </p>
             @if ($creditReason)
-                <span aria-hidden="true" class="es-foot-sep"></span>
                 {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
                 <a href="{{ $creditUrl }}" target="_blank" rel="noopener" title="{{ \App\Models\Role::creditChipTitle() }}" class="es-foot-credit">
-                    <span aria-hidden="true" class="es-foot-es">ES</span>
-                    <span>Event Schedule</span>
-                    <svg class="es-foot-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    <span aria-hidden="true" class="es-foot-es"><b>E</b>S</span>
+                    <span>{!! $madeWith !!}</span>
                 </a>
             @endif
-        </p>
+        </div>
     </nav>
     @endif
 

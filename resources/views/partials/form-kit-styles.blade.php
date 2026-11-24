@@ -298,7 +298,8 @@
     .event-hint {
       margin: 0.25rem 0 0.75rem;
       font-size: 0.8125rem;
-      color: rgb(var(--ap-ink-3));
+      line-height: 1.45;
+      color: rgb(var(--ap-ink-2));
     }
     .event-status {
       display: inline-flex;
@@ -438,13 +439,12 @@
         display: none;
       }
     }
+    /* What kind of page this is, over its title, in the brand colour (the 2026-11 redesign). */
     .event-eyebrow {
-      margin-bottom: 0.125rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: rgb(var(--ap-ink-3));
+      margin-bottom: 0.375rem;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--brand-blue);
     }
     .section-nav-text {
       text-align: start;
@@ -497,7 +497,7 @@
     .event-url-strip {
       display: flex;
       align-items: baseline;
-      gap: 0.75rem;
+      gap: 0.875rem;
       min-width: 0;
       margin-top: 0.25rem;
       font-size: 0.875rem;
@@ -524,9 +524,17 @@
     }
     .event-url-strip a.event-link {
       flex: none;
-      font-size: 0.8125rem;
-      font-weight: 500;
+      font-size: 0.875rem;
+      font-weight: 600;
       color: var(--brand-blue);
+    }
+    /* View opens the public page in a new tab, and says so with an arrow (the 2026-11 redesign).
+       Drawn here so every page's strip has it; a link that prints its own arrow is left alone.
+       The empty alternative keeps a screen reader from reading the arrow out. */
+    .event-url-strip a.event-link[target="_blank"]:not(:has([aria-hidden]))::after {
+      content: "\2197";
+      content: "\2197" / "";
+      margin-inline-start: 0.25em;
     }
     .event-url-strip a.event-link:hover {
       text-decoration: underline;
@@ -536,8 +544,8 @@
       padding: 0;
       border: 0;
       background: none;
-      font-size: 0.8125rem;
-      font-weight: 500;
+      font-size: 0.875rem;
+      font-weight: 600;
       color: var(--brand-blue);
     }
     .event-url-strip button.event-link:hover {
@@ -581,7 +589,7 @@
     }
     /* A row's one-line summary. */
     .event-row-summary.is-empty {
-      color: rgb(var(--ap-ink-3));
+      color: rgb(var(--ap-ink-2));
     }
     .event-row-summary:not(.is-empty) {
       color: rgb(var(--ap-ink-2));
@@ -603,6 +611,224 @@
       grid-template-columns: minmax(0, 1fr);
       gap: 0.625rem;
     }
+
+    /* The Tickets tab, as the 2026-11 redesign draws it. Four tiles ("No tickets" is one of them),
+       two across on a phone and four from a laptop. */
+    .event-tiles.event-tiles-4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    @media (min-width: 1024px) {
+      .event-tiles.event-tiles-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+    /* Each ticket type is a card of its own, titled, its name first. */
+    .event-ticket-card {
+      margin-top: 1rem;
+      padding: 1rem;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.75rem;
+      background: rgb(var(--ap-surface));
+    }
+    .event-ticket-card-title {
+      margin: 0 0 0.75rem;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    @media (min-width: 640px) {
+      /* Zip 16: the name has a line of its own, then price and quantity side by side. */
+      .event-ticket-card .event-ticket-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .event-ticket-card .event-ticket-grid > .event-ticket-name {
+        grid-column: 1 / -1;
+      }
+      .event-ticket-card .event-ticket-grid > :not(.event-ticket-name):not(.event-ticket-chips) {
+        order: 1;
+      }
+      .event-ticket-card .event-ticket-grid > .event-ticket-chips {
+        order: 2;
+        grid-column: 1 / -1;
+      }
+    }
+    .event-ticket-card .event-ticket-name {
+      order: 0;
+    }
+    /* What a ticket type can add, as small pills; Remove stays a quiet red word at the end. */
+    .event-ticket-chips > button:not(.ms-auto) {
+      margin-top: 0;
+      padding: 0.3125rem 0.75rem;
+      border: 1px solid rgb(var(--ap-border-strong));
+      border-radius: 999px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      line-height: 1.25rem;
+      color: rgb(var(--ap-ink));
+      background: rgb(var(--ap-surface));
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+    .event-ticket-chips > button:not(.ms-auto):hover {
+      border-color: var(--brand-blue);
+      color: var(--brand-blue);
+    }
+    /* The 2026-11 redesign of the Tickets tab: a type folds to one line (its name, its price and
+       quantity, and Edit), the open one says Close there; the tab's name carries how many are
+       sold; its links are blue words; a warning is an amber band with its action at the end. */
+    button.event-ticket-head,
+    form button.event-ticket-head {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: none;
+      text-align: start;
+      cursor: pointer;
+    }
+    .event-ticket-card:not(.is-folded) > button.event-ticket-head {
+      margin-bottom: 1rem;
+    }
+    .event-ticket-head-name {
+      min-width: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: rgb(var(--ap-ink));
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .event-ticket-head-meta {
+      flex: none;
+      font-size: 0.9375rem;
+      color: rgb(var(--ap-ink-2));
+    }
+    .event-ticket-head-act {
+      flex: none;
+      margin-inline-start: auto;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+    }
+    .event-ticket-card.is-folded {
+      margin-top: 0.625rem;
+      padding-block: 0.875rem;
+    }
+    .event-tickets-sold {
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: rgb(var(--ap-ink-2));
+    }
+    .event-tickets-sold strong {
+      font-weight: 700;
+      color: rgb(var(--ap-ink));
+    }
+    .event-head-link {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+    }
+    .event-head-link:hover {
+      text-decoration: underline;
+    }
+    .event-warn-band {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.25rem 1rem;
+      margin-top: 1rem;
+      padding: 0.875rem 1rem;
+      border-radius: 1rem;
+      background: rgb(254 243 199 / 0.8);
+      font-size: 0.9375rem;
+      color: rgb(var(--ap-ink));
+    }
+    .dark .event-warn-band {
+      background: rgb(120 53 15 / 0.3);
+    }
+    .event-warn-band-act,
+    form button.event-warn-band-act {
+      padding: 0;
+      border: 0;
+      background: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #92400e;
+    }
+    .dark .event-warn-band-act {
+      color: #fcd34d;
+    }
+    .event-ticket-types-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.25rem 1rem;
+      margin: 1.5rem 0 0.25rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
+    }
+    .event-ticket-capacity {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-transform: none;
+      color: rgb(var(--ap-ink-2));
+    }
+    .event-ticket-types-head + .event-ticket-card {
+      margin-top: 0.5rem;
+    }
+    #section-tickets .event-subrows {
+      padding: 0 1rem;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.875rem;
+    }
+
+    button.event-ticket-add,
+    form button.event-ticket-add {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px dashed rgb(var(--ap-border-strong));
+      border-radius: 0.75rem;
+      background: none;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+    button.event-ticket-add:hover,
+    form button.event-ticket-add:hover {
+      border-color: var(--brand-blue);
+      background: var(--brand-blue-a10);
+    }
+    /* The plan's rule for paid tickets, once, as a tinted note. */
+    .event-pro-note {
+      margin-top: 1rem;
+      padding: 0.875rem 1rem;
+      border-radius: 0.75rem;
+      background: var(--brand-blue-a10);
+      font-size: 0.875rem;
+      line-height: 1.45;
+      color: rgb(var(--ap-ink-2));
+    }
+    .event-pro-note strong {
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    .event-pro-note-link {
+      display: inline-block;
+      margin-top: 0.375rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+    }
+    .event-pro-note-link:hover {
+      text-decoration: underline;
+    }
     button.event-tile,
     form button.event-tile {
       display: flex;
@@ -622,11 +848,13 @@
     form button.event-tile:hover {
       border-color: var(--brand-blue);
     }
+    /* The chosen tile: a 2px blue edge on the card's own white (the 2026-11 design), where it
+       was a blue tint with a 1px edge. The second pixel is an inset ring, so nothing moves. */
     button.event-tile.is-on,
     form button.event-tile.is-on {
       border-color: var(--brand-blue);
-      background: var(--brand-blue-a10);
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+      background: rgb(var(--ap-surface));
+      box-shadow: inset 0 0 0 1px var(--brand-blue);
     }
     .event-tile-title {
       display: flex;
@@ -639,9 +867,8 @@
     .event-tile.is-on .event-tile-title {
       color: var(--brand-blue);
     }
-    .event-tile.is-on .event-tile-title::before {
-      content: "\2713";
-    }
+    /* The chosen tile is said by its blue border and title (the 2026-11 redesign); the tick
+       stays for a screen reader's sake in aria-pressed, not as a mark. */
     .event-tile-help {
       font-size: 0.8125rem;
       color: rgb(var(--ap-ink-3));
@@ -808,7 +1035,7 @@
       color: rgb(var(--ap-ink-3));
     }
     @media (min-width: 640px) {
-      .event-tiles {
+      .event-tiles:not(.event-tiles-4) {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
@@ -824,9 +1051,9 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      font-size: 0.8125rem;
+      font-size: 0.75rem;
       font-weight: 400;
-      line-height: 1.25rem;
+      line-height: 1.4;
       color: rgb(var(--ap-ink-2));
     }
     .section-nav-summary.is-empty {
@@ -878,6 +1105,7 @@
     .event-save-status {
       min-height: 1.25rem;
       font-size: 0.875rem;
+      font-weight: 500;
       color: rgb(var(--ap-ink-2));
     }
     .event-save-status > span {
@@ -918,7 +1146,7 @@
       border: 0;
       background: none;
       font-size: 0.9375rem;
-      font-weight: 600;
+      font-weight: 500;
       color: rgb(var(--ap-ink-2));
     }
     button.event-bar-text:hover,
@@ -928,7 +1156,10 @@
     /* Nothing to save yet on an existing event: Save is still there and still works, it just stops
        asking to be pressed. */
     button.event-bar-save.is-idle,
-    form button.event-bar-save.is-idle,
+    form button.event-bar-save.is-idle {
+      opacity: 0.45;
+      box-shadow: none;
+    }
     button.event-bar-quiet,
     form button.event-bar-quiet {
       border: 1px solid rgb(var(--ap-border-strong));
@@ -948,13 +1179,23 @@
       .event-save-spacer {
         height: 0;
       }
+      /* A card that floats at the foot of the form (the 2026-11 redesign), not a strip across
+         the room. */
       .event-save-bar {
         position: sticky;
+        bottom: 0.75rem;
         z-index: 30;
-        margin: 1.5rem -2rem 0;
-        padding: 0.75rem 2rem;
-        background: rgb(var(--ap-bg));
-        box-shadow: none;
+        margin: 1rem 0 0;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgb(var(--ap-border));
+        border-radius: 1rem;
+        background: rgb(var(--ap-surface));
+        box-shadow: 0 1px 2px rgba(20, 22, 26, 0.06), 0 8px 24px rgba(20, 22, 26, 0.12);
+      }
+      /* The schedule form and the settings page put their bar in the cards' column, whose
+         space-y-0 would sit it flush against the card. */
+      #form-save-bar.event-save-bar {
+        margin-top: 1rem;
       }
       .event-save-bar-inner {
         flex-direction: row;
@@ -975,37 +1216,23 @@
         min-width: 7.5rem;
       }
     }
-    /* The bar keeps its reach past the gutters at every width: that is what covers a card,
-       shadow and all, as it scrolls under. Its line does not: where the page's frame has stopped
-       growing (layouts/app-admin: 84rem beside the 18rem sidebar) a line a gutter longer than
-       the page on each side, and still short of the window, belonged to neither. From there the
-       bar's own border goes clear and the line is drawn at the frame's width. */
-    @media (min-width: 102rem) {
-      .event-save-bar {
-        border-top-color: transparent;
-      }
-      .event-save-bar::before {
-        content: "";
-        position: absolute;
-        inset-inline: 2rem;
-        top: -1px;
-        border-top: 1px solid rgb(var(--ap-border));
-        pointer-events: none;
-      }
+    /* A ticket type's description: two lines to start, growing with what is typed (where the
+       browser can), up to about eight. */
+    .event-ticket-desc textarea {
+      min-height: 4.25rem;
+      max-height: 12rem;
+      field-sizing: content;
     }
-
-    .section-nav-link.validation-error {
-      border-inline-start-color: #dc2626 !important;
+    /* A tab holding a field that was refused says so in red. The side menu has no coloured line
+       any more (the 2026-11 review: a white tile for the open section and nothing else), so the
+       old red edge drew nothing; the name turns red instead, open or not. */
+    .section-nav-link.validation-error,
+    .section-nav-link.validation-error.nav-active {
+      color: #b42318;
     }
-
-    @media (prefers-color-scheme: dark) {
-      .section-nav-link.validation-error {
-        border-inline-start-color: #ef4444 !important;
-      }
-    }
-
-    .dark .section-nav-link.validation-error {
-      border-inline-start-color: #ef4444 !important;
+    .dark .section-nav-link.validation-error,
+    .dark .section-nav-link.validation-error.nav-active {
+      color: #f87171;
     }
 
     /* Mobile accordion styles */
@@ -1040,8 +1267,9 @@
       justify-content: space-between;
       gap: 1rem;
       margin-bottom: 0.25rem;
-      font-size: 1.125rem;
-      font-weight: 600;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
       color: rgb(var(--ap-ink));
     }
 
@@ -1052,16 +1280,123 @@
       min-width: 0;
     }
 
-    .form-kit-title > span:first-child > svg {
-      width: 1.5rem;
-      height: 1.5rem;
+    /* The 2026-11 redesign names a section in words alone: the tab list beside it has no icons
+       either. The same for the headings the schedule form writes by hand. */
+    .form-kit-title > span:first-child > svg,
+    .section-content .section-heading-name > svg {
+      display: none;
+    }
+    .section-content h2:has(> .section-heading-name) {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* A row says what pressing it does, in words, where it had a chevron: Add when nothing is set,
+       Change when something is, Hide when it is open. The words are the page's own translations
+       (--row-add, --row-change and --row-hide, set by layouts/app-admin). */
+    .event-subrow .event-row-chevron,
+    button.event-row .event-row-chevron {
+      display: none;
+    }
+    .event-subrow::after,
+    button.event-row::after {
+      content: var(--row-change, "Change");
       flex: none;
+      margin-inline-start: auto;
+      padding-inline-start: 0.75rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+    }
+    /* Add only where the line is blank: a line that says a state ("Off", "None") is something to
+       change, as the 2026-11 redesign words it. */
+    .event-subrow:has(.event-row-summary bdi:empty)::after,
+    button.event-row:has(.event-row-summary bdi:empty)::after {
+      content: var(--row-add, "Add");
+    }
+    /* A row whose word is its own ("Set up" on a payment method not yet connected). */
+    .event-subrow[data-row-action][data-row-action]::after {
+      content: attr(data-row-action);
+    }
+    .event-subrow[aria-expanded="true"][aria-expanded]::after,
+    button.event-row[aria-expanded="true"][aria-expanded]::after {
+      content: var(--row-hide, "Hide");
+    }
+
+    /* Switches at the end of their line, the name and what it does before them (the 2026-11
+       redesign's preferences). */
+    .toggles-end > div > .flex.items-center.gap-3 {
+      flex-direction: row-reverse;
+      justify-content: space-between;
+    }
+    .toggles-end > div > .flex.items-center.gap-3 > label:last-child {
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    .toggles-end > div > p.ms-14 {
+      margin-inline-start: 0;
+      margin-inline-end: 3.5rem;
+      margin-top: 0.125rem;
+    }
+
+    /* Settings > Payment methods with nothing connected (the 2026-11 redesign): Stripe on its own,
+       with its button, and the other ways listed under it. */
+    .payment-hero {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem 1rem;
+      margin: 0.5rem 0 1.75rem;
+      padding: 1.25rem;
+      border-radius: 0.875rem;
+      /* A pale wash of the brand blue over the card (#f3f6ff on white), so it follows the palette
+         and reads as a blue tint in dark mode too. */
+      background: color-mix(in srgb, var(--brand-blue) 6%, rgb(var(--ap-surface)));
+    }
+    .payment-hero-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: rgb(var(--ap-ink));
+    }
+    .payment-hero-help {
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      line-height: 1.45;
+      color: rgb(var(--ap-ink-2));
+    }
+    .payment-other-label {
+      margin-bottom: 0.625rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
+    }
+    .event-subrow.is-hero-twin:not([aria-expanded="true"]) {
+      display: none;
+    }
+    .settings-title-pill {
+      display: inline-flex;
+      align-items: center;
+      margin-inline-start: 0.5rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 999px;
+      background: rgb(var(--ap-surface-sunken));
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0;
+      color: rgb(var(--ap-ink-2));
     }
 
     .form-kit-lead {
+      max-width: 40rem;
       margin: 0 0 1.25rem;
-      font-size: 0.875rem;
-      color: rgb(var(--ap-ink-3));
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      color: rgb(var(--ap-ink-2));
     }
 
     .form-kit-title + :not(.form-kit-lead) {
@@ -1115,6 +1450,9 @@
         .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-row-summary {
           grid-column: 2;
           margin-inline-start: 0.875rem;
+          /* A line wraps rather than being cut: beside the Style tab's preview the column is
+             narrow, and "Gradient · Custom" came out as "Gradien...". */
+          white-space: normal;
         }
         .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow > .event-badge-count {
           grid-column: 3;
@@ -1238,4 +1576,144 @@
       }
     }
 
+
+    /* An AI action beside a section's heading (the 2026-11 redesign): a pill in words, no icon. */
+    button.form-kit-ai,
+    form button.form-kit-ai {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      min-height: 2.25rem;
+      padding: 0 0.875rem;
+      border: 1px solid rgb(var(--ap-border-strong));
+      border-radius: 999px;
+      background: rgb(var(--ap-surface));
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: normal;
+      color: rgb(var(--ap-ink));
+      white-space: nowrap;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    button.form-kit-ai:hover,
+    form button.form-kit-ai:hover {
+      border-color: var(--brand-blue);
+      color: var(--brand-blue);
+    }
+    button.form-kit-ai.is-locked,
+    form button.form-kit-ai.is-locked {
+      color: rgb(var(--ap-ink-3));
+    }
+
+    /* A button that picks a file (the 2026-11 redesign): a plain bordered key, 40px tall. */
+    button.form-kit-file,
+    form button.form-kit-file {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.5rem;
+      padding: 0 0.875rem;
+      border: 1px solid rgb(var(--ap-border-strong));
+      border-radius: 0.625rem;
+      background: rgb(var(--ap-surface));
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+      transition: border-color 0.2s, color 0.2s;
+    }
+    button.form-kit-file:hover,
+    form button.form-kit-file:hover {
+      border-color: var(--brand-blue);
+      color: var(--brand-blue);
+    }
+
+    /* The quiet line under a field (13px in the second ink, the 2026-11 redesign): the forms write
+       it with Tailwind's text-xs and gray-500 in many places, which read smaller and paler. */
+    .section-content p.text-xs.text-gray-500 {
+      font-size: 0.8125rem;
+      line-height: 1.45;
+      color: rgb(var(--ap-ink-2));
+    }
+
+    /* Switches at the redesign's size, 38 by 22 (the component draws 44 by 24). */
+    .section-content label.relative.w-11.h-6,
+    .section-content label.relative.w-11.h-6 > div.w-11.h-6 {
+      width: 2.375rem;
+      height: 1.375rem;
+    }
+    .section-content label.relative.w-11.h-6 > div.absolute {
+      top: 0.125rem;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+    .section-content label.relative.w-11.h-6 > input:checked ~ div.absolute {
+      --tw-translate-x: 1rem;
+    }
+    [dir="rtl"] .section-content label.relative.w-11.h-6 > input:checked ~ div.absolute {
+      --tw-translate-x: -1rem;
+    }
+    /* A switch's description under its name: 13px, and short of the switch's edge. */
+    .toggles-end > div > p.ms-14 {
+      max-width: 85%;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+    .toggles-end > div > .flex.items-center.gap-3 > label:last-child {
+      font-size: 0.9375rem;
+    }
+
+    /* The 2026-11 redesign, everywhere a row opens in place: the rows stand in a box of their own
+       (a hairline between them), as the design draws them. The Stripe row that the payments hero
+       stands for stays hidden; the grid rule for rows outranked the first attempt. */
+    .section-content .event-subrows:not(.gfx-rows .event-subrows) {
+      padding: 0;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.875rem;
+    }
+    /* The rows keep their words off the box's edge with their own padding, so the hairline
+       between two rows runs from one side of the box to the other (it stopped 16px short). */
+    .section-content .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow {
+      padding-inline: 0.875rem;
+    }
+    .section-content .event-subrows:not(.gfx-rows .event-subrows) > .event-subrow-body {
+      padding-inline: 0.875rem;
+    }
+    /* The last thing in the box draws no line of its own: the box's border is that line. "Last"
+       is the last row on show, and its pane when it is open: a row hidden at the end of the list
+       (Accessibility, while the widget is shown) left the one above it with a doubled edge. */
+    .section-content .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow:not(:has(~ button.event-subrow:not([hidden]))):not([aria-expanded="true"]),
+    .section-content .event-subrows:not(.gfx-rows .event-subrows) > .event-subrow-body:not(:has(~ button.event-subrow:not([hidden]))) {
+      border-bottom-color: transparent;
+    }
+    .event-subrows:not(.gfx-rows .event-subrows) > button.event-subrow.is-hero-twin:not([aria-expanded="true"]) {
+      display: none;
+    }
+    /* The 2026-11 redesign: a set of pills reads as the segmented control (a grey track, the
+       chosen ones white). They stay checkboxes, so an event can be in person and online at once.
+       Rows carry no icon before their name. */
+    .event-pills {
+      gap: 0.25rem;
+      padding: 0.25rem;
+      border-radius: 0.875rem;
+      background: rgb(var(--ap-surface-active));
+    }
+    .event-pill span {
+      border-color: transparent;
+      border-radius: 0.625rem;
+      padding: 0.375rem 0.875rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink-2));
+    }
+    .event-pill input:checked + span {
+      border-color: transparent;
+      background: rgb(var(--ap-surface));
+      color: rgb(var(--ap-ink));
+      box-shadow: 0 1px 2px rgba(20, 22, 26, 0.1);
+    }
+    .event-pill input:checked + span::before {
+      content: none;
+    }
+    .event-row-icon {
+      display: none;
+    }
 </style>

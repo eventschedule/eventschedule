@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
+use App\Notifications\VerifyEmail;
+use App\Repos\EventRepo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -490,7 +492,7 @@ class BookingRequestFormTest extends TestCase
         $this->assertNotNull($user->terms_accepted_at);
         // The visitor's own clock, which the page sends. This path used to write America/New_York.
         $this->assertSame('Europe/Paris', $user->timezone);
-        Notification::assertNotSentTo($user, \App\Notifications\VerifyEmail::class);
+        Notification::assertNotSentTo($user, VerifyEmail::class);
         $this->assertSame($user->id, Event::where('name', 'Late Night Set')->firstOrFail()->user_id);
     }
 
@@ -555,7 +557,7 @@ class BookingRequestFormTest extends TestCase
         $this->postJson($this->storeUrl($role), $this->payload())
             ->assertStatus(422)
             ->assertJsonValidationErrors(['event_name', 'date', 'start_time', 'description', 'location'])
-            ->assertJsonFragment(['The Event Name field is required.']);
+            ->assertJsonFragment(['The Event name field is required.']);
 
         $this->assertSame(0, Event::count());
 
@@ -807,7 +809,7 @@ class BookingRequestFormTest extends TestCase
         $role = $this->bookingSchedule('venue');
         $this->postJson($this->storeUrl($role), $this->complete())->assertOk();
 
-        $payload = \App\Repos\EventRepo::buildClonePayload(Event::latest('id')->first());
+        $payload = EventRepo::buildClonePayload(Event::latest('id')->first());
 
         $this->assertArrayNotHasKey('contact_name', $payload);
         $this->assertArrayNotHasKey('contact_email', $payload);

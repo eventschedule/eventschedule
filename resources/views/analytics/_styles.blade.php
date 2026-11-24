@@ -17,10 +17,6 @@
       --an-up-bg: rgb(22 163 74 / 0.1);
       --an-down: #b91c1c;
       --an-down-bg: rgb(220 38 38 / 0.08);
-      --an-mobile: var(--brand-blue);
-      --an-desktop: #1baf7a;
-      --an-tablet: #eda100;
-      --an-other: rgb(var(--ap-ink-4));
     }
     .dark .an {
       --an-boost: #d95926;
@@ -29,8 +25,6 @@
       --an-up-bg: rgb(34 197 94 / 0.14);
       --an-down: #f87171;
       --an-down-bg: rgb(239 68 68 / 0.14);
-      --an-desktop: #199e70;
-      --an-tablet: #c98500;
     }
     .an > * + * { margin-top: 1rem; }
     .an > .ap-tabs-wrap { margin-top: 1.25rem; margin-bottom: 1rem; }
@@ -46,7 +40,7 @@
     }
 
     /* The figures and the chart: one card. */
-    .an-hero { padding: 1.25rem 1.25rem 0.75rem; }
+    .an-hero { padding: 1.25rem 1.25rem 0.75rem; box-shadow: 0 1px 2px rgba(20, 22, 26, 0.06), 0 8px 24px rgba(20, 22, 26, 0.08); }
     @media (min-width: 640px) { .an-hero { padding: 1.5rem 1.75rem 1rem; } }
     .an-hero-head {
       display: flex;
@@ -66,16 +60,18 @@
     .an-fig.is-lead { grid-column: 1 / -1; }
     @media (min-width: 900px) {
       .an-figs { display: flex; flex-wrap: wrap; gap: 1rem 0; }
-      .an-fig { flex: 1 1 0; padding-inline: 1.75rem; border-inline-start: 1px solid var(--ap-hairline); max-width: 20rem; }
-      .an-fig.is-lead { flex: 0 1 auto; padding-inline-start: 0; padding-inline-end: 2.5rem; border-inline-start: 0; max-width: none; }
+      .an-fig { flex: 0 1 auto; padding-inline: 1.75rem 0; max-width: 20rem; }
+      .an-fig.is-lead { flex: 0 1 auto; margin-inline-end: auto; padding-inline-start: 0; padding-inline-end: 2.5rem; max-width: none; }
     }
     .an-fig-label {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       margin: 0;
-      font-size: 0.8125rem;
-      font-weight: 500;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       line-height: 1.75rem;
       color: rgb(var(--ap-ink-3));
     }
@@ -231,15 +227,16 @@
     .an-side-head { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 0.625rem; }
 
     /* The cards under the chart, in a grid whose every row is full: one column on a phone, two
-       from a tablet, three from a 1440 window (a 1088px frame). The page marks the last cards of
-       a row that would be short (an-w2-full, an-w3-half, an-w3-full). */
+       from a tablet, three from a 1180px window (the designs' 1040px column beside the rail holds
+       three cards of 250px and more). The page marks the last cards of a row that would be short
+       (an-w2-full, an-w3-half, an-w3-full; App\Utils\AnalyticsGrid). */
     .an-grid { display: grid; gap: 1rem; grid-template-columns: minmax(0, 1fr); align-items: stretch; }
     @media (min-width: 768px) {
       .an-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
       .an-grid > * { grid-column: span 3; }
       .an-grid > .an-w2-full { grid-column: span 6; }
     }
-    @media (min-width: 1440px) {
+    @media (min-width: 1180px) {
       .an-grid > * { grid-column: span 2; }
       .an-grid > .an-w2-full { grid-column: span 2; }
       .an-grid > .an-w3-half { grid-column: span 3; }
@@ -337,8 +334,6 @@
       cursor: pointer;
     }
     .dark .an-more { color: var(--brand-blue); }
-    .an-more-count { border-radius: 999px; padding: 0 0.375rem; font-size: 0.6875rem; background: var(--an-wash); }
-    .an-more[aria-expanded="true"] .an-more-count { display: none; }
     .an-help { font-size: 0.8125rem; color: rgb(var(--ap-ink-2)); }
     .an-help summary { cursor: pointer; font-weight: 500; width: fit-content; }
     .an-help summary:hover { color: rgb(var(--ap-ink)); }
@@ -347,21 +342,6 @@
     .an-help dt::after { content: " "; }
     .an-help dd { display: inline; margin: 0; }
 
-    /* Devices: one bar split by share, a 2px gap between parts, and the parts named below. */
-    .an-split { display: flex; gap: 2px; height: 0.75rem; margin: 0.25rem 0 1rem; }
-    .an-split > span { min-width: 0.375rem; flex-basis: 0; }
-    .an-split > span:first-child { border-start-start-radius: 999px; border-end-start-radius: 999px; }
-    .an-split > span:last-child { border-start-end-radius: 999px; border-end-end-radius: 999px; }
-    .an-split .is-mobile, .an-swatch.is-mobile { background: var(--an-mobile); }
-    .an-split .is-desktop, .an-swatch.is-desktop { background: var(--an-desktop); }
-    .an-split .is-tablet, .an-swatch.is-tablet { background: var(--an-tablet); }
-    .an-split .is-unknown, .an-swatch.is-unknown { background: var(--an-other); }
-    .an-device-list { display: grid; gap: 0.125rem; margin: 0; padding: 0; list-style: none; }
-    .an-device-list li { display: flex; align-items: center; gap: 0.625rem; min-height: 2.25rem; font-size: 0.875rem; color: rgb(var(--ap-ink)); }
-    .an-swatch { flex: none; width: 0.625rem; height: 0.625rem; border-radius: 3px; }
-    .an-device-name { flex: 1 1 auto; min-width: 0; }
-    .an-device-share { font-weight: 600; font-variant-numeric: tabular-nums; }
-    .an-device-count { width: 4rem; text-align: end; font-size: 0.75rem; font-variant-numeric: tabular-nums; color: rgb(var(--ap-ink-2)); }
 
     /* Two figures at the head of a card (promo codes). */
     .an-minifigs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; padding: 0.875rem 1rem; border-radius: 0.75rem; background: var(--ap-tint-sunken); box-shadow: inset 0 0 0 1px var(--ap-hairline); }
@@ -440,4 +420,124 @@
     .an-ghost-say h2 { margin: 0; font-size: 1.0625rem; font-weight: 650; color: rgb(var(--ap-ink)); text-wrap: balance; }
     .an-ghost-say p { max-width: 30rem; margin: 0; font-size: 0.875rem; color: rgb(var(--ap-ink-2)); text-wrap: pretty; }
     .an-ghost-say .an-ghost-act { margin-top: 0.5rem; }
+
+    /* The 2026-11 redesign: the tabs and the filters share a line, and a list's bar is a thin
+       rule under its row in the brand colour, with no icon or picture before the name. */
+    .an-head-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem 1rem;
+      margin-bottom: 1rem;
+    }
+    .an-head-row > * {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+    .an-head-row .an-filters {
+      margin: 0;
+    }
+    .an-row-icon,
+    .an-row-thumb {
+      display: none;
+    }
+
+    /* The 2026-11 designs, second pass (Analytics.dc.html). The figure card stands higher than the
+       cards under it (.ap-hero, from partials/admin-page-styles), its label names the window, the
+       big number is 56px and the side figures sit on its baseline; the switch is a grey track
+       with the chosen word on white; a list row prints name, number and share on one line with a
+       6px bar under the whole row on a grey track; the cards' titles are small capitals. */
+    .an-hero { padding: clamp(1.25rem, 3vw, 1.75rem); }
+    .an-figs { align-items: end; }
+    @media (min-width: 900px) {
+      .an-figs { align-items: flex-end; }
+      .an-fig { padding-inline: 2.5rem 0; }
+    }
+    .an-fig-label { font-size: 0.75rem; line-height: 1.25rem; }
+    .an-fig-value { margin-top: 0.25rem; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.015em; }
+    .an-fig-value.is-text { font-size: 1.25rem; line-height: 1.2; }
+    .an-fig.is-lead .an-fig-value { font-size: clamp(2.5rem, 7vw, 3.5rem); letter-spacing: -0.035em; }
+    .an-fig-sub, .an-fig:not(.is-lead) .an-fig-sub { font-size: 0.875rem; }
+    .an-fig.is-lead .an-fig-sub { margin-top: 0.375rem; }
+    .an-delta.is-plain { padding: 0; background: none; font-size: 0.875rem; font-weight: 600; }
+    .an-delta.is-plain.is-flat { color: rgb(var(--ap-ink-2)); }
+
+    .an-legend { gap: 0.25rem 1rem; font-size: 0.8125rem; color: rgb(var(--ap-ink-2)); }
+    .an-legend li { gap: 0.375rem; }
+    .an-key { height: 3px; }
+    .an-key.is-previous { height: 0; border-top: 2px dashed var(--an-previous); background: none; }
+    .an-chart { height: 13rem; }
+    @media (min-width: 640px) { .an-chart { height: 14rem; } }
+
+    .an-seg {
+      border-radius: 0.625rem;
+      background: rgb(var(--ap-surface-sunken));
+      box-shadow: none;
+    }
+    .an-seg > a, .an-seg > button { border-radius: 0.5rem; padding: 0.4375rem 0.75rem; color: rgb(var(--ap-ink-2)); }
+    .an-seg > [aria-current="page"], .an-seg > [aria-selected="true"] {
+      background: rgb(var(--ap-surface));
+      box-shadow: 0 1px 2px rgba(20, 22, 26, 0.08);
+      color: rgb(var(--ap-ink));
+    }
+    .dark .an-seg > [aria-current="page"], .dark .an-seg > [aria-selected="true"] {
+      background: rgb(var(--ap-surface-hover));
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    .an-seg.is-sm > button { padding: 0.25rem 0.625rem; }
+
+    .an-grid { align-items: start; }
+    .an-card > .page-card-head { min-height: 0; margin-bottom: 0.875rem; align-items: baseline; }
+    .an-card .page-card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
+    }
+    .an-card-unit { color: rgb(var(--ap-ink-3)); white-space: nowrap; }
+
+    .an-rows { display: grid; gap: 0.75rem; margin: 0; }
+    .an-row-in {
+      flex-wrap: wrap;
+      gap: 0 0.625rem;
+      min-height: 0;
+      padding: 0;
+      border-radius: 0.25rem;
+      font-variant-numeric: tabular-nums;
+    }
+    a.an-row-in:hover { background: none; }
+    a.an-row-in:hover .an-row-label { color: var(--brand-blue-dark); }
+    .dark a.an-row-in:hover .an-row-label { color: var(--brand-blue); }
+    a.an-row-in:focus-visible { outline-offset: 2px; }
+    .an-row-track { flex: 1 1 0; gap: 0.5rem; min-height: 1.375rem; padding: 0; }
+    .an-row-label { font-weight: 500; }
+    .an-row-value { font-size: 0.875rem; }
+    .an-row-share { width: auto; min-width: 1.75rem; margin-inline-start: 0; }
+    .an-row-bar {
+      display: block;
+      flex: 1 1 100%;
+      height: 6px;
+      margin-top: 0.375rem;
+      border-radius: 3px;
+      background: rgb(var(--ap-surface-sunken));
+      overflow: hidden;
+    }
+    .an-row-bar > i { display: block; height: 100%; border-radius: 3px; background: var(--brand-blue); }
+    a.an-row-in:hover .an-row-bar > i { background: var(--brand-button-bg-hover, var(--brand-blue)); }
+    .an-more { margin-top: 0.75rem; min-height: 2rem; padding: 0; }
+
+    /* "What each source means": a link that opens the key, not a grey disclosure. */
+    .an-help summary {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2rem;
+      list-style: none;
+      font-weight: 600;
+      color: var(--brand-blue-dark);
+    }
+    .an-help summary::-webkit-details-marker { display: none; }
+    .an-help summary:hover { color: var(--brand-button-bg-hover, var(--brand-blue-dark)); text-decoration: underline; }
+    .dark .an-help summary { color: var(--brand-blue); }
 </style>

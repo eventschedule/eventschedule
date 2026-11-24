@@ -34,12 +34,95 @@
               background: var(--brand-button-bg);
               transition: width 0.5s;
             }
+            /* The door's one card (the 2026-11 redesign). */
+            .door-hero {
+              padding: 1.25rem 1.5rem 1.5rem;
+              box-shadow: 0 1px 2px rgba(20, 22, 26, 0.06), 0 8px 24px rgba(20, 22, 26, 0.08);
+            }
+            .door-hero-top {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: flex-end;
+              justify-content: space-between;
+              gap: 0.75rem 2rem;
+            }
+            .door-hero-side {
+              text-align: end;
+            }
+            .door-kicker {
+              font-size: 0.6875rem;
+              font-weight: 600;
+              letter-spacing: 0.06em;
+              text-transform: uppercase;
+              color: rgb(var(--ap-ink-3));
+            }
+            .door-big {
+              margin-top: 0.125rem;
+              font-size: 3rem;
+              font-weight: 700;
+              line-height: 1;
+              letter-spacing: -0.03em;
+              font-variant-numeric: tabular-nums;
+              color: rgb(var(--ap-ink));
+            }
+            .door-big .is-good {
+              color: rgb(var(--ap-ink));
+            }
+            .door-of {
+              font-size: 1rem;
+              font-weight: 500;
+              letter-spacing: 0;
+              color: rgb(var(--ap-ink-2));
+            }
+            .door-mid {
+              margin-top: 0.125rem;
+              font-size: 1.5rem;
+              font-weight: 700;
+              font-variant-numeric: tabular-nums;
+              color: rgb(var(--ap-ink));
+            }
+            .door-sub {
+              margin-top: 0.25rem;
+              font-size: 0.8125rem;
+              color: rgb(var(--ap-ink-3));
+            }
+            .door-types-grid {
+              display: grid;
+              gap: 1rem 2rem;
+              margin-top: 1rem;
+              padding-top: 1rem;
+              border-top: 1px solid rgb(var(--ap-border));
+            }
+            @media (min-width: 640px) {
+              .door-types-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+              }
+            }
+            .door-type-line {
+              display: flex;
+              justify-content: space-between;
+              gap: 1rem;
+              margin-bottom: 0.375rem;
+              font-size: 0.875rem;
+            }
+            .door-type-name {
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+            }
+            .door-type-num {
+              font-variant-numeric: tabular-nums;
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+            }
+            .door-type-num span {
+              font-weight: 400;
+              color: rgb(var(--ap-ink-3));
+            }
             .door-progress {
               display: flex;
               align-items: center;
               gap: 0.75rem;
-              border-top: 1px solid rgb(var(--ap-border));
-              padding: 0.75rem 1.25rem;
+              margin-top: 1rem;
               font-size: 0.8125rem;
               font-variant-numeric: tabular-nums;
               color: rgb(var(--ap-ink-3));
@@ -56,7 +139,6 @@
             .door-search input {
               display: block;
               width: 100%;
-              max-width: 48rem;
             }
             .door-hits {
               margin: 0.75rem -1.25rem -1.25rem;
@@ -83,6 +165,156 @@
                 width: auto;
               }
             }
+
+            /* The 2026-11 design, second pass (Check-in.dc.html): 24px between the parts, a hero
+               that stands higher (.ap-hero) with a 64px count and "of 150 sold" at 18px, "Still to
+               arrive" as a left-aligned block at 28px, the share in bold ink, a 52px search box,
+               and 52px rows of arrivals whose rules stay inside the card's padding. */
+            .door-wrap {
+              --door-track: rgb(var(--ap-border));
+            }
+            .dark .door-wrap {
+              --door-track: rgb(var(--ap-surface-sunken));
+            }
+            .door-wrap > .page-stack {
+              gap: 1.5rem;
+            }
+            .door-pickers {
+              margin-bottom: 1.5rem;
+            }
+            .door-date {
+              min-height: 3rem;
+              font-size: 0.9375rem;
+              font-weight: 500;
+              border-radius: 0.75rem;
+            }
+            .door-bar {
+              background: var(--door-track);
+            }
+            .door-hero {
+              display: flex;
+              flex-direction: column;
+              gap: 1.375rem;
+              padding: clamp(1.25rem, 3vw, 1.75rem);
+            }
+            .door-hero-top {
+              gap: 1.125rem 2.5rem;
+            }
+            .door-hero-top > .min-w-0 {
+              flex: 1 1 13.75rem;
+            }
+            .door-hero-side {
+              text-align: start;
+            }
+            .door-kicker {
+              margin: 0;
+              font-size: 0.75rem;
+            }
+            .door-big {
+              margin-top: 0.375rem;
+              font-size: clamp(2.75rem, 8vw, 4rem);
+              letter-spacing: -0.035em;
+            }
+            .door-of {
+              font-size: 1.125rem;
+              font-weight: 400;
+            }
+            .door-mid {
+              margin-top: 0.25rem;
+              font-size: 1.75rem;
+              letter-spacing: -0.02em;
+            }
+            .door-progress {
+              margin-top: 0;
+              font-size: 0.875rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+            }
+            .door-progress .door-bar {
+              height: 0.5rem;
+            }
+            .door-types-grid {
+              grid-template-columns: repeat(auto-fit, minmax(12.5rem, 1fr));
+              gap: 1rem 2rem;
+              margin: 0;
+              padding-top: 1.25rem;
+              border-top-color: var(--ap-hairline);
+            }
+            .door-type-line {
+              align-items: baseline;
+              margin-bottom: 0.5rem;
+            }
+            .door-type-name {
+              font-size: 0.9375rem;
+            }
+            .door-type-num {
+              font-size: 0.875rem;
+            }
+            .door-type-num span {
+              color: rgb(var(--ap-ink-2));
+            }
+            .door-types-grid .door-bar {
+              height: 0.375rem;
+            }
+            .door-search {
+              padding: 1.25rem;
+            }
+            .door-search-label {
+              display: block;
+              margin-bottom: 0.5rem;
+              font-size: 0.875rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+            }
+            .door-search input {
+              height: 3.25rem;
+              padding: 0 0.875rem;
+              font-size: 1rem;
+              border-radius: 0.75rem;
+            }
+            .door-recent {
+              padding: 1.25rem 1.25rem 0.375rem;
+            }
+            .door-recent .door-kicker {
+              padding-bottom: 0.75rem;
+            }
+            .door-people {
+              margin: 0;
+              padding: 0;
+              list-style: none;
+            }
+            .door-person {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 0.75rem;
+              min-height: 3.25rem;
+              border-top: 1px solid var(--ap-hairline);
+            }
+            .door-person-main {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: baseline;
+              gap: 0 0.625rem;
+              min-width: 0;
+            }
+            .door-person-name {
+              font-size: 0.9375rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+              overflow-wrap: anywhere;
+            }
+            .door-person-type {
+              font-size: 0.8125rem;
+              color: rgb(var(--ap-ink-2));
+            }
+            .door-person-ago {
+              flex: none;
+              font-size: 0.8125rem;
+              font-variant-numeric: tabular-nums;
+              white-space: nowrap;
+              color: rgb(var(--ap-ink-2));
+            }
         </style>
     </x-slot>
 
@@ -91,10 +323,6 @@
                        :back="route('sales')" :back-label="__('messages.sales')">
             <x-slot name="actions">
                 <x-brand-link :href="route('ticket.scan')" class="gap-2">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
-                    </svg>
                     {{ __('messages.scan_ticket') }}
                 </x-brand-link>
             </x-slot>
@@ -102,13 +330,13 @@
 
         @include('partials.team-access-notice', ['roles' => $planBlockedRoles])
 
-        <div id="app">
+        <div id="app" class="door-wrap">
 
             {{-- Which event, and which of its dates --}}
             <div class="door-pickers" v-if="events.length">
                 <x-event-selector />
                 <select v-if="availableDates.length > 0" v-model="selectedDate" @change="fetchStats" aria-label="{{ __('messages.date') }}"
-                    class="rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                    class="door-date rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                     <option v-for="date in availableDates" :key="date" :value="date">@{{ prettyDate(date) }}</option>
                 </select>
             </div>
@@ -142,29 +370,33 @@
                 </div>
 
                 <template v-else>
-                    {{-- The three figures a door asks for, on one line at every width, and how
-                         full the room is under them. --}}
-                    <div class="ap-card rounded-xl overflow-hidden">
-                        <div class="page-stats">
-                            <div class="page-stat">
-                                <div class="page-stat-value" :class="{ 'is-good': stats.total_checked_in > 0 }">@{{ stats.total_checked_in }}</div>
-                                <div class="page-stat-label">{{ __('messages.checked_in') }}</div>
-                                <div v-if="stats.total_admitted > stats.total_checked_in" class="page-stat-sub">@{{ stats.total_admitted }} {{ __('messages.admitted_incl_guests') }}</div>
+                    {{-- 2026-11 redesign: one card for the door. Who is in, out of how many, and who
+                         is still to come, then how full the room is, and each kind of ticket under it. --}}
+                    <div class="ap-card rounded-xl ap-hero door-hero">
+                        <div class="door-hero-top">
+                            <div class="min-w-0">
+                                <p class="door-kicker">{{ __('messages.checked_in') }}</p>
+                                <p class="door-big"><span :class="{ 'is-good': stats.total_checked_in > 0 }">@{{ stats.total_checked_in }}</span> <span class="door-of" v-text="{{ \Illuminate\Support\Js::from(__('messages.checkin_of_sold')) }}.replace(':total', stats.total_sold)"></span></p>
+                                <p v-if="stats.total_admitted > stats.total_checked_in" class="door-sub">@{{ stats.total_admitted }} {{ __('messages.admitted_incl_guests') }}</p>
+                                <p v-if="stats.pass_reserved > 0" class="door-sub">{{ __('messages.pass_seats_reserved') }}: @{{ stats.pass_reserved }}</p>
                             </div>
-                            <div class="page-stat">
-                                <div class="page-stat-value">@{{ Math.max(0, stats.total_sold - stats.total_checked_in) }}</div>
-                                <div class="page-stat-label">{{ __('messages.checkin_still_to_come') }}</div>
-                            </div>
-                            <div class="page-stat">
-                                <div class="page-stat-value">@{{ stats.total_sold }}</div>
-                                <div class="page-stat-label">{{ __('messages.tickets_sold') }}</div>
-                                <div v-if="stats.pass_reserved > 0" class="page-stat-sub">{{ __('messages.pass_seats_reserved') }}: @{{ stats.pass_reserved }}</div>
+                            <div class="door-hero-side">
+                                <p class="door-kicker">{{ __('messages.checkin_still_to_come') }}</p>
+                                <p class="door-mid">@{{ Math.max(0, stats.total_sold - stats.total_checked_in) }}</p>
                             </div>
                         </div>
                         <div class="door-progress">
                             <div class="door-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="progressPercent" aria-label="{{ __('messages.checked_in') }}"><i :style="{ width: progressPercent + '%' }"></i></div>
                             <span>@{{ progressPercent }}%</span>
                         </div>
+                        {{-- Each kind of ticket: how many of it are in. --}}
+                        <ul v-if="stats.tickets.length > 1" class="door-types-grid">
+                            <li v-for="ticket in stats.tickets" :key="ticket.type">
+                                <p class="door-type-line"><bdi class="door-type-name">@{{ ticket.type }}</bdi><span class="door-type-num">@{{ ticket.checked_in }} <span>{{ __('messages.of') }} @{{ ticket.sold }}</span></span></p>
+                                <div class="door-bar"><i :style="{ width: ticketPercent(ticket) + '%' }"></i></div>
+                                <p v-if="ticket.admitted > ticket.checked_in" class="door-sub">@{{ ticket.admitted }} {{ __('messages.admitted_incl_guests') }}</p>
+                            </li>
+                        </ul>
                     </div>
 
                     {{-- Find somebody at the door.
@@ -172,7 +404,7 @@
                          only a rear-view feed of the last ten arrivals. So "is C14 here yet", and "they say
                          they booked but the scanner will not read their phone", had no answer here. --}}
                     <section class="ap-card rounded-xl page-card door-search">
-                        <label for="checkin-search" class="page-card-title block mb-2">{{ __('messages.checkin_search') }}</label>
+                        <label for="checkin-search" class="door-search-label">{{ __('messages.checkin_search') }}</label>
                         {{-- A plain attribute. It was bound to a JSON string, whose own quotes closed
                              the attribute, so the box never showed what can be typed into it. --}}
                         <input id="checkin-search" v-model="searchQuery" @input="onSearch" type="search" autocomplete="off"
@@ -204,46 +436,24 @@
                         </div>
                     </section>
 
-                    {{-- Each kind of ticket: how many of it are in --}}
-                    <div v-if="stats.tickets.length > 1" class="ap-card rounded-xl overflow-hidden">
-                        <table class="page-table door-types">
-                            <thead>
-                                <tr>
-                                    <th scope="col">{{ __('messages.ticket_type') }}</th>
-                                    <th scope="col" class="c-bar"><span class="sr-only">{{ __('messages.checked_in') }}</span></th>
-                                    <th scope="col" class="c-num">{{ __('messages.checked_in') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="ticket in stats.tickets" :key="ticket.type">
-                                    <td class="c-main c-strong">
-                                        <bdi>@{{ ticket.type }}</bdi>
-                                        <span v-if="ticket.admitted > ticket.checked_in" class="c-sub">@{{ ticket.admitted }} {{ __('messages.admitted_incl_guests') }}</span>
-                                    </td>
-                                    <td class="c-bar"><div class="door-bar"><i :style="{ width: ticketPercent(ticket) + '%' }"></i></div></td>
-                                    <td class="c-num">@{{ ticket.checked_in }} / @{{ ticket.sold }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
                     {{-- The last people through the door --}}
-                    <x-page-card :title="__('messages.recent_checkins')" flush>
-                        <table v-if="stats.recent_checkins.length > 0" class="page-table is-compact">
-                            <tbody>
-                                <tr v-for="(checkin, index) in stats.recent_checkins" :key="index">
-                                    <td class="c-main c-strong">
-                                        <bdi>@{{ checkin.name }}</bdi>
-                                        <span class="c-sub">@{{ checkin.ticket_type }}<span v-if="checkin.seat_label"> &middot; @{{ checkin.seat_label }}</span></span>
-                                    </td>
-                                    <td class="c-actions c-date">@{{ relativeTime(checkin.timestamp) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    {{-- A name and its ticket on one line, the time at the end; the rules between
+                         rows stay inside the card's padding (the 2026-11 design). --}}
+                    <section class="ap-card rounded-xl door-recent" aria-labelledby="door-recent-title">
+                        <h2 id="door-recent-title" class="door-kicker">{{ __('messages.recent_checkins') }}</h2>
+                        <ul v-if="stats.recent_checkins.length > 0" class="door-people" role="list">
+                            <li v-for="(checkin, index) in stats.recent_checkins" :key="index" class="door-person">
+                                <span class="door-person-main">
+                                    <bdi class="door-person-name">@{{ checkin.name }}</bdi>
+                                    <span class="door-person-type">@{{ checkin.ticket_type }}<span v-if="checkin.seat_label"> &middot; @{{ checkin.seat_label }}</span></span>
+                                </span>
+                                <span class="door-person-ago">@{{ relativeTime(checkin.timestamp) }}</span>
+                            </li>
+                        </ul>
                         <div v-else>
                             <x-page-empty compact :title="__('messages.no_checkins_yet')" />
                         </div>
-                    </x-page-card>
+                    </section>
                 </template>
             </div>
         </div>

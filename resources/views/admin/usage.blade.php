@@ -132,7 +132,7 @@
                             @endif
                         </td>
                         @if (config('app.hosted'))
-                        <td><span class="event-chip">{{ __('messages.'.(in_array($nlData['plan_tier'], ['pro', 'enterprise'], true) ? $nlData['plan_tier'] : 'free')) }}</span></td>
+                        <td class="c-quiet">{{ __('messages.'.(in_array($nlData['plan_tier'], ['pro', 'enterprise'], true) ? $nlData['plan_tier'] : 'free')) }}</td>
                         @endif
                     </tr>
                     @endforeach

@@ -1049,7 +1049,7 @@
         {{-- Which schedule this is, where the page only said "Edit Schedule": there are usually
              several in the menu beside it. --}}
         <p class="event-eyebrow">{{ $title }}</p>
-        <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
+        <h2 class="page-title">
             {{ $role->name }}
         </h2>
         @if ($scheduleUrl)
@@ -1254,22 +1254,17 @@
                             </span>
                             @if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode())
                                 @if ($role->isEnterprise())
-                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-schedule-details')"
-                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
+                                    {{-- The 2026-11 redesign: a pill that says what it does, no icon. --}}
+                                    <button type="button" data-modal-open="ai-schedule-details"
+                                        class="ml-auto form-kit-ai"
                                         title="{{ __('messages.ai_details_generator') }}">
-                                        <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                                        </svg>
-                                        {{ __('messages.ai_generator') }}
+                                        {{ __('messages.write_with_ai') }}
                                     </button>
                                 @elseif (config('app.hosted'))
-                                    <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-details')"
-                                        class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 opacity-75"
+                                    <button type="button" data-modal-open="upgrade-ai-details"
+                                        class="ml-auto form-kit-ai is-locked"
                                         title="{{ __('messages.ai_details_generator') }}">
-                                        <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                                        </svg>
-                                        {{ __('messages.ai_generator') }}
+                                        {{ __('messages.write_with_ai') }}
                                     </button>
                                 @endif
                             @endif
@@ -1284,7 +1279,7 @@
                         <div id="details-tab-general" class="details-tab-content">
 
                         <div class="mb-6">
-                            <x-input-label for="name" :value="__('messages.schedule_name') . ' *'" />
+                            <x-input-label for="name" :value="__('messages.schedule_name')" />
                             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                                 :value="old('name', $role->name)" required data-action="update-preview-on-input" />
                             <x-input-error class="mt-2" :messages="$errors->get('name')" />
@@ -1300,7 +1295,7 @@
                         @endif
 
                         <div class="mb-6">
-                            <x-input-label for="short_description" :value="__('messages.short_description')" />
+                            <x-input-label for="short_description" :value="__('messages.short_description')" optional />
                             <x-text-input id="short_description" name="short_description" type="text" class="mt-1 block w-full"
                                 :value="old('short_description', $role->short_description)" maxlength="200" />
                             <p class="event-hint mt-1">{{ __('messages.schedule_short_description_help', ['style' => __('messages.header_style_banner')]) }}</p>
@@ -1317,8 +1312,15 @@
                         @endif
 
                         <div class="mb-6">
-                            <x-input-label for="description" :value="__('messages.description')" />
-                            <p class="event-hint">{{ __('messages.schedule_description_help') }}</p>
+                            {{-- The label and its line on one side, the editor's Write / Preview on the
+                                 other (placed by attachEditorChrome in resources/js/editor-helpers.js). --}}
+                            <div class="es-editor-head">
+                                <div>
+                                    <x-input-label for="description" :value="__('messages.description')" optional />
+                                    <p class="event-hint">{{ __('messages.schedule_description_help') }}</p>
+                                </div>
+                                <div data-editor-modes="description"></div>
+                            </div>
                             <textarea id="description" name="description" data-content-dir="{{ content_dir($role) }}"
                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">{{ old('description', $role->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
@@ -1657,7 +1659,7 @@
                         <div id="details-tab-contact" class="event-subrow-body details-tab-content" hidden>
 
                         <div class="mb-6">
-                            <x-input-label for="email" :value="__('messages.email') . ' *'" />
+                            <x-input-label for="email" :value="__('messages.email')" />
                             <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                                 :value="old('email', $role->exists ? $role->email : $user->email)" required />
                             <x-input-error class="mt-2" :messages="$errors->get('email')" />
@@ -1670,7 +1672,7 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="phone" :value="__('messages.phone_number')" />
+                            <x-input-label for="phone" :value="__('messages.phone_number')" optional />
                             <x-phone-input name="phone" id="role_phone" :value="old('phone', $role->phone)" :country="$role->country_code ?? 'us'" />
                             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
 
@@ -1687,10 +1689,9 @@
                                     <div id="role-phone-code-input" style="display: none;" class="mt-2 flex items-center gap-2">
                                         <input type="text" id="role-phone-verification-code" maxlength="6" placeholder="000000"
                                             class="w-28 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-center tracking-widest" />
-                                        <button type="button" id="role-phone-verify-code-btn"
-                                            class="inline-flex items-center px-3 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-medium rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
+                                        <x-secondary-button type="button" id="role-phone-verify-code-btn">
                                             {{ __('messages.verify') }}
-                                        </button>
+                                        </x-secondary-button>
                                     </div>
 
                                     <p id="role-phone-verify-message" class="mt-2 text-sm" style="display: none;"></p>
@@ -1709,7 +1710,7 @@
                         @endif
 
                         <div class="mb-6">
-                            <x-input-label for="website" :value="__('messages.website')" />
+                            <x-input-label for="website" :value="__('messages.website')" optional />
                             <x-text-input id="website" name="website" type="url" class="mt-1 block w-full"
                                 :value="old('website', $role->website)" />
                             <x-input-error class="mt-2" :messages="$errors->get('website')" />
@@ -1724,7 +1725,7 @@
 
                         @if ($role->isCurator())
                         <div class="mb-6">
-                            <x-input-label for="city" :value="__('messages.city')" />
+                            <x-input-label for="city" :value="__('messages.city')" optional />
                             <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
                                 :value="old('city', $role->city)" autocomplete="off" />
                             <x-input-error class="mt-2" :messages="$errors->get('city')" />
@@ -1947,7 +1948,7 @@
                         <p class="event-hint mb-4">{{ __('messages.address_is_public') }}</p>
 
                         <div class="mb-6">
-                            <x-input-label for="address1" :value="__('messages.street_address') . ' *'" />
+                            <x-input-label for="address1" :value="__('messages.street_address')" />
                             <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
                                 :value="old('address1', $role->address1)" autocomplete="off" required />
                             <x-input-error class="mt-2" :messages="$errors->get('address1')" />
@@ -1961,7 +1962,7 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('city')" />
                             </div>
                             <div>
-                                <x-input-label for="state" :value="__('messages.state_province')" />
+                                <x-input-label for="state" :value="__('messages.state_province')" optional />
                                 <x-text-input id="state" name="state" type="text" class="mt-1 block w-full"
                                     :value="old('state', $role->state)" autocomplete="off" />
                                 <x-input-error class="mt-2" :messages="$errors->get('state')" />
@@ -1970,7 +1971,7 @@
 
                         <div class="event-grid2 mb-6">
                             <div>
-                                <x-input-label for="postal_code" :value="__('messages.postal_code')" />
+                                <x-input-label for="postal_code" :value="__('messages.postal_code')" optional />
                                 <x-text-input id="postal_code" name="postal_code" type="text" class="mt-1 block w-full"
                                     :value="old('postal_code', $role->postal_code)" autocomplete="off" />
                                 <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
@@ -2132,9 +2133,19 @@
                 @php
                     // What the Style tab's islands are told. Built here, not inside a directive:
                     // a multi-line array argument does not compile.
+                    // The public page's own words, in each language, because the preview speaks the
+                    // schedule's language (the one picked on Details), not the admin's.
                     $styleFollowWords = [];
+                    $stylePageWords = [];
                     foreach (array_keys(config('app.supported_languages')) as $styleLanguage) {
                         $styleFollowWords[$styleLanguage] = __('messages.follow', [], $styleLanguage);
+                        $stylePageWords[$styleLanguage] = [
+                            'share' => __('messages.share', [], $styleLanguage),
+                            'details' => __('messages.details', [], $styleLanguage),
+                            'upcoming' => __('messages.upcoming_events', [], $styleLanguage),
+                            'list' => __('messages.list', [], $styleLanguage),
+                            'calendar' => __('messages.calendar', [], $styleLanguage),
+                        ];
                     }
                     $styleLabels = [
                         'preview' => __('messages.preview'),
@@ -2218,22 +2229,16 @@
                         </span>
                         @if ((config('services.google.gemini_key') || config('services.openai.api_key')) && !is_demo_mode())
                             @if ($role->isEnterprise())
-                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'ai-style-generator')"
-                                    class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600"
+                                <button type="button" data-modal-open="ai-style-generator"
+                                    class="ml-auto form-kit-ai st-ai-pill"
                                     title="{{ __('messages.ai_style_generator') }}">
-                                    <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                                    </svg>
-                                    {{ __('messages.ai_generator') }}
+                                    {{ __('messages.style_with_ai') }}
                                 </button>
                             @elseif (config('app.hosted'))
-                                <button type="button" x-data x-on:click.prevent="$dispatch('open-modal', 'upgrade-ai-style')"
-                                    class="ml-auto inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 opacity-75"
+                                <button type="button" data-modal-open="upgrade-ai-style"
+                                    class="ml-auto form-kit-ai is-locked st-ai-pill"
                                     title="{{ __('messages.ai_style_generator') }}">
-                                    <svg class="w-4 h-4 ltr:mr-1 rtl:ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-                                    </svg>
-                                    {{ __('messages.ai_generator') }}
+                                    {{ __('messages.style_with_ai') }}
                                 </button>
                             @endif
                         @endif
@@ -2247,6 +2252,7 @@
                         <div class="vue-style-preview" data-props="{{ $styleProps([
                             'events' => $listAnimationPreviewEvents ?? [],
                             'followWords' => $styleFollowWords,
+                            'pageWords' => $stylePageWords,
                             'guestUrl' => $role->exists ? $role->getGuestUrl() : '',
                             'labels' => $styleLabels,
                         ]) }}"></div>
@@ -2257,7 +2263,7 @@
                     <!-- Branding: always on the page -->
                     <div id="style-content-branding">
                             <div class="mb-6">
-                                <x-input-label :value="__('messages.square_profile_image')" />
+                                <x-input-label :value="__('messages.profile_image')" />
                                 <input id="profile_image" name="profile_image" type="file" class="hidden"
                                     accept="image/png, image/jpeg" data-file-trigger="profile_image" data-filename-target="profile_image_filename" data-preview-target="profile_image_preview" />
                                 {{-- The tile and the words beside it. Change is offered while a picture
@@ -2292,6 +2298,7 @@
                                         </div>
                                         @endif
                                         <span id="profile_image_filename" class="st-logo-name"></span>
+                                        <span class="st-logo-hint">{{ __('messages.square_images_work_best') }}</span>
                                     </div>
                                 </div>
                                 <x-input-error class="mt-2" :messages="$errors->get('profile_image')" />
@@ -2311,7 +2318,7 @@
                             </div>
 
                             <div class="mb-6">
-                                <x-input-label for="font_family" :value="__('messages.font_family')" />
+                                <x-input-label for="font_family" :value="__('messages.font')" />
                                 <select id="font_family" name="font_family" data-action="font-family-change"
                                     class="st-native mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                     @foreach($fonts as $font)
@@ -3476,7 +3483,7 @@
                                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
                                         </div>
                                         <div>
-                                            <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url')" />
+                                            <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url')" optional />
                                             <input type="url" id="new_sponsor_url_input" maxlength="500"
                                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
                                         </div>
@@ -3493,7 +3500,7 @@
                                             </select>
                                         </div>
                                         <div>
-                                            <x-input-label id="sponsor-logo-label" :value="__('messages.logo') . ' *'" />
+                                            <x-input-label id="sponsor-logo-label" :value="__('messages.logo')" />
                                             <input type="file" id="new_sponsor_logo_input" accept="image/*"
                                                 class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-button-bg)] file:text-white hover:file:bg-[var(--brand-button-bg-hover)]"
                                                 />
@@ -3501,13 +3508,12 @@
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <button type="button" data-action="add-sponsor" id="sponsor-action-btn"
-                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[var(--brand-button-bg)] rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
+                                        <x-secondary-button type="button" data-action="add-sponsor" id="sponsor-action-btn">
                                             <svg id="sponsor-action-icon" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                             </svg>
                                             <span id="sponsor-action-text">{{ __('messages.add_sponsor') }}</span>
-                                        </button>
+                                        </x-secondary-button>
                                         <button type="button" data-action="cancel-edit-sponsor" id="cancel-edit-sponsor-btn"
                                             class="hidden inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                                             {{ __('messages.cancel') }}
@@ -3663,7 +3669,7 @@
                         </div>
 
                         <div class="mb-6">
-                            <x-input-label for="stay22_aid" :value="__('messages.stay22_aid')" />
+                            <x-input-label for="stay22_aid" :value="__('messages.stay22_aid')" optional />
                             <x-text-input id="stay22_aid" name="stay22_aid" type="text"
                                 class="mt-1 block w-full font-mono text-sm"
                                 :value="old('stay22_aid', $role->stay22_aid)"
@@ -3922,7 +3928,7 @@
                                 <div class="flex-1 min-w-0">
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <x-input-label :value="__('messages.field_name') . ' *'" class="text-sm" />
+                                        <x-input-label :value="__('messages.field_name')" class="text-sm" />
                                         <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][name]"
                                             value="{{ $field['name'] ?? '' }}"
                                             class="mt-1 block w-full" required />
@@ -4249,9 +4255,9 @@
                                     <option value="{{ $labelKey }}">{{ $labelTranslated }}</option>
                                 @endforeach
                             </select>
-                            <x-brand-button size="sm" type="button" data-action="add-custom-label" disabled class="opacity-50 cursor-not-allowed flex-shrink-0">
+                            <x-secondary-button type="button" data-action="add-custom-label" disabled class="opacity-50 cursor-not-allowed flex-shrink-0">
                                 {{ __('messages.add') }}
-                            </x-brand-button>
+                            </x-secondary-button>
                         </div>
 
                         {{-- One line for each: which word it replaces, then what it says instead. The first
@@ -4474,7 +4480,7 @@
                         </div>
                         @endif
                         <div class="mb-6" id="request_terms_section">
-                            <x-input-label for="request_terms" :value="__('messages.request_terms')" />
+                            <x-input-label for="request_terms" :value="__('messages.request_terms')" optional />
                             <textarea id="request_terms" name="request_terms"
                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                 rows="4"
@@ -5442,7 +5448,7 @@
                                     <p id="push-status" class="text-sm font-medium mt-2"></p>
                                     <div class="mt-3 flex flex-wrap items-center gap-3">
                                         <button type="button" id="push-enable-btn"
-                                            class="inline-flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg shadow-sm text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
+                                            class="inline-flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] transition-all duration-200">
                                             {{ __('messages.push_enable_device') }}
                                         </button>
                                         <button type="button" id="push-test-btn"
@@ -6115,9 +6121,9 @@
                                         </p>
                                     </div>
                                     <div>
-                                        <x-brand-button type="button" id="force-google-resync-btn">
+                                        <x-secondary-button type="button" id="force-google-resync-btn">
                                             {{ __('messages.google_force_resync_to_google') }}
-                                        </x-brand-button>
+                                        </x-secondary-button>
                                         <span id="force-google-resync-status" class="ms-3 text-sm text-gray-600 dark:text-gray-400 hidden"></span>
                                     </div>
                                 </div>
@@ -6176,9 +6182,9 @@
                                     </div>
 
                                     <div>
-                                        <x-brand-button type="button" id="save-member-sync-btn">
+                                        <x-secondary-button type="button" id="save-member-sync-btn">
                                             {{ __('messages.save') }}
-                                        </x-brand-button>
+                                        </x-secondary-button>
                                         <span id="member-sync-status" class="ms-3 text-sm text-green-600 dark:text-green-400 hidden"></span>
                                     </div>
                                 </div>
@@ -6533,9 +6539,9 @@
                                 </div>
 
                                 <div id="caldav-connect-container" class="hidden">
-                                    <x-brand-button size="sm" type="button" id="caldav-connect-btn">
+                                    <x-secondary-button type="button" id="caldav-connect-btn">
                                         {{ __('messages.connect') }}
-                                    </x-brand-button>
+                                    </x-secondary-button>
                                 </div>
                             </div>
                             @endif
@@ -6705,10 +6711,11 @@
                     </div>
                 </div>
 
+                {{-- The save bar under the cards' column, not across the tab list too (the 2026-11
+                     redesign): sticky at the column's foot on a desktop, fixed to a phone's. --}}
+                @include('partials.form-save-bar')
                 </div> <!-- End of main content area -->
             </div> <!-- End of grid container -->
-
-        @include('partials.form-save-bar')
     </form>
 
 </x-app-admin-layout>
@@ -9510,7 +9517,7 @@ function addEventCustomField() {
             <div class="flex-1 min-w-0">
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_name') !!} *</label>
+                    <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_name') !!}</label>
                     <input type="text" name="event_custom_fields[${fieldKey}][name]"
                         dir="auto" autocomplete="off"
                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" required />
@@ -10131,10 +10138,6 @@ function editSponsor(btn) {
     var cancelBtn = document.getElementById('cancel-edit-sponsor-btn');
     if (cancelBtn) cancelBtn.classList.remove('hidden');
 
-    // Remove asterisk from logo label (logo optional when editing)
-    var logoLabel = document.getElementById('sponsor-logo-label');
-    if (logoLabel) logoLabel.textContent = logoLabel.textContent.replace(' *', '');
-
     // Scroll form into view
     var form = document.getElementById('add-sponsor-form');
     if (form) form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -10167,12 +10170,6 @@ function resetSponsorEditState() {
     // Hide cancel button
     var cancelBtn = document.getElementById('cancel-edit-sponsor-btn');
     if (cancelBtn) cancelBtn.classList.add('hidden');
-
-    // Restore asterisk on logo label
-    var logoLabel = document.getElementById('sponsor-logo-label');
-    if (logoLabel && logoLabel.textContent.indexOf('*') === -1) {
-        logoLabel.textContent = logoLabel.textContent + ' *';
-    }
 
     // Hide the form again if the list is at the cap
     updateSponsorLimitVisibility();
@@ -11687,7 +11684,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ['key' => 'profile_image', 'label' => __('messages.profile_image'), 'has_value' => (bool)$role->profile_image_url],
         ['key' => 'header_image', 'label' => __('messages.header_image'), 'has_value' => (bool)$role->header_image_url],
         ['key' => 'accent_color', 'label' => __('messages.accent_color'), 'has_value' => strtolower((string) $role->accent_color) !== '#007bff'],
-        ['key' => 'font', 'label' => __('messages.font_family'), 'has_value' => $role->font_family !== 'Roboto'],
+        ['key' => 'font', 'label' => __('messages.font'), 'has_value' => $role->font_family !== 'Roboto'],
         ['key' => 'background_image', 'label' => __('messages.background_image'), 'has_value' => (bool)$role->background_image_url],
     ]"
     endpoint="{{ $role->exists ? url('/'.$role->subdomain.'/generate-style') : url('/generate-style') }}"

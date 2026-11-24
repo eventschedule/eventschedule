@@ -51,7 +51,7 @@
         @include('newsletter.partials._notices')
 
         <div class="page-stack">
-            <x-page-card beside :title="__('messages.edit_segment')">
+            <x-page-card :title="__('messages.edit_segment')">
                 <form method="POST" action="{{ route('admin.newsletters.segment.update', ['hash' => $segmentHash]) }}">
                     @csrf
                     @method('PUT')
@@ -76,7 +76,7 @@
 
             {{-- Add subscriber (manual segments only) --}}
             @if ($isManual)
-            <x-page-card beside :title="__('messages.add_subscriber')">
+            <x-page-card :title="__('messages.add_subscriber')">
                 <form method="POST" action="{{ route('admin.newsletters.segment.user.store', ['hash' => $segmentHash]) }}" id="add-user-form" class="news-inline-form">
                     @csrf
                     <input type="hidden" name="user_id" id="selected-user-id">

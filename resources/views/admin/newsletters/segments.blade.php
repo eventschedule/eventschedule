@@ -61,7 +61,7 @@
         {{-- The type decides which of the form's fields show. Plain script on a server-rendered
              form (it was an Alpine island); a field that is not showing is disabled, so it is
              not sent. --}}
-        <x-page-card beside class="news-block" :title="__('messages.create_segment')">
+        <x-page-card class="news-block" :title="__('messages.create_segment')">
             <form method="POST" action="{{ route('admin.newsletters.segment.store') }}" id="create-segment-form">
                 @csrf
                 <div class="page-form-fields">

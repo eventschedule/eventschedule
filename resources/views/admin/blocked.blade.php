@@ -1,5 +1,7 @@
 <x-app-admin-layout>
     @include('admin.partials._navigation', ['active' => 'blocked'])
+    @include('admin.partials._quiet-saves')
+
 
     {{-- Shutting an account out, and the list of what new accounts are refused for.
 
@@ -127,7 +129,7 @@
                     <x-text-input id="spam-words" name="words" type="text" class="block w-full" :value="old('words', implode(', ', $spamWords))" autocomplete="off" dir="auto" maxlength="3000" />
                 </div>
                 <div class="is-end">
-                    <x-brand-button type="submit" size="sm" class="!py-2">@lang('messages.save')</x-brand-button>
+                    <x-brand-button type="submit" size="sm" class="!py-2" data-quiet-until-change>@lang('messages.save')</x-brand-button>
                 </div>
             </form>
             <x-input-error :messages="$errors->get('words')" class="mb-3" />
@@ -150,7 +152,7 @@
                     @if ($search !== '')
                     <a href="{{ route('admin.blocked') }}" class="page-tool">@lang('messages.clear')</a>
                     @endif
-                    <x-brand-button type="submit" size="sm" class="!py-2">@lang('messages.search')</x-brand-button>
+                    <button type="submit" class="page-tool">@lang('messages.search')</button>
                 </div>
             </form>
 
@@ -289,7 +291,7 @@
                     <x-text-input id="blocklist-note" name="note" type="text" class="block w-full" :value="$countryPosted ? '' : old('note')" :placeholder="__('messages.blocklist_note_placeholder')" autocomplete="off" dir="auto" maxlength="255" />
                 </div>
                 <div class="is-end">
-                    <x-brand-button type="submit" size="sm" class="!py-2">@lang('messages.blocklist_add')</x-brand-button>
+                    <x-brand-button type="submit" size="sm" class="!py-2" data-quiet-until-change>@lang('messages.blocklist_add')</x-brand-button>
                 </div>
             </form>
             @unless ($countryPosted)
@@ -325,7 +327,7 @@
                     <x-text-input id="blocklist-country-note" name="note" type="text" class="block w-full" :value="$countryPosted ? old('note') : ''" :placeholder="__('messages.blocklist_note_placeholder')" autocomplete="off" dir="auto" maxlength="255" />
                 </div>
                 <div class="is-end">
-                    <x-brand-button type="submit" size="sm" class="!py-2">@lang('messages.blocklist_add_country')</x-brand-button>
+                    <x-brand-button type="submit" size="sm" class="!py-2" data-quiet-until-change>@lang('messages.blocklist_add_country')</x-brand-button>
                 </div>
             </form>
             @if ($countryPosted)

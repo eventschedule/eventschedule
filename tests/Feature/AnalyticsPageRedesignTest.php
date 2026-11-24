@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsReferrersDaily;
+use App\Models\BoostCampaign;
 use App\Services\AnalyticsService;
 use App\Utils\AnalyticsGrid;
 use App\Utils\UrlUtils;
@@ -46,7 +47,7 @@ class AnalyticsPageRedesignTest extends TestCase
 
     public function test_every_row_of_the_card_grid_is_full(): void
     {
-        // Columns of the six a card takes: two to a row (from a tablet), three to a row (1440px).
+        // Columns of the six a card takes: two to a row (from a tablet), three to a row (1180px).
         $widths = [
             2 => fn (string $classes) => str_contains($classes, 'an-w2-full') ? 6 : 3,
             3 => fn (string $classes) => str_contains($classes, 'an-w3-full') ? 6 : (str_contains($classes, 'an-w3-half') ? 3 : 2),
@@ -64,6 +65,8 @@ class AnalyticsPageRedesignTest extends TestCase
                 $this->assertSame(0, $row, "$count cards, $perRow to a row: the last row is short");
             }
         }
+        // The design keeps three to a row: four cards are three and one across, not two by two.
+        $this->assertSame(['', '', '', 'an-w3-full'], AnalyticsGrid::spans(4));
     }
 
     public function test_a_series_has_every_period_and_its_weeks_are_mysqls(): void
@@ -137,7 +140,7 @@ class AnalyticsPageRedesignTest extends TestCase
         AnalyticsEventsDaily::create(['event_id' => $event->id, 'date' => '2026-10-10', 'desktop_views' => 10, 'mobile_views' => 0, 'tablet_views' => 0, 'unknown_views' => 0]);
         AnalyticsReferrersDaily::create(['role_id' => $role->id, 'date' => '2026-10-10', 'source' => 'boost', 'domain' => null, 'views' => 30]);
         // The boost line is drawn while a campaign ran in the window.
-        (new \App\Models\BoostCampaign)->forceFill(['event_id' => $event->id, 'role_id' => $role->id, 'user_id' => $owner->id, 'channel' => 'meta', 'name' => 'Launch', 'status' => 'active', 'currency_code' => 'USD', 'user_budget' => 50, 'markup_rate' => 0, 'scheduled_start' => now()->subDays(8)])->save();
+        (new BoostCampaign)->forceFill(['event_id' => $event->id, 'role_id' => $role->id, 'user_id' => $owner->id, 'channel' => 'meta', 'name' => 'Launch', 'status' => 'active', 'currency_code' => 'USD', 'user_budget' => 50, 'markup_rate' => 0, 'scheduled_start' => now()->subDays(8)])->save();
         $rid = UrlUtils::encodeId($role->id);
 
         $this->actingAs($owner)->get(route('analytics', ['role_id' => $rid]))

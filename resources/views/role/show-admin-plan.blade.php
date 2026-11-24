@@ -1,6 +1,120 @@
+{{-- The design's Plan card (2026-11-24): lifted (.ap-hero), the plan's name large with its term
+     beside it, the date it runs to in its own left-aligned column, and each allowance as a label,
+     a large figure "of 1,000 sent" with what is left on the right, then a thin bar. --}}
+<style {!! nonce_attr() !!}>
+    .plan-card {
+      padding: clamp(1.25rem, 3vw, 1.75rem);
+    }
+    .plan-card .plan-hero {
+      gap: 1.25rem 3rem;
+    }
+    .plan-card .plan-hero > .min-w-0 {
+      flex: 1 1 13.75rem;
+    }
+    .plan-card .plan-hero-kicker {
+      font-size: 0.75rem;
+    }
+    .plan-card .plan-hero-name {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.25rem 0.75rem;
+      margin-top: 0.375rem;
+      font-size: clamp(1.875rem, 5vw, 2.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+    .plan-card .plan-hero-term {
+      margin-inline-start: 0;
+      font-size: 1rem;
+      font-weight: 400;
+    }
+    .plan-card .plan-hero-side {
+      text-align: start;
+    }
+    .plan-card .plan-hero-date {
+      margin-top: 0.25rem;
+      letter-spacing: -0.015em;
+    }
+    .plan-card .plan-usage {
+      grid-template-columns: repeat(auto-fit, minmax(13.75rem, 1fr));
+      gap: 1.25rem 2rem;
+      margin-top: 1.5rem;
+      padding-top: 1.375rem;
+    }
+    .plan-meter {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      min-width: 0;
+    }
+    .plan-meter-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
+    }
+    .plan-meter-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.25rem 0.75rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .plan-meter-of {
+      font-size: 0.9375rem;
+      color: rgb(var(--ap-ink));
+    }
+    .plan-meter-figure,
+    .plan-meter-big {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      color: rgb(var(--ap-ink));
+    }
+    .plan-meter-left,
+    .plan-meter-note {
+      font-size: 0.875rem;
+      color: rgb(var(--ap-ink-2));
+    }
+    .plan-meter-left {
+      white-space: nowrap;
+    }
+    .plan-meter-left.is-out {
+      font-weight: 600;
+      color: rgb(180 83 9);
+    }
+    .dark .plan-meter-left.is-out {
+      color: rgb(251 191 36);
+    }
+    .plan-meter-track {
+      height: 0.375rem;
+      overflow: hidden;
+      border-radius: 0.1875rem;
+      background: rgb(var(--ap-surface-active));
+    }
+    .plan-meter-fill {
+      height: 100%;
+      background: var(--brand-button-bg);
+    }
+    .plan-meter-fill.is-out {
+      background: #f59e0b;
+    }
+    .plan-meter-more {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+    }
+    .plan-meter-more:hover {
+      text-decoration: underline;
+    }
+</style>
+
 <div>
     {{-- The tab above says "Plan": the card does not say it again. --}}
-    <div class="ap-card rounded-xl p-6">
+    <div class="ap-card ap-hero rounded-xl plan-card">
 
         @php
             $subscription = $role->subscription('default');
@@ -75,11 +189,25 @@
         </div>
         @endif
 
-        <div class="space-y-4">
-            {{-- Current Plan --}}
-            <div class="flex items-center">
-                <span class="text-gray-600 dark:text-gray-400 w-40">{{ __('messages.curent_plan') }}</span>
-                <span class="font-medium text-gray-700 dark:text-gray-300">
+        {{-- 2026-11 redesign: the plan as the card's headline, and the date it runs to (or the trial's
+             end) on the other side. What else there is to say follows under it as pairs. --}}
+        @php
+            $heroDate = null;
+            $heroDateLabel = null;
+            if ($role->onGenericTrial()) {
+                [$heroDateLabel, $heroDate] = [__('messages.trial_ends'), $role->trial_ends_at->translatedFormat('F j, Y')];
+            } elseif ($subscription && $subscription->onTrial()) {
+                [$heroDateLabel, $heroDate] = [__('messages.trial_ends'), $subscription->trial_ends_at->translatedFormat('F j, Y')];
+            } elseif ($subscription && $subscription->onGracePeriod()) {
+                [$heroDateLabel, $heroDate] = [__('messages.access_until'), $subscription->ends_at->translatedFormat('F j, Y')];
+            } elseif (! $subscription && in_array($role->plan_type, ['pro', 'enterprise']) && $role->plan_expires) {
+                [$heroDateLabel, $heroDate] = [__('messages.expires_on'), \Carbon\Carbon::parse($role->plan_expires)->translatedFormat('F j, Y')];
+            }
+        @endphp
+        <div class="plan-hero">
+            <div class="min-w-0">
+                <p class="plan-hero-kicker">{{ __('messages.curent_plan') }}</p>
+                <p class="plan-hero-name">
                     @if ($planTier === 'enterprise')
                         {{ __('messages.enterprise') }}
                     @elseif ($planTier === 'pro')
@@ -88,10 +216,19 @@
                         {{ __('messages.free_plan') }}
                     @endif
                     @if ($planTier !== 'free' && $role->currentPlanTerm())
-                        ({{ $role->currentPlanTerm() == 'yearly' ? __('messages.yearly') : __('messages.monthly') }})
+                        <span class="plan-hero-term">{{ $role->currentPlanTerm() == 'yearly' ? __('messages.yearly') : __('messages.monthly') }}</span>
                     @endif
-                </span>
+                </p>
             </div>
+            @if ($heroDate)
+            <div class="plan-hero-side">
+                <p class="plan-hero-kicker">{{ $heroDateLabel }}</p>
+                <p class="plan-hero-date">{{ $heroDate }}</p>
+            </div>
+            @endif
+        </div>
+
+        <div class="space-y-4 plan-details">
 
             {{-- Subscription Status --}}
             @if ($subscription || $role->onGenericTrial())
@@ -190,16 +327,6 @@
             </div>
             @endif
 
-            {{-- Legacy: plan_expires for non-subscription users --}}
-            @if (!$subscription && !$role->onGenericTrial() && in_array($role->plan_type, ['pro', 'enterprise']) && $role->plan_expires)
-            <div class="flex items-center">
-                <span class="text-gray-600 dark:text-gray-400 w-40">{{ __('messages.expires_on') }}</span>
-                <span class="font-medium text-gray-700 dark:text-gray-300">
-                    {{ \Carbon\Carbon::parse($role->plan_expires)->format('F j, Y') }}
-                </span>
-            </div>
-            @endif
-
             {{-- Payment Method --}}
             @if ($role->hasDefaultPaymentMethod())
             <div class="flex items-center">
@@ -211,41 +338,75 @@
             @endif
         </div>
 
-        {{-- Usage meters. All three share <x-usage-meter>; the markup used to be hand-rolled and
-             duplicated here and across three newsletter pages, which is how the thresholds drifted. --}}
-
-        {{-- Newsletter Usage --}}
-        @php $newsletterLimit = $role->newsletterLimit(); @endphp
+        {{-- Usage. Each allowance is a label, then its figure large ("0 of 1,000 sent", what is
+             left on the right) over a thin bar, or "Unlimited" when there is no ceiling. The
+             newsletter pages keep the compact <x-usage-meter>; the figures are the same ones,
+             with thousands separators. --}}
         @if (config('app.hosted'))
-        @php $newsletterUsed = $newsletterLimit === null ? 0 : $role->newslettersSentThisMonth(); @endphp
-        <x-usage-meter
-            variant="panel"
-            divider
-            :label="__('messages.newsletter_usage')"
-            :used="$newsletterUsed"
-            :limit="$newsletterLimit"
-            :usedText="$newsletterLimit === null ? null : __('messages.newsletters_used', ['used' => $newsletterUsed, 'limit' => $newsletterLimit])"
-            :remainingText="$newsletterLimit === null ? null : __('messages.newsletters_remaining', ['count' => max(0, $newsletterLimit - $newsletterUsed)])"
-            :unlimitedText="__('messages.usage_unlimited')"
-            :upgradeUrl="$newsletterLimit !== null && config('cashier.key') && $planTier !== 'enterprise' && $newsletterLimit < 1000 ? route('role.subscribe', ['subdomain' => $role->subdomain]) : null"
-            :upgradeLabel="__('messages.newsletter_upgrade_plan')" />
-        @endif
-
-        {{-- Photo Usage --}}
-        @php $photoLimit = $role->photoLimit(); @endphp
-        @if (config('app.hosted'))
-        @php $photoUsed = $photoLimit === null ? 0 : $role->photoCount(); @endphp
-        <x-usage-meter
-            variant="panel"
-            divider
-            :label="__('messages.photo_usage')"
-            :used="$photoUsed"
-            :limit="$photoLimit"
-            :usedText="$photoLimit === null ? null : __('messages.photos_used', ['used' => $photoUsed, 'limit' => $photoLimit])"
-            :remainingText="$photoLimit === null ? null : __('messages.photos_remaining', ['count' => max(0, $photoLimit - $photoUsed)])"
-            :unlimitedText="__('messages.usage_unlimited')"
-            :upgradeUrl="$photoLimit !== null && config('cashier.key') ? route('role.subscribe', ['subdomain' => $role->subdomain]) : null"
-            :upgradeLabel="__('messages.photo_upgrade_plan')" />
+        @php
+            // A sentence with its count set large: the translation is escaped whole, then the
+            // count is put back in a span, so no translation (or an operator's override of one)
+            // can bring markup with it.
+            $withFigure = fn (string $key, int $used, int $limit) => str_replace(
+                '@@USED@@',
+                '<span class="plan-meter-figure">'.e(number_format($used)).'</span>',
+                e(__($key, ['used' => '@@USED@@', 'limit' => number_format($limit)]))
+            );
+            $meters = [];
+            $newsletterLimit = $role->newsletterLimit();
+            $meters[] = [
+                'label' => __('messages.plan_usage_newsletters_label'),
+                'aria' => __('messages.newsletter_usage'),
+                'limit' => $newsletterLimit,
+                'used' => $newsletterLimit === null ? 0 : $role->newslettersSentThisMonth(),
+                'key' => 'messages.plan_usage_sent_of',
+                'left' => 'messages.newsletters_remaining',
+                'upgrade' => $newsletterLimit !== null && config('cashier.key') && $planTier !== 'enterprise' && $newsletterLimit < 1000
+                    ? [route('role.subscribe', ['subdomain' => $role->subdomain]), __('messages.newsletter_upgrade_plan')] : null,
+            ];
+            $photoLimit = $role->photoLimit();
+            $meters[] = [
+                'label' => __('messages.plan_usage_photos_label'),
+                'aria' => __('messages.photo_usage'),
+                'limit' => $photoLimit,
+                'used' => $photoLimit === null ? 0 : $role->photoCount(),
+                'key' => 'messages.usage_used_of',
+                'left' => 'messages.photos_remaining',
+                'upgrade' => $photoLimit !== null && config('cashier.key')
+                    ? [route('role.subscribe', ['subdomain' => $role->subdomain]), __('messages.photo_upgrade_plan')] : null,
+            ];
+        @endphp
+        <div class="plan-usage">
+            @foreach ($meters as $meter)
+            <div class="plan-meter">
+                <p class="plan-meter-label">{{ $meter['label'] }}</p>
+                @if ($meter['limit'] === null)
+                <p class="plan-meter-big">{{ __('messages.plan_usage_unlimited') }}</p>
+                <p class="plan-meter-note">{{ __('messages.plan_usage_included') }}</p>
+                @else
+                @php
+                    $meterLimit = max(0, (int) $meter['limit']);
+                    $meterUsed = max(0, (int) $meter['used']);
+                    $meterOut = $meterUsed >= $meterLimit;
+                    $meterPercent = $meterLimit === 0 ? 100 : min(100, (int) round($meterUsed / $meterLimit * 100));
+                    // One unit out of a large allowance rounds to 0% and would draw no bar at all.
+                    $meterWidth = $meterPercent === 0 && $meterUsed > 0 ? 2 : $meterPercent;
+                    $meterSentence = __($meter['key'], ['used' => number_format($meterUsed), 'limit' => number_format($meterLimit)]);
+                @endphp
+                <div class="plan-meter-line">
+                    <p class="plan-meter-of">{!! $withFigure($meter['key'], $meterUsed, $meterLimit) !!}</p>
+                    <p @class(['plan-meter-left', 'is-out' => $meterOut])>{{ __($meter['left'], ['count' => number_format(max(0, $meterLimit - $meterUsed))]) }}</p>
+                </div>
+                <div class="plan-meter-track" role="progressbar" aria-label="{{ $meter['aria'] }}" aria-valuenow="{{ $meterUsed }}" aria-valuemin="0" aria-valuemax="{{ $meterLimit }}" aria-valuetext="{{ $meterSentence }}">
+                    <div @class(['plan-meter-fill', 'is-out' => $meterOut]) style="width: {{ $meterWidth }}%"></div>
+                </div>
+                @if ($meter['upgrade'])
+                <a href="{{ $meter['upgrade'][0] }}" class="plan-meter-more">{{ $meter['upgrade'][1] }}</a>
+                @endif
+                @endif
+            </div>
+            @endforeach
+        </div>
         @endif
     </div>
 
@@ -315,17 +476,15 @@
 @if (config('app.hosted'))
 <div class="mt-4">
     <div class="ap-card rounded-xl p-6">
-        <div class="flex items-start gap-4">
-            <svg class="w-8 h-8 text-[var(--brand-blue)] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M21,12L14,5V9C7,10 4,15 3,20C5.5,16.5 9,14.9 14,14.9V19L21,12Z" />
-            </svg>
-            <div>
-                <h4 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-1">{{ __('messages.referral_program') }}</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">{{ __('messages.referral_plan_page_description') }}</p>
-                <a href="{{ route('referrals') }}" class="text-[var(--brand-blue)] hover:underline font-medium text-sm">
-                    {{ __('messages.view_referral_dashboard') }} &rarr;
-                </a>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="min-w-0">
+                <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.referral_program') }}</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.referral_plan_page_description') }}</p>
             </div>
+            <x-secondary-link :href="route('referrals')" class="gap-1.5 !py-2.5 !text-sm">
+                {{ __('messages.view_referral_dashboard') }}
+                <span aria-hidden="true">&rarr;</span>
+            </x-secondary-link>
         </div>
     </div>
 </div>

@@ -22,15 +22,91 @@ class ScheduleTypeChooserTest extends TestCase
 
         $html = $this->actingAs($user)->get('/getting-started')->assertOk()->getContent();
 
-        $this->assertStringContainsString(__('messages.schedule_type_question'), $html);
+        $this->assertStringContainsString(e(__('messages.schedule_type_question_for')), $html);
         $this->assertStringContainsString('Jordan', $html);
 
+        // One GET form back to this page, whose ?type= forwards to /new/{type}.
+        $this->assertStringContainsString('action="'.route('getting-started').'"', $html);
+
         foreach (['talent', 'venue', 'curator'] as $type) {
-            $this->assertStringContainsString('href="'.route('new', ['type' => $type]).'"', $html, $type);
+            $this->assertMatchesRegularExpression('/<input type="radio" id="schedule-type-choice-'.$type.'" name="type" value="'.$type.'"/', $html, $type);
             $this->assertStringContainsString('aria-labelledby="schedule-type-'.$type.'"', $html, $type);
-            // The line that tells the types apart, with its <b><i> emphasis kept as markup.
-            $this->assertStringContainsString(__('messages.'.$type.'_footer'), $html, $type);
         }
+
+        // Event schedule is the one chosen to begin with, and only it.
+        $this->assertSame(1, preg_match_all('/name="type" value="[a-z]+" class="sr-only" checked/', $html));
+        $this->assertMatchesRegularExpression('/name="type" value="talent" class="sr-only" checked/', $html);
+    }
+
+    public function test_each_type_says_whose_events_and_which_venues(): void
+    {
+        $user = $this->createOwner();
+
+        $html = $this->actingAs($user)->get('/getting-started')->assertOk()->getContent();
+
+        // The primary card's strip: two cells, Events and Venues.
+        preg_match_all('/class="st-cell-value[^"]*">([^<]*)</', $html, $m);
+        $values = array_map(fn ($v) => html_entity_decode(trim($v), ENT_QUOTES), $m[1]);
+
+        $this->assertSame([__('messages.schedule_type_events_yours'), __('messages.schedule_type_venues_anywhere')], $values);
+
+        // The two alternatives say it in one line each, as the 2026-11 design draws them:
+        // "Anyone's events · your venue" and "Anyone's events · any venue".
+        preg_match_all('/<p class="st-line[^"]*">(.*?)<\/p>/s', $html, $lines);
+        $lines = array_map(fn ($l) => html_entity_decode(trim(preg_replace('/\s+/', ' ', strip_tags($l))), ENT_QUOTES), $lines[1]);
+        $events = str_replace(':whose', __('messages.schedule_type_line_anyones'), __('messages.schedule_type_line_events'));
+
+        $this->assertSame([
+            $events.' · '.__('messages.schedule_type_line_your_venue'),
+            $events.' · '.__('messages.schedule_type_line_any_venue'),
+        ], $lines);
+    }
+
+    public function test_the_first_run_screens_show_their_step(): void
+    {
+        $user = $this->createOwner();
+        $user->forceFill(['name' => 'Jordan Rivera'])->save();
+
+        // Step 1 of 2 on the chooser, with the welcome on its own; step 2 of 2 on the form.
+        $this->actingAs($user)->get('/getting-started')->assertOk()
+            ->assertSee(__('messages.setup_step_of', ['current' => 1, 'total' => 2]))
+            ->assertSee(__('messages.getting_started_welcome_name', ['name' => 'Jordan']));
+
+        $this->get(route('new', ['type' => 'venue']))->assertOk()
+            ->assertSee(__('messages.setup_step_of', ['current' => 2, 'total' => 2]))
+            ->assertSee(__('messages.time_zone'))
+            ->assertSee(__('messages.venue_tagline'));
+    }
+
+    public function test_the_market_switch_lives_under_venue_and_no_separate_card_is_offered(): void
+    {
+        $user = $this->createOwner();
+
+        $html = $this->actingAs($user)->get('/getting-started')->assertOk()->getContent();
+
+        // The switch is inside the Venue option, not a card of its own linking to the venue form.
+        $this->assertMatchesRegularExpression('/data-type="venue".*?name="vendor_map" value="market".*?data-type="curator"/s', $html);
+        $this->assertStringNotContainsString('vendor_map=market', $html);
+    }
+
+    public function test_continue_forwards_to_the_chosen_form_and_keeps_the_market_only_for_a_venue(): void
+    {
+        $user = $this->createOwner();
+        $this->actingAs($user);
+
+        $this->get('/getting-started?type=venue&vendor_map=market')
+            ->assertRedirect(route('new', ['type' => 'venue', 'vendor_map' => 'market']));
+
+        // Left on, then another type chosen: the switch is dropped.
+        $this->get('/getting-started?type=curator&vendor_map=market')
+            ->assertRedirect(route('new', ['type' => 'curator']));
+
+        // A kind the vendor map does not know is not carried.
+        $this->get('/getting-started?type=venue&vendor_map=nonsense')
+            ->assertRedirect(route('new', ['type' => 'venue']));
+
+        $this->get('/getting-started?type=talent')
+            ->assertRedirect(route('new', ['type' => 'talent']));
     }
 
     public function test_the_dashboard_panel_nests_its_card_titles_under_its_own_heading(): void

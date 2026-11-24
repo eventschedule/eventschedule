@@ -75,7 +75,8 @@ class FirstRunImportBandTest extends TestCase
 
         $this->assertSame(['google', 'link', 'flyer'], $this->sources($html), 'a venue usually keeps a calendar');
         $this->assertStringContainsString(__('messages.import_band_title'), $block);
-        $this->assertStringContainsString(__('messages.import_band_by_hand'), $block);
+        // A line of links under the page's lead now, with no "or add one by hand" rule after it.
+        $this->assertStringNotContainsString('import-options-grid', $block);
 
         // Ahead of the form, and out of Vue's hands: the band sits inside the form's mount.
         $band = strpos($html, 'aria-labelledby="import-band-title" v-pre');
@@ -129,7 +130,7 @@ class FirstRunImportBandTest extends TestCase
             ->assertRedirect($createUrl)
             ->assertSessionHasErrors('name');
         $refused = $this->createHtml($owner, $talent);
-        $this->assertStringContainsString(__('messages.first_event_form_subtitle'), $refused, 'sanity check: still a first event');
+        $this->assertStringContainsString('data-first-event-lead', $refused, 'sanity check: still a first event');
         $this->assertSame([], $this->sources($refused));
 
         $this->createEvent($talent, ['user_id' => $owner->id]);
@@ -150,7 +151,7 @@ class FirstRunImportBandTest extends TestCase
         $venue->users()->attach($admin->id, ['level' => 'admin']);
 
         $html = $this->createHtml($admin, $venue);
-        $this->assertStringContainsString(__('messages.first_event_form_subtitle'), $html, 'sanity check: the admin\'s first event');
+        $this->assertStringContainsString('data-first-event-lead', $html, 'sanity check: the admin\'s first event');
         $this->assertSame([], $this->sources($html));
     }
 
@@ -170,7 +171,7 @@ class FirstRunImportBandTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString(__('messages.first_event_form_subtitle'), $html, 'sanity check: still a first event');
+        $this->assertStringContainsString('data-first-event-lead', $html, 'sanity check: still a first event');
         $this->assertSame([], $this->sources($html));
     }
 
@@ -185,7 +186,6 @@ class FirstRunImportBandTest extends TestCase
         $this->assertStringContainsString(__('messages.import_band_title'), $block);
         $this->assertStringContainsString('aria-labelledby="import-schedule-title" v-pre', $html);
         // The calendar's own Add Event below is the way by hand.
-        $this->assertStringNotContainsString(__('messages.import_band_by_hand'), $block);
 
         // A viewer cannot add events.
         $viewer = $this->createOwner();

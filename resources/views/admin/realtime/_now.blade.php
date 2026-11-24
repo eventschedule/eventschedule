@@ -5,13 +5,8 @@
      is the board under it (_board). --}}
 <section id="realtime-now" class="ap-card rounded-xl p-4 sm:p-6" aria-labelledby="realtime-now-heading">
     <div class="realtime-now-head" :class="splitTotal > 0 ? '' : 'is-quiet'">
-        {{-- One line: the icon, the number, and what it counts with how it splits. --}}
+        {{-- One line: the number, and what it counts with how it splits (no icon chip, 2026-11). --}}
         <div class="flex items-center gap-4 min-w-0">
-            <div class="dashboard-icon p-2 rounded-xl bg-green-50 dark:bg-green-500/10" style="--icon-glow: rgba(34, 197, 94, 0.15)">
-                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" :d="icons.signal" />
-                </svg>
-            </div>
             <span class="dashboard-stat-value text-4xl font-bold leading-none tabular-nums text-gray-900 dark:text-white">@{{ fmt(p.overview.now) }}</span>
             <div class="min-w-0">
                 <h2 id="realtime-now-heading" class="text-base font-semibold text-gray-900 dark:text-white">

@@ -51,9 +51,12 @@
         {{-- Four short tabs: a strip on a phone too (it scrolls there, fades at the edge it runs
              on from and brings the open tab into view). Realtime is the second, beside Web
              Analytics, whose question it answers for the last half hour. --}}
+        {{-- The tabs and what narrows them on one line (the 2026-11 redesign). --}}
+        <div class="an-head-row">
         <x-page-tabs :tabs="$analyticsTabs" id="analytics-tabs" strip :label="__('messages.analytics')" />
 
         @include('analytics._filters')
+        </div>
 
         {{-- A schedule the plan closes to a team member is missing from the picker and from every
              figure; this says why. The Realtime tab prints its own, above its Vue mount. --}}

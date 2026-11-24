@@ -5,13 +5,17 @@
      $liveStrip marks the Realtime tile's strip, which home/_live-script redraws. Named so that no
      view including this one has a variable of the same name: an include is handed everything its
      parent holds, and while this read `$live` the tiles' own `$live` (the Realtime summary) marked
-     all four strips, so the first refresh redrew Views, Followers and Revenue with minutes. --}}
+     all four strips, so the first refresh redrew Views, Followers and Revenue with minutes.
+
+     $barStyle: an inline background for a tone no Tailwind class carries (the 2026-11 design's pale
+     blue, mixed from --brand-blue so it follows dark mode). Used in place of $tone when set. --}}
 @php
     $values = $values ?? [];
     $peak = max(1, ...($values ?: [0]));
+    $barStyle = $barStyle ?? null;
 @endphp
 <span class="flex items-end justify-center gap-0.5 h-7 w-full" aria-hidden="true" @if (($liveStrip ?? false) === true) data-live-bars data-tone="{{ $tone }}" @endif>
     @foreach ($values as $value)
-        <span class="flex-1 max-w-[0.5rem] rounded-sm {{ $value ? $tone : 'bg-gray-200 dark:bg-gray-700' }}" style="height: {{ $value ? max(14, (int) round($value / $peak * 100)) : 6 }}%"></span>
+        <span class="flex-1 max-w-[0.5rem] rounded-sm {{ $value ? ($barStyle ? '' : $tone) : 'bg-gray-200 dark:bg-gray-700' }}" style="height: {{ $value ? max(14, (int) round($value / $peak * 100)) : 6 }}%;{{ $value && $barStyle ? ' '.$barStyle : '' }}"></span>
     @endforeach
 </span>

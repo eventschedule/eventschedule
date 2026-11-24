@@ -23,10 +23,6 @@
         {{-- What this page needs beyond the kit (partials/admin-page-styles). The lists of the
              other tabs (ticket/*_table) are drawn into this page and lean on these rules too. --}}
         <style {!! nonce_attr() !!}>
-            /* Seven columns of orders want more than the 64rem column of the portal's other lists. */
-            .sales-shell {
-              max-width: 80rem;
-            }
             /* A row that is closed. The kit lays a phone's rows out as flex, which outranks the
                hidden class and the hidden attribute alike. */
             .page-table tr.hidden,
@@ -39,6 +35,136 @@
             }
             /* !important because the kit sizes a filter's box that way (it has to, against the
                layout's own rule): without it typed text ran under the clear button. */
+            /* 2026-11-24 design: the filters and the list are one card (.sales-card); the filter
+               row is its top, and the rules between orders are set in from the card's edges by
+               its padding, as the design draws them. */
+            .sales-card {
+              padding: 0 1.25rem 0.375rem;
+            }
+            .sales-card > .page-filters {
+              margin: 0;
+              padding: 1rem 0 0.625rem;
+              border: 0;
+              background: none;
+            }
+            .sales-card .sales-rows {
+              border-top: 1px solid rgb(var(--ap-border));
+            }
+            .sales-card .sales-rows .page-empty {
+              padding-inline: 0;
+            }
+            /* The pager under the card: what this page holds on the left, the pages on the right. */
+            #sales-pager .page-pager {
+              margin-top: 1.5rem;
+            }
+            .sales-pager {
+              display: flex;
+              flex-wrap: wrap;
+              align-items: center;
+              justify-content: space-between;
+              gap: 0.625rem 1.25rem;
+            }
+            .sales-pager-count {
+              margin: 0;
+              font-size: 0.875rem;
+              font-variant-numeric: tabular-nums;
+              color: rgb(var(--ap-ink-2));
+            }
+            .sales-pager-track {
+              display: flex;
+              align-items: center;
+              gap: 0.125rem;
+              padding: 0.125rem;
+              border: 1px solid rgb(var(--ap-border-strong));
+              border-radius: 0.625rem;
+              background: rgb(var(--ap-surface));
+            }
+            .sales-pager-key {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              min-width: 2.5rem;
+              height: 2.5rem;
+              padding-inline: 0.5rem;
+              border-radius: 0.5rem;
+              font-size: 0.875rem;
+              font-weight: 600;
+              font-variant-numeric: tabular-nums;
+              color: rgb(var(--ap-ink));
+              transition: background-color 0.15s;
+            }
+            a.sales-pager-key:hover,
+            .sales-pager-key.is-on {
+              background: rgb(var(--ap-surface-active));
+            }
+            a.sales-pager-key:focus-visible {
+              outline: 2px solid var(--brand-blue);
+              outline-offset: -2px;
+            }
+            .sales-pager-key.is-arrow {
+              font-size: 0.9375rem;
+              font-weight: 400;
+            }
+            .sales-pager-key.is-off,
+            .sales-pager-key.is-gap {
+              color: rgb(var(--ap-ink-4));
+            }
+            [dir="rtl"] .sales-pager-arrow {
+              display: inline-block;
+              transform: scaleX(-1);
+            }
+            #sales-panel .sales-list thead {
+              position: absolute;
+              width: 1px;
+              height: 1px;
+              overflow: hidden;
+              clip: rect(0 0 0 0);
+              white-space: nowrap;
+            }
+            .sales-list .c-event a.sales-event {
+              font-size: 0.875rem;
+              font-weight: 500;
+              color: rgb(var(--ap-ink));
+            }
+            .sales-list .sales-customer .c-strong {
+              font-size: 0.9375rem;
+              font-weight: 600;
+              letter-spacing: -0.01em;
+              color: rgb(var(--ap-ink));
+            }
+            .sales-list .c-event a.sales-event:hover {
+              text-decoration: underline;
+            }
+            .sales-list .sales-email {
+              color: rgb(var(--ap-ink-2));
+            }
+            .sales-list .sales-email:hover {
+              text-decoration: underline;
+            }
+            .sales-list td.c-total {
+              text-align: end;
+            }
+            .sales-list .sales-amount {
+              display: block;
+              font-size: 0.9375rem;
+              font-weight: 600;
+              color: rgb(var(--ap-ink));
+              font-variant-numeric: tabular-nums;
+            }
+            .sales-list .sales-when {
+              display: block;
+              font-size: 0.8125rem;
+              color: rgb(var(--ap-ink-2));
+            }
+            .sales-list .sales-when .event-status {
+              padding: 0;
+              background: none;
+              border: 0;
+              font-weight: 600;
+            }
+            .sales-list .sales-when .event-status::before {
+              content: none;
+            }
             .page-filters .sales-filter-box input {
               padding-inline-end: 2.5rem !important;
             }
@@ -194,8 +320,24 @@
               max-width: 10.5rem;
               font-size: 0.8125rem;
             }
-            .sales-menu {
-              padding: 0.375rem;
+            /* The row's menu: three dots across, a 40px key right after the amount. */
+            .sales-list .c-actions {
+              width: 1%;
+            }
+            .sales-menu.page-tool {
+              justify-content: center;
+              width: 2.5rem;
+              height: 2.5rem;
+              padding: 0;
+              border: 0;
+              border-radius: 0.625rem;
+              background: none;
+              color: rgb(var(--ap-ink-2));
+            }
+            .sales-menu.page-tool:hover,
+            .sales-menu.page-tool[aria-expanded="true"] {
+              background: rgb(var(--ap-surface-active));
+              color: rgb(var(--ap-ink));
             }
             .sales-menu svg {
               width: 1.25rem;
@@ -230,6 +372,20 @@
               .sales-shell .page-table.is-wide th:last-child,
               .sales-shell .page-table.is-wide td:last-child {
                 padding-inline-end: 1rem;
+              }
+              /* Inside the card's own padding the list's outer cells start at its edge, so a
+                 name lines up with the filter box above it; the menu sits close to the amount. */
+              .sales-card .sales-list.is-wide td:first-child {
+                padding-inline-start: 0;
+              }
+              .sales-card .sales-list.is-wide td:last-child {
+                padding-inline-end: 0;
+              }
+              .sales-card .sales-list.is-wide td.c-actions {
+                padding-inline-start: 0.25rem;
+              }
+              .sales-card .sales-list.is-wide td {
+                padding-block: 0.625rem;
               }
               .sales-shell .page-table .c-event {
                 min-width: 8rem;
@@ -267,6 +423,35 @@
               }
               .sales-shell .page-table.is-wide td.c-main {
                 min-width: 9rem;
+              }
+              /* The orders' four columns at fixed widths (the design review of 2026-11): who
+                 bought, what for, the amount and the menu. Left to the table, the event column
+                 took whatever the name did not, and the amount drifted to the far edge of the
+                 card, a hand's width from the event it was paid for. */
+              .sales-list.is-wide {
+                table-layout: fixed;
+              }
+              .sales-list .sales-col-who {
+                width: 44%;
+              }
+              .sales-list .sales-col-event {
+                width: 34%;
+              }
+              .sales-list .sales-col-menu {
+                width: 3rem;
+              }
+              .sales-shell .sales-list.page-table .c-event {
+                min-width: 0;
+              }
+              .sales-list.is-wide td.c-total {
+                white-space: normal;
+              }
+              .sales-list.is-wide .sales-amount,
+              .sales-list.is-wide .sales-when {
+                white-space: nowrap;
+              }
+              .sales-shell .sales-list .sales-customer .page-person-text {
+                max-width: 100%;
               }
               .sales-fold-bar > .page-actions {
                 margin-inline-start: auto;
@@ -354,6 +539,10 @@
               max-width: 22rem;
             }
             @media (max-width: 639.98px) {
+              /* The card's padding already sets a phone's rows in from its edges. */
+              .sales-card .sales-list tr {
+                padding-inline: 0;
+              }
               /* An order on a phone: who, what for, then the total and what became of it, then
                  the reference with the row's menu at the end. */
               .sales-list .c-event {
@@ -421,18 +610,11 @@
                      free schedule that sold a ticket must still be able to admit the holder at
                      the door. --}}
                 @if ($hasPro)
-                <x-secondary-link href="{{ route('sales.import', request()->only(['filter', 'include_past'])) }}">
-                    {{ __('messages.import') }}
-                </x-secondary-link>
-                <x-secondary-link href="{{ route('checkin.index') }}">
-                    {{ __('messages.checkin_dashboard') }}
-                </x-secondary-link>
+                {{-- 2026-11 redesign: the two quieter ways out are words beside Scan ticket. --}}
+                <a href="{{ route('sales.import', request()->only(['filter', 'include_past'])) }}" class="ap-text-action">{{ __('messages.import') }}</a>
+                <a href="{{ route('checkin.index') }}" class="ap-text-action">{{ __('messages.checkin_dashboard') }}</a>
                 @endif
                 <x-brand-link href="{{ route('ticket.scan') }}">
-                    <svg class="-ms-0.5 me-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
-                    </svg>
                     {{ __('messages.scan_ticket') }}
                 </x-brand-link>
             </x-slot>
@@ -470,10 +652,14 @@
         @endif
 
         <div id="sales-panel" @if ($hasTabs) role="tabpanel" aria-labelledby="tab-sales" @endif>
+            {{-- 2026-11-24 design: the filters and the orders are ONE card (they were two boxes
+                 butted together, with a seam where a border met a shadow), and the pager sits
+                 under it. --}}
+            <div class="ap-card rounded-xl sales-card">
             <div class="page-filters" role="search">
                 <div class="is-grow sales-filter-box">
                     <label for="filter" class="sr-only">{{ __('messages.filter') }}</label>
-                    <x-text-input type="text" name="filter" id="filter" placeholder="{{ __('messages.filter') }}"
+                    <x-text-input type="text" name="filter" id="filter" placeholder="{{ __('messages.filter_by_name_or_email') }}"
                         value="{{ request()->filter }}" autocomplete="off" class="block w-full"/>
                     <button type="button" id="clear-filter" class="sales-filter-clear" hidden>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -490,18 +676,17 @@
                      same "Include past events". --}}
                 @if ($hasPro)
                 <div class="is-end">
-                    <a href="{{ route('sales.export') }}" id="export-sales" class="page-tool">
-                        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                        </svg>
-                        {{ __('messages.export') }}
-                    </a>
+                    <a href="{{ route('sales.export') }}" id="export-sales" class="event-head-link">{{ __('messages.export') }}</a>
                 </div>
                 @endif
             </div>
 
             <div id="sales-table">
-                @include('ticket.sales_table')
+                @include('ticket.sales_table', ['salesPart' => 'rows'])
+            </div>
+            </div>
+            <div id="sales-pager">
+                @include('ticket.sales_table', ['salesPart' => 'pager'])
             </div>
         </div>
 
@@ -960,8 +1145,25 @@ function updateResults(value) {
     })
     .then(html => {
         const salesTable = document.getElementById('sales-table');
-        if (salesTable) {
-            salesTable.innerHTML = html;
+        if (!salesTable) {
+            return;
+        }
+        // The answer holds the rows and the pager; the rows go in the card, the pager under it.
+        const answer = document.createElement('div');
+        answer.innerHTML = html;
+        const pager = answer.querySelector('[data-sales-pager]');
+        const pagerSlot = document.getElementById('sales-pager');
+        if (pagerSlot) {
+            pagerSlot.innerHTML = '';
+            if (pager) {
+                pagerSlot.appendChild(pager);
+            }
+        } else if (pager) {
+            pager.remove();
+        }
+        salesTable.innerHTML = '';
+        while (answer.firstChild) {
+            salesTable.appendChild(answer.firstChild);
         }
     });
 }

@@ -619,7 +619,8 @@ class SetupGuideTest extends TestCase
         $this->assertSame('</script><i>Jazz</i>', $guide['events'][0]['name']);
     }
 
-    /** The ring is the count. Words say how close; nothing prints "2 of 3". */
+    /** No string writes a count into its words. The dashboard card says "2 of 5 done" (his 2026-11
+     * redesign choice), from :done and :total, never from a digit in the text. */
     public function test_no_string_of_the_guide_prints_a_fraction(): void
     {
         foreach (array_keys(config('app.supported_languages')) as $language) {
@@ -1167,16 +1168,17 @@ class SetupGuideTest extends TestCase
         $this->assertSame('section', $this->surfaceOf($home->getContent()));
         $this->assertCount(2, $home->viewData('nextStepItems'));
 
-        // The ring above the first schedule form is the guide's too. Somebody with no schedule
-        // yet sees it, unless they turned suggestions off first.
+        // The "Step 2 of 2" bar above the first schedule form is the guide's too. Somebody with no
+        // schedule yet sees it, unless they turned suggestions off first.
         $newcomer = $this->createOwner();
         $form = route('new', ['type' => 'talent']);
+        $step = __('messages.setup_step_of', ['current' => 2, 'total' => 2]);
 
-        $this->actingAs($newcomer)->get($form)->assertOk()->assertSee(__('messages.setup_guide_two_steps'));
+        $this->actingAs($newcomer)->get($form)->assertOk()->assertSee($step);
 
         SetupGuide::suggest($newcomer, false);
 
-        $this->actingAs($newcomer->fresh())->get($form)->assertOk()->assertDontSee(__('messages.setup_guide_two_steps'));
+        $this->actingAs($newcomer->fresh())->get($form)->assertOk()->assertDontSee($step);
     }
 
     /**

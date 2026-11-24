@@ -215,7 +215,7 @@
 
         <h3 id="schedule-other-notices" class="doc-subheading">Other notices above the calendar</h3>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Owners and admins may see a few more panels above the calendar. While the schedule has no events, <strong class="text-gray-900 dark:text-white">Already have your events listed somewhere?</strong> offers ways to bring them in, such as from a link or a flyer (see <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a>). When a calendar sync is keeping events off your public page, or publishes a whole main calendar, a notice says so and links to the events it held (see <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-review" class="doc-link">Events from your calendar</a>). On a selfhosted site, an invitation to join or list the schedule on the Event Schedule network can appear here too.
+            Owners and admins may see a few more panels above the calendar. While the schedule has no events, <strong class="text-gray-900 dark:text-white">Already listed somewhere?</strong> offers ways to bring them in, such as from a link or a flyer (see <a href="{{ route('marketing.docs.ai_import') }}" class="doc-link">AI Import</a>). When a calendar sync is keeping events off your public page, or publishes a whole main calendar, a notice says so and links to the events it held (see <a href="{{ route('marketing.docs.creating_schedules') }}#calendar-review" class="doc-link">Events from your calendar</a>). On a selfhosted site, an invitation to join or list the schedule on the Event Schedule network can appear here too.
         </p>
 
         <h3 id="schedule-notices" class="doc-subheading">Notices on a Curator schedule</h3>

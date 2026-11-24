@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\AnalyticsDaily;
 use App\Models\Role;
+use App\Models\RoleTransfer;
+use App\Models\SaleTicket;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\HomeDashboard;
@@ -210,7 +212,7 @@ class HomeDashboardTest extends TestCase
         $nameless = User::factory()->create(['name' => '', 'email' => 'tom@gmail.com']);
         $role->users()->attach($named->id, ['level' => 'follower', 'created_at' => now()->subHour(), 'updated_at' => now()->subHour()]);
         $role->users()->attach($nameless->id, ['level' => 'follower', 'created_at' => now()->subHours(2), 'updated_at' => now()->subHours(2)]);
-        $this->createSale($event, $role, ['payment_amount' => 20, 'name' => 'Maya Okafor'], $ticket, 2);
+        $this->createSale($event, $role, ['payment_amount' => 20, 'name' => 'Jordan Reyes'], $ticket, 2);
         // A deleted sale is not something that happened. Mutation: drop is_deleted from the feed.
         $this->createSale($event, $role, ['payment_amount' => 99, 'name' => 'Deleted Buyer', 'is_deleted' => true], $ticket, 1);
 
@@ -218,13 +220,19 @@ class HomeDashboardTest extends TestCase
         $this->assertNotContains('Deleted Buyer', $rows->pluck('who')->all());
 
         $sale = $rows->firstWhere('type', 'sale');
-        $this->assertSame(['The Show', 'Maya Okafor', 2, 20.0], [$sale['title'], $sale['who'], $sale['quantity'], $sale['amount']]);
+        $this->assertSame(['The Show', 'Jordan Reyes', 2, 20.0], [$sale['title'], $sale['who'], $sale['quantity'], $sale['amount']]);
 
         $followers = $rows->where('type', 'follower')->values();
         $this->assertSame(['Dana Whitlock', 'dana@gmail.com'], [$followers[0]['title'], $followers[0]['who']]);
         $this->assertSame(['tom@gmail.com', null], [$followers[1]['title'], $followers[1]['who']], 'no name: the address stands in');
 
-        $this->actingAs($owner)->get(route('home'))->assertOk()->assertSee('Dana Whitlock')->assertSee('Maya Okafor');
+        $page = $this->actingAs($owner)->get(route('home'))->assertOk()->assertSee('Dana Whitlock')->assertSee('Jordan Reyes');
+        // A sale says how many in words that agree with the number ("2 tickets"), in every
+        // language: it used to print the column heading and the number, "Tickets 2".
+        // Mutation: go back to __('messages.tickets').' '.$quantity.
+        $page->assertSee('Jordan Reyes · 2 tickets')->assertDontSee(__('messages.tickets').' 2');
+        // A mix of sales and followers is activity; the card is "Recent sales" only when that is all it holds.
+        $page->assertSee(__('messages.recent_activity'));
     }
 
     /**
@@ -279,7 +287,7 @@ class HomeDashboardTest extends TestCase
             ->assertSee(__('messages.dash_waiting_title'))
             ->assertSee('data-first-visitor-waiting', false)
             ->assertDontSee(__('messages.dash_page_views_30m'))
-            ->assertDontSee(__('messages.dash_in_total'));
+            ->assertDontSee('dashboard-tile-figure', false);
 
         // One view, and they are an organizer with numbers.
         $this->views($role, '2026-10-06', 1);
@@ -336,7 +344,7 @@ class HomeDashboardTest extends TestCase
         $page->assertSee(__('messages.your_tickets'))
             ->assertSee(__('messages.dash_from_following'))
             ->assertDontSee(__('messages.create_your_first_schedule'))
-            ->assertDontSee(__('messages.dash_in_total'))
+            ->assertDontSee('dashboard-tile-figure', false)
             ->assertDontSee('data-dashboard-customize', false);
     }
 
@@ -367,7 +375,7 @@ class HomeDashboardTest extends TestCase
 
         $page->assertSee('Members Night')
             ->assertDontSee(__('messages.dash_page_views_30m'))
-            ->assertDontSee(__('messages.dash_in_total'))
+            ->assertDontSee('dashboard-tile-figure', false)
             ->assertDontSee('data-dashboard-customize', false)
             ->assertDontSee('dashboard-add-event-menu', false);
         $this->assertArrayNotHasKey('addTargets', $dashboard, 'and nothing to add an event to');
@@ -382,7 +390,7 @@ class HomeDashboardTest extends TestCase
 
         $this->assertSame('empty', $page->viewData('dashboard')['state']);
         $this->assertFalse($page->viewData('showCalendar'));
-        $page->assertSee(__('messages.create_your_first_schedule'))->assertDontSee(__('messages.dash_in_total'));
+        $page->assertSee(__('messages.create_your_first_schedule'))->assertDontSee('dashboard-tile-figure', false);
     }
 
     /**
@@ -417,14 +425,16 @@ class HomeDashboardTest extends TestCase
         // than once is the tiles and cards saying it too. Counted in the body alone: the head
         // carries the portal's stylesheets, and a note in one of them that quotes a label (the
         // page kit's, about a select's arrow) is not the page saying it.
-        $said = fn ($response, int $days) => substr_count((string) strstr($response->getContent(), '</head>'), e(__('messages.last_'.$days.'_days')));
+        // The tiles name the span in their label ("Views · 7 days", the 2026-11 design), and the
+        // dialog's "Last 7 days" holds the same words, so it counts once here too.
+        $said = fn ($response, int $days) => substr_count((string) strstr($response->getContent(), '</head>'), e(__('messages.dash_days_'.$days)));
         $this->assertGreaterThan(1, $said($page, 7), 'the tiles cover the saved period');
         $this->assertSame(1, $said($page, 14));
         $this->assertSame(1, $said($page, 30));
         $page->assertSee('id="dashboard-activity"', false)
             ->assertDontSee('id="dashboard-coming-up"', false)
             ->assertDontSee('Hidden With Its Card')
-            ->assertSee(__('messages.dash_in_total'))
+            ->assertSee('dashboard-tile-figure', false)
             ->assertSee('id="dashboard-calendar"', false);
 
         // And the calendar, which can be switched off now, is saved through the same endpoint.
@@ -471,7 +481,7 @@ class HomeDashboardTest extends TestCase
         $page = $this->actingAs($owner)->get(route('home'))->assertOk();
         $page->assertDontSee(__('messages.dash_page_views_30m'))
             ->assertDontSee('realtime\/summary', false)
-            ->assertSee(__('messages.dash_from_today'))
+            ->assertSee(e(__('messages.upcoming_events')), false)
             // "Next event", not the pager's "Next" (which is "Weiter" and "Avanti" in translation).
             ->assertSee(__('messages.dash_next_event'));
         $this->assertNull($page->viewData('dashboard')['live']);
@@ -635,11 +645,14 @@ class HomeDashboardTest extends TestCase
 
         $this->assertNotNull($this->actingAs($owner)->get(route('home'))->viewData('dashboard')['live'], 'this page has the live tile');
         $this->assertSame(1, substr_count($html, 'data-live-bars data-tone='), 'one live strip, the Realtime tile\'s');
-        $this->assertSame(4, substr_count($html, 'flex items-end justify-center gap-0.5 h-7 w-full'), 'and four strips in all');
+        // Since the 2026-11 design only Views and Realtime carry a strip.
+        $this->assertSame(2, substr_count($html, 'flex items-end justify-center gap-0.5 h-7 w-full'), 'and two strips in all');
 
         $card = substr($html, (int) strpos($html, 'aria-labelledby="dashboard-coming-up"'));
         $card = substr($card, 0, (int) strpos($card, '</section>'));
-        $this->assertStringContainsString('w-12 h-12 rounded-xl', $card, 'the row thumbnail');
+        // Since the 2026-11 redesign a row leads with its time, not a picture, and no other
+        // card's small picture leaks into it.
+        $this->assertStringContainsString('w-[4.25rem] shrink-0', $card, 'the row\'s time column');
         $this->assertStringNotContainsString('w-10 h-10 rounded-lg', $card);
     }
 
@@ -811,7 +824,7 @@ class HomeDashboardTest extends TestCase
         $first->forceFill(['group_id' => $first->id])->save();
         // Two parking spaces: with one, "three tickets" and "three lines on the first row" were
         // the same number, and the assertion below could not tell an add-on from a ticket.
-        \App\Models\SaleTicket::create(['sale_id' => $first->id, 'ticket_id' => $parking->id, 'quantity' => 2, 'seats' => json_encode([1 => null, 2 => null])]);
+        SaleTicket::create(['sale_id' => $first->id, 'ticket_id' => $parking->id, 'quantity' => 2, 'seats' => json_encode([1 => null, 2 => null])]);
         $guest = $this->createSale($event, $role, ['name' => 'Kim Guest', 'payment_amount' => 15, 'event_date' => '2026-10-20'], $ticket, 1);
         $guest->forceFill(['group_id' => $first->id])->save();
 
@@ -903,7 +916,7 @@ class HomeDashboardTest extends TestCase
         $giver = $this->createOwner();
         $offered = $this->createRole($giver, 'venue', ['name' => 'Handed Over Hall']);
         $offer = function (User $to) use ($giver, $offered) {
-            $transfer = new \App\Models\RoleTransfer;
+            $transfer = new RoleTransfer;
             $transfer->role_id = $offered->id;
             $transfer->from_user_id = $giver->id;
             $transfer->to_email = strtolower($to->email);

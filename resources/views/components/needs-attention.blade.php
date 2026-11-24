@@ -91,52 +91,40 @@
 @endphp
 
 @if ($layout === 'chips')
-    @php
-        // Tinted background with a full 1px tinted border, the AP's warning panel in small.
-        $chipTones = [
-            'red' => 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30',
-            'amber' => 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/30',
-            'blue' => 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30',
-            'green' => 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/30',
-            'purple' => 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/30',
-        ];
-        $chip = 'inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium text-gray-900 dark:text-white transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]';
-    @endphp
-    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <h2 class="inline-flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
-            {{ $heading }}
-            <span role="img" aria-label="{{ $heading }}: {{ number_format($total) }}"
-                class="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-xs font-semibold rounded-full {{ $toneClasses }}">{{ number_format($total) }}</span>
-        </h2>
+    {{-- 2026-11 redesign: one amber band across the page, a small capitals label, then each thing
+         to look at with "Review" at its end. More than four fold under a "show more" line. --}}
+    <section class="rounded-2xl bg-amber-100/80 dark:bg-amber-900/25 border border-amber-200/70 dark:border-amber-800/60 px-4 sm:px-5 py-3.5" aria-label="{{ $heading }}">
+        <h2 class="text-[11px] font-semibold uppercase tracking-[0.06em] text-amber-800 dark:text-amber-300">{{ $heading }}@if ($total > 1) <span class="tabular-nums">&middot; {{ number_format($total) }}</span>@endif</h2>
+        <ul class="mt-1 divide-y divide-amber-200/70 dark:divide-amber-800/50">
+            @foreach ($visibleItems as $item)
+                <li>
+                    <a href="{{ $item['url'] }}" class="group flex items-center justify-between gap-4 py-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] rounded">
+                        <span class="min-w-0 text-[15px] font-medium text-gray-900 dark:text-white">{{ $item['title'] }}@if ($subtitles && ! empty($item['subtitle'])) <span class="font-normal text-gray-600 dark:text-gray-300">&middot; {{ $item['subtitle'] }}</span>@endif</span>
+                        <span class="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-amber-900 dark:text-amber-200 group-hover:underline">
+                            {{ __('messages.review') }}
+                            <svg class="w-3.5 h-3.5 {{ is_rtl() ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+                        </span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
 
-        @foreach ($visibleItems as $item)
-            <a href="{{ $item['url'] }}" title="{{ $item['subtitle'] }}" class="{{ $chip }} {{ $chipTones[$item['color']] ?? $chipTones['blue'] }}">
-                <svg class="w-4 h-4 flex-shrink-0 {{ ($styles[$item['color']] ?? $styles['blue'])['text'] }}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                    {!! $icons[$item['type']] ?? '' !!}
-                </svg>
-                <span>{{ $item['title'] }}@if ($subtitles && ! empty($item['subtitle'])) <span class="font-normal text-gray-600 dark:text-gray-300">&middot; {{ $item['subtitle'] }}</span>@endif</span>
-                <svg class="w-3.5 h-3.5 flex-shrink-0 text-gray-400 dark:text-gray-500 {{ is_rtl() ? 'rotate-180' : '' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-            </a>
-        @endforeach
-
-        {{-- The rest open as a short list under the chip that counts them. --}}
+        {{-- The rest open as a short list under the line that counts them. --}}
         @if ($hiddenItems->isNotEmpty())
-            <details class="relative">
-                <summary class="{{ $chip }} cursor-pointer select-none list-none border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 [&::-webkit-details-marker]:hidden">
+            <details class="mt-1">
+                <summary class="cursor-pointer select-none list-none text-sm font-semibold text-amber-900 dark:text-amber-200 hover:underline [&::-webkit-details-marker]:hidden">
                     {{ __('messages.pending_action_show_more', ['count' => $hiddenItems->count()]) }}
                 </summary>
-                <div class="absolute start-0 z-20 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg py-1">
+                <ul class="mt-1 divide-y divide-amber-200/70 dark:divide-amber-800/50">
                     @foreach ($hiddenItems as $item)
-                        <a href="{{ $item['url'] }}" class="block px-4 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)]">{{ $item['title'] }}</a>
+                        <li><a href="{{ $item['url'] }}" class="block py-1.5 text-[15px] font-medium text-gray-900 dark:text-white hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">{{ $item['title'] }}</a></li>
                     @endforeach
-                </div>
+                </ul>
             </details>
         @endif
 
         {{ $slot }}
-    </div>
+    </section>
 @else
 <div class="ap-card rounded-xl overflow-hidden">
     <div class="dashboard-panel-header px-5 py-4 flex items-center justify-between gap-3">

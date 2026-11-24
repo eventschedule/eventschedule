@@ -158,7 +158,7 @@ class CustomFieldFilterTest extends DuskTestCase
             $browser->clear('#filter-search-d')->type('#filter-search-d', 'zzzz-nothing');
             $this->closeFilters($browser);
             $browser->waitForText('No events found', 5)
-                ->press('Clear Filters')
+                ->press('Clear filters')
                 ->waitForText('Keynote', 5)
                 ->assertSee('Panel Talk');
         });

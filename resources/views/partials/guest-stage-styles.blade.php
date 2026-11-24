@@ -723,4 +723,37 @@
         .gk-leads-3 > .gk-lead:first-child .gk-lead-img { height: 100%; aspect-ratio: auto; }
         .gk-leads > .gk-lead:first-child .gk-lead-title { font-size: 1.875rem; }
     }
+
+    {{-- The owner's bar over their own public page (layouts/app-guest, the 2026-11 redesign): a
+         dark strip in every theme, so it reads as the app speaking and not as the page. The
+         header's own Manage button steps aside while it is there. --}}
+    .gk-ownerbar { position: relative; z-index: 20; background: #18242f; color: #d2dae5; font-size: .8125rem; }
+    .gk-ownerbar-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .25rem 1rem; max-width: 70rem; margin: 0 auto; padding: .5rem 1.25rem; }
+    .gk-ownerbar-links { display: inline-flex; gap: 1.25rem; }
+    .gk-ownerbar-links a { color: #fff; font-weight: 600; }
+    .gk-ownerbar-links a:hover { text-decoration: underline; }
+    body:has(.gk-ownerbar) .gk-head-manage,
+    body:has(.gk-ownerbar) .gk-head-manage-phone { display: none !important; }
+
+    {{-- The foot of every guest page (layouts/app-guest, data-privacy-pill): one row under a
+         hairline in the page's own column, the policy and the cookie choice at its start and the
+         credit at its end; a phone centres them on two lines. --}}
+    .es-foot-nav { box-sizing: border-box; width: 100%; padding-inline: max(clamp(1rem, 4vw, 3.5rem), calc((100% - var(--gk-col, 70rem)) / 2)); }
+    .es-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .25rem 1.25rem; max-width: none; margin: 0; padding: .75rem 0 0; border: 0; border-top: 1px solid var(--gk-line); border-radius: 0; background: none; color: var(--gk-ink-2); font-size: .8125rem; line-height: 1.3; white-space: normal; }
+    .es-foot-links { display: flex; flex-wrap: wrap; gap: 0 1.25rem; margin: 0; }
+    .es-foot-link { min-height: 2.75rem; padding: 0; border-radius: 0; background: none; font-size: inherit; }
+    .es-foot-link:hover { background: none; color: var(--gk-ink); text-decoration: underline; text-underline-offset: 3px; }
+    .es-foot-credit, [dir="rtl"] .es-foot-credit { gap: .5rem; min-height: 2.75rem; padding: 0; border-radius: 0; background: none; color: var(--gk-ink-2); font-weight: 400; }
+    .es-foot-credit:hover { background: none; color: var(--gk-ink); }
+    .es-foot-credit:hover .es-foot-name { text-decoration: underline; text-underline-offset: 3px; }
+    .es-foot-name { font-weight: 600; color: var(--gk-ink); }
+    {{-- The Event Schedule mark: its own white disc with the E in its blue, in every palette. --}}
+    .es-foot-es { display: inline-flex; align-items: center; justify-content: center; width: 1.375rem; height: 1.375rem; background: #ffffff; color: #1f2937; font-size: .5625rem; font-weight: 800; letter-spacing: -.02em; box-shadow: inset 0 0 0 1px rgb(15 23 42 / .14); }
+    .es-foot-es b { font-weight: inherit; color: #2563eb; }
+    @media (max-width: 39.99rem) {
+        .es-foot { flex-direction: column; justify-content: center; gap: .125rem; padding-top: 1rem; font-size: .8125rem; }
+        .es-foot-links { justify-content: center; }
+        .es-foot-link { padding: 0; }
+        .es-foot-credit, [dir="rtl"] .es-foot-credit { padding: 0; }
+    }
 </style>

@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <x-page-card beside :title="__('messages.app_update')">
+        <x-page-card :title="__('messages.app_update')">
             <x-slot name="aside">
                 @if ($update_available)
                     <span class="event-status is-warn">{{ __('messages.app_update_available') }}</span>

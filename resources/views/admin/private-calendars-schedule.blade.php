@@ -47,7 +47,7 @@
             <x-page-flash :keys="['success' => 'success', 'warning' => 'warn', 'error' => 'error']" />
 
             {{-- What was found, and where it came from. --}}
-            <x-page-card beside :title="__('messages.private_calendars_found_title')" :lead="__('messages.private_calendars_found_lead')">
+            <x-page-card :title="__('messages.private_calendars_found_title')" :lead="__('messages.private_calendars_found_lead')">
                 <dl class="page-kv">
                     <div>
                         <dt>@lang('messages.private_calendars_col_found')</dt>

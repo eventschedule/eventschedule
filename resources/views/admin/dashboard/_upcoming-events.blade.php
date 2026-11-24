@@ -1,11 +1,14 @@
 {{-- Events with something still to come, by how people attend. Colour is on the bar and the
-     dots; the words stay in the page's ink. --}}
+     swatches; the words stay in the page's ink. One hue, the brand blue (2026-11: it was cyan,
+     purple and pink), stepped down in strength for each way of attending, and grey for none, so
+     the bar reads as one figure split up rather than as four things with meanings of their own.
+     Each is a mix of the --brand-blue token, which the six palettes set. --}}
 @php
     $modes = [
-        ['in_person', __('messages.in_person'), 'bg-cyan-600'],
-        ['online', __('messages.online'), 'bg-purple-600 dark:bg-purple-500'],
-        ['hybrid', __('messages.hybrid'), 'bg-pink-600'],
-        ['no_location', __('messages.admin_dash_no_location'), 'bg-gray-400 dark:bg-gray-500'],
+        ['in_person', __('messages.in_person'), 'background: var(--brand-blue)'],
+        ['online', __('messages.online'), 'background: color-mix(in srgb, var(--brand-blue) 60%, rgb(var(--ap-surface)))'],
+        ['hybrid', __('messages.hybrid'), 'background: color-mix(in srgb, var(--brand-blue) 32%, rgb(var(--ap-surface)))'],
+        ['no_location', __('messages.admin_dash_no_location'), 'background: rgb(var(--ap-ink-4))'],
     ];
     $sub = 'text-xs font-medium text-gray-500 dark:text-gray-400 px-2 pb-1';
     $total = $events['total'] ?? 0;
@@ -35,10 +38,10 @@
             </p>
 
             @if ($total > 0)
-                <div class="mt-4 flex h-2.5 gap-0.5" role="img" aria-label="{{ __('messages.admin_dash_how_attend') }}">
+                <div class="mt-4 flex h-1.5 gap-0.5 rounded-full overflow-hidden" role="img" aria-label="{{ __('messages.admin_dash_how_attend') }}">
                     @foreach ($modes as [$key, $label, $color])
                         @if ($events[$key] > 0)
-                            <span class="{{ $color }} rounded-sm" style="width: {{ $events[$key] / $total * 100 }}%" title="{{ $label }} {{ number_format($events[$key]) }}"></span>
+                            <span style="{{ $color }}; width: {{ $events[$key] / $total * 100 }}%" title="{{ $label }} {{ number_format($events[$key]) }}"></span>
                         @endif
                     @endforeach
                 </div>
@@ -51,7 +54,7 @@
                 <dl>
                     @foreach ($modes as [$key, $label, $color])
                         <div class="flex items-center gap-2 px-2 py-1.5 text-sm">
-                            <span class="w-2.5 h-2.5 rounded-sm shrink-0 {{ $color }}" aria-hidden="true"></span>
+                            <span class="w-2.5 h-2.5 rounded-sm shrink-0" style="{{ $color }}" aria-hidden="true"></span>
                             <dt class="flex-1 min-w-0 truncate text-gray-900 dark:text-gray-100">{{ $label }}</dt>
                             <dd class="tabular-nums text-xs text-gray-500 dark:text-gray-400 w-9 text-end">{{ $total > 0 ? round($events[$key] / $total * 100) : 0 }}%</dd>
                             <dd class="tabular-nums text-gray-700 dark:text-gray-300 w-12 text-end">{{ number_format($events[$key]) }}</dd>

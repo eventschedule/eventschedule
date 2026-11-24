@@ -103,7 +103,7 @@ class GuestHeaderTest extends TestCase
         $this->assertMatchesRegularExpression('~<div class="gk-head-actions">.*?<button type="button"\s+data-follow-trigger[^>]*class="gk-btn gk-btn-primary\s+gk-head-follow"~s', $header);
         // What else a visitor may do is the second row, under the description.
         $rest = $this->part($header, 'gk-head-more-actions');
-        $this->assertStringContainsString('>Submit Event</a>', $rest);
+        $this->assertStringContainsString('>Submit event</a>', $rest);
         $this->assertStringNotContainsString('data-follow-trigger', $rest);
     }
 
@@ -177,7 +177,7 @@ class GuestHeaderTest extends TestCase
 
         $this->assertSame(1, preg_match('~<div id="gp-header" class="relative z-20.*?</header>~s', $html, $m));
         $this->assertSame(1, substr_count($m[0], 'gk-btn-primary'));
-        $this->assertStringContainsString('>Submit Event</a>', $m[0]);
+        $this->assertStringContainsString('>Submit event</a>', $m[0]);
         $this->assertSame(1, substr_count($m[0], 'id="hero-filters-btn"'));
         $this->assertSame(1, substr_count($m[0], 'id="hero-filters-btn-mobile"'));
         $this->assertSame(1, substr_count($m[0], 'id="toggle-list-btn"'));

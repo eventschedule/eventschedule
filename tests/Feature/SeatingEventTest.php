@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\BackupJob;
 use App\Models\Event;
 use App\Models\EventSeatingMap;
 use App\Models\Role;
@@ -11,7 +12,9 @@ use App\Models\SeatingSeat;
 use App\Models\SeatingSection;
 use App\Models\Ticket;
 use App\Repos\EventRepo;
+use App\Services\BackupService;
 use App\Services\SeatingMapService;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -296,12 +299,21 @@ class SeatingEventTest extends TestCase
         ], null, $role)->fresh();
 
         $html = $this->actingAs($owner)
-            ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]))
+            ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
             ->assertOk()
             ->getContent();
 
         $this->assertStringContainsString('name="seating_plan_id"', $html);
         $this->assertStringContainsString('Main House', $html);
+        // A row of the Tickets tab, like Payment after it (the 2026-11 review), not a box of its
+        // own above the ticket types: it says the plan and opens the select in place.
+        $this->assertMatchesRegularExpression('/<button type="button" class="event-subrow ticket-tab" data-tab="seating"[^>]*@click="toggleTicketRow\(\'seating\'\)"/', $html);
+        $this->assertStringContainsString('v-text="ticketRows.seating.text"', $html);
+        $pane = strpos($html, 'data-ticket-pane="seating"');
+        $this->assertNotFalse($pane);
+        $this->assertGreaterThan($pane, strpos($html, 'name="seating_plan_id"'), 'the select is inside the row');
+        $this->assertLessThan(strpos($html, 'data-tab="payment"'), $pane, 'and the row comes before Payment');
+        $this->assertStringContainsString('"ticket-tab-seating":', $html, 'Help knows the row');
         $this->assertStringContainsString('seatingBands', $html, 'the per-ticket band select is bound to the plan');
         $this->assertStringContainsString('seatingPlanOptions', $html);
         // The plan's bands reached the client so the select has something to offer.
@@ -323,7 +335,7 @@ class SeatingEventTest extends TestCase
         $event = $this->save(['tickets' => [['type' => 'General', 'price' => 10, 'quantity' => 50]]], null, $role)->fresh();
 
         $html = $this->actingAs($owner)
-            ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]))
+            ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
             ->assertOk()
             ->getContent();
 
@@ -343,16 +355,16 @@ class SeatingEventTest extends TestCase
             'tickets' => $this->bandedTickets($plan),
         ], null, $role);
 
-        $svc = app(\App\Services\BackupService::class);
+        $svc = app(BackupService::class);
 
-        $exportJob = \App\Models\BackupJob::create(['user_id' => $owner->id, 'type' => 'export', 'status' => 'processing']);
+        $exportJob = BackupJob::create(['user_id' => $owner->id, 'type' => 'export', 'status' => 'processing']);
         $data = $svc->exportSchedules([$role->fresh()], false, $exportJob)['json'];
 
         $exportedTickets = collect($data['schedules'][0]['events'][0]['tickets']);
         $this->assertContains('Stalls', $exportedTickets->pluck('seating_band')->all(),
             'exportTickets() is an explicit allowlist - an omitted column is silently dropped');
 
-        $importJob = \App\Models\BackupJob::create(['user_id' => $owner->id, 'type' => 'import', 'status' => 'processing']);
+        $importJob = BackupJob::create(['user_id' => $owner->id, 'type' => 'import', 'status' => 'processing']);
         $svc->importSchedules($data, [0], $owner->id, $importJob);
 
         $restoredRole = Role::where('user_id', $owner->id)->where('id', '!=', $role->id)->latest('id')->firstOrFail();
@@ -484,7 +496,7 @@ class SeatingEventTest extends TestCase
     }
 
     /**
-     * The "no plans yet" panel is an advert for the Seating tab, and that tab is now venue only -
+     * The "no plans yet" row is an advert for the Seating tab, and that tab is now venue only -
      * so on any other schedule type it would link straight into a redirect. A venue with no plans
      * must still see it, or the guard has just deleted the panel for everyone.
      */
@@ -496,12 +508,15 @@ class SeatingEventTest extends TestCase
             $event = $this->save(['tickets' => [['type' => 'General', 'price' => 10, 'quantity' => 50]]], null, $role)->fresh();
 
             $html = $this->actingAs($owner)
-                ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]))
+                ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
                 ->assertOk()
                 ->getContent();
 
-            $this->assertSame($expected, str_contains($html, __('messages.seating_no_plans_yet')),
-                "the build-a-plan panel on a {$type} schedule");
+            // A row at the top of the Tickets tab's rows now (the 2026-11 design), where it was a panel.
+            $this->assertSame($expected, str_contains($html, 'data-seating-row'),
+                "the build-a-plan row on a {$type} schedule");
+            $this->assertSame($expected, str_contains($html, e(__('messages.seating_sell_specific_seats'))),
+                "and what it is for ({$type})");
         }
     }
 }

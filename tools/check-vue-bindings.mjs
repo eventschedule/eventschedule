@@ -54,6 +54,18 @@ let failed = false;
 
 for (const file of process.argv.slice(2)) {
     const src = fs.readFileSync(file, 'utf8');
+
+    // In a scoped <style>, `:global(.dark) .x` compiles to a bare `.dark { ... }`: Vue keeps only
+    // what is inside :global() and drops the rest, so the rule never reaches .x and lands on the
+    // page's root instead (a dark-mode amber band once stayed light, its title unreadable).
+    // Write the whole selector inside: `:global(.dark .x)`.
+    for (const style of src.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)) {
+        const bad = style[1].match(/:global\([^)]*\)\s*[.#\[\w][^{,]*/g);
+        if (bad) {
+            console.error(`GLOBAL in ${file}: ${bad.map((b) => b.trim()).join(' | ')} (put the whole selector inside :global())`);
+            failed = true;
+        }
+    }
     const { descriptor } = parse(src, { filename: file });
 
     if (! descriptor.scriptSetup) {

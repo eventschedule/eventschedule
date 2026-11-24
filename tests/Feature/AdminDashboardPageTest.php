@@ -471,6 +471,29 @@ class AdminDashboardPageTest extends TestCase
     }
 
     /**
+     * Realtime switched off is one amber line with its one action, above the four panels and never
+     * in a panel's place: as a large centred card where the Visitors panel goes, it left an empty
+     * block beside Revenue and Active users, which now close up into one row (is-off). Mutation:
+     * include the off partial inside realtime-top again.
+     */
+    public function test_realtime_off_is_one_line_above_the_panels(): void
+    {
+        config(['app.hosted' => true, 'app.is_nexus' => false]);
+
+        $html = $this->page()->getContent();
+        $off = strpos($html, 'msg.trackingOffTitle');
+        $top = strpos($html, '<div class="realtime-top');
+        $this->assertNotFalse($off, 'the line is on the page');
+        $this->assertLessThan($top, $off, 'above the panels, not in one of their places');
+
+        $this->assertSame(1, preg_match('/<div [^>]*v-if="p\.state === (?:\'|&#039;)off(?:\'|&#039;)"[^>]*>(.*?)msg\.turnOn/s', $html, $line), 'a notice, shown only while off');
+        $this->assertStringContainsString('href="'.route('admin.settings').'#realtime"', $line[0], 'its one action opens the switch');
+        $this->assertStringNotContainsString('msg.trackingOffBody', $html, 'one sentence, the rest is said beside the switch');
+        $this->assertStringNotContainsString('ap-btn', $line[0], 'and the action is a word, not a second solid button');
+        $this->assertStringContainsString(":class=\"p.state === 'off' ? 'is-off' : ''\"", $html, 'the corner two close up');
+    }
+
+    /**
      * /admin/users shows the same record, and says "Estimate" while the window still reaches back
      * before counting began. Before the tables exist, both pages say nothing of the kind and the
      * dashboard tells the operator to migrate. Mutation: print the figure bare on /admin/users.

@@ -177,17 +177,15 @@
             </nav>
         </div>
         -->
-        <div class="flex items-start justify-between">
-            @if ($role->profile_image_url)
-                <div class="pe-4">
-                    <img src="{{ $role->profile_image_url }}" class="rounded-lg h-14 w-14 flex-none">
-                </div>
-            @endif
+        {{-- 2026-11 redesign: the name and its address, with no picture beside them, and the
+             page's actions as words at the end of the row, on the line of the address
+             (md:items-end), and on the Schedule tab "Add event" last of them. --}}
+        <div class="flex items-start md:items-end justify-between">
             <div class="min-w-0 flex-1">
                 {{-- h1, not h2: this is the page title for every admin tab. The Schedule and
                      Availability tabs have no other heading of their own, so with the calendar
                      partial's month title demoted to h2 they would otherwise have no h1 at all. --}}
-                <h1 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
+                <h1 class="page-title">
                     {{ $role->name }}</h1>
 
                 @if ($scheduleUrl)
@@ -197,7 +195,7 @@
                     {{-- data-setup-share: copying the schedule's own address is the setup guide's "share" step. --}}
                     <button type="button" class="event-link" id="copy-schedule-link-btn" data-setup-share="link" data-copy-text="{{ $scheduleUrl }}" data-copied="{{ __('messages.copied') }}">{{ __('messages.copy') }}</button>
                     @if ($role->email_verified_at)
-                    <a href="{{ $viewGuestUrl }}" target="_blank" rel="noopener" class="event-link">{{ __('messages.view') }}</a>
+                    <a href="{{ $viewGuestUrl }}" target="_blank" rel="noopener" class="event-link">{{ __('messages.view') }} <span aria-hidden="true">&nearr;</span></a>
                     @endif
                 </div>
                 @endif
@@ -227,23 +225,35 @@
             </div>
 
             {{-- Desktop buttons (hidden on mobile) --}}
-            <div class="mt-2 hidden md:flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:gap-x-3 flex-shrink-0 md:ms-4">
+            {{-- After Actions, as the design has it (md:order-2). --}}
+            <div class="mt-2 hidden md:flex md:order-2 flex-col space-y-2 sm:flex-row sm:space-y-0 sm:gap-x-3 flex-shrink-0 md:ms-4">
                 @if (!$isViewer)
-                <x-secondary-link href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="w-full sm:w-auto">
-                    <svg class="-ms-0.5 me-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="currentColor"
-                        aria-hidden="true">
-                        <path
-                            d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
-                    </svg>
+                <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}" class="ap-text-action">
                     {{ __('messages.edit_schedule') }}
-                </x-secondary-link>
+                </a>
                 @endif
             </div>
 
+            {{-- Add event, the Schedule tab's forward action, in the page's header (the 2026-11
+                 design); the month's toolbar keeps Filter, Month or List and the months. A phone
+                 keeps its own Add event under the calendar (role/partials/calendar). With event
+                 templates, "Use a template" opens the picker the calendar prints. --}}
+            @if ($tab == 'schedule' && $role->email_verified_at && ! $isViewer)
+            <div class="mt-2 hidden md:flex md:order-3 items-center gap-1 flex-shrink-0 md:ms-1.5">
+                @if ($role->isPro() && $role->eventTemplates->isNotEmpty())
+                <button type="button" class="js-template-picker-open ap-text-action">{{ __('messages.use_a_template') }}</button>
+                @endif
+                <x-brand-link href="{{ route('event.create', ['subdomain' => $role->subdomain]) }}" class="ap-head-btn w-auto gap-1.5">
+                    <svg class="-ms-0.5 h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                    {{ __('messages.add_event') }}
+                </x-brand-link>
+            </div>
+            @endif
+
             {{-- Actions dropdown (always visible) --}}
-            <div class="mt-2 md:ms-3">
+            <div class="mt-2 md:order-1 md:ms-3">
                 <div class="relative inline-block text-start w-full">
-                    <button type="button" data-popup-target="role-actions-pop-up-menu" class="popup-toggle inline-flex w-full justify-center rounded-lg bg-white dark:bg-gray-800 px-4 py-3 text-base font-semibold text-gray-900 dark:text-gray-100 shadow-sm border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800" id="role-actions-menu-button" aria-expanded="false" aria-haspopup="true">
+                    <button type="button" data-popup-target="role-actions-pop-up-menu" class="popup-toggle ap-text-action w-full justify-center" id="role-actions-menu-button" aria-expanded="false" aria-haspopup="true">
                         {{ __('messages.actions') }}
                         <svg class="-me-1 ms-2 h-6 w-6 text-gray-400 dark:text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                             <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />

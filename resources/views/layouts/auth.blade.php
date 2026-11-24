@@ -47,8 +47,26 @@
 
     {{ isset($abovePage) ? $abovePage : '' }}
 
-    <div id="main-content" tabindex="-1" class="min-h-screen flex flex-col sm:justify-center items-center pt-10 bg-gray-100 dark:bg-gray-900">
-        @if ($authSchedule)
+    @php
+        // A page may put a bar across the top (the logo at one end, its own slot at the other)
+        // instead of the centred logo: sign-up does, for "Already registered? Log in". The card
+        // is then centred in the room below the bar. Never under a schedule's own branding.
+        $authTopBar = ! $authSchedule && isset($topBar) && trim((string) $topBar) !== '';
+    @endphp
+    {{-- The page's own ground (--ap-bg: gray-50 in a light palette, gray-900 in a dark one), a
+         step below the card, as the 2026-11 design draws it. gray-100 is the palette's
+         surface-alt, which left the card barely standing out from the page. --}}
+    <div id="main-content" tabindex="-1" class="min-h-screen flex flex-col items-center bg-gray-50 dark:bg-gray-900 {{ $authTopBar ? 'px-4 pt-6 sm:px-6 sm:pt-7' : 'sm:justify-center pt-10' }}">
+        @if ($authTopBar)
+        <header class="flex w-full max-w-[57.5rem] flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <a href="{{ marketing_url() }}" class="rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                <img class="h-9 w-auto dark:hidden" src="{{ asset(ltrim(config('app.logo_dark'), '/')) }}" alt="{{ config('app.name') }}"/>
+                <img class="h-9 w-auto hidden dark:block" src="{{ asset(ltrim(config('app.logo_light'), '/')) }}" alt="{{ config('app.name') }}"/>
+            </a>
+            {{ $topBar }}
+        </header>
+        <div class="flex w-full flex-1 flex-col items-center justify-start py-6 sm:justify-center sm:py-10">
+        @elseif ($authSchedule)
             {{-- The schedule's own logo and name, and the way back to its page. No platform logo:
                  this is the schedule speaking to its own audience (docs/BRANDING_MATRIX.md). --}}
             {{-- A schedule nobody has claimed has no public page, and getGuestUrl() answers ''
@@ -74,19 +92,26 @@
         </a>
         @endif
 
-        <div class="flex flex-col lg:flex-row lg:gap-8 w-full max-w-md mx-auto">
-            <div class="auth-card w-full sm:max-w-md sm:min-w-[28rem] mt-6 px-6 py-4 overflow-hidden sm:rounded-lg">
+        <div class="flex flex-col lg:flex-row lg:gap-8 w-full {{ $authTopBar ? 'max-w-[28.75rem]' : 'max-w-md' }} mx-auto">
+            <div class="auth-card w-full overflow-hidden {{ $authTopBar ? 'auth-card-roomy rounded-[1.25rem] p-6 sm:p-9' : 'sm:max-w-md sm:min-w-[28rem] mt-6 px-6 py-4 sm:rounded-lg' }}">
                 {{ $slot }}
             </div>
         </div>
 
-        {{-- The way back into the cookie banner (GDPR Art. 7(3): withdrawing consent must be as
-             easy as giving it), on the pages that asked for it. --}}
-        @if (cookie_banner_visible())
-        <p class="mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-4 text-xs text-gray-500 dark:text-gray-400">
-            <a href="{{ policy_url('privacy') }}" class="hover:text-gray-700 dark:hover:text-gray-200 hover:underline">{{ __('messages.privacy_policy') }}</a>
-            <span aria-hidden="true">&middot;</span>
-            <button type="button" data-cookie-consent-reopen class="hover:text-gray-700 dark:hover:text-gray-200 hover:underline">{{ __('messages.cookie_consent_manage') }}</button>
+        {{-- Under the card: the privacy policy, and the way back into the cookie banner (GDPR
+             Art. 7(3): withdrawing consent must be as easy as giving it). The policy is always
+             there on hosted, as the 2026-11 design draws it; off hosted only beside the banner,
+             because an install that wrote no policy of its own would otherwise point its users
+             at eventschedule.com's (issue #116). "Cookie preferences" only where there is a
+             banner to reopen: without one the button would do nothing. --}}
+        @php $authCookieReopen = cookie_banner_visible(); @endphp
+        @if ($authCookieReopen || config('app.hosted'))
+        <p class="{{ $authTopBar ? 'mt-5 gap-x-4 text-[0.8125rem] text-gray-600 dark:text-gray-400' : 'mt-8 gap-x-2 text-xs text-gray-500 dark:text-gray-400' }} flex flex-wrap items-center justify-center gap-y-1 px-4">
+            <a href="{{ policy_url('privacy') }}" class="hover:text-gray-900 dark:hover:text-gray-200 hover:underline">{{ __('messages.privacy_policy') }}</a>
+            @if ($authCookieReopen)
+            @unless ($authTopBar)<span aria-hidden="true">&middot;</span>@endunless
+            <button type="button" data-cookie-consent-reopen class="hover:text-gray-900 dark:hover:text-gray-200 hover:underline">{{ __('messages.cookie_consent_manage') }}</button>
+            @endif
         </p>
         @endif
 
@@ -102,7 +127,11 @@
         </p>
         @endif
 
+        @if ($authTopBar)
+        </div>
+        @else
         <div class="pt-20"></div>
+        @endif
     </div>
 
     @include('partials.cookie-banner')

@@ -301,3 +301,101 @@ export function attachEditorObserver(easyMDE) {
     // Editors already visible at init still need one refresh.
     refresh();
 }
+
+// The toolbar every editor shares (the 2026-11 redesign): quiet text buttons, words where an
+// icon used to be ("Link", "Quote"), and no preview eye or "?" in it: Write and Preview are a
+// segmented control of their own, and the guide is a line under the box (attachEditorChrome).
+// `compact` leaves the heading out, for the small agenda editors.
+export function editorToolbar(EasyMDE, element, { compact = false } = {}) {
+    const t = window.editorTranslations || {};
+    const dir = resolveEditorDirection(element, element.value);
+    const tool = (name, action, title, text, extra = '') => ({
+        name,
+        action,
+        className: ('editor-button-text es-tool ' + extra).trim(),
+        title,
+        text,
+    });
+
+    return [
+        tool('bold', EasyMDE.toggleBold, t.bold || 'Bold', 'B', 'is-bold'),
+        tool('italic', EasyMDE.toggleItalic, t.italic || 'Italic', 'I', 'is-italic'),
+        ...(compact ? [] : [tool('heading', EasyMDE.toggleHeadingSmaller, t.heading || 'Heading', 'H', 'is-bold')]),
+        '|',
+        tool('link', (editor) => EasyMDE.drawLink(editor), t.link || 'Link', t.link || 'Link'),
+        tool('quote', EasyMDE.toggleBlockquote, t.quote || 'Quote', t.quote || 'Quote'),
+        '|',
+        tool('unordered-list', EasyMDE.toggleUnorderedList, t.unorderedList || 'Unordered list', 'UL'),
+        tool('ordered-list', EasyMDE.toggleOrderedList, t.orderedList || 'Ordered list', 'OL'),
+        '|',
+        tool('direction', (editor) => toggleEditorDirection(editor, element), (t.textDirection || 'Text direction') + ' (Ctrl+Shift)', dir.toUpperCase(), 'no-disable'),
+    ];
+}
+
+// What goes around the box: the Write / Preview control and the "Formatting uses Markdown" line.
+// The control goes where the page left a place for it beside the field's label
+// ([data-editor-modes="<textarea id>"]), or at the end of the toolbar. The line goes inside the
+// editor's own container, under the box, so it leaves with the editor (toTextArea) and adds no
+// node beside the textarea for a Vue template to trip over. A textarea with
+// data-editor-foot="off" has a line of its own about formatting.
+export function attachEditorChrome(easyMDE, element) {
+    if (!easyMDE || !easyMDE.codemirror) return;
+    const t = window.editorTranslations || {};
+    const container = easyMDE.codemirror.getWrapperElement().parentNode;
+    if (!container || container.classList.contains('es-editor')) return;
+    container.classList.add('es-editor');
+
+    const toolbar = easyMDE.gui && easyMDE.gui.toolbar;
+    let previewing = false;
+    const modes = document.createElement('div');
+    modes.className = 'es-editor-modes';
+    modes.setAttribute('role', 'group');
+    const buttons = [['write', t.write || 'Write'], ['preview', t.previewTab || 'Preview']].map(([mode, label]) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'no-disable';
+        button.textContent = label;
+        button.dataset.mode = mode;
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            // EasyMDE marks the preview active a tick after it is asked to, so the control keeps
+            // its own note of which side is shown.
+            if ((mode === 'preview') !== previewing) {
+                easyMDE.togglePreview();
+                previewing = ! previewing;
+            }
+            paint();
+        });
+        modes.appendChild(button);
+
+        return button;
+    });
+    function paint() {
+        buttons.forEach((button) => button.setAttribute('aria-pressed', (button.dataset.mode === 'preview') === previewing ? 'true' : 'false'));
+        if (toolbar) {
+            toolbar.classList.toggle('disabled-for-preview', previewing);
+        }
+    }
+    paint();
+
+    const slot = element.id ? document.querySelector('[data-editor-modes="' + element.id + '"]') : null;
+    if (slot) {
+        slot.appendChild(modes);
+    } else if (toolbar) {
+        modes.classList.add('is-in-toolbar');
+        toolbar.appendChild(modes);
+    }
+
+    if (element.dataset.editorFoot !== 'off') {
+        const foot = document.createElement('p');
+        foot.className = 'es-editor-foot';
+        foot.appendChild(document.createTextNode((t.markdownNote || 'Formatting uses Markdown.') + ' '));
+        const help = document.createElement('a');
+        help.href = 'https://www.markdownguide.org/basic-syntax/';
+        help.target = '_blank';
+        help.rel = 'noopener';
+        help.textContent = t.formattingHelp || 'Formatting help';
+        foot.appendChild(help);
+        container.appendChild(foot);
+    }
+}

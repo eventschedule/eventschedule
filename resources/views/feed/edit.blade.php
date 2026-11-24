@@ -110,12 +110,13 @@
                             </div>
                         </div>
                     </div>
-                </section>
-            </div>
 
-            <div class="page-form-actions">
-                <x-secondary-link :href="$feedUrl">{{ __('messages.cancel') }}</x-secondary-link>
-                <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    {{-- A short form keeps Cancel and Save inside its (last) card. --}}
+                    <div class="page-form-actions">
+                        <x-secondary-link :href="$feedUrl">{{ __('messages.cancel') }}</x-secondary-link>
+                        <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    </div>
+                </section>
             </div>
         </form>
 

@@ -5,8 +5,10 @@ namespace Tests\Feature;
 use App\Models\User;
 use App\Models\Webhook;
 use App\Services\DemoService;
+use App\Utils\HelpUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -400,9 +402,10 @@ class SettingsPageTest extends TestCase
     }
 
     /**
-     * Each of the three saves that says "Saved" says it once, in its own section, and with no
-     * script: the old fades were Alpine islands, each rendered only under its own status, so each
-     * status has to be looked at under itself.
+     * Each of the saves that says "Saved" says it once, in its own section, and with no Alpine:
+     * the old fades were Alpine islands, each rendered only under its own status, so each status
+     * has to be looked at under itself. The profile is saved by the floating bar under its card
+     * (the 2026-11 redesign), which says "Saved" in its own status line until something changes.
      */
     public function test_saving_says_saved_once_beside_the_button_without_a_script(): void
     {
@@ -411,8 +414,15 @@ class SettingsPageTest extends TestCase
         // The class name alone is also in the page's styles: this is the element.
         $said = 'class="event-status is-on form-kit-saved"';
 
+        $html = $this->page($owner, ['status' => 'profile-updated']);
+        $this->assertSame(1, preg_match('/<div class="event-save-bar" id="form-save-bar"[^>]*data-form="profile-info-form"[^>]*data-saved="1"/', $html), 'profile-updated: the bar says Saved');
+        $this->assertStringNotContainsString($said, $html, 'profile-updated: and nothing else does');
+        $this->assertStringContainsString(__('messages.saved'), $html);
+        foreach (['x-init=', 'x-data', 'x-show=', 'x-transition'] as $alpine) {
+            $this->assertStringNotContainsString($alpine, $this->section($html, 'section-profile'), 'profile-updated: no Alpine in section-profile');
+        }
+
         foreach ([
-            'profile-updated' => 'section-profile',
             'password-updated' => 'section-password',
             'payments-updated' => 'section-payment-methods',
         ] as $status => $section) {
@@ -428,6 +438,7 @@ class SettingsPageTest extends TestCase
         // withSession() puts the value in for good, where the app flashes it for one request.
         $this->flushSession();
         $this->assertStringNotContainsString($said, $this->page($owner));
+        $this->assertStringNotContainsString('data-saved="1"', $this->page($owner));
     }
 
     /** Every `<button>` inside the sections of a page, as its opening tag. */
@@ -500,7 +511,7 @@ class SettingsPageTest extends TestCase
         foreach (['section-profile', 'section-payment-methods', 'section-password', 'section-two-factor', 'section-google-calendar', 'section-microsoft-calendar', 'section-api', 'section-webhooks', 'section-backup', 'section-delete'] as $id) {
             $section = $this->section($html, $id);
             $this->assertStringContainsString(__('messages.demo_mode_settings_disabled'), $section, "{$id} says why it cannot be changed");
-            $this->assertStringContainsString('bg-amber-50', $section, "{$id}: in the bordered amber panel, not a yellow box");
+            $this->assertStringContainsString('bg-amber-100', $section, "{$id}: in the amber band, not a yellow box");
         }
         $this->assertStringNotContainsString('bg-yellow-50', $html);
         // And every brand button that would save is switched off. The attribute itself, at the end
@@ -525,7 +536,7 @@ class SettingsPageTest extends TestCase
         $section = $this->section($this->page($owner), 'section-webhooks');
 
         $this->assertStringContainsString(__('messages.webhooks_require_pro'), $section);
-        $this->assertStringContainsString('bg-amber-50', $section);
+        $this->assertStringContainsString('bg-amber-100', $section);
         $this->assertStringContainsString(__('messages.settings_no_webhooks'), $section);
     }
 
@@ -540,7 +551,7 @@ class SettingsPageTest extends TestCase
         config(['services.facebook.client_id' => 'fb', 'services.facebook.client_secret' => 'secret']);
         $html = $this->page($this->createOwner());
 
-        $mappings = (new \ReflectionClass(\App\Utils\HelpUtils::class))->getStaticPropertyValue('mappings');
+        $mappings = (new \ReflectionClass(HelpUtils::class))->getStaticPropertyValue('mappings');
         $anchors = $mappings['settings']['anchors'];
         $this->assertArrayHasKey('payment-tab-stripe', $anchors, 'sanity check: this is the settings map');
 
@@ -596,7 +607,7 @@ class SettingsPageTest extends TestCase
     {
         config(['services.facebook.client_id' => 'fb', 'services.facebook.client_secret' => 'secret']);
         $html = $this->page($this->createOwner());
-        $anchors = (new \ReflectionClass(\App\Utils\HelpUtils::class))->getStaticPropertyValue('mappings')['settings']['anchors'];
+        $anchors = (new \ReflectionClass(HelpUtils::class))->getStaticPropertyValue('mappings')['settings']['anchors'];
 
         // Down the page: each tab, and each section inside it. A tab of several opens the guide
         // at its first section, so the two share a place; nothing comes before what is above it.
@@ -877,8 +888,8 @@ class SettingsPageTest extends TestCase
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner);
-        \Illuminate\Support\Facades\DB::table('roles')->where('id', $role->id)->update(['stripe_id' => 'cus_settings_page']);
-        \Illuminate\Support\Facades\DB::table('subscriptions')->insert([
+        DB::table('roles')->where('id', $role->id)->update(['stripe_id' => 'cus_settings_page']);
+        DB::table('subscriptions')->insert([
             'role_id' => $role->id, 'type' => 'default', 'stripe_id' => 'sub_settings_page', 'stripe_status' => 'active',
             'stripe_price' => 'price_pro_monthly', 'quantity' => 1, 'created_at' => now(), 'updated_at' => now(),
         ]);

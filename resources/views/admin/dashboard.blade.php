@@ -126,9 +126,7 @@
                 'nNow' => __('messages.realtime_n_now'),
                 'showOnly' => __('messages.realtime_show_only'),
                 'trackingOffTitle' => __('messages.realtime_tracking_off_title'),
-                'trackingOffBody' => __('messages.realtime_tracking_off_body'),
                 'turnOn' => __('messages.realtime_turn_on'),
-                'mentionPolicy' => __('messages.realtime_mention_policy'),
                 'waitingTitle' => __('messages.realtime_waiting_title'),
                 // Edge-cached marketing pages exist on the nexus only; elsewhere every page reports
                 // as soon as it is opened.
@@ -199,7 +197,6 @@
                 'revenueUrl' => config('app.hosted') ? route('admin.dashboard.revenue').($sample ? '?sample=1' : '') : null,
                 'pageUrl' => route('admin.dashboard'),
                 'settingsUrl' => route('admin.settings').'#realtime',
-                'legalUrl' => Route::has('admin.legal') ? route('admin.legal') : null,
                 'isNexus' => (bool) config('app.is_nexus'),
                 'locale' => app()->getLocale(),
                 // The one clock for the whole page: Trends buckets its hours and days in it, and
@@ -222,15 +219,19 @@
                 @include('admin.realtime._toolbar')
             </template>
 
+            {{-- Tracking off: one line above the panels, which then close up (is-off). --}}
+            @include('admin.realtime._off')
+
             {{-- Four panels: Visitors (the Now card) and Sign-ups, and on hosted Revenue and Active
                  users in the corner beside them. From xl they take the three columns of the Today
                  grid below, two rows (realtime-top in _script), so the corner stands over the
                  Activity rail, and the board of who is where runs the full width under them. With
                  tracking off, the card that says how to turn it on takes the Visitors panel's
-                 place. --}}
-            <div class="realtime-top grid grid-cols-1 gap-4" @if (config('app.hosted')) data-corner @endif>
-                @include('admin.realtime._off')
-                <section v-else-if="p.state === 'loading'" class="realtime-now-skeleton ap-card rounded-xl p-4 sm:p-6" :aria-label="msg.loading" :aria-busy="status === 'reauth' || status === 'stopped' ? 'false' : 'true'" :class="status === 'reauth' || status === 'stopped' ? 'is-still' : ''">
+                 place. With tracking off the line above says so and Visitors and Sign-ups are
+                 left out, so on hosted the corner two close up into one row of their own (is-off)
+                 rather than standing beside an empty block, and elsewhere there is nothing here. --}}
+            <div class="realtime-top grid grid-cols-1 gap-4" @if (config('app.hosted')) data-corner @else v-show="p.state !== 'off'" @endif :class="p.state === 'off' ? 'is-off' : ''">
+                <section v-if="p.state === 'loading'" class="realtime-now-skeleton ap-card rounded-xl p-4 sm:p-6" :aria-label="msg.loading" :aria-busy="status === 'reauth' || status === 'stopped' ? 'false' : 'true'" :class="status === 'reauth' || status === 'stopped' ? 'is-still' : ''">
                     <div class="flex items-center gap-4">
                         <span class="w-9 h-9 rounded-xl realtime-skeleton"></span>
                         <span class="w-16 h-9 rounded-lg realtime-skeleton"></span>
@@ -238,7 +239,7 @@
                     </div>
                     <div class="mt-5 h-24 rounded-xl realtime-skeleton"></div>
                 </section>
-                <template v-else>
+                <template v-else-if="p.state !== 'off'">
                     @include('admin.realtime._now')
                 </template>
 

@@ -40,8 +40,8 @@
 
         {{-- Nobody's schedule, nobody's ticket, nobody followed: the invitation to start. --}}
         @if ($state === 'empty' && ! is_demo_mode())
-        <div>
-            <div class="text-center mb-6">
+        <div class="w-full max-w-[57.5rem]">
+            <div class="mb-8">
                 <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
                     {{ __('messages.getting_started_welcome', ['name' => auth()->user()->firstName()]) }}
                 </h2>
@@ -87,17 +87,13 @@
                 {{-- One column where there is no live view (every selfhost by default): a card
                      must not sit beside a hole. --}}
                 <div class="grid grid-cols-1 {{ $dashboard['live'] !== null ? 'lg:grid-cols-2' : '' }} gap-4">
-                    @include('home._coming-up', ['coming' => $dashboard['coming'], 'numbers' => false, 'stretch' => $dashboard['live'] !== null])
+                    @include('home._coming-up', ['coming' => $dashboard['coming'], 'numbers' => false, 'tiles' => true, 'stretch' => $dashboard['live'] !== null])
                     @if ($dashboard['live'] !== null)
                         @include('home._first-visitor', ['live' => $dashboard['live']])
                     @endif
                 </div>
             @else
                 @include('home._tiles')
-
-                @if ($several)
-                    @include('home._schedules', ['rows' => $dashboard['schedules'], 'viewer' => false])
-                @endif
 
                 {{-- Two to a row when both are on the page; one alone takes the row. --}}
                 @php
@@ -107,12 +103,17 @@
                 @if ($showComing || $showActivity)
                 <div class="grid grid-cols-1 {{ $showComing && $showActivity ? 'lg:grid-cols-2' : '' }} gap-4">
                     @if ($showComing)
-                        @include('home._coming-up', ['coming' => $dashboard['coming'], 'numbers' => true, 'stretch' => false])
+                        @include('home._coming-up', ['coming' => $dashboard['coming'], 'numbers' => true, 'tiles' => false, 'stretch' => false])
                     @endif
                     @if ($showActivity)
                         @include('home._activity', ['activity' => $dashboard['activity']])
                     @endif
                 </div>
+                @endif
+
+                {{-- After what is on today and what sold (the 2026-11 redesign's order). --}}
+                @if ($several)
+                    @include('home._schedules', ['rows' => $dashboard['schedules'], 'viewer' => false])
                 @endif
 
                 {{-- The cards someone switched on in Customize, two to a row. --}}
@@ -129,7 +130,7 @@
         @elseif ($state === 'viewer')
             @include('home._schedules', ['rows' => $dashboard['schedules'], 'viewer' => true])
             @if ($dashboard['coming'] !== null && $dashboard['coming']['rows'])
-                @include('home._coming-up', ['coming' => $dashboard['coming'], 'numbers' => false, 'stretch' => false])
+                @include('home._coming-up', ['coming' => $dashboard['coming'], 'numbers' => false, 'tiles' => false, 'stretch' => false])
             @endif
         @elseif ($state === 'attendee')
             @include('home._attendee')

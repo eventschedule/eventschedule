@@ -1,103 +1,129 @@
 @php
     // Shared by the post-signup chooser (/getting-started) and the dashboard's zero-schedule panel.
-    // Below lg the cards stack, capped so a lone card does not stretch across a wide pane.
+    // One choice and one Continue: a GET form to /getting-started, whose ?type= forwards to
+    // /new/{type} (HomeController::gettingStarted()), so it works with no script at all. What is
+    // selected, the market switch under Venue and the Continue label are all drawn by CSS from
+    // the checked radio (.st-chooser in app.css).
     $cardHeading = $cardHeading ?? 'h2';
+    $skipUrl = $skipUrl ?? null;
 
-    // Literal class strings, so Tailwind's scanner can see every one of them.
-    $cards = [
-        'talent' => [
-            'icon' => 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
-            'iconTile' => 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400',
-            'rule' => 'bg-blue-50/80 dark:bg-blue-500/[0.08]',
-            'check' => 'text-blue-500 dark:text-blue-400',
-            'cta' => 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 group-hover:bg-blue-600 group-hover:text-white group-focus-visible:bg-blue-600 group-focus-visible:text-white',
-        ],
-        'venue' => [
-            'icon' => 'M15 10.5a3 3 0 11-6 0 3 3 0 016 0z M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z',
-            'iconTile' => 'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400',
-            'rule' => 'bg-sky-50/80 dark:bg-sky-500/[0.08]',
-            'check' => 'text-sky-600 dark:text-sky-400',
-            'cta' => 'bg-sky-50 text-sky-800 dark:bg-sky-500/10 dark:text-sky-300 group-hover:bg-sky-700 group-hover:text-white group-focus-visible:bg-sky-700 group-focus-visible:text-white',
-        ],
-        'curator' => [
-            'icon' => 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5',
-            'iconTile' => 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400',
-            'rule' => 'bg-indigo-50/80 dark:bg-indigo-500/[0.08]',
-            'check' => 'text-indigo-500 dark:text-indigo-400',
-            'cta' => 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 group-hover:bg-indigo-600 group-hover:text-white group-focus-visible:bg-indigo-600 group-focus-visible:text-white',
-        ],
+    // What tells the three types apart: whose events, and at which venues. The primary card says
+    // it as a two-cell strip (Events | Venues); the two alternatives as one line under their
+    // names ("Anyone's events · your venue"), as the 2026-11 design draws them. The values are
+    // separate keys because some languages agree them with the noun.
+    $options = [
+        'talent' => ['events' => 'schedule_type_events_yours', 'venues' => 'schedule_type_venues_anywhere'],
+        'venue' => ['events' => 'schedule_type_events_anyones', 'venues' => 'schedule_type_venues_yours', 'line_venue' => 'schedule_type_line_your_venue'],
+        'curator' => ['events' => 'schedule_type_events_anyones', 'venues' => 'schedule_type_venues_anywhere', 'line_venue' => 'schedule_type_line_any_venue'],
     ];
+    // The line's events half is a sentence with the bold word in it; split around the placeholder
+    // rather than printing the translation as HTML, which an operator's override could carry.
+    [$lineBefore, $lineAfter] = array_pad(explode(':whose', __('messages.schedule_type_line_events'), 2), 2, '');
 @endphp
 
 {{-- The standard schedule ("Event schedule", `talent` in the code) is the one most people want,
-     so it is one wide card on top; Venue and Curator are the two alternatives under it. The word
-     "talent" is never shown: ScheduleTypeLabel names the type. --}}
-<div class="schedule-type-grid mx-auto max-w-md lg:max-w-none">
-    @foreach ($cards as $type => $card)
-        @if ($type === 'venue')
-            <p class="schedule-type-or mt-8 mb-3 text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.schedule_type_alternatives') }}</p>
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        @endif
-        @php
-            $primary = $type === 'talent';
-        @endphp
-        {{-- The whole card is the link. Named by its title alone, so a screen reader announces
-             "Event schedule, link" rather than reading every feature line as the link text. --}}
-        <a href="{{ route('new', ['type' => $type]) }}"
-           data-type="{{ $type }}"
-           aria-labelledby="schedule-type-{{ $type }}"
-           aria-describedby="schedule-type-{{ $type }}-for"
-           class="schedule-type-card group ap-card rounded-2xl p-6 flex flex-col focus:outline-none {{ $primary ? 'schedule-type-primary lg:grid lg:grid-cols-2 lg:gap-x-10 lg:p-8' : '' }}">
+     so it is the wide option on top and is chosen to begin with; Venue and Curator are the two
+     alternatives under it. The word "talent" is never shown: ScheduleTypeLabel names the type. --}}
+<form method="GET" action="{{ route('getting-started') }}" class="st-chooser w-full max-w-[57.5rem]">
+    <fieldset>
+        <legend class="sr-only">{{ __('messages.schedule_type_question_for') }}</legend>
 
-            <div class="flex flex-col">
-                <div class="flex items-center gap-3">
-                    <span class="flex-shrink-0 {{ $primary ? 'w-12 h-12' : 'w-10 h-10' }} rounded-xl flex items-center justify-center {{ $card['iconTile'] }}" aria-hidden="true">
-                        <svg class="{{ $primary ? 'w-6 h-6' : 'w-5 h-5' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $card['icon'] }}" /></svg>
-                    </span>
-                    <{{ $cardHeading }} id="schedule-type-{{ $type }}" class="{{ $primary ? 'text-2xl' : 'text-xl' }} font-bold text-gray-900 dark:text-white">{{ \App\Utils\ScheduleTypeLabel::for($type) }}</{{ $cardHeading }}>
+        @foreach ($options as $type => $option)
+            @php($primary = $type === 'talent')
+            @if ($type === 'venue')
+                <p class="mt-7 mb-3 text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('messages.schedule_type_alternatives') }}</p>
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+            @endif
+
+            <div class="st-card {{ $primary ? 'st-card-primary ap-card ![box-shadow:var(--ap-shadow-lift)]' : 'st-card-alt' }}" data-type="{{ $type }}">
+                @if ($primary)
+                    <span class="st-badge">{{ __('messages.schedule_type_most_common') }}</span>
+                @endif
+
+                <input type="radio" id="schedule-type-choice-{{ $type }}" name="type" value="{{ $type }}" class="sr-only" {{ $primary ? 'checked' : '' }}
+                    aria-labelledby="schedule-type-{{ $type }}" aria-describedby="schedule-type-{{ $type }}-for">
+                {{-- The whole card is the radio's label, laid over the content rather than around it:
+                     a heading inside a <label> is not valid HTML. The radio is named by its heading. --}}
+                <label for="schedule-type-choice-{{ $type }}" class="st-hit" aria-hidden="true"></label>
+
+                <div class="st-option {{ $primary ? 'p-6 sm:p-8 md:flex md:flex-wrap md:gap-x-10 md:gap-y-7' : 'px-[1.125rem] py-4' }}">
+                    <span class="st-radio {{ $primary ? 'st-radio-lg' : '' }}" aria-hidden="true"></span>
+
+                    <div class="flex min-w-0 flex-col {{ $primary ? 'gap-5 md:flex-[1_1_20rem]' : 'gap-3' }}">
+                        <div class="flex flex-col {{ $primary ? 'gap-2 pe-10' : 'gap-[0.1875rem] pe-8' }}">
+                            <{{ $cardHeading }} id="schedule-type-{{ $type }}" class="{{ $primary ? 'text-2xl sm:text-[1.75rem] leading-tight tracking-tight font-bold' : 'text-base font-semibold tracking-tight' }} text-gray-900 dark:text-white">{{ \App\Utils\ScheduleTypeLabel::for($type) }}</{{ $cardHeading }}>
+                            <p id="schedule-type-{{ $type }}-for" class="{{ $primary ? 'text-base leading-[1.45]' : 'text-[0.8125rem] leading-[1.45]' }} text-gray-600 dark:text-gray-400">{{ __('messages.' . $type . '_best_for') }}</p>
+                        </div>
+
+                        @if ($primary)
+                        <span class="st-strip max-w-[21.25rem]">
+                            <span class="st-cell">
+                                <span class="st-cell-label">{{ __('messages.events') }}</span>
+                                <span class="st-cell-value {{ $option['events'] === 'schedule_type_events_yours' ? 'is-yours' : '' }}">{{ __('messages.' . $option['events']) }}</span>
+                            </span>
+                            <span class="st-cell">
+                                <span class="st-cell-label">{{ __('messages.venues') }}</span>
+                                <span class="st-cell-value {{ $option['venues'] === 'schedule_type_venues_yours' ? 'is-yours' : '' }}">{{ __('messages.' . $option['venues']) }}</span>
+                            </span>
+                        </span>
+                        @else
+                        <p class="st-line text-[0.8125rem] leading-[1.45] text-gray-600 dark:text-gray-400">{{ $lineBefore }}<span class="font-semibold text-gray-900 dark:text-white">{{ __('messages.schedule_type_line_anyones') }}</span>{{ $lineAfter }} <span aria-hidden="true">&middot;</span> <span class="font-semibold text-gray-900 dark:text-white">{{ __('messages.' . $option['line_venue']) }}</span></p>
+                        @endif
+                    </div>
+
+                    <ul class="flex flex-col justify-center {{ $primary ? 'mt-6 gap-3 md:mt-0 md:min-w-0 md:flex-[1_1_16.25rem]' : 'mt-3 gap-1.5' }}">
+                        @foreach ([1, 2, 3] as $n)
+                            <li class="flex items-start {{ $primary ? 'gap-3 text-base text-gray-700 dark:text-gray-300' : 'gap-2 text-[0.8125rem] leading-[1.4] text-gray-600 dark:text-gray-400' }}">
+                                <svg class="{{ $primary ? 'w-5 h-5 text-[var(--brand-blue)]' : 'w-4 h-4 text-gray-500 dark:text-gray-500' }} mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                <span>{{ __('messages.' . $type . '_feature_' . $n) }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
-                <p id="schedule-type-{{ $type }}-for" class="mt-3 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.' . $type . '_best_for') }}</p>
 
-                {{-- The one line that tells the three types apart. The {type}_footer strings carry
-                     <b><i> around the part that differs; app.css turns that into the accent colour.
-                     Translation overrides are sanitized on save (TranslationOverrideTest), so this
-                     stays a raw echo. --}}
-                <p class="schedule-type-rule mt-4 rounded-lg px-3 py-2 text-sm text-gray-700 dark:text-gray-300 {{ $card['rule'] }}">{!! __('messages.' . $type . '_footer') !!}</p>
+                @if ($type === 'venue')
+                    {{-- A market, a fair or an expo is a venue with a vendor map. Offered only once
+                         Venue is chosen (app.css shows it); the server reads it only beside
+                         type=venue, so a switch left on under another choice is ignored. Then the
+                         venue form opens and, once saved, the map's setup ("When is the market?"). --}}
+                    <div class="st-market relative z-10 px-[1.125rem] pb-4">
+                        <div class="flex items-start gap-3 border-t border-gray-200 dark:border-white/10 pt-3">
+                            <label class="relative mt-0.5 h-6 w-11 flex-shrink-0 cursor-pointer">
+                                <input type="checkbox" id="schedule-type-market" name="vendor_map" value="market" class="sr-only peer"
+                                    aria-describedby="schedule-type-market-lead">
+                                <span class="block h-6 w-11 rounded-full bg-gray-300 dark:bg-gray-600 transition-colors peer-checked:bg-[var(--brand-button-bg)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--brand-blue)] peer-focus-visible:ring-offset-2 dark:peer-focus-visible:ring-offset-gray-800"></span>
+                                <span class="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200 ltr:left-0.5 rtl:right-0.5 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></span>
+                            </label>
+                            <label for="schedule-type-market" class="min-w-0 cursor-pointer">
+                                <span class="block text-sm font-semibold text-gray-900 dark:text-white">{{ __('messages.vm_type_card_title') }}</span>
+                                <span id="schedule-type-market-lead" class="block text-sm text-gray-500 dark:text-gray-400">{{ __('messages.vm_type_card_lead') }}</span>
+                            </label>
+                        </div>
+                    </div>
+                @endif
             </div>
 
-            <div class="flex flex-col flex-1">
-                <ul class="mt-4 mb-6 space-y-2.5 {{ $primary ? 'lg:mt-0' : '' }}">
-                    @foreach ([1, 2, 3] as $n)
-                        <li class="flex items-start gap-2.5 text-sm text-gray-700 dark:text-gray-300">
-                            <svg class="w-4 h-4 mt-0.5 flex-shrink-0 {{ $card['check'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                            {{ __('messages.' . $type . '_feature_' . $n) }}
-                        </li>
-                    @endforeach
-                </ul>
+            @if ($type === 'curator')
+                </div>
+            @endif
+        @endforeach
+    </fieldset>
 
-                <span class="mt-auto flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-base font-semibold transition-all duration-200 {{ $card['cta'] }}" aria-hidden="true">
-                    {{ __('messages.get_started_cta') }}
-                    <svg class="w-4 h-4 rtl:rotate-180 transition-transform duration-200 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-                </span>
-            </div>
-        </a>
-        @if ($type === 'curator')
-            </div>
+    <div class="mt-9 flex flex-wrap items-center gap-x-5 gap-y-2">
+        <button type="submit" class="inline-flex min-h-[3.25rem] items-center gap-2.5 rounded-xl bg-[var(--brand-button-bg)] px-6 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
+            {{-- One label per choice, shown by app.css from the checked radio. The type's name is
+                 lower-cased inside the sentence ("Continue with venue"), except in German, where
+                 every noun keeps its capital. --}}
+            @foreach (array_keys($options) as $type)
+                @php($typeName = \App\Utils\ScheduleTypeLabel::for($type))
+                <span class="st-continue" data-for="{{ $type }}">{{ __('messages.schedule_type_continue_with', ['type' => app()->getLocale() === 'de' ? $typeName : mb_strtolower($typeName)]) }}</span>
+            @endforeach
+            <span aria-hidden="true" class="inline-block rtl:rotate-180">&rarr;</span>
+        </button>
+        @if ($skipUrl)
+            <a href="{{ $skipUrl }}" class="px-1 py-3 text-[0.9375rem] font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                {{ __('messages.skip_for_now') }}
+            </a>
         @endif
-    @endforeach
-
-    {{-- A market, a fair or an expo is a venue with a vendor map: this opens the venue form and,
-         once it is saved, the map's setup ("When is the market?"). --}}
-    <a href="{{ route('new', ['type' => 'venue', 'vendor_map' => 'market']) }}"
-       data-type="market"
-       class="schedule-type-market group ap-card rounded-2xl mt-4 p-5 flex items-center gap-4 focus:outline-none">
-        <span class="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400" aria-hidden="true">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.75L5.25 4.5h13.5l1.5 5.25M3.75 9.75h16.5M3.75 9.75a2.25 2.25 0 004.125 1.243 2.25 2.25 0 004.125 0 2.25 2.25 0 004.125 0A2.25 2.25 0 0020.25 9.75M5.25 12.75V19.5h13.5v-6.75M9.75 19.5v-4.5h4.5v4.5" /></svg>
-        </span>
-        <span class="min-w-0 flex-1">
-            <span class="block text-base font-bold text-gray-900 dark:text-white">{{ __('messages.vm_type_card_title') }}</span>
-            <span class="block text-sm text-gray-500 dark:text-gray-400">{{ __('messages.vm_type_card_lead') }}</span>
-        </span>
-        <svg class="w-5 h-5 flex-shrink-0 text-gray-400 rtl:rotate-180 transition-transform duration-200 group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
-    </a>
-</div>
+    </div>
+</form>

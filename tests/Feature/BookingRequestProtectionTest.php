@@ -332,7 +332,7 @@ class BookingRequestProtectionTest extends TestCase
 
         $this->assertStringContainsString('Nobody manages Ghost Band yet. Your event appears on it as soon as you submit, and no one will reply.', $html);
         $this->assertStringNotContainsString('who accepts or declines it', $html);
-        $this->assertStringContainsString('<title>Submit Event', $html);
+        $this->assertStringContainsString('<title>Submit event', $html);
         // The account is not a box to tick there: it is the only way through, and the page says so first.
         $this->assertStringContainsString('An account is needed to add an event to a page nobody manages yet.', $html);
         $this->assertStringContainsString('mustHaveAccount: true,', $html);

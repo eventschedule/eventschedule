@@ -120,7 +120,7 @@ class CartTest extends DuskTestCase
 
     private function showTicketForm(Browser $browser): void
     {
-        $browser->visit('/talent/venue')->waitForText('Buy Tickets', 15);
+        $browser->visit('/talent/venue')->waitForText('Buy tickets', 15);
         // The recorder buyerTrail() prints, installed in the SAME call that opens the form: the
         // typed-buyer step fails rarely, and every extra round trip added before it locally (a
         // probe of its own) made it pass. It records every change to the form's name and email

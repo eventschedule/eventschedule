@@ -1,6 +1,7 @@
 <x-app-admin-layout>
 
     @include('admin.partials._navigation', ['active' => 'schedules'])
+    @include('admin.partials._quiet-saves')
 
     @php
         $hosted = (bool) config('app.hosted');
@@ -46,7 +47,7 @@
                  schedule is enterprise whatever plan_type says (Role::actualPlanTier()), so the form
                  saved values nothing read, and updateSchedule() 404s there. --}}
             @if ($hosted)
-            <x-page-card beside :title="__('messages.current_subscription_status')">
+            <x-page-card :title="__('messages.current_subscription_status')">
                 <dl class="page-kv">
                     <div>
                         <dt>@lang('messages.status')</dt>
@@ -75,7 +76,7 @@
             {{-- Whose it is, and the way to that account's own page: taking this schedule down
                  leaves the account free to make another, and blocking is decided there. --}}
             @if ($owner = $role->user)
-            <x-page-card beside :title="__('messages.owner')">
+            <x-page-card :title="__('messages.owner')">
                 <div class="event-setting">
                     <div class="min-w-0">
                         <div class="event-setting-label"><bdi>{{ $owner->name ?: $owner->email }}</bdi>@if ($owner->isBlocked()) <span class="event-chip">@lang('messages.blocked')</span>@endif</div>
@@ -87,7 +88,7 @@
             @endif
 
             {{-- Schedule details --}}
-            <x-page-card beside :title="__('messages.schedule_details')">
+            <x-page-card :title="__('messages.schedule_details')">
                 <form method="POST" action="{{ route('admin.schedules.update_details', ['role' => $role->encodeId()]) }}">
                     @csrf
                     @method('PUT')
@@ -123,14 +124,14 @@
 
                     <div class="page-form-actions">
                         <x-secondary-link :href="route('admin.schedules')">@lang('messages.cancel')</x-secondary-link>
-                        <x-brand-button type="submit">@lang('messages.save_changes')</x-brand-button>
+                        <x-brand-button type="submit" data-quiet-until-change>@lang('messages.save_changes')</x-brand-button>
                     </div>
                 </form>
             </x-page-card>
 
             {{-- Whether each contact is verified, and the operator's way to vouch for one. It was
                  a card or an amber panel per contact, four looks in all. --}}
-            <x-page-card beside :title="__('messages.verification')">
+            <x-page-card :title="__('messages.verification')">
                 <div class="event-setting">
                     <div class="min-w-0">
                         <div class="event-setting-label">@lang('messages.email')</div>
@@ -172,7 +173,7 @@
 
             {{-- The plan --}}
             @if ($hosted)
-            <x-page-card beside :title="__('messages.plan')">
+            <x-page-card :title="__('messages.plan')">
                 <form method="POST" action="{{ route('admin.schedules.update', ['role' => $role->encodeId()]) }}">
                     @csrf
                     @method('PUT')
@@ -221,7 +222,7 @@
 
                     <div class="page-form-actions">
                         <x-secondary-link :href="route('admin.schedules')">@lang('messages.cancel')</x-secondary-link>
-                        <x-brand-button type="submit">@lang('messages.save_changes')</x-brand-button>
+                        <x-brand-button type="submit" data-quiet-until-change>@lang('messages.save_changes')</x-brand-button>
                     </div>
                 </form>
             </x-page-card>
@@ -236,7 +237,7 @@
 
                  The heading is neutral once deleted: the card can offer Restore AND Release at that
                  point, so naming it after either one reads as the only choice. --}}
-            <x-page-card beside :title="$role->is_deleted ? __('messages.deleted') : __('messages.mark_schedule_deleted')" class="border border-red-200 dark:border-red-800">
+            <x-page-card :title="$role->is_deleted ? __('messages.deleted') : __('messages.mark_schedule_deleted')" class="border border-red-200 dark:border-red-800">
                 {{-- What the button does, and the button beside it. --}}
                 @if ($role->is_deleted)
                     <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">

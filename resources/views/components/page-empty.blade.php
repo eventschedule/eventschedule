@@ -11,13 +11,8 @@
 {{-- Nothing here yet (partials/admin-page-styles, .page-empty): what would be here, and the one
      thing to do about it, which goes in the slot as buttons. The portal had four looks for this. --}}
 <div {{ $attributes->merge(['class' => 'page-empty'.($compact ? ' is-compact' : '')]) }}>
-    @unless ($compact)
-    <svg class="page-empty-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-        @foreach ((array) $icon as $iconPath)
-        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $iconPath }}" />
-        @endforeach
-    </svg>
-    @endunless
+    {{-- 2026-11 redesign: a short sentence and its one action, no picture. The icon prop is kept
+         so no caller changes. --}}
     <h3 v-pre>{{ $title }}</h3>
     @if ($text)
     <p v-pre>{{ $text }}</p>

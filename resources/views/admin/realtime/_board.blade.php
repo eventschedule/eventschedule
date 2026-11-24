@@ -18,7 +18,7 @@
                  :class="[isActive('surface', area.key) ? 'realtime-area-on' : '', filters.surface && !isActive('surface', area.key) ? 'realtime-area-dim' : '']">
                 <button type="button" @click="toggleFilter('surface', area.key)" :aria-pressed="isActive('surface', area.key) ? 'true' : 'false'"
                         class="realtime-area-head w-full flex items-center gap-2.5 px-3 pt-3 pb-2 rounded-xl text-start transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)]">
-                    <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center" :class="surfaceTone(area.key).bg" aria-hidden="true">
+                    <span class="w-4 h-4 shrink-0 flex items-center justify-center" aria-hidden="true">
                         <svg class="w-4 h-4" :class="surfaceTone(area.key).text" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" :d="icons[area.key] || icons.other" />
                         </svg>

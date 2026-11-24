@@ -515,7 +515,7 @@
                     <tr>
                         <td><code class="doc-inline-code">SUPPORT_EMAIL</code></td>
                         <td><code class="doc-inline-code">contact@eventschedule.com</code></td>
-                        <td>Shown at the foot of every admin portal page ("If you have any questions or suggestions email us at ...") and as <strong>Contact Us</strong> in the <strong>About</strong> dialog. It is also the Reply-To on the notices sent when an account, schedule or event is deleted, and on the email a customer gets when you answer them in the <a href="#support-chat" class="doc-link">support chat</a>. Change it or your customers will write to us.</td>
+                        <td>Shown at the foot of every admin portal page ("Questions or suggestions? Email ...") and as <strong>Contact Us</strong> in the <strong>About</strong> dialog. It is also the Reply-To on the notices sent when an account, schedule or event is deleted, and on the email a customer gets when you answer them in the <a href="#support-chat" class="doc-link">support chat</a>. Change it or your customers will write to us.</td>
                     </tr>
                 </tbody>
             </table>

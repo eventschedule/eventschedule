@@ -196,28 +196,28 @@
                 <x-page-notice tone="warn" class="mt-4">{{ __('messages.boost_testing_mode') }}</x-page-notice>
                 @endif
                 <div id="payment-errors" class="mt-3 text-sm text-red-600 dark:text-red-400 hidden" role="alert"></div>
-            </x-page-card>
 
-            {{-- The other way to do this at the start of the row, then Cancel, and the button that
-                 spends the money last. --}}
-            <div class="page-form-actions is-split" style="margin-top: 0">
-                <a href="{{ route('boost.create', ['event_id' => $event->hashedId(), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
-                   class="event-link">
-                    {{ __('messages.use_simple_boost') }}
-                </a>
-                <div class="page-actions">
-                    <x-secondary-link href="{{ route('boost.index') }}" class="js-cancel-btn">{{ __('messages.cancel') }}</x-secondary-link>
-                    <x-brand-button type="submit" id="submit-btn">
-                        <span id="submit-text">{{ __('messages.launch_boost') }}</span>
-                        <span id="submit-spinner" class="hidden ms-2">
-                            <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" aria-hidden="true">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                            </svg>
-                        </span>
-                    </x-brand-button>
+                {{-- The other way to do this at the start of the row, then Cancel, and the button that
+                     spends the money last: inside the last card, as on every short form. --}}
+                <div class="page-form-actions is-split">
+                    <a href="{{ route('boost.create', ['event_id' => $event->hashedId(), 'role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}"
+                       class="event-link">
+                        {{ __('messages.use_simple_boost') }}
+                    </a>
+                    <div class="page-actions">
+                        <x-secondary-link href="{{ route('boost.index') }}" class="js-cancel-btn">{{ __('messages.cancel') }}</x-secondary-link>
+                        <x-brand-button type="submit" id="submit-btn">
+                            <span id="submit-text">{{ __('messages.launch_boost') }}</span>
+                            <span id="submit-spinner" class="hidden ms-2">
+                                <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                </svg>
+                            </span>
+                        </x-brand-button>
+                    </div>
                 </div>
-            </div>
+            </x-page-card>
         </form>
     </div>
 

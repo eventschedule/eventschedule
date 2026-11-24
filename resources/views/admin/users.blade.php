@@ -39,12 +39,14 @@
 
         $signupTotal = $emailUsers + $googleUsers + $hybridUsers;
         $share = fn ($part, $whole) => $ltr(($whole > 0 ? round(($part / $whole) * 100, 1) : 0).'%');
-        // The colours the two sign-up charts draw each method in.
+        // The colours the two sign-up charts draw each method in: the brand blue, the same blue at
+        // half strength, and the grey ink (2026-11: red and amber, which say "wrong" and "stuck"
+        // everywhere else in the portal). The script draws the charts from the same three.
         // The fifth is the period's organizers, for the Signups by method card's choice.
         $methods = [
             [__('messages.email'), $emailUsers, $emailUsersInPeriod, 'var(--brand-blue)', $emailOrganizersInPeriod],
-            [__('messages.google'), $googleUsers, $googleUsersInPeriod, '#EF4444', $googleOrganizersInPeriod],
-            [__('messages.hybrid'), $hybridUsers, $hybridUsersInPeriod, '#F59E0B', $hybridOrganizersInPeriod],
+            [__('messages.google'), $googleUsers, $googleUsersInPeriod, 'color-mix(in srgb, var(--brand-blue) 50%, rgb(var(--ap-surface)))', $googleOrganizersInPeriod],
+            [__('messages.hybrid'), $hybridUsers, $hybridUsersInPeriod, 'rgb(var(--ap-ink-4))', $hybridOrganizersInPeriod],
         ];
         $signupSegments = ['organizers' => __('messages.admin_dash_organizers'), 'others' => __('messages.admin_dash_other_accounts'), 'all' => __('messages.all')];
         $signupsInPeriod = $usersWithUtmInPeriod + $usersWithoutUtmInPeriod;
@@ -673,6 +675,10 @@
             const textColor = apColor('--ap-ink-3', isDarkMode ? '#9CA3AF' : '#6B7280');
             const gridColor = apColor('--ap-border', isDarkMode ? '#2d2d30' : '#E5E7EB');
             const brandBlue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim();
+            // One blue for the main series, the same blue at half strength beside it and grey for
+            // the third: the token is a hex in every palette.
+            const blueHalf = /^#[0-9a-f]{6}$/i.test(brandBlue) ? brandBlue + '80' : brandBlue;
+            const quietInk = apColor('--ap-ink-4', isDarkMode ? '#6B7280' : '#9CA3AF');
 
             // Signup Method Donut Chart
             const signupMethodCtx = document.getElementById('signupMethodChart').getContext('2d');
@@ -682,7 +688,7 @@
                     labels: [@json(__('messages.email')), @json(__('messages.google')), @json(__('messages.hybrid'))],
                     datasets: [{
                         data: [{{ $emailUsers }}, {{ $googleUsers }}, {{ $hybridUsers }}],
-                        backgroundColor: [brandBlue, '#EF4444', '#F59E0B'],
+                        backgroundColor: [brandBlue, blueHalf, quietInk],
                         borderColor: apColor('--ap-surface', isDarkMode ? '#252526' : '#FFFFFF'),
                         borderWidth: 2
                     }]
@@ -722,13 +728,13 @@
                         {
                             label: @json(__('messages.google')),
                             data: signupSeries.organizers[1],
-                            backgroundColor: '#EF4444',
+                            backgroundColor: blueHalf,
                             stack: 'signups'
                         },
                         {
                             label: @json(__('messages.hybrid')),
                             data: signupSeries.organizers[2],
-                            backgroundColor: '#F59E0B',
+                            backgroundColor: quietInk,
                             stack: 'signups'
                         }
                     ]
@@ -803,7 +809,7 @@
                         datasets: [{
                             label: @json(__('messages.users')),
                             data: @json($utmSourcesInPeriod->pluck('count')->toArray()),
-                            backgroundColor: '#8B5CF6'
+                            backgroundColor: brandBlue
                         }]
                     },
                     options: {
@@ -838,7 +844,7 @@
                         datasets: [{
                             label: @json(__('messages.users')),
                             data: @json($topUtmSources->pluck('count')->toArray()),
-                            backgroundColor: '#8B5CF6'
+                            backgroundColor: brandBlue
                         }]
                     },
                     options: {
@@ -873,7 +879,7 @@
                         datasets: [{
                             label: @json(__('messages.users')),
                             data: @json($topReferrerDomains->pluck('count')->toArray()),
-                            backgroundColor: '#10B981'
+                            backgroundColor: brandBlue
                         }]
                     },
                     options: {
@@ -919,8 +925,8 @@
                 funnelDatasets.push({
                     label: @json(__('messages.funnel_signup_to_schedule')),
                     data: @json($funnelTrend['signup_to_schedule']),
-                    borderColor: '#F59E0B',
-                    backgroundColor: '#F59E0B',
+                    borderColor: blueHalf,
+                    backgroundColor: blueHalf,
                     spanGaps: true,
                     tension: 0.3,
                     segment: { borderDash: dashLast },
@@ -928,8 +934,8 @@
                 funnelDatasets.push({
                     label: @json(__('messages.funnel_signup_to_event')),
                     data: @json($funnelTrend['signup_to_event']),
-                    borderColor: '#10B981',
-                    backgroundColor: '#10B981',
+                    borderColor: quietInk,
+                    backgroundColor: quietInk,
                     spanGaps: true,
                     tension: 0.3,
                     segment: { borderDash: dashLast },

@@ -30,6 +30,7 @@ use App\Services\PassBookingService;
 use App\Services\PassRedemptionService;
 use App\Services\Payments\CheckoutContext;
 use App\Services\Payments\PaymentGatewayDriver;
+use App\Services\PromoterLinks;
 use App\Services\RoleMailerService;
 use App\Services\SaleRefundResult;
 use App\Services\SaleRefundService;
@@ -39,12 +40,14 @@ use App\Services\SeatingMapService;
 use App\Services\TicketScanService;
 use App\Services\TicketVolumeDiscount;
 use App\Services\UsageTrackingService;
+use App\Services\Wallet\AppleWalletService;
 use App\Services\Wallet\GoogleWalletService;
 use App\Services\WebhookService;
 use App\Traits\HandlesSaleStatusActions;
 use App\Utils\CsvUtils;
 use App\Utils\GuestFunnel;
 use App\Utils\HoneypotUtils;
+use App\Utils\MoneyUtils;
 use App\Utils\QrCodeUtils;
 use App\Utils\TurnstileUtils;
 use App\Utils\UrlUtils;
@@ -63,6 +66,9 @@ use Stripe\StripeClient;
 class TicketController extends Controller
 {
     use HandlesSaleStatusActions;
+
+    /** Orders a page of the Sales tab shows. */
+    public const SALES_PER_PAGE = 20;
 
     public function tickets()
     {
@@ -171,10 +177,13 @@ class TicketController extends Controller
                 $query->orderBy($sortBy, $sortDir);
             }
         } else {
-            $query->orderBy('id', 'desc');
+            // Newest first by the day the row prints (created_at), id breaking a tie, so the
+            // dates read down in order even where a sale was imported or backfilled later.
+            $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
         }
 
-        $sales = $query->paginate(50, ['*'], 'page')->withQueryString();
+        // Twenty a page, as the design draws it: fifty made the page almost four screens long.
+        $sales = $query->paginate(self::SALES_PER_PAGE, ['*'], 'page')->withQueryString();
 
         // Eager-load guest sales for grouped primaries
         $sales->load(['guestSales' => function ($q) {
@@ -1220,17 +1229,17 @@ class TicketController extends Controller
 
                 $ticketsTotal = collect($leg['tickets'])->map(fn ($quantity, $hash) => (float) ($event->tickets->firstWhere('id', UrlUtils::decodeId($hash))?->price ?? 0) * (int) $quantity)->sum();
                 [$minimum, $maximum] = $event->donationLimits($ticketsTotal);
-                $donation = round($leg['donation'], \App\Utils\MoneyUtils::decimalsFor($event->ticket_currency_code ?: 'USD'));
+                $donation = round($leg['donation'], MoneyUtils::decimalsFor($event->ticket_currency_code ?: 'USD'));
 
                 // An owner who offers only their suggested amounts gets only those.
-                if ($event->donation_custom === false && ! in_array($donation, array_map(fn ($amount) => round((float) $amount, \App\Utils\MoneyUtils::decimalsFor($event->ticket_currency_code ?: 'USD')), $event->donationAmounts()), true)) {
+                if ($event->donation_custom === false && ! in_array($donation, array_map(fn ($amount) => round((float) $amount, MoneyUtils::decimalsFor($event->ticket_currency_code ?: 'USD')), $event->donationAmounts()), true)) {
                     return back()->withInput()->with('error', __('messages.donation_not_available'));
                 }
 
                 if ($donation < $minimum || $donation > $maximum) {
                     return back()->withInput()->with('error', __('messages.donation_out_of_range', [
-                        'min' => \App\Utils\MoneyUtils::format($minimum, $event->ticket_currency_code),
-                        'max' => \App\Utils\MoneyUtils::format($maximum, $event->ticket_currency_code),
+                        'min' => MoneyUtils::format($minimum, $event->ticket_currency_code),
+                        'max' => MoneyUtils::format($maximum, $event->ticket_currency_code),
                     ]));
                 }
 
@@ -1790,7 +1799,7 @@ class TicketController extends Controller
         }
 
         // The promoter whose link brought the buyer, for the event's own schedule only.
-        $sale->promoter_link_id = \App\Services\PromoterLinks::linkFor($request, $event)?->id;
+        $sale->promoter_link_id = PromoterLinks::linkFor($request, $event)?->id;
 
         if (! $sale->event_date) {
             $sale->event_date = $event->saleEventDateFromStartsAt();
@@ -2080,8 +2089,8 @@ class TicketController extends Controller
                 $coveredByCard = $giftCard && (float) $giftCard->remaining_amount >= $ticketsNet + $donation;
                 if ($ticketsNet + $donation < $minCharge && ! $coveredByCard) {
                     throw new BusinessException(__('messages.donation_out_of_range', [
-                        'min' => \App\Utils\MoneyUtils::format($minCharge - $ticketsNet, $event->ticket_currency_code),
-                        'max' => \App\Utils\MoneyUtils::format($event->donationLimits()[1], $event->ticket_currency_code),
+                        'min' => MoneyUtils::format($minCharge - $ticketsNet, $event->ticket_currency_code),
+                        'max' => MoneyUtils::format($event->donationLimits()[1], $event->ticket_currency_code),
                     ]));
                 }
             }
@@ -2534,7 +2543,7 @@ class TicketController extends Controller
                     $sale->newsletter_id = UrlUtils::decodeId($utmParams['utm_campaign']);
                 }
 
-                $sale->promoter_link_id = \App\Services\PromoterLinks::linkFor($request, $event)?->id;
+                $sale->promoter_link_id = PromoterLinks::linkFor($request, $event)?->id;
 
                 if (! $sale->event_date) {
                     $sale->event_date = $event->saleEventDateFromStartsAt();
@@ -3111,7 +3120,7 @@ class TicketController extends Controller
      */
     public function appleWalletPass($eventId, $secret)
     {
-        if (! \App\Services\Wallet\AppleWalletService::isConfigured()) {
+        if (! AppleWalletService::isConfigured()) {
             abort(404);
         }
 
@@ -3127,12 +3136,12 @@ class TicketController extends Controller
             'secret' => $secret,
         ]);
 
-        if (! \App\Services\Wallet\AppleWalletService::canOffer($sale, $event)) {
+        if (! AppleWalletService::canOffer($sale, $event)) {
             return redirect($ticketUrl);
         }
 
         try {
-            $pass = app(\App\Services\Wallet\AppleWalletService::class)->pass($sale, $event);
+            $pass = app(AppleWalletService::class)->pass($sale, $event);
         } catch (\Throwable $e) {
             report($e);
             $pass = null;

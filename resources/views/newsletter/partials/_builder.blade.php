@@ -139,6 +139,10 @@ $builderProps = [
     'translations' => [
         'add_block' => __('messages.add_block'),
         'blocks' => __('messages.blocks'),
+        'row_add' => __('messages.add'),
+        'add_subject_to_send' => __('messages.add_subject_to_send'),
+        'row_edit' => __('messages.edit'),
+        'row_hide' => __('messages.row_action_hide'),
         'block_settings' => __('messages.block_settings'),
         'subject' => __('messages.subject'),
         'style_settings' => __('messages.style_settings'),
@@ -267,6 +271,12 @@ $builderProps = [
         'something_went_wrong' => __('messages.something_went_wrong'),
         'error_uploading_image' => __('messages.error_uploading_image'),
         'to' => __('messages.to'),
+        // "To · 1 person" over who it goes to (the 2026-11 redesign); :count is filled in the page.
+        'to_one' => trans_choice('messages.newsletter_to_people', 1, ['count' => ':count']),
+        'to_many' => trans_choice('messages.newsletter_to_people', 2, ['count' => ':count']),
+        'subject_placeholder' => __('messages.newsletter_subject_placeholder', ['name' => $isAdmin ? config('app.name') : ($role->name ?? '')]),
+        'inbox_subject' => __('messages.newsletter_inbox_subject'),
+        'inbox_preview' => __('messages.newsletter_inbox_preview'),
         'change' => __('messages.change'),
         'close' => __('messages.close'),
         'undo' => __('messages.undo'),

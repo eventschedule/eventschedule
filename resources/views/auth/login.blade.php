@@ -1,4 +1,15 @@
 <x-auth-layout>
+    {{-- 2026-11 redesign: the roomy card of the sign-up page (the layout draws it whenever a page
+         has a top bar), with the way to the other page in that bar and the page's name as its title. --}}
+    <x-slot name="topBar">
+        @if (public_registration_enabled())
+        <a class="text-sm font-semibold text-[var(--brand-blue)] hover:underline" href="{{ route('sign_up') }}">{{ __('messages.create_new_account') }}</a>
+        @else
+        <span aria-hidden="true"></span>
+        @endif
+    </x-slot>
+    <h1 class="mb-6 text-[1.875rem] font-bold leading-tight tracking-tight text-gray-900 dark:text-gray-100">{{ __('messages.log_in') }}</h1>
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -106,24 +117,16 @@
         </p>
         @endif
 
-        <div class="flex items-center {{ public_registration_enabled() ? 'justify-between' : 'justify-end' }} mt-8">
-            @if (public_registration_enabled())
-            <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800" href="{{ route('sign_up') }}">
-                {{ __('messages.create_new_account') }}
-            </a>
-            @endif
+        {{-- Sign-up is offered in the top bar (the 2026-11 redesign); only the reset link stays here. --}}
+        <div class="flex items-center justify-end mt-8">
             <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
                 {{ __('messages.reset_password') }}
             </a>
         </div>
     </div>
     @else
-        <div class="flex items-center {{ public_registration_enabled() ? 'justify-between' : 'justify-end' }} mt-8">
-            @if (public_registration_enabled())
-            <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800" href="{{ route('sign_up') }}">
-                {{ __('messages.create_new_account') }}
-            </a>
-            @endif
+        {{-- Sign-up is offered in the top bar (the 2026-11 redesign); only the reset link stays here. --}}
+        <div class="flex items-center justify-end mt-8">
             <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}">
                 {{ __('messages.reset_password') }}
             </a>

@@ -421,6 +421,9 @@ class HomeDashboard
                     : $this->safe(fn () => $event->getGuestUrl($mine?->subdomain ?: false, $row['date'] ?: false)),
                 'when' => $when,
                 'date' => $start->translatedFormat('D, M j'),
+                // The new organizer's card draws the date as a calendar tile (home/_coming-up).
+                'month' => $start->translatedFormat('M'),
+                'day' => $start->format('j'),
                 'time' => $start->translatedFormat($this->timeFormat($mine)),
                 'series' => $row['date'] !== null,
                 'frequency' => $row['date'] !== null ? (string) $event->recurring_frequency : null,

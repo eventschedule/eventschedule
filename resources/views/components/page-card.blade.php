@@ -4,10 +4,6 @@
     'lead' => null,
     // A list or a table inside runs to the card's edges; the head keeps its padding.
     'flush' => false,
-    // On a wide screen the title, its line and anything in `aside` stand on one side and what
-    // the card holds on the other (.page-card.is-beside). A page sets it on all of its titled
-    // cards that are not lists, or on none; a card with no title never invents one to split.
-    'beside' => false,
 ])
 
 {{-- A card on a page of the admin portal (partials/admin-page-styles, .page-card): what it holds,
@@ -15,7 +11,7 @@
      button, a figure); `foot` is a quiet last line. The title is an h2: the page's own name is the
      h1 of <x-page-header>. The title and the lead carry v-pre, as the header's do: a card may sit
      inside a Vue mount, where a name printed as text would be compiled as a template. --}}
-<section {{ $attributes->merge(['class' => 'ap-card rounded-xl page-card'.($flush ? ' is-flush' : '').($beside && $title ? ' is-beside' : '')]) }}>
+<section {{ $attributes->merge(['class' => 'ap-card rounded-xl page-card'.($flush ? ' is-flush' : '')]) }}>
     @if ($title || isset($aside))
     <div class="page-card-head">
         <div class="min-w-0">

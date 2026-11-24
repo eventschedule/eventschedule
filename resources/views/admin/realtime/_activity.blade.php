@@ -33,7 +33,8 @@
                 <li v-for="(item, index) in feedItems" :key="item.key"
                     :class="[index >= 5 && !activityAll ? 'hidden xl:flex' : 'flex', fresh[item.key] ? 'realtime-fresh' : '']"
                     class="items-start gap-3 rounded-lg px-2 py-2 transition-all duration-200">
-                    <span class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center" :class="activityTone(item.type).bg" aria-hidden="true">
+                    {{-- The kind of thing that happened as a bare icon in its colour, no tinted tile (2026-11). --}}
+                    <span class="w-5 h-5 mt-px shrink-0 flex items-center justify-center" aria-hidden="true">
                         <svg class="w-5 h-5" :class="activityTone(item.type).text" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" :d="icons[item.type] || icons.other" />
                         </svg>

@@ -18,7 +18,7 @@ body *:not(html):not(style):not(br):not(tr):not(code) {
 
 body {
     -webkit-text-size-adjust: none;
-    background-color: #f1f5f9;
+    background-color: #eef0f4;
     color: #334155;
     height: 100%;
     line-height: 26px;
@@ -94,7 +94,7 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    background-color: #f1f5f9;
+    background-color: #eef0f4;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -134,7 +134,7 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    background-color: #f1f5f9;
+    background-color: #eef0f4;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -145,8 +145,8 @@ img {
     -premailer-cellspacing: 0;
     -premailer-width: 600px;
     background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
+    border: 1px solid #e3e6ec;
+    border-radius: 20px;
     margin: 0 auto;
     padding: 0;
     width: 600px;
@@ -245,13 +245,13 @@ img {
 
 .button {
     -webkit-text-size-adjust: none;
-    border-radius: 10px;
+    border-radius: 12px;
     color: #ffffff;
     display: inline-block;
     font-size: 16px;
     font-weight: 600;
     line-height: 20px;
-    padding: 14px 28px;
+    padding: 15px 26px;
     text-decoration: none;
 }
 

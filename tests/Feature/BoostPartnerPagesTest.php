@@ -9,9 +9,13 @@ use App\Models\BoostStatementLine;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\BoostBillingService;
 use App\Services\BoostPartnerService;
 use App\Services\MetaAdsServiceFake;
+use App\Utils\HelpUtils;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
+use GuzzleHttp\Exception\TransferException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
@@ -196,7 +200,7 @@ class BoostPartnerPagesTest extends TestCase
         $this->assertStringContainsString(e(__('messages.boost_partner_asked_for_changes', ['page' => 'Harbor Events Page'])), $html);
         $this->assertStringContainsString('Please use a photo of the venue', $html);
         $this->assertStringContainsString(__('messages.boost_partner_edit_and_resend'), $html);
-        $this->assertStringContainsString('bg-amber-50', $html);
+        $this->assertStringContainsString('bg-amber-100', $html);
         $this->assertBusinessWording($html, 'a declined request');
 
         // Edited and sent again, then approved and waiting for payment: how to pay the partner.
@@ -391,7 +395,7 @@ class BoostPartnerPagesTest extends TestCase
         $html = $this->actingAs($this->partnerUser)->get(route('boost.partner.statement', ['period' => '2026-09', 'currency' => 'USD']))->assertOk()->getContent();
         $this->assertStringContainsString('action="'.route('boost.partner.statement_pay', ['period' => '2026-09']).'"', $html);
         $this->assertStringContainsString('<input type="hidden" name="currency" value="USD">', $html, 'Pay now names the statement\'s currency');
-        $this->assertStringContainsString(e(__('messages.boost_statement_correction', ['month' => \Carbon\Carbon::createFromFormat('Y-m-d', '2026-08-01')->translatedFormat('F Y')])), $html);
+        $this->assertStringContainsString(e(__('messages.boost_statement_correction', ['month' => Carbon::createFromFormat('Y-m-d', '2026-08-01')->translatedFormat('F Y')])), $html);
         $this->assertSame(1, substr_count($html, e(__('messages.boost_statement_correction', ['month' => '']))), 'only the line for an earlier month is a correction');
         $this->assertStringContainsString(__('messages.pay_now'), $html);
         $this->assertStringContainsString('href="'.route('profile.edit').'#section-boost-card"', $html);
@@ -434,7 +438,7 @@ class BoostPartnerPagesTest extends TestCase
         $this->assertStringNotContainsString(route('boost.partner.settings.login'), $html, 'Login waits on its configuration');
 
         // Every place on the tab has a Help page.
-        $anchors = (new \ReflectionClass(\App\Utils\HelpUtils::class))->getStaticPropertyValue('mappings')['settings']['anchors'];
+        $anchors = (new \ReflectionClass(HelpUtils::class))->getStaticPropertyValue('mappings')['settings']['anchors'];
         foreach (['section-boost', 'section-boost-account', 'section-boost-card'] as $id) {
             $this->assertArrayHasKey($id, $anchors);
         }
@@ -617,7 +621,7 @@ class BoostPartnerPagesTest extends TestCase
     {
         Exceptions::fake();
         config(['services.meta.app_id' => '1234', 'services.meta.app_secret' => 'app-secret-xyz']);
-        Http::fake(fn () => throw new \GuzzleHttp\Exception\TransferException('cURL error 56: Connection reset by peer for https://graph.facebook.com/v21.0/oauth/access_token?client_id=1234&client_secret=app-secret-xyz&code=c0de'));
+        Http::fake(fn () => throw new TransferException('cURL error 56: Connection reset by peer for https://graph.facebook.com/v21.0/oauth/access_token?client_id=1234&client_secret=app-secret-xyz&code=c0de'));
 
         $this->loginAgain()->assertRedirect()->assertSessionHas('error', __('messages.boost_partner_login_failed'));
 
@@ -678,7 +682,7 @@ class BoostPartnerPagesTest extends TestCase
     public function test_a_boost_sent_after_the_partner_was_switched_on_gives_its_card_payment_back(): void
     {
         // The form was opened before the partner was, and its card was confirmed for this site.
-        $this->mock(\App\Services\BoostBillingService::class)
+        $this->mock(BoostBillingService::class)
             ->shouldReceive('abandonPaymentIntent')->once()
             ->with('pi_3QxCharged', 'boost_partner_request', 'boost_abandon_', $this->event->id, 'boost', $this->business->id);
 

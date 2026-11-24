@@ -1325,7 +1325,7 @@
                         Anything left unpaired is one of the rows above. Fix it on the side the
                         table names, and prefer recording a payment in Invoice Ninja to pressing Mark
                         Paid here: the webhook keeps the invoice id on the sale, where Mark Paid
-                        writes Manual Payment instead.
+                        writes "Manual payment" instead.
                     </p>
                 </div>
             </div>

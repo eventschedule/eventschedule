@@ -116,6 +116,8 @@
 
     {{-- Navigation --}}
     @include('admin.partials._navigation', ['active' => 'settings'])
+    @include('admin.partials._quiet-saves')
+
 
     {{-- What this installation does for everyone on it. Each card is its own small form with its
          own Save: the cards post to different endpoints, and one card's Save must never carry
@@ -145,7 +147,7 @@
             $homeRoot = rtrim(url('/'), '/');
             $homeSelected = old('home_schedule', $homeScheduleId ? \App\Utils\UrlUtils::encodeId($homeScheduleId) : '');
         @endphp
-        <x-page-card beside id="home-schedule" class="scroll-mt-24" :title="__('messages.home_schedule_title')" :lead="__('messages.home_schedule_description', ['url' => $homeRoot])">
+        <x-page-card id="home-schedule" class="scroll-mt-24" :title="__('messages.home_schedule_title')" :lead="__('messages.home_schedule_description', ['url' => $homeRoot])">
             <form method="POST" action="{{ route('admin.settings.update_home_schedule') }}" class="{{ $formClass }}">
                 @csrf
 
@@ -173,13 +175,13 @@
                 </div>
 
                 <div class="page-form-actions">
-                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>{{ __('messages.save') }}</x-brand-button>
                 </div>
             </form>
         </x-page-card>
         @endif
 
-        <x-page-card beside :title="__('messages.header_footer_code')" :lead="__('messages.header_footer_code_intro')">
+        <x-page-card :title="__('messages.header_footer_code')" :lead="__('messages.header_footer_code_intro')">
             <form method="POST" action="{{ route('admin.settings.update') }}" class="{{ $formClass }}">
                 @csrf
 
@@ -209,7 +211,7 @@
                 </div>
 
                 <div class="page-form-actions">
-                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>{{ __('messages.save') }}</x-brand-button>
                 </div>
             </form>
         </x-page-card>
@@ -217,7 +219,7 @@
         @if ($federationAvailable)
         {{-- Anchor target for the dashboard adoption prompt's "Open settings" link. Arriving from
              the dashboard's invitation, it is marked and says what happens next (once: a flash). --}}
-        <x-page-card beside id="federation" class="scroll-mt-24 {{ $federationFromInvite ? 'sys-invited' : '' }}" :title="__('messages.federation_settings_title')" :lead="__('messages.federation_settings_description')">
+        <x-page-card id="federation" class="scroll-mt-24 {{ $federationFromInvite ? 'sys-invited' : '' }}" :title="__('messages.federation_settings_title')" :lead="__('messages.federation_settings_description')">
             <div class="page-form-fields">
                 @if ($federationFromInvite && ! $federationEnabled)
                     <x-page-notice tone="info">{{ __('messages.federation_invite_next_steps', ['site' => parse_url((string) config('app.nexus_url'), PHP_URL_HOST) ?: 'eventschedule.com']) }}</x-page-notice>
@@ -483,14 +485,14 @@
                 </div>
 
                 <div class="page-form-actions">
-                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>{{ __('messages.save') }}</x-brand-button>
                 </div>
             </form>
         </x-page-card>
         @endif
 
         @if ($adsAvailable)
-        <x-page-card beside id="monetization" class="scroll-mt-24" :title="__('messages.monetization_settings_title')" :lead="__('messages.monetization_settings_description')">
+        <x-page-card id="monetization" class="scroll-mt-24" :title="__('messages.monetization_settings_title')" :lead="__('messages.monetization_settings_description')">
             {{-- This card posts to its own endpoint rather than sharing admin.settings.update.
                  The shared-endpoint cards above each have to carry every other card's values
                  through as hidden inputs, which is quadratic in the number of cards and fails
@@ -588,7 +590,7 @@
                 </div>
 
                 <div class="page-form-actions">
-                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>{{ __('messages.save') }}</x-brand-button>
                 </div>
             </form>
         </x-page-card>
@@ -598,7 +600,7 @@
         {{-- Before the currency card, not after: the amounts come first and the currency is what
              they are printed in. Gated on hosted-or-nexus, because a plain selfhost has no
              surface that quotes a plan price - see AdminController::settings(). --}}
-        <x-page-card beside id="plan-pricing" class="scroll-mt-24" :title="__('messages.plan_pricing_title')" :lead="__('messages.plan_pricing_description')">
+        <x-page-card id="plan-pricing" class="scroll-mt-24" :title="__('messages.plan_pricing_title')" :lead="__('messages.plan_pricing_description')">
             <form method="POST" action="{{ route('admin.settings.update_plan_pricing') }}" class="{{ $formClass }}">
                 @csrf
 
@@ -653,7 +655,7 @@
                 </div>
 
                 <div class="page-form-actions">
-                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>{{ __('messages.save') }}</x-brand-button>
                 </div>
             </form>
         </x-page-card>
@@ -661,7 +663,7 @@
 
         {{-- Always rendered. Even a selfhost with no plans to price uses this as the
              default currency for a new event. --}}
-        <x-page-card beside id="currency" class="scroll-mt-24" :title="__('messages.platform_currency_title')" :lead="__('messages.platform_currency_description')">
+        <x-page-card id="currency" class="scroll-mt-24" :title="__('messages.platform_currency_title')" :lead="__('messages.platform_currency_description')">
             <form method="POST" action="{{ route('admin.settings.update_currency') }}" class="{{ $formClass }}">
                 @csrf
 
@@ -693,14 +695,14 @@
                 </div>
 
                 <div class="page-form-actions">
-                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>{{ __('messages.save') }}</x-brand-button>
                 </div>
             </form>
         </x-page-card>
 
         {{-- Its own form and route (admin.settings.update_realtime): the shared settings endpoint
              overwrites the header and footer code unless the federation marker is posted. --}}
-        <x-page-card beside id="realtime" class="scroll-mt-24" :title="__('messages.realtime_settings_title')" :lead="__('messages.realtime_settings_description')">
+        <x-page-card id="realtime" class="scroll-mt-24" :title="__('messages.realtime_settings_title')" :lead="__('messages.realtime_settings_description')">
             <form method="POST" action="{{ route('admin.settings.update_realtime') }}" class="{{ $formClass }}">
                 @csrf
 
@@ -730,7 +732,7 @@
                 </div>
 
                 <div class="page-form-actions">
-                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>{{ __('messages.save') }}</x-brand-button>
                 </div>
             </form>
         </x-page-card>
@@ -739,7 +741,7 @@
              are printed on. A quote is shown with its schedule's own picture and page, under the
              person's name when the operator gives one (with their permission). --}}
         @if ($homeQuotesAvailable)
-        <x-page-card beside id="home-quotes" class="scroll-mt-24" :title="__('messages.home_quotes_title')" :lead="__('messages.home_quotes_description')">
+        <x-page-card id="home-quotes" class="scroll-mt-24" :title="__('messages.home_quotes_title')" :lead="__('messages.home_quotes_description')">
             <form method="POST" action="{{ route('admin.settings.update_home_quotes') }}" class="{{ $formClass }}">
                 @csrf
 
@@ -795,7 +797,7 @@
                 </div>
 
                 <div class="page-form-actions">
-                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>{{ __('messages.save') }}</x-brand-button>
                 </div>
             </form>
         </x-page-card>
@@ -810,7 +812,7 @@
              free-tier schedules on multi-tenant hosted installs and this one is none of
              those. --}}
         @if ($stay22Available)
-        <x-page-card beside id="accommodation" class="scroll-mt-24" :title="__('messages.stay22_settings_title')" :lead="__('messages.stay22_settings_description')">
+        <x-page-card id="accommodation" class="scroll-mt-24" :title="__('messages.stay22_settings_title')" :lead="__('messages.stay22_settings_description')">
             <form method="POST" action="{{ route('admin.settings.update_stay22') }}" class="{{ $formClass }}">
                 @csrf
 
@@ -831,7 +833,7 @@
                 </div>
 
                 <div class="page-form-actions">
-                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                    <x-brand-button type="submit" data-quiet-until-change>{{ __('messages.save') }}</x-brand-button>
                 </div>
             </form>
         </x-page-card>

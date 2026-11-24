@@ -1,5 +1,5 @@
-{{-- A ranked list: one row a thing, its number at the end, and a wash behind the row as long as
-     the number is against the largest. The same rows the Realtime tab draws, so the four tabs read
+{{-- A ranked list: one row a thing, its number and share at the end, and a bar under the row as
+     long as the number is against the largest. The same rows the Realtime tab draws, so the four tabs read
      alike. Every value is printed, so nothing waits on a hover, and a list of one is still a
      list, not a fat bar on an axis that runs to 500.
 
@@ -10,12 +10,12 @@
                   'flag' (a country code), 'icon' (a stroked path), 'brand' (a filled path),
                   'sub', 'mono'], ...]
        listShare  print each row's share of the whole beside its figure
-       listBars   draw the washes (not across currencies, where lengths would compare euros
+       listBars   draw the bars (not across currencies, where lengths would compare euros
                   with dollars)
      and, only where it applies, listMax (a fixed scale: a rate is against 100, not against
      the largest rate) and listTotal (the whole a share is of, when the list is not all of it).
 
-     Six rows show; the rest wait behind "Show all", in the page and not behind a request. --}}
+     Six rows show; the rest wait behind "Show N more", in the page and not behind a request. --}}
 @php
     $listVisible = 6;
     $listPeak = ($listMax ?? null) ?: max(1, ...array_map(fn ($r) => (float) $r['value'], $listRows ?: [['value' => 0]]));
@@ -25,10 +25,8 @@
     @foreach ($listRows as $i => $row)
     @php $rowTag = ! empty($row['href']) ? 'a' : 'div'; @endphp
     <li class="an-row" @if ($i >= $listVisible) hidden data-an-extra @endif>
-        <{{ $rowTag }} class="an-row-in" @if (! empty($row['href'])) href="{{ $row['href'] }}" @endif @if (! empty($row['title'])) title="{{ $row['title'] }}" @endif>
-            {{-- The wash is the track's, and the track stops short of the figures, so a long bar
-                 never runs under a number and a short one still clears the picture. --}}
-            <span class="an-row-track" @if ($listBars) style="--w: {{ round(max(0, $row['value'] / $listPeak * 100), 1) }}%" @endif>
+        <{{ $rowTag }} class="an-row-in{{ $listBars ? ' has-bar' : '' }}" @if (! empty($row['href'])) href="{{ $row['href'] }}" @endif @if (! empty($row['title'])) title="{{ $row['title'] }}" @endif>
+            <span class="an-row-track">
                 @if (! empty($row['thumb']))
                     <img src="{{ $row['thumb'] }}" alt="" loading="lazy" class="an-row-thumb">
                 @elseif (! empty($row['flag']))
@@ -47,10 +45,16 @@
             @if ($listShare)
                 <span class="an-row-share">{{ round($row['value'] / $listSum * 100) }}%</span>
             @endif
+            {{-- The bar runs under the whole row, on a grey track, as long as the number is
+                 against the largest (the 2026-11 designs). --}}
+            @if ($listBars)
+                <span class="an-row-bar" aria-hidden="true"><i style="width: {{ round(max(0, min(100, $row['value'] / $listPeak * 100)), 1) }}%"></i></span>
+            @endif
         </{{ $rowTag }}>
     </li>
     @endforeach
 </ol>
 @if (count($listRows) > $listVisible)
-<button type="button" class="an-more" data-an-more aria-expanded="false" data-less="{{ __('messages.realtime_show_less') }}">{{ __('messages.realtime_show_all') }} <span class="an-more-count">{{ number_format(count($listRows)) }}</span></button>
+@php $listMore = trans_choice('messages.realtime_show_more', count($listRows) - $listVisible, ['count' => number_format(count($listRows) - $listVisible)]); @endphp
+<button type="button" class="an-more" data-an-more aria-expanded="false" data-more="{{ $listMore }}" data-less="{{ __('messages.realtime_show_less') }}">{{ $listMore }}</button>
 @endif

@@ -94,7 +94,7 @@
                             @endif
                         </div>
                         <div>
-                            <x-input-label for="webhook_description_{{ $webhookId }}" :value="__('messages.description')" />
+                            <x-input-label for="webhook_description_{{ $webhookId }}" :value="__('messages.description')" optional />
                             <x-text-input id="webhook_description_{{ $webhookId }}" type="text" name="description" :value="$webhookEditBack ? old('description') : $webhook->description" class="mt-1 block w-full" maxlength="255" />
                         </div>
                         <div>
@@ -152,7 +152,7 @@
         <p class="event-group-label">{{ __('messages.add_webhook') }}</p>
 
         <div>
-            <x-input-label for="webhook_url_new" :value="__('messages.webhook_url') . ' *'" />
+            <x-input-label for="webhook_url_new" :value="__('messages.webhook_url')" />
             <x-text-input id="webhook_url_new" type="url" name="url" dir="ltr" :value="$webhookFormBack === 'add' ? old('url') : ''" required placeholder="https://example.com/webhook" class="mt-1 block w-full" />
             @if ($webhookFormBack === 'add' || $webhookFormBack === null)
             <x-input-error class="mt-2" :messages="$errors->get('url')" />
@@ -160,7 +160,7 @@
         </div>
 
         <div>
-            <x-input-label for="webhook_description_new" :value="__('messages.description')" />
+            <x-input-label for="webhook_description_new" :value="__('messages.description')" optional />
             <x-text-input id="webhook_description_new" type="text" name="description" :value="$webhookFormBack === 'add' ? old('description') : ''" placeholder="{{ __('messages.webhook_description_placeholder') }}" class="mt-1 block w-full" maxlength="255" />
         </div>
 

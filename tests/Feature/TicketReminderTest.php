@@ -310,7 +310,7 @@ class TicketReminderTest extends TestCase
         $this->assertStringContainsString("\u{2068}Jazz Night\u{2069}", (new TicketReminder($sale, $event->fresh(), $this->role))->envelope()->subject);
         app()->setLocale('en');
         $this->assertStringContainsString('Hello Omar', (string) $ticket->getHtmlBody());
-        $this->assertStringContainsString('View Your Tickets', (string) $ticket->getHtmlBody());
+        $this->assertStringContainsString('View your tickets', (string) $ticket->getHtmlBody());
         $this->assertStringContainsString('/ticket/view/', (string) $ticket->getTextBody());
         $this->assertStringContainsString('because you have a ticket to Jazz Night', (string) $ticket->getTextBody());
         $this->assertStringContainsString('Show this code at the door', (string) $ticket->getHtmlBody(), 'the ticket itself, in the body');
@@ -318,7 +318,7 @@ class TicketReminderTest extends TestCase
         $this->assertStringContainsString('cid:', (string) $ticket->getHtmlBody());
 
         $registration = $messages[1]->getOriginalMessage();
-        $this->assertStringContainsString('View Registration', (string) $registration->getHtmlBody());
+        $this->assertStringContainsString('View registration', (string) $registration->getHtmlBody());
         $this->assertStringContainsString('Can&#039;t make it?', (string) $registration->getHtmlBody(), 'a free place the guest can give up');
         $this->assertStringContainsString('because you registered for Jazz Night', (string) $registration->getTextBody());
     }

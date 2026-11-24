@@ -494,6 +494,10 @@
 
             const textColor = apColor('--ap-ink-3', isDarkMode ? '#9CA3AF' : '#6B7280');
             const gridColor = apColor('--ap-border', isDarkMode ? '#2d2d30' : '#E5E7EB');
+            // The main series in the brand blue (2026-11: it was green), with the same blue at a
+            // tenth under the line. The token is a hex in every palette.
+            const brandBlue = apStyle.getPropertyValue('--brand-blue').trim() || '#2456E6';
+            const blueFill = /^#[0-9a-f]{6}$/i.test(brandBlue) ? brandBlue + '1a' : 'transparent';
 
             // Revenue Trend Chart
             const revenueTrendCtx = document.getElementById('revenueTrendChart').getContext('2d');
@@ -504,8 +508,8 @@
                     datasets: [{
                         label: @json(__('messages.revenue')),
                         data: @json($trendData['revenue']),
-                        borderColor: '#10B981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderColor: brandBlue,
+                        backgroundColor: blueFill,
                         fill: true,
                         tension: 0.3
                     }]

@@ -46,98 +46,21 @@ import 'easymde/dist/easymde.min.css';
 import {
     applyEditorDirection,
     attachDirectionShortcut,
+    attachEditorChrome,
+    editorToolbar,
     attachEditorObserver,
     attachPasteSanitizer,
     resolveEditorDirection,
-    toggleEditorDirection,
     unlockEditorDirection,
 } from './editor-helpers';
 
 function initEasyMDEOn(element) {
     if (element._easyMDE) return;
 
-    const t = window.editorTranslations || {};
     const initialDir = resolveEditorDirection(element, element.value);
     const easyMDE = new EasyMDE({
         element: element,
-        toolbar: [
-            {
-                name: "bold",
-                action: EasyMDE.toggleBold,
-                className: "editor-button-text",
-                title: t.bold || "Bold",
-                text: "B"
-            },
-            {
-                name: "italic",
-                action: EasyMDE.toggleItalic,
-                className: "editor-button-text",
-                title: t.italic || "Italic",
-                text: "I"
-            },
-            {
-                name: "heading",
-                action: EasyMDE.toggleHeadingSmaller,
-                className: "editor-button-text",
-                title: t.heading || "Heading",
-                text: "H"
-            },
-            "|",
-            {
-                name: "link",
-                action: function(editor) {
-                    EasyMDE.drawLink(editor);
-                },
-                className: "editor-button-text",
-                title: t.link || "Link",
-                text: "🔗"
-            },
-            {
-                name: "quote",
-                action: EasyMDE.toggleBlockquote,
-                className: "editor-button-text",
-                title: t.quote || "Quote",
-                text: "\""
-            },
-            {
-                name: "unordered-list",
-                action: EasyMDE.toggleUnorderedList,
-                className: "editor-button-text",
-                title: t.unorderedList || "Unordered List",
-                text: "UL"
-            },
-            {
-                name: "ordered-list",
-                action: EasyMDE.toggleOrderedList,
-                className: "editor-button-text",
-                title: t.orderedList || "Ordered List",
-                text: "OL"
-            },
-            {
-                name: "direction",
-                action: function(editor) {
-                    toggleEditorDirection(editor, element);
-                },
-                className: "editor-button-text no-disable",
-                title: (t.textDirection || "Text Direction") + " (Ctrl+Shift)",
-                text: initialDir.toUpperCase()
-            },
-            "|",
-            {
-                name: "preview",
-                action: EasyMDE.togglePreview,
-                className: "editor-button-text no-disable",
-                title: t.preview || "Toggle Preview",
-                text: "👁"
-            },
-            {
-                name: "guide",
-                action: "https://www.markdownguide.org/basic-syntax/",
-                className: "editor-button-text",
-                title: t.guide || "Markdown Guide",
-                text: "?"
-            }
-        ],
+        toolbar: editorToolbar(EasyMDE, element),
         minHeight: "200px",
         spellChecker: true,
         nativeSpellcheck: true,
@@ -153,6 +76,7 @@ function initEasyMDEOn(element) {
     attachEditorObserver(easyMDE);
     attachDirectionShortcut(easyMDE, element);
     attachPasteSanitizer(easyMDE);
+    attachEditorChrome(easyMDE, element);
 
     easyMDE.codemirror.on('change', function(cm, changeObj) {
         unlockEditorDirection(element, changeObj && changeObj.origin);
@@ -179,23 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Make EasyMDE available globally for Vue components (tiny version for agenda descriptions)
 window.initTinyMDE = function(element, onChange) {
-    const t = window.editorTranslations || {};
     const initialDir = resolveEditorDirection(element, element.value);
     const easyMDE = new EasyMDE({
         element: element,
-        toolbar: [
-            { name: "bold", action: EasyMDE.toggleBold, className: "editor-button-text", title: t.bold || "Bold", text: "B" },
-            { name: "italic", action: EasyMDE.toggleItalic, className: "editor-button-text", title: t.italic || "Italic", text: "I" },
-            { name: "link", action: (editor) => EasyMDE.drawLink(editor), className: "editor-button-text", title: t.link || "Link", text: "🔗" },
-            "|",
-            { name: "quote", action: EasyMDE.toggleBlockquote, className: "editor-button-text", title: t.quote || "Quote", text: "\"" },
-            { name: "unordered-list", action: EasyMDE.toggleUnorderedList, className: "editor-button-text", title: t.unorderedList || "Unordered List", text: "UL" },
-            { name: "ordered-list", action: EasyMDE.toggleOrderedList, className: "editor-button-text", title: t.orderedList || "Ordered List", text: "OL" },
-            { name: "direction", action: (editor) => toggleEditorDirection(editor, element), className: "editor-button-text no-disable", title: (t.textDirection || "Text Direction") + " (Ctrl+Shift)", text: initialDir.toUpperCase() },
-            "|",
-            { name: "preview", action: EasyMDE.togglePreview, className: "editor-button-text no-disable", title: t.preview || "Toggle Preview", text: "👁" },
-            { name: "guide", action: "https://www.markdownguide.org/basic-syntax/", className: "editor-button-text", title: t.guide || "Markdown Guide", text: "?" }
-        ],
+        toolbar: editorToolbar(EasyMDE, element, { compact: true }),
         minHeight: "80px",
         spellChecker: false,
         status: false,
@@ -208,6 +119,7 @@ window.initTinyMDE = function(element, onChange) {
     attachEditorObserver(easyMDE);
     attachDirectionShortcut(easyMDE, element);
     attachPasteSanitizer(easyMDE);
+    attachEditorChrome(easyMDE, element);
 
     easyMDE.codemirror.on('change', function(cm, changeObj) {
         unlockEditorDirection(element, changeObj && changeObj.origin);

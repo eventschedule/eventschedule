@@ -78,9 +78,11 @@
                             <span class="min-w-0">
                                 <span class="flex flex-wrap items-center gap-1.5">
                                     <span class="realtime-cut text-sm font-medium truncate" dir="auto" :class="person.now ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'">@{{ person.kind === 'user' ? (person.name || person.email) : (countryName(person.country) || msg.anonymous) }}</span>
+                                    {{-- New, Demo and the plan are words after the name (2026-11), not chips:
+                                         only "new" is coloured, since it is the one that asks for a look. --}}
                                     <span v-for="badge in person.badges" :key="badge"
-                                          class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap"
-                                          :class="badge === 'new' ? 'bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">@{{ badgeLabel(badge) }}</span>
+                                          class="text-xs font-medium whitespace-nowrap"
+                                          :class="badge === 'new' ? 'text-green-700 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'">@{{ badgeLabel(badge) }}</span>
                                 </span>
                                 <span class="block text-xs text-gray-500 dark:text-gray-400 truncate">
                                     <bdi v-if="person.kind === 'user'" dir="ltr">@{{ person.email }}</bdi>

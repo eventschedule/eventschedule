@@ -63,7 +63,7 @@
                     default => ['', __('messages.legal_status_builtin')],
                 };
             @endphp
-            <x-page-card beside :id="$type" class="scroll-mt-24" :title="__('messages.legal_'.$type.'_title')"
+            <x-page-card :id="$type" class="scroll-mt-24" :title="__('messages.legal_'.$type.'_title')"
                 :lead="$hasContent || $hasUrl ? __('messages.legal_last_updated', ['date' => $document->updated_at->isoFormat('LL')]) : __('messages.legal_using_builtin')">
                 <x-slot name="aside">
                     <span class="event-status {{ $inForceTone }}">{{ $inForce }}</span>
@@ -90,7 +90,7 @@
 
                         <div>
                             <x-input-label :for="$type.'_content'" :value="__('messages.legal_document_content')" />
-                            <textarea id="{{ $type }}_content" name="content" rows="18" {{ is_demo_mode() ? 'disabled' : '' }}
+                            <textarea id="{{ $type }}_content" name="content" rows="18" data-editor-foot="off" {{ is_demo_mode() ? 'disabled' : '' }}
                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">{{ $refused ? old('content', $document->content ?? '') : ($document->content ?? '') }}</textarea>
                             <p class="sys-help">{{ __('messages.legal_document_content_help') }}</p>
                             <x-input-error class="mt-2" :messages="$refused ? $errors->get('content') : []" />

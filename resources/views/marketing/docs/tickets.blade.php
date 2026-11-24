@@ -1179,7 +1179,7 @@
                     </tr>
                     <tr>
                         <td>Transaction Reference</td>
-                        <td>The payment's reference, linked to your provider's dashboard where there is a page to link to. A sale you marked paid reads <em>Manual Payment</em>, an imported attendee <em>Manual import</em> and a box office sale <em>Box office</em>.</td>
+                        <td>The payment's reference, linked to your provider's dashboard where there is a page to link to. A sale you marked paid reads <em>Manual payment</em>, an imported attendee <em>Manual import</em> and a box office sale <em>Box office</em>.</td>
                     </tr>
                     <tr>
                         <td>Status</td>

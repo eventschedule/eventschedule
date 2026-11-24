@@ -7,7 +7,7 @@
     phone. With no href it renders disabled, for test sends, with an optional note beneath.
 --}}
 @aware(['theme' => null])
-@props(['href' => null, 'variant' => 'primary', 'note' => null, 'align' => 'center'])
+@props(['href' => null, 'variant' => 'primary', 'note' => null, 'align' => 'center', 'arrow' => false])
 @php
     $theme ??= \App\Utils\EmailTheme::account();
     $disabled = blank($href);
@@ -17,18 +17,22 @@
         default => [$theme->accent, $theme->onAccent, $theme->accentBorder],
     };
     $cellAlign = $align === 'center' ? 'center' : $theme->start;
-    $label = 'display: inline-block; padding: 14px 28px; font-family: '.\App\Utils\EmailTheme::FONT.'; font-size: 16px; line-height: 20px; font-weight: 600; color: '.$fg.'; text-decoration: none; border-radius: 10px; mso-padding-alt: 0;';
+    // 52px tall with its 1px edge and a 12px radius, as the 2026-11 design draws its buttons.
+    $label = 'display: inline-block; padding: 15px 26px; font-family: '.\App\Utils\EmailTheme::FONT.'; font-size: 16px; line-height: 20px; font-weight: 600; color: '.$fg.'; text-decoration: none; border-radius: 12px; mso-padding-alt: 0;';
+    // A forward action may carry the design's arrow, pointing the way the mail reads. A text
+    // glyph, not an image: it takes the label's colour in dark mode and in every client.
+    $arrowHtml = ($arrow && ! $disabled) ? '<span aria-hidden="true" style="padding-'.$theme->start.': 10px;">'.($theme->dir === 'rtl' ? '&larr;' : '&rarr;').'</span>' : '';
 @endphp
 <table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
-<td align="{{ $cellAlign }}" style="padding: 8px 0 24px; text-align: {{ $cellAlign }};">
+<td align="{{ $cellAlign }}" style="padding: 8px 0 28px; text-align: {{ $cellAlign }};">
 <table role="presentation" dir="{{ $theme->dir }}" @if ($cellAlign === 'center') align="center" @endif cellpadding="0" cellspacing="0" border="0" class="es-btn-wrap" style="{{ $cellAlign === 'center' ? 'margin: 0 auto;' : '' }}">
 <tr>
-<td align="center" bgcolor="{{ $bg }}" class="{{ $disabled ? 'es-btn-off' : ($variant === 'secondary' ? 'es-btn-ghost' : 'es-btn') }}" style="background-color: {{ $bg }}; border: 1px solid {{ $border }}; border-radius: 10px; mso-padding-alt: 14px 28px; text-align: center;">
+<td align="center" bgcolor="{{ $bg }}" class="{{ $disabled ? 'es-btn-off' : ($variant === 'secondary' ? 'es-btn-ghost' : 'es-btn') }}" style="background-color: {{ $bg }}; border: 1px solid {{ $border }}; border-radius: 12px; mso-padding-alt: 15px 26px; text-align: center;">
 @if ($disabled)
 <span style="{{ $label }}">{{ $slot }}</span>
 @else
-<a href="{{ $href }}" target="_blank" rel="noopener" class="es-btn-a{{ $variant === 'secondary' ? ' es-link' : '' }}" style="{{ $label }}">{{ $slot }}</a>
+<a href="{{ $href }}" target="_blank" rel="noopener" class="es-btn-a{{ $variant === 'secondary' ? ' es-link' : '' }}" style="{{ $label }}">{{ $slot }}{!! $arrowHtml !!}</a>
 @endif
 </td>
 </tr>

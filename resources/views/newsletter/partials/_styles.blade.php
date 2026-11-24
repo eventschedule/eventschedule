@@ -41,10 +41,35 @@
       flex: 0 1 24rem;
       min-width: min(100%, 16rem);
     }
-    .news-meter .text-sm {
-      margin-bottom: 0.375rem;
+    .news-meter-line {
+      margin: 0 0 0.375rem;
       font-size: 0.8125rem;
       line-height: 1.25rem;
+      font-variant-numeric: tabular-nums;
+      color: rgb(var(--ap-ink-2));
+    }
+    .news-meter-line strong {
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    .news-meter-track {
+      height: 0.375rem;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgb(var(--ap-border-strong) / 0.6);
+    }
+    .news-meter-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--brand-blue);
+    }
+    /* Nothing left this month: amber, as the plan page's meter says it. */
+    .news-meter-fill.is-full {
+      background: #f59e0b;
+    }
+    .news-meter-upgrade {
+      margin: 0.375rem 0 0;
+      font-size: 0.8125rem;
     }
 
     /* A card's last quiet line keeps off the form above it (the kit spaces it only in a flush card). */

@@ -29,6 +29,13 @@
         position: sticky;
         top: 5rem;
       }
+      /* The save bar's height and the gap above it. The sticky mail is that much shorter
+         (paneHeight in the component), so the bar never covers its last lines. The bar itself
+         stays in the flow at this width, so at the end of the page it sits below the mail and
+         above the footer line, covering neither; below a laptop the kit's spacer does that. */
+      #newsletter-builder {
+        --nb-bar-space: 6.5rem;
+      }
       #newsletter-builder .nb-tab-preview {
         display: none;
       }
@@ -232,12 +239,6 @@
       align-items: center;
       gap: 0.125rem;
       padding: 0.25rem 0.375rem 0.25rem 0.25rem;
-    }
-    #newsletter-builder .nb-handle {
-      display: inline-flex;
-      padding: 0.375rem;
-      color: rgb(var(--ap-ink-4));
-      cursor: grab;
     }
     #newsletter-builder .nb-block-toggle {
       display: flex;
@@ -713,5 +714,209 @@
     .news-template-name-field {
       max-width: 32rem;
       margin-bottom: 1rem;
+    }
+
+    /* The 2026-11 redesign. The tabs as the kit's segmented control; Subject, Preview text and
+       To in one card and the blocks in another; a block as a line with its arrows first and the
+       word for what pressing it does last; labels in small capitals. */
+    #newsletter-builder .nb-tabs .ap-tab[aria-selected="true"] {
+      box-shadow: 0 1px 2px rgba(20, 22, 26, 0.1);
+      color: rgb(var(--ap-ink));
+    }
+    #nb-pane-content.nb-card {
+      background: none;
+      box-shadow: none;
+      border: 0;
+    }
+    #nb-pane-content.nb-card::before {
+      content: none;
+    }
+    #nb-pane-content > .nb-section {
+      padding: 1.5rem;
+      background: rgb(var(--ap-surface));
+      border: 1px solid rgb(var(--ap-border));
+      box-shadow: var(--ap-shadow-card, 0 1px 2px rgba(20, 22, 26, 0.06));
+      border-radius: 1rem;
+    }
+    #nb-pane-content > .nb-section:not(.is-blocks):has(+ .nb-section:not(.is-blocks)) {
+      padding-bottom: 0.75rem;
+      border-bottom: 0;
+      border-end-start-radius: 0;
+      border-end-end-radius: 0;
+    }
+    #nb-pane-content > .nb-section:not(.is-blocks) + .nb-section:not(.is-blocks) {
+      padding-top: 0.75rem;
+      border-top: 0;
+      border-start-start-radius: 0;
+      border-start-end-radius: 0;
+    }
+    #nb-pane-content > .nb-section.is-blocks {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem 0.5rem;
+    }
+    #newsletter-builder .nb-label {
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    #newsletter-builder .nb-audience {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 0.125rem 1rem;
+      margin-top: 1.25rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgb(var(--ap-border));
+      border-radius: 0.75rem;
+    }
+    #newsletter-builder .nb-audience-to {
+      grid-column: 1;
+      font-size: 0.6875rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    #newsletter-builder .nb-audience-who {
+      grid-column: 1;
+    }
+    #newsletter-builder .nb-audience > .event-link {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      font-weight: 600;
+    }
+    #newsletter-builder .is-blocks .nb-title,
+    #newsletter-builder .nb-preview-head .nb-title {
+      font-size: 0.6875rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgb(var(--ap-ink-3));
+    }
+    #newsletter-builder .is-blocks .nb-count {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      background: none;
+      font-size: inherit;
+      color: inherit;
+    }
+    #newsletter-builder .is-blocks .nb-count::before {
+      content: "\00b7\00a0";
+    }
+    #newsletter-builder .nb-canvas {
+      gap: 0;
+    }
+    #newsletter-builder .nb-block {
+      border: 0;
+      border-top: 1px solid rgb(var(--ap-border));
+      border-radius: 0;
+      background: none;
+    }
+    #newsletter-builder .nb-block.is-open {
+      box-shadow: none;
+    }
+    #newsletter-builder .nb-block-head {
+      padding: 0.375rem 0;
+    }
+    #newsletter-builder .nb-moves {
+      display: inline-flex;
+      flex: none;
+      cursor: grab;
+    }
+    #newsletter-builder .nb-moves .nb-tool {
+      width: 1.75rem;
+      color: rgb(var(--ap-ink-2));
+    }
+    #newsletter-builder .nb-block-toggle > .nb-icon {
+      display: none;
+    }
+    #newsletter-builder .nb-block-name {
+      font-size: 0.9375rem;
+    }
+    #newsletter-builder .nb-block-snippet.is-empty {
+      font-style: normal;
+      color: rgb(var(--ap-ink-3));
+    }
+    #newsletter-builder .nb-block-act {
+      margin-inline-start: auto;
+      padding-inline-start: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--brand-blue);
+    }
+    #newsletter-builder .nb-block-body {
+      border-top: 0;
+      padding: 0.25rem 0 1rem;
+    }
+
+    /* The 2026-11 redesign's builder. The preview opens on the mail as an inbox lists it: who it
+       is from, the subject (grey until there is one), and the preview text. */
+    #newsletter-builder .nb-inbox {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+      padding: 0.625rem 1.25rem 0.75rem;
+      border-bottom: 1px solid rgb(var(--ap-border));
+      min-width: 0;
+    }
+    #newsletter-builder .nb-inbox > bdi {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #newsletter-builder .nb-inbox-from {
+      font-size: 0.75rem;
+      color: rgb(var(--ap-ink-2));
+    }
+    #newsletter-builder .nb-inbox-subject {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    #newsletter-builder .nb-inbox-subject.is-empty {
+      color: rgb(var(--ap-ink-3));
+    }
+    #newsletter-builder .nb-inbox-pre {
+      font-size: 0.8125rem;
+      color: rgb(var(--ap-ink-2));
+    }
+    /* A block's line ends with its word (Edit, Add, Hide) at the row's end: the copy and remove
+       tools are the open block's, where they no longer hold a space at the end of every line. */
+    #newsletter-builder .nb-block:not(.is-open) .nb-block-tools {
+      display: none;
+    }
+    #newsletter-builder .nb-block-act {
+      font-size: 0.8125rem;
+    }
+    /* Up and down as arrows. */
+    #newsletter-builder .nb-tool.nb-arrow {
+      width: 1.875rem;
+      height: 2.25rem;
+      font-size: 0.8125rem;
+      line-height: 1;
+    }
+    #newsletter-builder .nb-tool.nb-arrow:disabled {
+      opacity: 0.3;
+    }
+    /* + Add block: a bordered key in words. */
+    #newsletter-builder .page-tool.nb-add {
+      min-height: 2.25rem;
+      padding: 0 0.75rem;
+      border: 1px solid rgb(var(--ap-border-strong));
+      border-radius: 0.625rem;
+      background: rgb(var(--ap-surface));
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: rgb(var(--ap-ink));
+    }
+    #newsletter-builder .page-tool.nb-add:hover {
+      border-color: var(--brand-blue);
+      color: var(--brand-blue);
+    }
+    /* Review and send ends with an arrow that points the way the page reads. */
+    #newsletter-builder .nb-forward {
+      display: inline-block;
+      margin-inline-start: 0.25rem;
+    }
+    [dir="rtl"] #newsletter-builder .nb-forward {
+      transform: scaleX(-1);
     }
 </style>

@@ -63,7 +63,7 @@ class FirstEventFlowTest extends TestCase
         // straight to the database rather than saved through the wizard, does not have.
         $this->assertStringNotContainsString('class="step-indicator', $html);
         $this->assertStringContainsString(__('messages.next_step_add_first_event'), $html);
-        $this->assertStringContainsString(__('messages.first_event_form_subtitle'), $html);
+        $this->assertStringContainsString('data-first-event-lead', $html);
         $this->assertStringContainsString(__('messages.more_options'), $html);
         $this->assertStringContainsString('v-show="showMoreSections"', $html);
         $this->assertStringContainsString('showMoreSections: false', $html);
@@ -103,7 +103,7 @@ class FirstEventFlowTest extends TestCase
         $html = $this->createHtml($owner, $role);
 
         $this->assertStringNotContainsString('class="step-indicator', $html);
-        $this->assertStringNotContainsString(__('messages.first_event_form_subtitle'), $html);
+        $this->assertStringNotContainsString('data-first-event-lead', $html);
         $this->assertStringNotContainsString('v-show="showMoreSections"', $html);
         $this->assertStringContainsString('showMoreSections: true', $html);
         // Not this, though: there is nothing to boost until the event is saved, on any new event.
@@ -140,7 +140,7 @@ class FirstEventFlowTest extends TestCase
         $html = $this->createHtml($owner, $role);
 
         $this->assertStringNotContainsString('class="step-indicator', $html);
-        $this->assertStringContainsString(__('messages.first_event_form_subtitle'), $html);
+        $this->assertStringContainsString('data-first-event-lead', $html);
     }
 
     /** The band survives in exactly one place: someone adding an event to another schedule. */

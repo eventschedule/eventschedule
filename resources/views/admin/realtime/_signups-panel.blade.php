@@ -5,11 +5,6 @@
 <section class="realtime-panel-signups ap-card rounded-xl p-4 sm:p-6" aria-labelledby="realtime-signups-panel-heading">
     <div class="grid grid-cols-1 sm:grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-3 items-end">
         <div class="flex items-center gap-3 min-w-0">
-            <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10" style="--icon-glow: rgba(59, 130, 246, 0.15)">
-                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" :d="icons.signup" />
-                </svg>
-            </div>
             <span class="dashboard-stat-value text-3xl font-bold leading-none tabular-nums text-gray-900 dark:text-white">@{{ fmt(signups.total || 0) }}</span>
             <div class="min-w-0">
                 <h2 id="realtime-signups-panel-heading" class="text-sm font-semibold text-gray-900 dark:text-white">@{{ msg.signups }}</h2>

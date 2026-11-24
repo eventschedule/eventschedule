@@ -54,8 +54,8 @@
           />
         </template>
         <template v-else>
-          <div class="sg-head-static sg-section-head">
-            <SetupGuideRing :size="44" :total="ringTotal" :done="ringDone" :fused="ringFused" :closed="ended" :check="ended && ! handed" :bump="ended" :photo="g.photo" :initial="g.initial" />
+          <div class="sg-head-static sg-section-head" :class="{ 'sg-section-head-bar': ! finished }">
+            <SetupGuideRing v-if="finished" :size="44" :total="ringTotal" :done="ringDone" :fused="ringFused" :closed="ended" :check="ended && ! handed" :bump="ended" :photo="g.photo" :initial="g.initial" />
             <span class="min-w-0 flex-1">
               <!-- Finished: the ring and the finish line ARE the header. The name is in that line
                    already, so it is not said a second time above it. -->
@@ -63,10 +63,18 @@
                 <span class="sg-finish-title" role="progressbar" :aria-label="t.progress" :aria-valuemin="0" :aria-valuemax="ringTotal" :aria-valuenow="ringDone" :aria-valuetext="status">{{ fmt(t.set_up) }}</span>
                 <span class="sg-step-text">{{ fmt(t.events_count, { count: g.total }) }}</span>
               </template>
+              <!-- 2026-11 redesign (his choice): "Setup guide · name" over the status, and on the
+                   other side how many of the list are done, said and drawn as segments. -->
               <template v-else>
-                <span class="sg-eyebrow" role="progressbar" :aria-label="t.progress" :aria-valuemin="0" :aria-valuemax="ringTotal" :aria-valuenow="ringDone" :aria-valuetext="status">{{ status }}</span>
-                <span class="sg-head-name"><bdi>{{ g.name }}</bdi></span>
+                <span class="sg-section-kicker">{{ t.title }} · <bdi>{{ g.name }}</bdi></span>
+                <span class="sg-section-title">{{ status }}</span>
               </template>
+            </span>
+            <span v-if="! finished" class="sg-progress" role="progressbar" :aria-label="t.progress" :aria-valuemin="0" :aria-valuemax="rows.length" :aria-valuenow="rowsDone" :aria-valuetext="status">
+              <span class="sg-progress-text">{{ fmt(t.n_of_m_done, { done: rowsDone, total: rows.length }) }}</span>
+              <span class="sg-progress-bar" aria-hidden="true">
+                <span v-for="(row, index) in rows" :key="row.key" class="sg-progress-seg" :class="{ 'is-done': index < rowsDone }"></span>
+              </span>
             </span>
           </div>
 
@@ -223,17 +231,29 @@
       <svg class="sg-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
     </button>
 
+    <!-- The page preview beside the fields (2026-11 design). The page's own eyebrow says "One step
+         from live" from this width, so the card has no header line of its own: the progress is
+         kept for a screen reader, and the fold is a small button in the corner. The sentence under
+         the preview is the page's lead now, except a curator's, whose way in is importing. -->
     <aside v-if="dock.fits && ! dock.folded" class="sg-root sg-dock sg-surface" :class="{ 'sg-dock-enter': arrival && ! calm }" :style="dockStyle" :aria-label="t.title">
-      <div class="sg-dock-head">
-        <SetupGuideRing :size="28" :total="3" :done="2" :drawing="arrival ? 1 : -1" :photo="g.photo" :initial="g.initial" />
-        <span class="sg-eyebrow min-w-0 flex-1" role="progressbar" :aria-label="t.progress" :aria-valuemin="0" :aria-valuemax="3" :aria-valuenow="2" :aria-valuetext="status">{{ status }}</span>
-        <button type="button" class="sg-icon-button" :aria-label="t.minimize" @click="foldDock">
-          <svg class="sg-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-        </button>
+      <span class="sr-only" role="progressbar" :aria-label="t.progress" :aria-valuemin="0" :aria-valuemax="3" :aria-valuenow="2" :aria-valuetext="status">{{ status }}</span>
+      <!-- One plain card (the 2026-11 design, "Add First Event"): the schedule's name and address,
+           and the event being typed filling in, its name and when, as the fields change. -->
+      <div class="sg-preview">
+        <span class="sg-preview-label">{{ t.page_preview }}</span>
+        <span class="sg-preview-who">
+          <span class="sg-preview-name"><bdi>{{ g.name }}</bdi></span>
+          <bdi dir="ltr" class="sg-preview-url">{{ g.address }}</bdi>
+        </span>
+        <span class="sg-preview-event" :class="{ 'is-empty': ! mirror.name }">
+          <span class="sg-preview-event-name"><bdi>{{ mirror.name || t.first_slot }}</bdi></span>
+          <span class="sg-preview-event-when"><bdi>{{ mirror.when || t.preview_when }}</bdi></span>
+        </span>
       </div>
-      <SetupGuideStrip :guide="g" :t="t" layout="stack" :mirror="mirror" :calm="calm" here />
-      <p class="sg-dock-promise">{{ fmt(g.type === 'curator' ? t.event_body_curator : t.event_body) }}</p>
-      <a v-if="g.type === 'curator'" :href="g.urls.import" class="sg-dock-link">{{ t.import_events }}</a>
+      <template v-if="g.type === 'curator'">
+        <p class="sg-dock-promise">{{ fmt(t.event_body_curator) }}</p>
+        <a :href="g.urls.import" class="sg-dock-link">{{ t.import_events }}</a>
+      </template>
     </aside>
 
     <div v-else-if="wide" class="sg-root sg-corner">
@@ -342,8 +362,9 @@
  *   - two curves: things arrive on --sg-arrive, things complete on --sg-complete;
  *   - one forward button per view, last, and the last beat of any sequence lands on it.
  *
- * GUARDS. Nothing moves while a form field has focus (the form only feeds slot one, on blur
- * and on change). Every reward plays once: going live is remembered on the server, the rest
+ * GUARDS. Nothing travels while a form field has focus: the docked preview's text follows the
+ * fields as they are typed in, and the motion (a tile tearing off) is the card's, which is closed
+ * while the form is being filled in. Every reward plays once: going live is remembered on the server, the rest
  * per tab in sessionStorage. Nothing loops. Under reduced motion the words and colours still
  * change; nothing travels and there is no confetti.
  *
@@ -394,7 +415,7 @@ const isolate = (text) => '⁨' + text + '⁩';
 // One pass, with a function: a name handed to replace() as a string is a PATTERN, in which
 // "$$" is one dollar and "$&" is the placeholder itself ("Ca$$h Bingo" lost a dollar), and a
 // second pass would fill a ":event" that somebody typed into their schedule's name.
-const fmt = (text, values = {}) => String(text || '').replace(/:(name|address|event|count)/g, (match, key) => {
+const fmt = (text, values = {}) => String(text || '').replace(/:(name|address|event|count|done|total)/g, (match, key) => {
   if (key === 'name') {
     return isolate(g.name);
   }
@@ -405,6 +426,10 @@ const fmt = (text, values = {}) => String(text || '').replace(/:(name|address|ev
 
   if (key === 'event') {
     return isolate(values.event || '');
+  }
+
+  if (key === 'done' || key === 'total') {
+    return values[key] === undefined ? '' : String(values[key]);
   }
 
   return values.count === undefined ? '' : String(values.count);
@@ -429,6 +454,9 @@ const ringDone = computed(() => {
 
   return 3 + order.value.filter((key) => key !== 'event' && (g.steps[key].done || g.steps[key].skipped)).length;
 });
+
+// How many of the dashboard list are done, for its "2 of 5 done" (the 2026-11 redesign).
+const rowsDone = computed(() => (rows.value || []).filter((row) => row.state === 'done').length);
 
 const status = computed(() => {
   if (finished.value) {
@@ -1044,7 +1072,7 @@ const DOCK_FROM = 1408;
 const dock = reactive({ fits: false, folded: false, top: 0, side: 0, width: 216 });
 const wide = ref(window.innerWidth >= DOCK_FROM);
 const arrival = ref(false);
-const mirror = reactive({ name: '', month: '', day: '' });
+const mirror = reactive({ name: '', month: '', day: '', when: '' });
 
 // The field column of whichever section of the form is showing.
 const fieldColumn = () => {
@@ -1100,7 +1128,7 @@ const measure = () => {
 
   // 18px clear of the fields, 12px in from the edge of the panel the gutter belongs to, and
   // level with the section's heading rather than the panel's border.
-  dock.width = Math.min(232, Math.max(160, free - 30));
+  dock.width = Math.min(288, Math.max(160, free - 30));
   dock.side = rtl ? window.innerWidth - fields.left + 18 : fields.right + 18;
   dock.top = Math.max(88, (section || column).getBoundingClientRect().top + 16);
   dock.fits = true;
@@ -1126,20 +1154,15 @@ const dockStyle = computed(() => ({
   [rtl ? 'right' : 'left']: dock.side + 'px',
 }));
 
-const foldDock = () => {
-  dock.folded = true;
-  writeSeen();
-  focusToggle();
-};
-
 const unfoldDock = () => {
   dock.folded = false;
   writeSeen();
 };
 
-// Slot one, from what has been typed. Read on leaving the name field and when the date or the
-// time changes - never on a keystroke - and built from the wall-clock parts as entered, with
-// no timezone arithmetic: the form's own preview does the same.
+// Slot one, from what has been typed. Read as the fields are typed in and changed (the docked
+// preview fills in live, as the 2026-11 design has it: it was read on leaving the field, and a
+// name typed and not yet left was missing from it), and built from the wall-clock parts as
+// entered, with no timezone arithmetic: the form's own preview does the same.
 const readForm = () => {
   const name = document.getElementById('event_name');
   const date = document.getElementById('event_date');
@@ -1157,6 +1180,20 @@ const readForm = () => {
     mirror.month = '';
     mirror.day = '';
   }
+
+  // "Thu, Dec 3 · 8:00 PM": the day as the browser names it, the time as it was typed.
+  let when = '';
+  if (picked) {
+    try {
+      when = picked.toLocaleDateString(g.locale || undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    } catch (e) {
+      when = picked.toDateString();
+    }
+    if (time && time.value.trim()) {
+      when += ' · ' + time.value.trim();
+    }
+  }
+  mirror.when = when;
 };
 
 // Any field of the event form being left or changed. A beat later, because the time picker
@@ -1504,6 +1541,7 @@ onMounted(() => {
     document.addEventListener('click', scheduleMeasure);
     document.addEventListener('focusout', onFormChange);
     document.addEventListener('change', onFormChange);
+    document.addEventListener('input', onFormChange);
 
     // The reward for the schedule just saved: the card rises and its segment draws. Once.
     if (g.arrived && ! arrived) {
@@ -1555,6 +1593,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', scheduleMeasure);
   document.removeEventListener('focusout', onFormChange);
   document.removeEventListener('change', onFormChange);
+  document.removeEventListener('input', onFormChange);
   document.removeEventListener('click', onPageClick, true);
   document.removeEventListener('keydown', onKey);
   window.removeEventListener('hashchange', onHash);
@@ -1894,19 +1933,16 @@ onBeforeUnmount(() => {
      A flat 100dvh - 7rem let a card that starts lower (the import band stands above a first
      event's form) run on under the bar until the page was scrolled. */
   max-height: calc(100dvh - var(--sg-dock-top, 7rem) - var(--sg-bar, 0px) - 1rem);
-  padding: 14px;
+  padding: 20px;
   overflow-y: auto;
   border-radius: 16px;
+  /* A plain white card, as the 2026-11 design has it, not the guide's gradient surface. */
+  background: rgb(var(--ap-surface));
+  box-shadow: 0 1px 2px rgba(20, 22, 26, .06), 0 8px 24px rgba(20, 22, 26, .06);
 }
 
 .sg-dock-enter {
   animation: sg-rise-16 280ms var(--sg-arrive) both;
-}
-
-.sg-dock-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .sg-icon-button {
@@ -1922,6 +1958,74 @@ onBeforeUnmount(() => {
 
 .sg-icon-button:hover {
   background: rgb(var(--ap-surface-hover));
+}
+
+/* The docked preview: one plain card, its event filling in as it is typed. */
+.sg-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sg-preview-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgb(var(--ap-ink-3));
+}
+
+.sg-preview-who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sg-preview-name {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: rgb(var(--ap-ink));
+  overflow-wrap: anywhere;
+}
+
+.sg-preview-url {
+  font-size: 13px;
+  color: rgb(var(--ap-ink-2));
+  overflow-wrap: anywhere;
+}
+
+.sg-preview-event {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px;
+  border: 1.5px solid rgb(var(--ap-border));
+  border-radius: 12px;
+  background: rgb(var(--ap-surface));
+}
+
+.sg-preview-event.is-empty {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--brand-blue) 45%, transparent);
+  background: color-mix(in srgb, var(--brand-blue) 5%, rgb(var(--ap-surface)));
+}
+
+.sg-preview-event-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgb(var(--ap-ink));
+  overflow-wrap: anywhere;
+}
+
+.sg-preview-event.is-empty .sg-preview-event-name {
+  color: var(--brand-blue);
+}
+
+.sg-preview-event-when {
+  font-size: 13px;
+  color: rgb(var(--ap-ink-2));
 }
 
 .sg-dock-promise {
@@ -2971,6 +3075,96 @@ a.sg-slot-empty:hover {
 
 .sg-section-page .sg-slot {
   min-height: 84px;
+}
+
+/* The 2026-11 redesign of the dashboard card, while the guide is not finished: one column, a
+   header with the count drawn as segments, and the steps as rows between hairlines, each ending in
+   a word. The page preview is the event form's (the dock), not this card's. */
+.sg-section:not(.sg-section-done):not(.sg-section-quiet) {
+  grid-template-areas: "head" "steps" "also";
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto;
+  gap: 8px;
+}
+
+.sg-section:not(.sg-section-done):not(.sg-section-quiet) .sg-section-page {
+  display: none;
+}
+
+.sg-section-head-bar {
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgb(var(--ap-border));
+}
+
+.sg-section-kicker {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--brand-blue);
+}
+
+.sg-section-title {
+  display: block;
+  margin-top: 2px;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: rgb(var(--ap-ink));
+}
+
+.sg-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+.sg-progress-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgb(var(--ap-ink-2));
+}
+
+.sg-progress-bar {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.sg-progress-seg {
+  width: 26px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgb(var(--ap-border-strong));
+}
+
+.sg-progress-seg.is-done {
+  background: var(--brand-blue);
+}
+
+.sg-section .sg-spine {
+  display: none;
+}
+
+.sg-section .sg-step + .sg-step {
+  border-top: 1px solid rgb(var(--ap-border));
+}
+
+.sg-section .sg-step-head {
+  padding-block: 12px;
+}
+
+.sg-step-state {
+  flex: none;
+  margin-inline-start: auto;
+  padding-inline-start: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgb(var(--ap-ink-2));
 }
 
 .sg-enter {

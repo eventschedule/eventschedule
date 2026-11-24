@@ -28,7 +28,7 @@ class TicketFormJourneyTest extends DuskTestCase
             $this->createTestEventWithTickets($browser);
 
             // A phone: the page's own bar is at the foot of the screen until the form opens.
-            $browser->resize(390, 844)->visit('/talent/venue')->waitForText('Buy Tickets', 15);
+            $browser->resize(390, 844)->visit('/talent/venue')->waitForText('Buy tickets', 15);
             $this->assertTrue($this->js($browser, "return document.getElementById('gp-mobile-cta').offsetHeight > 0;"), 'fixture: the phone bar is showing');
 
             $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");

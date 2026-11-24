@@ -28,37 +28,62 @@
     $paidMovable = $paidSchedules->first(fn ($schedule) => in_array($schedule->type, ['talent', 'curator'], true));
 @endphp
 
-    <div class="flex flex-col items-center px-4 pt-8 pb-12 sm:px-6 lg:px-8">
+    @php
+        // The bare shell (a first schedule) has no navigation, so the page draws its own top bar:
+        // the logo, and "Step 2 of 2" at the other end (the 2026-11 design; /getting-started is
+        // step 1). Inside the portal the sidebar and its own bar are already there.
+        $bareShell = ! ($hasSchedules ?? false);
+    @endphp
+    <div class="px-4 pt-7 pb-12 sm:px-6 lg:px-8">
+        @if ($bareShell)
+        <header class="mx-auto flex w-full max-w-[57.5rem] flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            {{-- Not a link, as on /getting-started: the dashboard forwards a newcomer straight back. --}}
+            <div class="flex">
+                <img class="h-9 w-auto dark:hidden" src="{{ asset(ltrim(config('app.logo_dark'), '/')) }}" alt="{{ config('app.name') }}"/>
+                <img class="h-9 w-auto hidden dark:block" src="{{ asset(ltrim(config('app.logo_light'), '/')) }}" alt="{{ config('app.name') }}"/>
+            </div>
+            @if ($startsGuide)
+                @include('partials.setup-step-bar', ['current' => 2, 'total' => 2])
+            @endif
+        </header>
+        @endif
+
         {{-- "Create Account / Create Schedule / Create Event" is noise on somebody's tenth
              schedule, so it is gated - but on the SAME condition HomeController::gettingStarted()
              uses, not a near-miss. That one also bounces on tickets()->count(), so a visitor who
              bought a ticket and later came back to run their own schedule was being shown the
              onboarding bar and a "choose a different type" link that silently redirected them to
-             the dashboard. Resolved once, here, and passed down. --}}
-        {{-- The band is now the guest-submit flow's alone. Everyone else starting out gets the
-             setup guide's ring and line above the heading (partials/setup-guide-eyebrow). --}}
+             the dashboard. Resolved once, here, and passed down. The band is the guest-submit
+             flow's alone; everyone else starting out gets the step bar. --}}
         @if ($isFirstRun && session('pending_request'))
-        <div class="w-full max-w-2xl rounded-2xl overflow-hidden">
+        <div class="mx-auto mt-6 w-full max-w-2xl rounded-2xl overflow-hidden">
             <x-step-indicator :currentStep="2" />
         </div>
         @endif
 
-        <div class="w-full max-w-xl mt-8">
-            <div class="text-center mb-6">
-                @if ($startsGuide)
-                <div class="mb-3">
-                    @include('partials.setup-guide-eyebrow', ['line' => __('messages.setup_guide_two_steps'), 'initialFrom' => 'name'])
+        <div class="mx-auto w-full max-w-[35rem] {{ $bareShell ? 'mt-9' : 'mt-2' }}">
+            <div class="mb-7 flex flex-col gap-2.5">
+                {{-- Always a way back, named for where it goes. It used to be gated on being new,
+                     so a returning user on the bare shell had no nav, no back and no cancel. --}}
+                <a href="{{ $isFirstRun ? route('getting-started') : route('home') }}"
+                   class="inline-flex min-h-[2rem] items-center gap-1.5 self-start rounded text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                    <svg class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+                    {{ $isFirstRun ? __('messages.choose_different_type') : __('messages.dashboard') }}
+                </a>
+                @if ($startsGuide && ! $bareShell)
+                <div>
+                    @include('partials.setup-step-bar', ['current' => 2, 'total' => 2])
                 </div>
                 @endif
-                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">
-                    {{ \App\Utils\ScheduleTypeLabel::for($role->type) }}
+                <h1 class="text-3xl sm:text-[2.625rem] font-bold leading-[1.1] tracking-tight text-gray-900 dark:text-white" style="text-wrap: balance">
+                    {{ __('messages.create_schedule_heading_' . $role->type) }}
                 </h1>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <p class="text-base text-gray-600 dark:text-gray-400">
                     {{ __('messages.' . $role->type . '_tagline') }}
                 </p>
             </div>
 
-            <div class="ap-card rounded-xl p-6">
+            <div class="ap-card new-schedule-card rounded-[1.25rem] p-6 sm:p-9 ![box-shadow:var(--ap-shadow-lift)]">
                 <form method="post" action="{{ route('role.store') }}" enctype="multipart/form-data" id="edit-form">
                     @csrf
 
@@ -105,62 +130,75 @@
                     @endif
 
                     <div>
-                        <x-input-label for="name" :value="__('messages.schedule_name')" />
-                        <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
+                        <x-input-label for="name" :value="__('messages.schedule_name')" class="font-semibold text-gray-900 dark:text-gray-100" />
+                        <x-text-input id="name" name="name" type="text" class="mt-2 block w-full min-h-[3.25rem] rounded-xl"
                             :value="old('name', $role->name)" required autofocus autocomplete="organization" />
                         <x-input-error :messages="$errors->get('name')" class="mt-2" />
                     </div>
 
                     @if ($role->isVenue())
-                    <div class="mt-4">
-                        <x-input-label for="address1" :value="__('messages.street_address')" />
-                        <x-text-input id="address1" name="address1" type="text" class="mt-1 block w-full"
+                    <div class="mt-5">
+                        <x-input-label for="address1" :value="__('messages.street_address')" class="font-semibold text-gray-900 dark:text-gray-100" />
+                        <x-text-input id="address1" name="address1" type="text" class="mt-2 block w-full min-h-[3.25rem] rounded-xl"
                             :value="old('address1')" autocomplete="off" required />
                         <x-input-error :messages="$errors->get('address1')" class="mt-2" />
                     </div>
                     @endif
 
-                    {{-- The email is shown rather than asked: it is the account's own and
-                         changeable afterwards. --}}
-                    <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                        <bdi dir="ltr">{{ $user->email }}</bdi>
-                    </p>
-
-                    {{-- The timezone is shown collapsed but CAN be changed here, because it cannot
-                         be trusted: a Google sign-up used to be stored as America/New_York whatever
-                         the browser said, and every event on the schedule is anchored to this
-                         value. A closed <details> still submits its select, so this works without
-                         JavaScript; the script below only opens it when the device disagrees. --}}
+                    {{-- What the schedule takes from the account, said once, as a small table. The
+                         email is shown rather than asked: it is the account's own and changeable
+                         afterwards. --}}
                     @php
                         $formTimezone = \App\Utils\TimezoneUtils::canonicalize(old('timezone', $role->timezone))
                             ?? config('app.timezone');
                     @endphp
-                    <details id="timezone-details" class="mt-2 group" @if ($errors->has('timezone')) open @endif>
-                        <summary class="inline-flex cursor-pointer items-center gap-1 text-xs text-gray-500 dark:text-gray-400 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
-                            <span id="timezone-summary" data-template="{{ __('messages.schedule_times_in_timezone', ['timezone' => '__TIMEZONE__']) }}">{{ __('messages.schedule_times_in_timezone', ['timezone' => $formTimezone]) }}</span>
-                            <span aria-hidden="true">&middot;</span>
-                            <span class="text-[var(--brand-blue)] hover:underline">{{ __('messages.change_timezone') }}</span>
-                        </summary>
-
-                        <div class="mt-3">
-                            <div id="timezone-mismatch" class="hidden mb-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3"
-                                data-template="{{ __('messages.timezone_device_mismatch', ['timezone' => '__TIMEZONE__']) }}">
-                                <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                    </svg>
-                                    <p id="timezone-mismatch-text" class="text-sm text-amber-800 dark:text-amber-200"></p>
-                                </div>
-                            </div>
-
-                            <x-input-label for="timezone" :value="__('messages.timezone')" />
-                            <select name="timezone" id="timezone" required data-searchable
-                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                <x-timezone-options :selected="$formTimezone" />
-                            </select>
-                            <x-input-error :messages="$errors->get('timezone')" class="mt-2" />
+                    <div class="mt-7 rounded-xl border border-gray-200 dark:border-white/10 text-sm">
+                        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-3.5 py-3">
+                            <span class="text-gray-600 dark:text-gray-400">{{ __('messages.email') }}</span>
+                            <bdi dir="ltr" class="font-medium text-gray-900 dark:text-gray-100 [overflow-wrap:anywhere]">{{ $user->email }}</bdi>
                         </div>
-                    </details>
+
+                        {{-- The timezone is shown collapsed but CAN be changed here, because it cannot
+                             be trusted: a Google sign-up used to be stored as America/New_York whatever
+                             the browser said, and every event on the schedule is anchored to this
+                             value. A closed <details> still submits its select, so this works without
+                             JavaScript; the script below only opens it when the device disagrees. --}}
+                        <details id="timezone-details" class="group border-t border-gray-200 dark:border-white/10" @if ($errors->has('timezone')) open @endif>
+                            <summary class="flex cursor-pointer list-none flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-3.5 py-3 rounded-b-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--brand-blue)] [&::-webkit-details-marker]:hidden">
+                                <span class="text-gray-600 dark:text-gray-400">{{ __('messages.time_zone') }}</span>
+                                <span class="flex items-baseline gap-2.5">
+                                    <span id="timezone-summary" class="font-medium text-gray-900 dark:text-gray-100" data-template="__TIMEZONE__">{{ $formTimezone }}</span>
+                                    <span class="font-medium text-[var(--brand-blue)] hover:underline">{{ __('messages.change_timezone') }}</span>
+                                </span>
+                            </summary>
+
+                            <div class="px-3.5 pb-3.5">
+                                <div id="timezone-mismatch" class="hidden mb-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3"
+                                    data-template="{{ __('messages.timezone_device_mismatch', ['timezone' => '__TIMEZONE__']) }}">
+                                    <div class="flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                        <p id="timezone-mismatch-text" class="text-sm text-amber-800 dark:text-amber-200"></p>
+                                    </div>
+                                </div>
+
+                                <x-input-label for="timezone" :value="__('messages.time_zone')" class="sr-only" />
+                                <select name="timezone" id="timezone" required data-searchable
+                                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <x-timezone-options :selected="$formTimezone" />
+                                </select>
+                                <x-input-error :messages="$errors->get('timezone')" class="mt-2" />
+                            </div>
+                        </details>
+
+                        {{-- Every schedule is public; said as a fact of the schedule, not a warning. --}}
+                        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-gray-200 dark:border-white/10 px-3.5 py-3"
+                             title="{{ __('messages.note_all_schedules_are_publicly_listed') }}">
+                            <span class="text-gray-600 dark:text-gray-400">{{ __('messages.visibility') }}</span>
+                            <span class="font-medium text-gray-900 dark:text-gray-100">{{ __('messages.public') }}</span>
+                        </div>
+                    </div>
 
                     {{-- Runs inline, before searchable-select.js (deferred) enhances the select, so
                          the combobox picks up the device timezone as its initial text. The device
@@ -209,35 +247,21 @@
                     })();
                     </script>
 
-                    <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                        {{ __('messages.note_all_schedules_are_publicly_listed') }}
-                    </p>
-
                     @if ($paidSchedules->isNotEmpty())
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400" data-plan-note v-pre>
+                    <p class="mt-3 text-sm text-gray-500 dark:text-gray-400" data-plan-note v-pre>
                         {{ $paidMovable
                             ? __('messages.new_schedule_plan_note', ['name' => $paidMovable->name])
                             : __('messages.new_schedule_plan_note_venue') }}
                     </p>
                     @endif
 
-                    <div class="mt-6 flex items-center justify-end gap-3">
-                        {{-- Always an exit. It used to be gated on being new, so a returning user
-                             on the bare shell had no nav, no back and no cancel: the browser button
-                             was the only way off this page. --}}
-                        @if ($isFirstRun)
-                        <a href="{{ route('getting-started') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
-                            {{ __('messages.choose_different_type') }}
-                        </a>
-                        @else
-                        <a href="{{ route('home') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline">
-                            {{ __('messages.cancel') }}
-                        </a>
+                    {{-- The way back is the link above the heading, so the card ends in one button. --}}
+                    <button type="submit" class="mt-7 inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2.5 rounded-xl bg-[var(--brand-button-bg)] px-6 text-base font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800">
+                        {{ $leadsToEventForm ? __('messages.setup_guide_save_continue') : __('messages.save') }}
+                        @if ($leadsToEventForm)
+                        <span aria-hidden="true" class="inline-block rtl:rotate-180">&rarr;</span>
                         @endif
-                        <x-brand-button type="submit">
-                            {{ $leadsToEventForm ? __('messages.setup_guide_save_continue') : __('messages.save') }}
-                        </x-brand-button>
-                    </div>
+                    </button>
                 </form>
             </div>
         </div>

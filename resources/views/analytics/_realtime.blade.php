@@ -285,9 +285,6 @@
                     {{-- It wraps: "Verbindung wird wiederhergestellt" does not fit beside the
                          heading in a 17rem column. --}}
                     <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-4">
-                        <div class="dashboard-icon p-2 rounded-xl bg-green-50 dark:bg-green-500/10" style="--icon-glow: rgba(34, 197, 94, 0.15)">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ \App\Utils\RealtimeIcons::PATHS['signal'] }}" /></svg>
-                        </div>
                         <h2 id="schedule-realtime-now" class="text-sm font-medium text-gray-500 dark:text-gray-400">@{{ msg.rightNow }}</h2>
                         <span v-if="status === 'live'" class="ms-auto inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">
                             <span class="w-2 h-2 shrink-0 rounded-full bg-green-500" aria-hidden="true"></span>@{{ msg.live }}

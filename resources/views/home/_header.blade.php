@@ -16,8 +16,9 @@
      script only handles Escape, so every item carrying tabindex="-1" would be unreachable by
      keyboard. As plain lists of links, Tab reaches every one. --}}
 @php
-    // <x-secondary-link>'s own classes, for the two controls that are buttons and cannot be one.
-    $secondaryAction = 'ap-secondary-btn inline-flex items-center justify-center gap-1.5 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800';
+    // The dashboard's quieter actions, as words (the 2026-11 redesign).
+    // The page's quieter actions as words beside Add event (the 2026-11 redesign), not boxes.
+    $secondaryAction = 'inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl font-semibold text-[0.9375rem] text-gray-900 dark:text-gray-100 hover:bg-[rgb(var(--ap-surface-hover))] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]';
     $menu = 'ap-dropdown pop-up-menu hidden absolute z-10 mt-2 w-64 max-w-[calc(100vw-2rem)] divide-y divide-gray-100 dark:divide-white/[0.06] rounded-md ring-1 ring-black/5 dark:ring-white/[0.06] focus:outline-none';
     $menuItem = 'group flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-black/10';
     $caret = '<svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>';
@@ -35,17 +36,17 @@
 @endphp
 
 <div class="flex flex-wrap justify-between items-center gap-3">
-    <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ __('messages.dashboard') }}</h1>
+    <h1 class="page-title">{{ __('messages.dashboard') }}</h1>
 
     @if ($hasActions)
     {{-- basis-full on a phone: the actions take their own row under the title, with Add event
          pushed to its end. From sm they sit beside the title, at the end of its row. --}}
     <div class="flex items-center gap-3 basis-full sm:basis-auto sm:ms-auto">
         @if ($page)
-            <x-secondary-link :href="$page" target="_blank" rel="noopener" class="gap-1.5 !hidden sm:!inline-flex">
+            <a href="{{ $page }}" target="_blank" rel="noopener" class="{{ $secondaryAction }} !hidden sm:!inline-flex">
                 {{ __('messages.dash_view_page') }}
                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
-            </x-secondary-link>
+            </a>
         @endif
 
         {{-- From sm: Customize (its word from xl, where there is room for it) and New schedule. --}}
@@ -78,10 +79,12 @@
             </div>
         @endif
 
-        {{-- A phone: View page and the two rare actions behind one button. --}}
+        {{-- A phone: View page and the two rare actions behind one button: a 44px square with an
+             edge of its own (the design review of 2026-11), since an unlabelled "..." in bare text
+             read as nothing to tap. --}}
         @if ($page || $organizer || $canNewSchedule)
             <div class="relative sm:hidden text-start">
-                <button type="button" class="popup-toggle {{ $secondaryAction }} !px-3" data-popup-target="dashboard-more-menu" aria-expanded="false" aria-label="{{ __('messages.dash_more') }}">
+                <button type="button" class="popup-toggle {{ $secondaryAction }} !p-0 w-11 h-11 border border-[rgb(var(--ap-border-strong))] bg-[rgb(var(--ap-surface))]" data-popup-target="dashboard-more-menu" aria-expanded="false" aria-label="{{ __('messages.dash_more') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" /></svg>
                 </button>
                 <div id="dashboard-more-menu" class="{{ $menu }}">
@@ -118,13 +121,13 @@
 
         {{-- Add event. One schedule: straight to its form. Several: choose which. --}}
         @if (count($targets) === 1)
-            <x-brand-link :href="$targets[0]['add']" class="gap-1.5 ms-auto sm:ms-0">
+            <x-brand-link :href="$targets[0]['add']" class="ap-head-btn gap-1.5 ms-auto sm:ms-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                 {{ __('messages.add_event') }}
             </x-brand-link>
         @elseif (count($targets) > 1)
             <div class="relative inline-block text-start ms-auto sm:ms-0">
-                <x-brand-button class="popup-toggle gap-1.5" data-popup-target="dashboard-add-event-menu" aria-expanded="false">
+                <x-brand-button class="ap-head-btn popup-toggle gap-1.5" data-popup-target="dashboard-add-event-menu" aria-expanded="false">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                     {{ __('messages.add_event') }}
                     <span class="text-white/80">{!! $caret !!}</span>

@@ -8,11 +8,13 @@
         $pct = fn ($part, $whole) => new \Illuminate\Support\HtmlString('<span dir="ltr">'.($whole > 0 ? round(($part / $whole) * 100, 1) : 0).'%</span>');
         $ltr = fn ($text) => new \Illuminate\Support\HtmlString('<span dir="ltr">'.e($text).'</span>');
         $sourceTotal = $directViews + $searchViews + $socialViews + $emailViews + $newsletterViews + $otherViews;
-        // The same colours the two charts draw each series in.
+        // The same colours the chart draws each device in: the brand blue, the same blue at half
+        // strength, and the grey ink (2026-11: green and purple, which meant nothing here). The
+        // script below draws the chart from the same three.
         $devices = [
             [__('messages.desktop'), $desktopViews, 'var(--brand-blue)'],
-            [__('messages.mobile'), $mobileViews, '#10B981'],
-            [__('messages.tablet'), $tabletViews, '#8B5CF6'],
+            [__('messages.mobile'), $mobileViews, 'color-mix(in srgb, var(--brand-blue) 50%, rgb(var(--ap-surface)))'],
+            [__('messages.tablet'), $tabletViews, 'rgb(var(--ap-ink-4))'],
         ];
         $sources = [
             [__('messages.direct'), $directViews],
@@ -173,6 +175,9 @@
             const textColor = apColor('--ap-ink-3', isDarkMode ? '#9CA3AF' : '#6B7280');
             const gridColor = apColor('--ap-border', isDarkMode ? '#2d2d30' : '#E5E7EB');
             const brandBlue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim();
+            // The brand blue at a strength, over the card: the token is a hex in every palette.
+            const blueAt = (alpha) => /^#[0-9a-f]{6}$/i.test(brandBlue) ? brandBlue + Math.round(alpha * 255).toString(16).padStart(2, '0') : brandBlue;
+            const quietInk = apColor('--ap-ink-4', isDarkMode ? '#6B7280' : '#9CA3AF');
 
             // Device Breakdown Chart
             const deviceCtx = document.getElementById('deviceChart').getContext('2d');
@@ -182,7 +187,7 @@
                     labels: [@json(__('messages.desktop')), @json(__('messages.mobile')), @json(__('messages.tablet'))],
                     datasets: [{
                         data: [{{ $desktopViews }}, {{ $mobileViews }}, {{ $tabletViews }}],
-                        backgroundColor: [brandBlue, '#10B981', '#8B5CF6'],
+                        backgroundColor: [brandBlue, blueAt(0.5), quietInk],
                         borderColor: apColor('--ap-surface', isDarkMode ? '#252526' : '#FFFFFF'),
                         borderWidth: 2
                     }]
@@ -208,7 +213,8 @@
                     datasets: [{
                         label: @json(__('messages.views')),
                         data: [{{ $directViews }}, {{ $searchViews }}, {{ $socialViews }}, {{ $emailViews }}, {{ $newsletterViews }}, {{ $otherViews }}],
-                        backgroundColor: ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#6B7280']
+                        // One colour: the source is named under each bar, so six colours meant nothing.
+                        backgroundColor: brandBlue
                     }]
                 },
                 options: {
@@ -251,7 +257,8 @@
                     datasets: [{
                         label: @json(__('messages.schedules')),
                         data: [{{ $stripeConnected }}, {{ $stripeOnboarded }}, {{ $stripeEvents }}],
-                        backgroundColor: ['#16A34A', '#22C55E', '#86EFAC']
+                        // Each step of the funnel a little lighter than the one before, in the one blue.
+                        backgroundColor: [brandBlue, blueAt(0.7), blueAt(0.45)]
                     }]
                 },
                 options: {

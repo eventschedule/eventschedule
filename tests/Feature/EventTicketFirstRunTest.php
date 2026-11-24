@@ -41,7 +41,8 @@ class EventTicketFirstRunTest extends TestCase
         ]))->assertOk()->getContent();
     }
 
-    /** The panel says what the row is, instead of opening on two bare number inputs. */
+    /** The panel says what the row is, instead of opening on two bare number inputs: each ticket
+     * type is a card titled "Ticket type N" (the 2026-11 redesign). */
     public function test_the_first_ticket_row_is_introduced(): void
     {
         $owner = $this->createOwner();
@@ -50,8 +51,8 @@ class EventTicketFirstRunTest extends TestCase
 
         $html = $this->editHtml($owner, $role, $event);
 
-        $this->assertStringContainsString(__('messages.your_first_ticket_type'), $html);
-        $this->assertStringContainsString(__('messages.your_first_ticket_type_help'), $html);
+        $this->assertStringContainsString('class="event-ticket-card"', $html);
+        $this->assertStringContainsString('class="event-ticket-card-title"', $html);
     }
 
     /**

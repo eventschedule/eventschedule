@@ -26,7 +26,25 @@
 
 {{-- v-pre: the band sits inside the event form's Vue mount. It prints no user text, and links
      only, so nothing in it is Vue's to compile. --}}
-<section class="import-options {{ $variant === 'band' ? 'mb-2 mt-2' : 'mb-6' }}" aria-labelledby="import-{{ $variant }}-title" v-pre>
+@if ($variant === 'band')
+{{-- On a first event, a line under the page's lead, not a row of tiles above the form: the form
+     is the main way in, and importing is the shortcut for somebody whose events are elsewhere. --}}
+<section class="import-options mb-2" aria-labelledby="import-band-title" v-pre>
+    <div class="flex flex-wrap items-baseline gap-x-5 gap-y-1.5 text-sm leading-snug">
+        <h3 id="import-band-title" class="font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.import_band_title') }}</h3>
+        @foreach ($tiles as $tile)
+            {{-- Each link says what it does ("Import from a flyer, screenshot or text", the
+                 2026-11 design), where the tiles below name only the source. --}}
+            <a href="{{ $tile['href'] }}" data-import-source="{{ $tile['key'] }}"
+               class="group inline-flex items-center gap-1 rounded font-medium text-[var(--brand-blue)] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">
+                {{ __('messages.import_band_'.$tile['key']) }}
+                <svg class="h-3.5 w-3.5 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2.25" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+            </a>
+        @endforeach
+    </div>
+</section>
+@else
+<section class="import-options mb-6" aria-labelledby="import-{{ $variant }}-title" v-pre>
     <h3 id="import-{{ $variant }}-title" class="mb-3 text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.import_band_title') }}</h3>
 
     <div class="import-options-grid grid grid-cols-1 gap-4 {{ $grid }}">
@@ -63,12 +81,5 @@
         @endforeach
     </div>
 
-    @if ($variant === 'band')
-    {{-- The other way in, which is the form below. --}}
-    <div class="mt-6 flex items-center gap-3">
-        <span class="h-px flex-1 bg-gray-200 dark:bg-gray-700" aria-hidden="true"></span>
-        <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.import_band_by_hand') }}</span>
-        <span class="h-px flex-1 bg-gray-200 dark:bg-gray-700" aria-hidden="true"></span>
-    </div>
-    @endif
 </section>
+@endif

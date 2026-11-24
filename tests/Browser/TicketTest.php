@@ -32,7 +32,7 @@ class TicketTest extends DuskTestCase
 
             // Purchase ticket
             $browser->visit('/talent/venue')
-                ->waitForText('Buy Tickets', 10)
+                ->waitForText('Buy tickets', 10)
                 ->pause(500);
             $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
             $browser->waitFor('#ticket-0', 10);
@@ -173,7 +173,7 @@ class TicketTest extends DuskTestCase
 
             // Visit the event page
             $browser->visit('/talent/venue')
-                ->waitForText('Buy Tickets', 10)
+                ->waitForText('Buy tickets', 10)
                 ->pause(500);
 
             // Dispatch show-event-form via JS (more reliable than pressing the button in headless Chrome)

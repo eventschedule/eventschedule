@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Mail\TicketPurchase;
+use App\Models\Event;
+use App\Models\Role;
+use App\Models\Sale;
 use App\Services\Wallet\GoogleWalletService;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -85,7 +88,7 @@ class GoogleWalletPassTest extends TestCase
         ]);
     }
 
-    /** @return array{0: \App\Models\Role, 1: \App\Models\Event, 2: \App\Models\Sale} */
+    /** @return array{0: Role, 1: Event, 2: Sale} */
     private function paidTicket(array $eventAttrs = [], array $saleAttrs = [])
     {
         $owner = $this->createOwner();
@@ -615,7 +618,7 @@ class GoogleWalletPassTest extends TestCase
         $rendered = (new TicketPurchase($sale, $event, $role))->render();
 
         $this->assertStringNotContainsString('ticket/wallet/google', $rendered);
-        $this->assertStringContainsString('View Your Tickets', $rendered);
+        $this->assertStringContainsString('View your tickets', $rendered);
     }
 
     public function test_the_order_page_offers_a_condensed_badge_per_live_leg(): void

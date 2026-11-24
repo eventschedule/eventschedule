@@ -98,6 +98,13 @@
         .realtime-top[data-corner] > .realtime-corner { grid-column: 3; grid-row: 1; }
         .realtime-top[data-corner] > .realtime-panel-active { grid-column: 3; grid-row: 2; }
     }
+    /* Tracking off: Visitors and Sign-ups are not drawn, so the corner two share one row the
+       full width rather than standing beside an empty block where those two would be. */
+    @media (min-width: 768px) {
+        .realtime-top[data-corner].is-off { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .realtime-top[data-corner].is-off > .realtime-corner { grid-column: 1; grid-row: 1; }
+        .realtime-top[data-corner].is-off > .realtime-panel-active { grid-column: 2; grid-row: 1; }
+    }
     /* Beside Revenue, the Visitors panel stands as tall as Revenue's figures and MRR line. It
        spends that height on its own chart: the number with the consent split beside it, and page
        views per minute under both, the full width, taking what is left. In one row the chart was a
@@ -1157,17 +1164,19 @@
                         return;
                     }
                     var colors = chartColors(), last = h.values.length - 1;
-                    // The probed green is rgb(), the same colour at an eighth for the fill under the line.
-                    var rgb = /^rgba?\(([^,]+),([^,]+),([^,)]+)/.exec((colors.green || '').replace(/\s/g, ''));
-                    var fill = rgb ? 'rgba(' + rgb[1] + ',' + rgb[2] + ',' + rgb[3] + ',0.12)' : 'transparent';
+                    // The main series is the brand blue (2026-11: it was green, which on this page
+                    // means live), with the same colour at an eighth for the fill under the line. The
+                    // token is a hex in every palette; an rgb() is taken too.
+                    var hex = /^#([0-9a-f]{6})$/i.exec(colors.blue || ''), rgb = /^rgba?\(([^,]+),([^,]+),([^,)]+)/.exec((colors.blue || '').replace(/\s/g, ''));
+                    var fill = hex ? '#' + hex[1] + '1f' : (rgb ? 'rgba(' + rgb[1] + ',' + rgb[2] + ',' + rgb[3] + ',0.12)' : 'transparent');
                     // The axis in the platform's currency, as the server prints a whole amount.
                     var money = function (value) { return (h.axis || '7').replace('7', numberFormat.format(Math.round(value))); };
                     this.mrrChart = new Chart(canvas, {
                         type: 'line',
                         data: {
                             labels: h.labels,
-                            datasets: [{ label: 'MRR', data: h.values, borderColor: colors.green, backgroundColor: fill, fill: true, borderWidth: 2, tension: 0.3,
-                                pointRadius: h.values.map(function (value, index) { return index === last ? 3 : 0; }), pointBackgroundColor: colors.green, pointHoverRadius: 4 }],
+                            datasets: [{ label: 'MRR', data: h.values, borderColor: colors.blue, backgroundColor: fill, fill: true, borderWidth: 2, tension: 0.3,
+                                pointRadius: h.values.map(function (value, index) { return index === last ? 3 : 0; }), pointBackgroundColor: colors.blue, pointHoverRadius: 4 }],
                         },
                         options: {
                             responsive: true,

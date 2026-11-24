@@ -1,7 +1,9 @@
 <x-app-admin-layout>
 
     {{-- One small form that hangs from the schedule's Team tab: the way back names the schedule,
-         and the form ends with Cancel and then the button that goes on. --}}
+         and the card ends with Cancel and then the button that goes on (a short form keeps them
+         inside its card; a long one has the save bar). Two fields a row from a tablet up, as on
+         Settings. --}}
     @php $teamUrl = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']); @endphp
 
     <div class="page-shell page-col is-narrow">
@@ -12,23 +14,23 @@
             @method('post')
 
             <div class="ap-card rounded-xl page-card">
-                <div class="page-form-fields">
+                <div class="page-form-fields sm:grid-cols-2">
                     <div>
-                        <x-input-label for="name" :value="__('messages.name') . ' *'" />
+                        <x-input-label for="name" :value="__('messages.name')" />
                         <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                             :value="old('name')" required autofocus autocomplete="name" />
                         <x-input-error class="mt-2" :messages="$errors->get('name')" />
                     </div>
 
                     <div>
-                        <x-input-label for="email" :value="__('messages.email') . ' *'" />
+                        <x-input-label for="email" :value="__('messages.email')" />
                         <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                             :value="old('email')" required autocomplete="username" />
                         <x-input-error class="mt-2" :messages="$errors->get('email')" />
                     </div>
 
                     <div>
-                        <x-input-label for="phone" :value="__('messages.phone_number')" />
+                        <x-input-label for="phone" :value="__('messages.phone_number')" optional />
                         <x-phone-input name="phone" :value="old('phone')" :country="$role->country_code ?? 'us'" />
                         <x-input-error class="mt-2" :messages="$errors->get('phone')" />
                     </div>
@@ -41,11 +43,11 @@
                         </select>
                     </div>
                 </div>
-            </div>
 
-            <div class="page-form-actions">
-                <x-secondary-link :href="$teamUrl">{{ __('messages.cancel') }}</x-secondary-link>
-                <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                <div class="page-form-actions">
+                    <x-secondary-link :href="$teamUrl">{{ __('messages.cancel') }}</x-secondary-link>
+                    <x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button>
+                </div>
             </div>
         </form>
     </div>

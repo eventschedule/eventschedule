@@ -74,7 +74,7 @@ class GuestMailLinkPagesTest extends TestCase
 
         $this->assertStringContainsString('<title>Event Schedule</title>', $html);
         $this->assertStringNotContainsString('data-auth-schedule', $html);
-        $this->assertStringContainsString('<a href="'.e(marketing_url()).'">', $html);
+        $this->assertStringContainsString('<a href="'.e(marketing_url()).'"', $html);
 
         // A link that has expired names no schedule, and stands under the platform too. The
         // page is rendered: the mark lives in the layout, so the view's own source never held

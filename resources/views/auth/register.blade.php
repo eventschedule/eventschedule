@@ -1158,6 +1158,23 @@
                 });
             }
 
+            // Continue looks ready once it is: an address and the tick. Only a class (see
+            // .is-waiting): the button stays pressable, and pressing it early still explains
+            // what is missing. Autofill fires `change` without `input` in some browsers.
+            var readinessBtn = document.getElementById('send-code-btn');
+            var readinessEmail = document.getElementById('email');
+            if (readinessBtn && readinessEmail && termsBox) {
+                var markReadiness = function () {
+                    var address = readinessEmail.value.trim();
+                    var ready = termsBox.checked && address.indexOf('@') > 0 && readinessEmail.checkValidity();
+                    readinessBtn.classList.toggle('is-waiting', ! ready);
+                };
+                readinessEmail.addEventListener('input', markReadiness);
+                readinessEmail.addEventListener('change', markReadiness);
+                termsBox.addEventListener('change', markReadiness);
+                markReadiness();
+            }
+
             var changeEmailBtn = document.getElementById('change-email-btn');
             if (changeEmailBtn) {
                 changeEmailBtn.addEventListener('click', function(e) {
@@ -1753,6 +1770,44 @@
             .auth-card {
                 overflow: clip;
             }
+            /* The hosted sign-up's card (.auth-card-roomy, set by the layout when the page has a top
+               bar): taller, rounder fields and labels that read as headings, as in the 2026-11
+               design. Scoped to that card, so the selfhost install form keeps the plain look. */
+            .auth-card-roomy :is(input[type="email"], input[type="text"]:not(.code-input), input[type="password"]) {
+                min-height: 3.25rem;
+                border-radius: 0.75rem;
+                font-size: 1rem;
+                padding-inline: 0.875rem;
+            }
+            .auth-card-roomy label:is([for="email"], [for="name"], [for="password"], [for="verification_code"]) {
+                font-weight: 600;
+                color: rgb(var(--ap-ink));
+            }
+            /* 18px boxes with the field border, as in the design: the 16px ones in a hairline
+               grey were the palest thing on the card. */
+            .auth-card-roomy :is(#terms, #no_product_updates) {
+                width: 1.125rem;
+                height: 1.125rem;
+                border-color: rgb(var(--ap-border-strong));
+            }
+            /* Room enough to tap on a phone, as each box is a row of its own. */
+            .auth-card-roomy :is(#terms-field > .relative, #product-updates-field) {
+                min-height: 2.75rem;
+                align-items: center;
+            }
+            .auth-card-roomy #product-updates-field {
+                margin-top: 0.25rem;
+            }
+            .auth-card-roomy .code-slot {
+                height: 3.75rem;
+            }
+            /* Continue until there is an address and a tick: quieter, but still pressable, so a
+               press can say what is missing (requireTerms(), the browser's email check). */
+            #send-code-btn.is-waiting:not(:disabled) {
+                opacity: 0.5;
+                box-shadow: none;
+            }
+
             /* Step two's fields settle in rather than snapping into place. */
             @keyframes signup-step-enter {
                 from { opacity: 0; transform: translateY(6px); }
@@ -1769,6 +1824,20 @@
 
     <x-slot name="abovePage">
     </x-slot>
+
+    @if (config('app.hosted'))
+    {{-- In the layout's top bar, opposite the logo. The whole link used to be the question, so
+         the destination was never stated: the question stays plain text and only the answer is
+         a link. The link also carries the address, so /login can prefill it. Hidden in step two
+         (showCodeSentState()): a code only goes to an address that has no account. --}}
+    <x-slot name="topBar">
+        <p class="text-sm text-gray-600 dark:text-gray-400" id="already-registered">
+            {{ __('messages.already_registered') }}
+            <a id="already-registered-link" class="ms-1 font-semibold text-[var(--brand-blue)] hover:underline rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--brand-blue)] dark:focus-visible:ring-offset-gray-900"
+                href="{{ route('login') }}">{{ __('messages.log_in') }}</a>
+        </p>
+    </x-slot>
+    @endif
 
     @php
         // The hosted sign-up is a two-step flow: the visitor gives an email, we mail a code, and
@@ -1799,30 +1868,25 @@
          written into a string is wrong on any install that changed its currency. "No credit card"
          is currency-free, which is why the claim is phrased that way. --}}
     @if (config('app.hosted'))
-    <div class="mb-8 text-center">
-        <h1 id="signup-heading" class="text-xl font-bold text-gray-900 dark:text-gray-100">
+    <div class="mb-7">
+        <h1 id="signup-heading" class="text-[1.875rem] font-bold leading-tight tracking-tight text-gray-900 dark:text-gray-100">
             {{ __('messages.signup_heading') }}
         </h1>
-        <p id="signup-subheading" class="mt-1 text-sm text-gray-500 dark:text-gray-400 text-balance">
+        <p id="signup-subheading" class="mt-2 text-[0.9375rem] leading-normal text-gray-600 dark:text-gray-400">
             {{ __('messages.signup_subheading') }}
         </p>
 
-        {{-- Step two's subheading: where the code went, and a way to fix the address. The
-             address gets a line of its own, so a long one never breaks the sentence at the card
-             edge, and the fix is a small pill rather than a bare link, so it reads as the one
-             secondary action here. Outside the form, which is fine: the button is type="button".
+        {{-- Step two's subheading: where the code went, and a way to fix the address, in one
+             sentence. The address may break anywhere, so a long one wraps at the card's edge
+             instead of pushing past it. The fix is a link-styled button: outside the form, which
+             is fine, it is type="button". Its spoken name keeps the full "use a different email".
              The spam and expiry help is further down, under the code field, and only once it is
              needed (see showCodeHelp()). --}}
-        <div id="code-sent-panel" class="mt-2" style="display: none;">
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.code_sent_to_prefix') }}</p>
-            <p class="mt-0.5 text-sm font-semibold text-gray-900 dark:text-gray-100 break-words">
-                <bdi dir="ltr" id="code-sent-address"></bdi>
-            </p>
-            <button type="button" id="change-email-btn" class="mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800 transition-all duration-200">
-                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
-                {{ __('messages.use_another_email') }}
-            </button>
-        </div>
+        <p id="code-sent-panel" class="mt-2 text-[0.9375rem] leading-normal text-gray-600 dark:text-gray-400" style="display: none;">
+            {{ __('messages.code_sent_to_prefix') }}
+            <span class="font-semibold text-gray-900 dark:text-gray-100 [overflow-wrap:anywhere]"><bdi dir="ltr" id="code-sent-address"></bdi></span>.
+            <button type="button" id="change-email-btn" class="font-medium text-[var(--brand-blue)] hover:underline rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-blue)]">{{ __('messages.change') }}<span class="sr-only">: {{ __('messages.use_another_email') }}</span></button>
+        </p>
     </div>
     @endif
 
@@ -1990,7 +2054,7 @@
                 {{-- Says, before the button is pressed, what pressing it does and why: without it
                      the send button read as an odd alternative to signing up rather than the
                      first half of it. Inside #email-entry, so it folds away with the address. --}}
-                <p id="signup-code-hint" class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.signup_code_hint') }}</p>
+                <p id="signup-code-hint" class="mt-2 text-[0.8125rem] text-gray-600 dark:text-gray-400">{{ __('messages.signup_code_hint') }}</p>
                 {{-- "Did you mean jane@gmail.com?" for a likely typo of a big provider, filled in by
                      updateEmailSuggestion(). A code sent to gmial.com is a code nobody receives. --}}
                 <p id="email-suggestion" class="mt-2 text-sm text-gray-700 dark:text-gray-300" style="display: none;"></p>
@@ -2002,9 +2066,8 @@
             {{-- First in step two: the code is what the visitor has just come back from their inbox
                  with, so it comes before Name and Password, not after them. --}}
             <div class="mt-4" id="verification-code-field" style="display: none;">
-                {{-- Screen-reader only: the line under the heading already says "We emailed a 6-digit code",
-                     and the boxes say the rest. It still names the input. --}}
-                <x-input-label for="verification_code" :value="__('messages.verification_code')" class="sr-only" />
+                {{-- Shown, so the boxes are named on screen as well as to a screen reader. --}}
+                <x-input-label for="verification_code" :value="__('messages.signup_code_label')" />
                 {{-- NOT required in the markup: this wrapper renders display:none until a code has
                      actually been sent, and a browser refuses to focus a required control it cannot
                      show - so the form silently refuses to submit and reports nothing, which is the
@@ -2027,15 +2090,12 @@
                      (1Password, LastPass, Bitwarden, Dashlane, Proton Pass) keep password managers
                      from painting their badge over the sixth box; see .code-input for the ones
                      that do not listen. --}}
-                <div id="code-boxes" class="relative mt-1" dir="ltr">
+                <div id="code-boxes" class="relative mt-2" dir="ltr">
                     <div class="code-slots" aria-hidden="true">
                         {{-- $codeSlot, never $slot: loops share the view's scope, and $slot is Blade's
                              name for component content. --}}
                         @for ($codeSlot = 0; $codeSlot < 6; $codeSlot++)
                             <div data-code-slot class="code-slot bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700"><span data-digit></span><span data-caret></span></div>
-                            @if ($codeSlot === 2)
-                                <span class="code-slots-gap"></span>
-                            @endif
                         @endfor
                     </div>
                     <input id="verification_code" name="verification_code" type="text" class="code-input"
@@ -2117,14 +2177,14 @@
              requireTerms(); the server still validates `terms => accepted` on this path. Both
              documents are replaceable by the operator, so policy_url() resolves them, never
              marketing_url(). --}}
-        <div id="terms-field" class="mt-4">
+        <div id="terms-field" class="mt-7">
             <div class="relative flex items-start">
                 <div class="flex h-6 items-center">
                     <input id="terms" name="terms" type="checkbox" value="1" {{ old('terms') ? 'checked' : '' }} required aria-describedby="terms-error"
                         class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
                 </div>
                 <div class="ms-3 text-sm leading-6">
-                    <label for="terms" class="text-gray-700 dark:text-gray-300">
+                    <label for="terms" class="text-gray-900 dark:text-gray-200">
                         {!! str_replace([':terms', ':privacy'], [
                             '<a href="' . policy_url('terms') . '" target="_blank" class="text-[var(--brand-blue)] hover:underline">' . __('messages.terms_of_service') . '</a>',
                             '<a href="' . policy_url('privacy') . '" target="_blank" class="text-[var(--brand-blue)] hover:underline">' . __('messages.privacy_policy') . '</a>'
@@ -2152,7 +2212,7 @@
                 <input id="no_product_updates" name="no_product_updates" type="checkbox" value="1" {{ old('no_product_updates') ? 'checked' : '' }}
                     class="h-4 w-4 rounded border-gray-300 dark:border-gray-700 dark:bg-gray-900 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
             </div>
-            <label for="no_product_updates" class="ms-3 text-sm leading-6 text-gray-700 dark:text-gray-300">{{ __('messages.no_product_updates') }}</label>
+            <label for="no_product_updates" class="ms-3 text-sm leading-6 text-gray-600 dark:text-gray-300">{{ __('messages.no_product_updates') }}</label>
         </div>
         <script {!! nonce_attr() !!}>
             (function () {
@@ -2219,9 +2279,9 @@
         {{-- Below the Turnstile widget rather than beside the email field, so the address gets
              the full width and the step reads top to bottom: address, check, go. The id is what
              the script block drives (busy state, cooldown, hidden in step two), so keep it. --}}
-        <button type="button" id="send-code-btn" class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] border border-transparent rounded-md font-semibold text-base text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
+        <button type="button" id="send-code-btn" class="mt-7 w-full min-h-[3.25rem] inline-flex items-center justify-center gap-2.5 px-4 py-3 bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] border border-transparent rounded-xl font-semibold text-base text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
             {{ __('messages.signup_continue') }}
-            <svg class="w-5 h-5 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+            <span aria-hidden="true" class="inline-block rtl:rotate-180">&rarr;</span>
         </button>
         @endif
 
@@ -2314,8 +2374,9 @@
                 <div id="signup-form-error" role="alert" class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-3" style="display: none;">
                     <p id="signup-form-error-text" class="text-sm text-red-700 dark:text-red-300"></p>
                 </div>
-                <button type="submit" id="create-account-btn" disabled class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] border border-transparent rounded-md font-semibold text-base text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
+                <button type="submit" id="create-account-btn" disabled class="w-full min-h-[3.25rem] inline-flex items-center justify-center gap-2.5 px-4 py-3 bg-gradient-to-r from-[var(--brand-button-bg-light)] to-[var(--brand-button-bg)] hover:from-[var(--brand-button-bg)] hover:to-[var(--brand-button-bg-hover)] border border-transparent rounded-xl font-semibold text-base text-white shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
                     {{ __('messages.create_account') }}
+                    <span aria-hidden="true" class="inline-block rtl:rotate-180">&rarr;</span>
                 </button>
                 @else
                 <x-primary-button class="w-full sm:w-auto justify-center">
@@ -2325,18 +2386,6 @@
             </div>
         </div>
 
-        @if (config('app.hosted'))
-        {{-- The whole link used to be the question, so the destination was never stated. Two
-             existing keys rather than a new sentence: the question stays plain text and only the
-             answer is a link. Also carries the address, so /login can prefill it. --}}
-        <div class="mt-5 text-sm text-center text-gray-600 dark:text-gray-400" id="already-registered">
-            {{ __('messages.already_registered') }}
-            <a id="already-registered-link" class="hover:underline text-[var(--brand-blue)] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800"
-                href="{{ route('login') }}">
-                {{ __('messages.log_in') }}
-            </a>
-        </div>
-        @endif
 
         @if (selfhost_needs_setup())
         </div>

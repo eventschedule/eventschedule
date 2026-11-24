@@ -309,7 +309,7 @@ class ApDoorPagesTest extends TestCase
         $this->assertSame(1, substr_count($checkin, 'placeholder="'.e(__('messages.checkin_search_placeholder')).'"'));
         $this->assertSame(0, substr_count($checkin, ':placeholder='));
         $this->assertGreaterThanOrEqual(1, substr_count($checkin, 'href="'.e(route('ticket.scan')).'"'), 'the scanner is one press away');
-        $this->assertSame(1, substr_count($checkin, 'class="page-stats"'), 'the figures are one strip');
+        $this->assertSame(1, substr_count($checkin, 'class="ap-card rounded-xl ap-hero door-hero"'), 'the figures are one card');
         $this->assertSame(1, substr_count($checkin, 'id="event-selector-dropdown"'));
 
         $scan = $this->page($owner, route('ticket.scan'));

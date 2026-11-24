@@ -12,6 +12,8 @@
     $viewsInRange = $periodComparison ? $periodComparison['current_period'] : (int) array_sum($viewsChart['views']);
     $previousViews = $periodComparison['previous_period'] ?? 0;
     $change = $periodComparison && $previousViews > 0 ? $periodComparison['percentage_change'] : null;
+    // The window the figure counts, as the date picker names it ("last 30 days").
+    $rangeLabel = \Illuminate\Support\Facades\Lang::has('messages.'.$range) ? __('messages.'.$range) : null;
 
     // The busiest day (week, month) of the range, said as a date: the number a person asks next.
     $busiest = null;
@@ -35,8 +37,10 @@
 
     // The chart's series, in the order of the legend. Colours are the chart's own and never the
     // text's: the legend and the tooltip write the names in ink beside a short line of colour.
-    $series = [['id' => 'views', 'label' => __('messages.realtime_views'), 'values' => $viewsChart['views'], 'tone' => 'views']];
-    if ($hasPrevious && array_sum($viewsChart['previous']) > 0) {
+    // With the window before laid under it the key reads "This period" / "Previous period".
+    $withPrevious = $hasPrevious && array_sum($viewsChart['previous']) > 0;
+    $series = [['id' => 'views', 'label' => $withPrevious ? __('messages.realtime_so_far_this_period') : __('messages.realtime_views'), 'values' => $viewsChart['views'], 'tone' => 'views']];
+    if ($withPrevious) {
         $series[] = ['id' => 'previous', 'label' => __('messages.views_previous_period'), 'values' => $viewsChart['previous'], 'tone' => 'previous'];
     }
     // Views that came from a boost or a newsletter are counted for the schedule, never for one
@@ -106,13 +110,8 @@
     ]);
 
     $deviceNames = ['mobile' => __('messages.mobile'), 'desktop' => __('messages.desktop'), 'tablet' => __('messages.tablet'), 'unknown' => __('messages.other')];
-    $deviceIcons = [
-        'mobile' => 'M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3',
-        'desktop' => 'M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25',
-        'tablet' => 'M10.5 19.5h3m-6.75 2.25h10.5a2.25 2.25 0 002.25-2.25v-15a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 4.5v15a2.25 2.25 0 002.25 2.25z',
-        'unknown' => 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z',
-    ];
-    // Largest first, but each device keeps its own colour whatever its place.
+    // Largest first. The same blue bars as every other card (the design review of 2026-11): the
+    // bar split in blue, green and amber was the one chart in another palette.
     $devices = collect($deviceBreakdown)->sortDesc();
     $deviceTotal = max(1, $devices->sum());
 
@@ -121,11 +120,11 @@
     // The cards under the chart, in the order a person reads them. Each is there only when it
     // has something to say; the grid then fills every row (see .an-grid in _styles).
     $cards = array_values(array_filter([
-        ($topEvents->isNotEmpty() && ! $selectedEventId) ? 'events' : null,
         $sourcePanels ? 'sources' : null,
-        $locationBreakdown->isNotEmpty() ? 'countries' : null,
-        $devices->isNotEmpty() ? 'devices' : null,
         ($viewsBySchedule->count() > 1 && ! $selectedEventId) ? 'schedules' : null,
+        $devices->isNotEmpty() ? 'devices' : null,
+        ($topEvents->isNotEmpty() && ! $selectedEventId) ? 'events' : null,
+        $locationBreakdown->isNotEmpty() ? 'countries' : null,
         $socialClickStats->isNotEmpty() ? 'social' : null,
         $topSchedulesAppearedOn->isNotEmpty() ? 'appeared' : null,
         $topAppearances->isNotEmpty() ? 'appearances' : null,
@@ -138,24 +137,17 @@
 @endphp
 
 {{-- The figures and the chart are one card: the number, what it is against, and the shape of it. --}}
-<section class="ap-card rounded-xl an-hero" aria-labelledby="an-views-title">
+<section class="ap-card rounded-xl ap-hero an-hero" aria-labelledby="an-views-title">
     <div class="an-hero-head">
         <div class="an-figs">
             <div class="an-fig is-lead">
-                <p class="an-fig-label" id="an-views-title">
-                    <span class="dashboard-icon p-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/10" style="--icon-glow: rgba(59, 130, 246, 0.15)">
-                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    </span>
-                    {{ __('messages.realtime_views') }}
-                </p>
+                {{-- "Page views · last 30 days": the figure says which window it counts. --}}
+                <p class="an-fig-label" id="an-views-title">{{ __('messages.realtime_views') }}@if ($rangeLabel) · {{ $rangeLabel }}@endif</p>
                 <p class="an-fig-value">{{ number_format($viewsInRange) }}</p>
                 @if ($periodComparison)
                 <p class="an-fig-sub">
                     @if (! is_null($change))
-                    <span class="an-delta {{ $change > 0 ? 'is-up' : ($change < 0 ? 'is-down' : 'is-flat') }}">
-                        @if ($change != 0)<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.25" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $change > 0 ? 'M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18' : 'M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3' }}" /></svg>@endif
-                        <bdi dir="ltr">{{ $change > 0 ? '+' : '' }}{{ $change }}%</bdi>
-                    </span>
+                    <span class="an-delta is-plain {{ $change > 0 ? 'is-up' : ($change < 0 ? 'is-down' : 'is-flat') }}"><bdi dir="ltr">{{ $change > 0 ? '+' : '' }}{{ $change }}%</bdi></span>
                     @endif
                     @if ($previousViews > 0)
                     <span>{{ __('messages.'.$periodComparison['comparison_label']) }} <span class="an-num">({{ number_format($previousViews) }})</span></span>
@@ -165,13 +157,6 @@
                 </p>
                 @endif
             </div>
-            @if ($range !== 'all_time')
-            <div class="an-fig">
-                <p class="an-fig-label">{{ __('messages.total_views') }}</p>
-                <p class="an-fig-value">{{ number_format($totalViews) }}</p>
-                <p class="an-fig-sub">{{ __('messages.all_time') }}</p>
-            </div>
-            @endif
             @if ($busiest)
             <div class="an-fig">
                 <p class="an-fig-label">{{ $busiest['label'] }}</p>
@@ -179,6 +164,13 @@
                      the server's is the fallback. --}}
                 <p class="an-fig-value is-text"><span data-an-date="{{ $busiest['key'] }}" data-an-period="{{ $period }}">{{ $busiest['when'] }}</span></p>
                 <p class="an-fig-sub"><span><span class="an-num">{{ number_format($busiest['views']) }}</span> {{ __('messages.page_views') }}</span></p>
+            </div>
+            @endif
+            @if ($range !== 'all_time')
+            <div class="an-fig">
+                <p class="an-fig-label">{{ __('messages.all_time') }}</p>
+                <p class="an-fig-value">{{ number_format($totalViews) }}</p>
+                <p class="an-fig-sub">{{ __('messages.an_total_views_caption') }}</p>
             </div>
             @endif
             @if ($appearanceViews > 0 && ! $selectedEventId)
@@ -314,24 +306,14 @@
         </x-page-card>
         @elseif ($card === 'devices')
         <x-page-card :title="__('messages.realtime_owner_devices')" class="an-card {{ $spanOf($i) }}">
-            <div class="an-split" role="img" aria-label="{{ $devices->map(fn ($n, $d) => ($deviceNames[$d] ?? $d).' '.round($n / $deviceTotal * 100).'%')->implode(', ') }}">
-                @foreach ($devices as $device => $n)
-                <span class="is-{{ $device }}" style="flex-grow: {{ $n }}"></span>
-                @endforeach
-            </div>
-            <ul class="an-device-list" role="list">
-                @foreach ($devices as $device => $n)
-                <li>
-                    <span class="an-swatch is-{{ $device }}" aria-hidden="true"></span>
-                    <span class="an-device-name">{{ $deviceNames[$device] ?? $device }}</span>
-                    <span class="an-device-share">{{ round($n / $deviceTotal * 100) }}%</span>
-                    <span class="an-device-count">{{ number_format($n) }}</span>
-                </li>
-                @endforeach
-            </ul>
+            @include('analytics._list', [
+                'listRows' => $devices->map(fn ($n, $device) => ['label' => $deviceNames[$device] ?? $device, 'value' => $n])->values()->all(),
+                'listShare' => true,
+                'listBars' => true,
+            ])
         </x-page-card>
         @elseif ($card === 'schedules')
-        <x-page-card :title="__('messages.schedule_views')" class="an-card {{ $spanOf($i) }}">
+        <x-page-card :title="__('messages.schedules')" class="an-card {{ $spanOf($i) }}">
             <x-slot:aside><span class="an-card-unit">{{ __('messages.realtime_views') }}</span></x-slot:aside>
             @include('analytics._list', [
                 'listRows' => $viewsBySchedule->filter(fn ($r) => $r['role'])->sortByDesc('view_count')->map(fn ($r) => [
