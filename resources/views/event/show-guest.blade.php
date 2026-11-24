@@ -2744,7 +2744,7 @@
              guest_page): it used to open the marketing homepage, and nothing could say whether
              the card ever brought anybody. --}}
         <a href="{{ app_url('/sign_up?ref=gp') }}" target="_blank" rel="noopener noreferrer" class="gk-create-cta">
-          <span>{{ __('messages.create_schedule') }}</span>
+          <span>{{ __('messages.create_schedule') }}<span class="sr-only"> ({{ __('messages.opens_in_new_tab') }})</span></span>
           <svg class="gk-create-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
       </div>

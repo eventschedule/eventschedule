@@ -327,7 +327,7 @@ return [
     'create_schedule' => 'Criar Agenda',
     'create_your_own_event_schedule' => 'Crie sua própria agenda de eventos!',
     'create_own_title' => 'Organiza um evento seu?',
-    'create_own_line' => 'Coloque as suas datas numa página como esta e partilhe-a.',
+    'create_own_line' => 'Coloque suas datas em uma página como esta e compartilhe.',
     'events' => 'Eventos',
     'manage_account' => 'Gerenciar conta',
     'venue_details' => 'Detalhes do local',

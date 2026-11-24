@@ -2926,5 +2926,6 @@ return array_replace(require __DIR__.'/../pt/messages.php', function_exists('ope
     'vm_claim_tap_area' => 'Toque na área onde monta a banca.',
     'log_in_first' => 'Inicie sessão primeiro na página de início de sessão e depois volte a este formulário.',
     'vm_vendors_can_join_lead' => 'Os expositores abrem o link, tocam no seu lugar e dizem o que vendem. Nada aparece no mapa até aprovar.',
+    'create_own_line' => 'Coloque as suas datas numa página como esta e partilhe-a.',
     'social_link_handle_required' => 'Adicione o seu nome de utilizador depois da barra ou cole a ligação completa',
 ]);

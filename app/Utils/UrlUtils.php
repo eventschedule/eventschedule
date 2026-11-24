@@ -286,6 +286,16 @@ class UrlUtils
     /** The share codes that are a post, a reel, a video or a group rather than a page. */
     private const FACEBOOK_SHARE_KINDS = ['p', 'r', 'v', 'g'];
 
+    /**
+     * The tabs under an account's name, copied from the address bar while on one: they name the
+     * account (unlike a post under it), and are saved as the account itself.
+     */
+    private const ACCOUNT_TABS = [
+        'instagram' => ['reels', 'tagged', 'guides', 'saved', 'channel', 'followers', 'following'],
+        'facebook' => ['about', 'events', 'photos', 'videos', 'reviews', 'community', 'followers', 'following', 'friends', 'reels', 'mentions', 'about_contact_and_basic_info'],
+        'twitter' => ['media', 'likes', 'with_replies', 'followers', 'following', 'highlights', 'articles', 'verified_followers'],
+    ];
+
     /** LinkedIn's kinds of page: the account is the segment after one of these. */
     private const LINKEDIN_PAGE_KINDS = ['company', 'in', 'school', 'showcase'];
 
@@ -347,14 +357,15 @@ class UrlUtils
                 && ! in_array(strtolower($segments[1]), self::LINKEDIN_PAGE_KINDS, true) ? $platform : null;
         }
 
-        // Facebook's older page and profile addresses carry a name and a number.
-        if ($platform === 'facebook' && in_array($first, ['pages', 'people'], true)) {
+        // Facebook's page and profile addresses that carry a name and a number: today's
+        // facebook.com/p/Name-100063712345678 and the older pages/ and people/.
+        if ($platform === 'facebook' && in_array($first, ['p', 'pages', 'people'], true)) {
             return isset($segments[1]) ? $platform : null;
         }
 
-        // Anything under the name is one of its posts, reels or tabs, not the account
-        // (x.com/band/status/123, instagram.com/band/reels/, a .php page deeper down).
-        return count($segments) === 1 ? $platform : null;
+        // The name, or the name and one of its tabs (instagram.com/band/reels/). Anything else
+        // under the name is one of its posts (x.com/band/status/123, facebook.com/band/posts/...).
+        return count($segments) === 1 || self::isAccountTab($platform, $segments) ? $platform : null;
     }
 
     /**
@@ -382,12 +393,30 @@ class UrlUtils
         $path = rtrim($parts['path'] ?? '', '/');
         $query = '';
 
+        // A tab copied from the address bar is saved as the account it is on: instagram.com/band
+        // for .../band/reels, linkedin.com/company/acme for .../company/acme/about.
+        $segments = array_values(array_filter(explode('/', $path), fn ($segment) => $segment !== ''));
+        $platform = self::detectPlatform($url);
+
+        if (self::isAccountTab($platform, $segments)) {
+            $path = '/'.$segments[0];
+        } elseif ($platform === 'linkedin' && count($segments) > 2) {
+            $path = '/'.$segments[0].'/'.$segments[1];
+        }
+
         if (strtolower(basename($path)) === 'profile.php') {
             parse_str($parts['query'] ?? '', $params);
             $query = is_string($params['id'] ?? null) ? '?id='.rawurlencode($params['id']) : '';
         }
 
         return ($parts['scheme'] ?? 'https').'://'.$parts['host'].$path.$query;
+    }
+
+    /** Whether $segments is an account's name and one of its tabs (ACCOUNT_TABS). */
+    private static function isAccountTab(string $platform, array $segments): bool
+    {
+        return count($segments) === 2
+            && in_array(strtolower($segments[1]), self::ACCOUNT_TABS[$platform] ?? [], true);
     }
 
     /** Whether $url's host is one an account on $platform lives at (ACCOUNT_HOST_PREFIXES). */

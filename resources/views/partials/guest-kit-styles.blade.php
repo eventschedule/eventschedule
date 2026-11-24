@@ -365,14 +365,16 @@
     .gk-create { display: flex; flex-wrap: wrap; align-items: center; gap: .875rem 1.25rem; padding: 1.125rem 1rem; border: 1px solid var(--gk-line); }
     @media (min-width: 40rem) { .gk-create { padding: 1.375rem 1.5rem; } }
     .gk-create-mark { display: inline-grid; flex: none; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 999px; background: #06121a; color: #5cc4fb; color: oklch(0.8 0.15 240); font-size: .8125rem; font-weight: 800; letter-spacing: .02em; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .1); }
-    .gk-create-text { display: grid; gap: .25rem; flex: 1 1 18rem; min-width: 0; }
-    .gk-create-title { margin: 0; font-size: 1.1875rem; font-weight: 700; line-height: 1.3; color: var(--gk-ink); }
+    {{-- 12rem, not more: beside the 2.75rem mark it fits a 360px phone, where 18rem left the
+         mark alone on a row of its own. --}}
+    .gk-create-text { display: grid; gap: .25rem; flex: 1 1 12rem; min-width: 0; }
+    .gk-create-title { margin: 0; font-size: 1.1875rem; font-weight: 700; line-height: 1.3; color: var(--gk-ink); text-wrap: balance; }
     .gk-create-line { margin: 0; font-size: 1rem; line-height: 1.45; color: var(--gk-ink-2); text-wrap: pretty; }
     .gk-create-cta { display: inline-flex; flex: none; align-items: center; gap: .625rem; padding: .875rem 1.375rem; border-radius: .875rem; background: #3eb0ee; background: oklch(0.74 0.15 240); color: #06121a; font-size: 1rem; font-weight: 700; line-height: 1.2; text-decoration: none; transition: background-color var(--gk-swap); }
     .gk-create-cta:hover { background: #5cc4fb; background: oklch(0.8 0.15 240); }
     .gk-create-cta:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
     .gk-create-arrow { width: 1.125rem; height: 1.125rem; flex: none; }
-    [dir="rtl"] .gk-create-arrow { transform: scaleX(-1); }
+    :where([dir="rtl"]) .gk-create-arrow { transform: scaleX(-1); }
     {{-- On a phone the button takes the card's width under the words, a thumb's target. --}}
     @media (max-width: 39.99rem) { .gk-create-cta { flex: 1 1 100%; justify-content: center; } }
     @media (min-width: 64rem) {
@@ -532,7 +534,7 @@
     :where(html:has(.gk-headbar)) { scroll-padding-top: calc(3.875rem + env(safe-area-inset-top, 0px)); }
 
     @media (prefers-reduced-motion: reduce) {
-        .gk-btn, .gk-link { transition-duration: 1ms; }
+        .gk-btn, .gk-link, .gk-create-cta { transition-duration: 1ms; }
         .gk-btn:active { transform: none; }
         .gk-headbar { transition: none; }
     }
@@ -543,6 +545,7 @@
         .gk-panel, .dark .gk-panel { background: #ffffff; color: #000000; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; border: 1px solid #d1d5db; }
         .gk-row-item, .dark .gk-row-item { --gk-ink: #000000; --gk-ink-2: #374151; --gk-ink-3: #4b5563; background: #ffffff; box-shadow: none; border-color: #d1d5db; }
         .gk-btn { display: none; }
+        .gk-create-cta { display: none; }
         .gk-headbar { display: none; }
         .gk-note { background: #ffffff; color: #000000; border-color: #9ca3af; }
     }
