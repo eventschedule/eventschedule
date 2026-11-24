@@ -1665,9 +1665,10 @@
       justify-content: flex-start;
     }
     /* A card's own heading reads as the design's small capitals label, wherever a card names
-       itself with the old bold line. */
-    .ap-card h2.text-base.font-semibold,
-    .ap-card h3.text-base.font-semibold {
+       itself with the old bold line. Not a dialog's title or a notice's (role dialog, status,
+       alert; written unquoted so the page's markup holds no stray role attribute text): those are sentences ("Where is The Cellar?", "Your venue map is being prepared"),
+       and a sentence in capitals reads as shouting. */
+    .ap-card:not([role=dialog], [role=alertdialog], [role=status], [role=alert]) :is(h2, h3).text-base.font-semibold:not(:where([role=dialog], [role=alertdialog], [role=status], [role=alert]) *) {
       font-size: 0.75rem;
       line-height: 1.25rem;
       letter-spacing: 0.06em;

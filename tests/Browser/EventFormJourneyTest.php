@@ -206,6 +206,9 @@ class EventFormJourneyTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($event, $lateFrom) {
             $this->openExisting($browser, $event);
             $this->openTickets($browser);
+            // Ticket types fold to one line once there are several (only the first starts open on
+            // an event that exists); open each, as the owner would, before looking inside.
+            $browser->script('window.vueApp.tickets.forEach(function (ticket) { window.vueApp.openTicketCard(ticket); });');
             $browser->pause(500);
 
             $read = 'return window.vueApp.tickets.map(function (ticket) {

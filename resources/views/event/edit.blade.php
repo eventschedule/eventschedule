@@ -12021,8 +12021,13 @@ document.addEventListener('click', function (e) {
     document.addEventListener('paste', function (e) {
         var details = document.getElementById('section-details');
         var file = e.clipboardData ? imageIn(e.clipboardData.files) : null;
-        // Only while the Event tab is the one on screen: a pasted image anywhere else is not a flyer.
+        // Only while the Event tab is the one on screen, and the one being worked in: a pasted image
+        // anywhere else is not a flyer (on a first event, with Tickets open under the Event card).
         if (! file || ! details || details.offsetParent === null) {
+            return;
+        }
+        var aimed = e.target && e.target.closest ? e.target.closest('#section-details') : null;
+        if (! aimed && window.currentEventSection && window.currentEventSection !== 'section-details') {
             return;
         }
         if (takeFlyer(file)) {
@@ -12108,6 +12113,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Track current section
         currentSectionId = sectionId;
+        // Read by the paste handler: on a first event every section stands in one column, so
+        // "is the Event card on screen" cannot say which section the person is working in.
+        window.currentEventSection = sectionId;
 
         // A section folded behind "More options" on a first event opens the fold when anything
         // navigates to it (a #hash, an invalid field), or its header would stay hidden while its

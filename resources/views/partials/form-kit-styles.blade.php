@@ -1087,6 +1087,12 @@
     .event-save-spacer {
       height: 7.5rem;
     }
+    /* What is scrolled into view (a field reached with Tab, a row opened from a link, an error
+       brought forward) stops above the save bar, never under it (WCAG 2.4.11, focus not
+       obscured). The bar is about 5.5rem with its gap; the rest is room to see the field's edge. */
+    html:has(.event-save-bar) {
+      scroll-padding-bottom: 7rem;
+    }
     .event-save-bar {
       position: fixed;
       bottom: 0;

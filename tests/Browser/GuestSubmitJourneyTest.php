@@ -127,7 +127,7 @@ class GuestSubmitJourneyTest extends DuskTestCase
             $this->pressSubmit($browser);
 
             $bar = $this->barText($browser);
-            $this->assertStringStartsWith('Still needed: Event Name, Date, Start Time', $bar);
+            $this->assertStringStartsWith('Still needed: Event name, Date, Start time', $bar);
             // Three names, then a count: a longer list covered the field on a phone.
             $this->assertMatchesRegularExpression('/, \+\d+$/', $bar);
             $this->assertSame('Required', trim($browser->text('#err_name')));
