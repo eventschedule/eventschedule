@@ -87,9 +87,9 @@ class TicketTest extends DuskTestCase
 
             // Enable tickets via JS click on section link
             $browser->script("document.querySelector('a[data-section=\"section-tickets\"]').click()");
-            $browser->waitFor('#ticket_choice_tickets', 10)
-                ->click('#ticket_choice_tickets')
-                ->pause(1000);
+            $browser->waitFor('#ticket_choice_tickets', 10);
+            $this->clickInView($browser, '#ticket_choice_tickets');
+            $browser->pause(1000);
 
             // Configure ticket 0: General Admission ($10, qty 50, description, dropdown custom field)
             $browser->script("

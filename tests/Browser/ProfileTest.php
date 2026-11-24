@@ -36,11 +36,9 @@ class ProfileTest extends DuskTestCase
             // 1. Change timezone
             // -----------------------------------------------
             $browser->visit('/settings')
-                ->waitFor('button[data-tab="localization"]', 5)->waitUntil(self::SETTLED, 5)
-                ->scrollIntoView('button[data-tab="localization"]')
-                ->pause(150)
-                ->click('button[data-tab="localization"]')
-                ->pause(500);
+                ->waitFor('button[data-tab="localization"]', 5)->waitUntil(self::SETTLED, 5);
+            $this->clickInView($browser, 'button[data-tab="localization"]');
+            $browser->pause(500);
 
             $browser->script("
                 var select = document.getElementById('timezone');
@@ -56,11 +54,9 @@ class ProfileTest extends DuskTestCase
 
             // Verify persisted on reload
             $browser->visit('/settings')
-                ->waitFor('button[data-tab="localization"]', 5)->waitUntil(self::SETTLED, 5)
-                ->scrollIntoView('button[data-tab="localization"]')
-                ->pause(150)
-                ->click('button[data-tab="localization"]')
-                ->pause(500);
+                ->waitFor('button[data-tab="localization"]', 5)->waitUntil(self::SETTLED, 5);
+            $this->clickInView($browser, 'button[data-tab="localization"]');
+            $browser->pause(500);
             $timezoneValue = $browser->script("return document.getElementById('timezone').value;");
             $this->assertEquals('Pacific/Auckland', $timezoneValue[0]);
 
@@ -79,11 +75,9 @@ class ProfileTest extends DuskTestCase
             // 3. Change language to Spanish
             // -----------------------------------------------
             $browser->visit('/settings')
-                ->waitFor('button[data-tab="localization"]', 5)->waitUntil(self::SETTLED, 5)
-                ->scrollIntoView('button[data-tab="localization"]')
-                ->pause(150)
-                ->click('button[data-tab="localization"]')
-                ->pause(500);
+                ->waitFor('button[data-tab="localization"]', 5)->waitUntil(self::SETTLED, 5);
+            $this->clickInView($browser, 'button[data-tab="localization"]');
+            $browser->pause(500);
 
             $browser->script("
                 var select = document.getElementById('language_code');
@@ -168,8 +162,8 @@ class ProfileTest extends DuskTestCase
                 ->assertAttribute('button.profile-tab[data-tab="localization"]', 'aria-expanded', 'false');
 
             // A row opens under its own name, says what it holds, and closes when pressed again.
-            $browser->click('button.profile-tab[data-tab="localization"]')
-                ->waitFor('#language_code', 5)
+            $this->clickInView($browser, 'button.profile-tab[data-tab="localization"]');
+            $browser->waitFor('#language_code', 5)
                 ->assertAttribute('button.profile-tab[data-tab="localization"]', 'aria-expanded', 'true');
             // The row says the clock the account is on, whichever that is for the account this
             // browser made, and says the other one as soon as the switch is flipped.
@@ -187,14 +181,14 @@ class ProfileTest extends DuskTestCase
             $browser->assertSeeIn('button.profile-tab[data-tab="localization"] .event-row-summary', $words[! $on24]);
             // Something typed and not saved puts a dot on the section, and saving takes it off.
             $this->assertTrue($browser->script("return ! document.querySelector('.section-nav-link [data-dirty-dot=\"section-profile\"]').hidden;")[0]);
-            $browser->click('button.profile-tab[data-tab="localization"]')
-                ->waitUntilMissing('#language_code', 5);
+            $this->clickInView($browser, 'button.profile-tab[data-tab="localization"]');
+            $browser->waitUntilMissing('#language_code', 5);
 
             // Pressing the section you are on leaves its rows alone (it used to press its first tab).
-            $browser->click('button.profile-tab[data-tab="appearance"]')
-                ->waitFor('#profile-tab-appearance .js-theme-mode-btn', 5)
-                ->click('.section-nav-link[data-section="section-profile"]')
-                ->pause(300)
+            $this->clickInView($browser, 'button.profile-tab[data-tab="appearance"]');
+            $browser->waitFor('#profile-tab-appearance .js-theme-mode-btn', 5);
+            $this->clickInView($browser, '.section-nav-link[data-section="section-profile"]');
+            $browser->pause(300)
                 ->assertAttribute('button.profile-tab[data-tab="appearance"]', 'aria-expanded', 'true');
 
             // An address that names a field opens the section the field is in.

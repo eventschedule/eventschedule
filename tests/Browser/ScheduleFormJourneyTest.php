@@ -7,9 +7,11 @@ use App\Models\Group;
 use App\Models\Role;
 use App\Models\TicketPreset;
 use App\Models\User;
+use App\Services\TicketPresets;
 use App\Utils\ColorUtils;
 use App\Utils\GuestTheme;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
+use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
@@ -40,7 +42,7 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $group = new Group;
             $group->role_id = $this->talent->id;
             $group->name = $name;
-            $group->slug = \Illuminate\Support\Str::slug($name);
+            $group->slug = Str::slug($name);
             $group->save();
         }
     }
@@ -183,7 +185,7 @@ class ScheduleFormJourneyTest extends DuskTestCase
         $this->assertSame('Regular', $preset->name);
         $this->assertTrue($preset->is_default);
         $this->assertSame([['src' => 0, 'type' => 'Entry', 'price' => 5.0, 'quantity' => null, 'description' => null, 'custom_fields' => null, 'volume_discount' => null, 'max_per_order' => null]], $preset->ticketRows());
-        $this->assertTrue(\App\Services\TicketPresets::teamUsesPresets($this->talent->fresh()));
+        $this->assertTrue(TicketPresets::teamUsesPresets($this->talent->fresh()));
     }
 
     public function test_the_tabs_say_what_they_hold_and_the_rows_say_their_setting(): void
@@ -585,7 +587,7 @@ class ScheduleFormJourneyTest extends DuskTestCase
         $event->starts_at = now()->addDays(7)->setTime(12, 0)->format('Y-m-d H:i:s');
         $event->duration = 2;
         $event->is_draft = false;
-        $event->slug = 'journey-'.strtolower(\Illuminate\Support\Str::random(6));
+        $event->slug = 'journey-'.strtolower(Str::random(6));
         $event->save();
         $event->roles()->attach($this->talent->id, ['is_accepted' => true]);
 
@@ -920,7 +922,7 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $browser->waitFor('#style_background_aurora .st-aur-sw[data-value="ember"]', 5);
             $browser->waitUntil('!! document.querySelector("#style-preview > .gp-aurora")', 5);
 
-            $browser->click('#style_background_aurora .st-aur-sw[data-value="ember"]');
+            $this->press($browser, '#style_background_aurora .st-aur-sw[data-value="ember"]');
             $browser->waitUntil('document.getElementById("aurora_palette").value === "ember"', 5);
             $this->assertStringStartsWith(__('messages.aurora').' · '.__('messages.aurora_palette_ember'), $this->summary($browser, 'style:background'));
 
@@ -936,7 +938,7 @@ class ScheduleFormJourneyTest extends DuskTestCase
             $this->assertFalse((bool) $this->js($browser, 'document.getElementById("aurora_custom_colors").offsetParent !== null'));
             $browser->click('#style_background_aurora .st-aur-sw[data-value="custom"]');
             $browser->waitUntil('document.getElementById("aurora_custom_colors").offsetParent !== null', 5);
-            $browser->click('#style_background_aurora .st-aur-sw[data-value="ember"]');
+            $this->press($browser, '#style_background_aurora .st-aur-sw[data-value="ember"]');
             $browser->waitUntil('document.getElementById("aurora_palette").value === "ember"', 5);
 
             $browser->script('window._skipUnsavedWarning = true; document.getElementById("edit-form").requestSubmit();');

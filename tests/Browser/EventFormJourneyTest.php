@@ -428,7 +428,8 @@ class EventFormJourneyTest extends DuskTestCase
             $browser->script('document.querySelector(\'a[data-section="section-tickets"]\').click();');
             $browser->waitUntil('document.getElementById("section-tickets").style.display === "block"', 10);
 
-            $browser->click('#ticket_choice_rsvp')->pause(300);
+            $this->press($browser, '#ticket_choice_rsvp');
+            $browser->pause(300);
 
             $state = $browser->script('return {
                 pressed: document.getElementById("ticket_choice_rsvp").getAttribute("aria-pressed"),
@@ -461,7 +462,8 @@ class EventFormJourneyTest extends DuskTestCase
             $this->assertSame('tickets', $browser->script('return window.vueApp.activeTicketTab;')[0]);
 
             // A tile that is on does nothing when pressed again: switching off is "Not needed".
-            $browser->type('#rsvp_limit', '40')->click('#ticket_choice_rsvp')->pause(200);
+            $browser->type('#rsvp_limit', '40');
+            $this->press($browser, '#ticket_choice_rsvp');
             $this->assertSame('rsvp', $browser->script('return window.vueApp.ticketChoice;')[0]);
 
             $this->save($browser);
@@ -480,8 +482,8 @@ class EventFormJourneyTest extends DuskTestCase
             $this->fillBasics($browser, 'Paid Night');
             $this->openTickets($browser);
 
-            $browser->click('#ticket_choice_tickets')
-                ->waitFor('#section-tickets [name="tickets[0][price]"]', 5)
+            $this->press($browser, '#ticket_choice_tickets');
+            $browser->waitFor('#section-tickets [name="tickets[0][price]"]', 5)
                 ->pause(200);
             $this->assertSame('tickets[0][price]', $browser->script('return document.activeElement.getAttribute("name");')[0], 'the price has the caret');
 
@@ -554,7 +556,8 @@ class EventFormJourneyTest extends DuskTestCase
             $browser->pause(300);
             $this->assertFalse($browser->script('return document.getElementById("edit-form").checkValidity();')[0], 'sanity check: while tickets are on, the empty code is a required field');
 
-            $browser->click('#ticket_choice_rsvp')->pause(300);
+            $this->press($browser, '#ticket_choice_rsvp');
+            $browser->pause(300);
             $this->assertTrue($browser->script('return document.getElementById("edit-form").checkValidity();')[0], 'with tickets off it is not asked for');
 
             $this->save($browser);
@@ -626,11 +629,13 @@ class EventFormJourneyTest extends DuskTestCase
 
             // Off clears what guests would be shown; on again brings back what was there.
             $browser->type('#registration_url', 'https://tickets.example.org/new')->pause(200);
-            $browser->click('#ticket_choice_none')->pause(300);
+            $this->press($browser, '#ticket_choice_none');
+            $browser->pause(300);
             $off = $browser->script('return [window.vueApp.ticketChoice, window.vueApp.event.registration_url];')[0];
             $this->assertSame([null, ''], $off);
 
-            $browser->click('#ticket_choice_external')->pause(300);
+            $this->press($browser, '#ticket_choice_external');
+            $browser->pause(300);
             $this->assertSame('https://tickets.example.org/new', $browser->script('return document.getElementById("registration_url").value;')[0]);
         });
 
@@ -672,12 +677,14 @@ class EventFormJourneyTest extends DuskTestCase
 
             // Answered yes: it is off, and the bar says what Save will now do.
             $browser->script('window.confirm = function () { return true; };');
-            $browser->click('#ticket_choice_none')->pause(300);
+            $this->press($browser, '#ticket_choice_none');
+            $browser->pause(300);
             $this->assertNull($browser->script('return window.vueApp.ticketChoice;')[0]);
             $this->assertSame("Saving removes this event's ticket types.", $this->barText($browser));
 
             // Back on: nothing to warn about.
-            $browser->click('#ticket_choice_tickets')->pause(300);
+            $this->press($browser, '#ticket_choice_tickets');
+            $browser->pause(300);
             $this->assertStringNotContainsString('removes', $this->barText($browser));
         });
 
@@ -1412,7 +1419,8 @@ class EventFormJourneyTest extends DuskTestCase
             $browser->pause(200);
             $this->assertFalse($browser->script('return document.getElementById("edit-form").checkValidity();')[0], 'sanity check: the browser refuses it while it is the choice');
 
-            $browser->click('#ticket_choice_rsvp')->pause(300);
+            $this->press($browser, '#ticket_choice_rsvp');
+            $browser->pause(300);
             $state = $browser->script('
                 var form = document.getElementById("edit-form");
                 var standIn = form.querySelector("input[type=hidden][name=registration_url]");
@@ -1441,7 +1449,8 @@ class EventFormJourneyTest extends DuskTestCase
             $this->openExisting($browser, $event);
             $this->openTickets($browser);
 
-            $browser->click('#ticket_choice_none')->pause(300);
+            $this->press($browser, '#ticket_choice_none');
+            $browser->pause(300);
             $this->assertTrue($browser->script('return document.getElementById("ticket_choice_none").classList.contains("is-current");')[0], '"Not needed" reads as the choice in force');
             $this->save($browser);
         });
@@ -1468,12 +1477,14 @@ class EventFormJourneyTest extends DuskTestCase
 
             $this->assertSame('Parking', $browser->script('return document.querySelector(".event-subrow[data-tab=add_ons] .event-row-summary").innerText.trim();')[0]);
 
-            $browser->click('#ticket_choice_none')->pause(300);
+            $this->press($browser, '#ticket_choice_none');
+            $browser->pause(300);
             $bar = $this->barText($browser);
             $this->assertStringContainsString("Saving removes this event's ticket types.", $bar);
             $this->assertStringContainsString("Saving removes this event's add-ons.", $bar);
 
-            $browser->click('#ticket_choice_tickets')->pause(300);
+            $this->press($browser, '#ticket_choice_tickets');
+            $browser->pause(300);
             $this->assertStringNotContainsString('removes', $this->barText($browser));
         });
 

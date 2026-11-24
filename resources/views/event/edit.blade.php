@@ -8487,7 +8487,10 @@
         }
       },
       ticketIsOpen(ticket, index) {
-        if (Object.prototype.hasOwnProperty.call(this.ticketOpen, ticket.uid)) {
+        // `in`, not hasOwnProperty: Vue tracks a key being added only through `in` (its has trap),
+        // so with hasOwnProperty the first open of a folded type changed the state and redrew
+        // nothing, and the card stayed shut.
+        if (ticket.uid in this.ticketOpen) {
           return this.ticketOpen[ticket.uid];
         }
         return this.ticketsStartOpen || index === 0 || ! ticket.type;
@@ -9892,6 +9895,9 @@
             sales_end_at_date: '',
             sales_end_at_time: '',
         });
+        // A type added here stays open while it is filled in: it used to be open only while it had
+        // no name, so typing its name folded it shut under the cursor.
+        this.ticketOpen[this.tickets[newIndex].uid] = true;
         // Every type has its date pickers, shown or not: its sales dates open in place.
         this.$nextTick(() => {
           this.$nextTick(() => {

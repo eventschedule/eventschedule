@@ -320,9 +320,9 @@ trait AccountSetupTrait
 
         // Navigate to tickets section via JS
         $browser->script("document.querySelector('a[data-section=\"section-tickets\"]').click()");
-        $browser->waitFor('#ticket_choice_tickets', 10)
-            ->click('#ticket_choice_tickets')
-            ->pause(1000);
+        $browser->waitFor('#ticket_choice_tickets', 10);
+        $this->clickInView($browser, '#ticket_choice_tickets');
+        $browser->pause(1000);
 
         // Configure ticket via Vue (more reliable than DOM type in headless Chrome)
         $browser->script('
@@ -460,5 +460,16 @@ trait AccountSetupTrait
         ");
 
         $this->landOn($browser, '/', 15);
+    }
+
+    /**
+     * Click an element after bringing it to the middle of the window. The forms' save bar floats
+     * at the foot of the window, and WebDriver does not scroll an element that is already inside
+     * the window, so one near the bottom edge was clicked through the bar.
+     */
+    protected function clickInView(Browser $browser, string $selector): void
+    {
+        $browser->script('document.querySelector('.json_encode($selector).').scrollIntoView({ block: "center" });');
+        $browser->pause(150)->click($selector);
     }
 }
