@@ -16,7 +16,7 @@
 @if ($head)
 <tr>
 @foreach ($head as $i => $label)
-<th scope="col" class="es-rule es-ink-3" style="padding: 0 0 8px;{{ $i ? ' padding-'.$theme->start.': 12px;' : '' }} border-bottom: 1px solid #e2e8f0; text-align: {{ $side($i) }}; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b;">{{ $label }}</th>
+<th scope="col" class="es-rule es-ink-3" style="padding: 0 0 8px;{{ $i ? ' padding-'.$theme->start.': 12px;' : '' }} border-bottom: 1px solid #e3e6ec; text-align: {{ $side($i) }}; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6a7183;">{{ $label }}</th>
 @endforeach
 </tr>
 @endif
@@ -26,9 +26,9 @@
 @php
     [$text, $tone] = is_array($cell) ? [$cell[0] ?? '', $cell[1] ?? null] : [$cell, null];
     $tone = $tone ? \App\Utils\EmailTheme::toneName($tone) : null;
-    $colour = $tone ? $theme->tone($tone)['ink'] : '#334155';
+    $colour = $tone ? $theme->tone($tone)['ink'] : '#323640';
 @endphp
-<td class="es-rule {{ $tone ? 'es-ink-'.$tone : 'es-ink-2' }}" style="padding: 10px 0;{{ $i ? ' padding-'.$theme->start.': 12px;' : '' }} border-bottom: 1px solid #e2e8f0; text-align: {{ $side($i) }}; font-size: 14px; line-height: 20px; color: {{ $colour }}; font-variant-numeric: tabular-nums;{{ $tone ? ' font-weight: 600;' : '' }}">{{ $text }}</td>
+<td class="es-rule {{ $tone ? 'es-ink-'.$tone : 'es-ink-2' }}" style="padding: 10px 0;{{ $i ? ' padding-'.$theme->start.': 12px;' : '' }} border-bottom: 1px solid #e3e6ec; text-align: {{ $side($i) }}; font-size: 14px; line-height: 20px; color: {{ $colour }}; font-variant-numeric: tabular-nums;{{ $tone ? ' font-weight: 600;' : '' }}">{{ $text }}</td>
 @endforeach
 </tr>
 @endforeach

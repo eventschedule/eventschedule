@@ -24,7 +24,7 @@
         : e((string) $value);
     $neutral = $tone === 'neutral';
     $surface = $neutral
-        ? 'class="es-panel" bgcolor="#f8fafc" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;"'
+        ? 'class="es-panel" bgcolor="#f8f9fb" style="background-color: #f8f9fb; border: 1px solid #e3e6ec; border-radius: 12px;"'
         : 'class="es-tint" bgcolor="'.e($theme->accentTint).'" style="background-color: '.e($theme->accentTint).'; border-radius: 12px;"';
 @endphp
 <table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -34,11 +34,11 @@
 <tr>
 <td align="center" style="padding: 24px 20px; text-align: center;">
 @if (filled($label))
-<p class="es-ink-3" style="margin: 0 0 6px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b;">{{ $label }}</p>
+<p class="es-ink-3" style="margin: 0 0 6px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6a7183;">{{ $label }}</p>
 @endif
-<p class="es-ink" @if ($ltr) dir="ltr" @endif style="margin: 0; font-family: {{ $font }}; font-size: {{ $valueSize }}px; line-height: {{ $valueLine }}px; font-weight: 700; letter-spacing: {{ $tracking }}; color: #0f172a; font-variant-numeric: tabular-nums; word-break: break-all;">{!! $valueHtml !!}</p>
+<p class="es-ink" @if ($ltr) dir="ltr" @endif style="margin: 0; font-family: {{ $font }}; font-size: {{ $valueSize }}px; line-height: {{ $valueLine }}px; font-weight: 700; letter-spacing: {{ $tracking }}; color: #14161a; font-variant-numeric: tabular-nums; word-break: break-all;">{!! $valueHtml !!}</p>
 @if (filled($caption))
-<p class="es-ink-2" style="margin: 6px 0 0; font-size: 14px; line-height: 20px; color: #475569;">{{ $caption }}</p>
+<p class="es-ink-2" style="margin: 6px 0 0; font-size: 14px; line-height: 20px; color: #4b5263;">{{ $caption }}</p>
 @endif
 </td>
 </tr>

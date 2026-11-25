@@ -17,8 +17,8 @@
 </table>
 </td>
 <td valign="top" style="vertical-align: top; padding: 0 0 {{ $last ? 8 : 20 }}px; padding-{{ $theme->start }}: 14px; text-align: {{ $theme->start }};">
-<p class="es-ink" style="margin: 4px 0 4px; font-size: 16px; line-height: 22px; font-weight: 700; color: #0f172a;">{{ $title }}</p>
-<div class="es-ink-2" style="font-size: 15px; line-height: 24px; color: #334155;">{{ $slot }}</div>
+<p class="es-ink" style="margin: 4px 0 4px; font-size: 16px; line-height: 22px; font-weight: 700; color: #14161a;">{{ $title }}</p>
+<div class="es-ink-2" style="font-size: 15px; line-height: 24px; color: #323640;">{{ $slot }}</div>
 </td>
 </tr>
 </table>

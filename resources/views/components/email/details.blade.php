@@ -13,7 +13,7 @@
 <tr>
 <td style="padding: 0 0 {{ $panel ? 24 : 4 }}px;">
 @if ($panel)
-<table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" class="es-panel" bgcolor="#f8fafc" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+<table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" class="es-panel" bgcolor="#f8f9fb" style="background-color: #f8f9fb; border: 1px solid #e3e6ec; border-radius: 12px;">
 <tr>
 <td style="padding: 20px 24px 0;">
 @endif

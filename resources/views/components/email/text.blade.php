@@ -8,10 +8,10 @@
 @php
     $theme ??= \App\Utils\EmailTheme::account();
     [$size, $line, $colour, $class] = match ($variant) {
-        'lead' => [18, 28, '#334155', 'es-ink-2'],
-        'small' => [14, 22, '#475569', 'es-ink-2'],
-        'muted' => [14, 22, '#64748b', 'es-ink-3'],
-        default => [16, 26, '#334155', 'es-ink-2'],
+        'lead' => [18, 28, '#323640', 'es-ink-2'],
+        'small' => [14, 22, '#4b5263', 'es-ink-2'],
+        'muted' => [14, 22, '#6a7183', 'es-ink-3'],
+        default => [16, 26, '#323640', 'es-ink-2'],
     };
     $textAlign = match ($align) {
         'center' => 'center',

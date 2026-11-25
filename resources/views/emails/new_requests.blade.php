@@ -52,7 +52,7 @@
      right-to-left mail. --}}
 @foreach ($requests as $summary)
 <x-email.section :label="__('messages.request_mail_position', ['number' => $loop->iteration, 'count' => $shown])" />
-<x-email.text><strong class="es-ink" dir="auto" style="font-size: 20px; line-height: 26px; font-weight: 700; color: #0f172a;">{{ $summary['title'] }}</strong></x-email.text>
+<x-email.text><strong class="es-ink" dir="auto" style="font-size: 20px; line-height: 26px; font-weight: 700; color: #14161a;">{{ $summary['title'] }}</strong></x-email.text>
 @include('emails.partials.request_summary', ['summary' => $summary])
 @endforeach
 

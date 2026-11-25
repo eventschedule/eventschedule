@@ -14,7 +14,7 @@
 @props(['theme', 'title' => '', 'preheader' => null])
 @php
     $t = $theme;
-    $ring = $t->darkRing ? 'border-color: #cbd5e1 !important;' : '';
+    $ring = $t->darkRing ? 'border-color: #c5cbd6 !important;' : '';
     // Cast rather than ->hasActualContent(): a string passed as hero="..." or footer="..." must not crash.
     $hasHero = trim((string) ($hero ?? '')) !== '';
     $hasFooter = trim((string) ($footer ?? '')) !== '';
@@ -63,15 +63,15 @@ a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !im
 .es-card { background-color: #111827 !important; border-color: #1f2937 !important; }
 .es-panel { background-color: #1a2332 !important; border-color: #273244 !important; }
 .es-rule { border-color: #273244 !important; }
-.es-ink { color: #f8fafc !important; }
-.es-ink-2 { color: #cbd5e1 !important; }
-.es-ink-3, .es-foot { color: #94a3b8 !important; }
+.es-ink { color: #f8f9fb !important; }
+.es-ink-2 { color: #c5cbd6 !important; }
+.es-ink-3, .es-foot { color: #9aa2b1 !important; }
 .es-link, .es-accent-ink { color: {{ $t->darkLink }} !important; }
 .es-tint { background-color: {{ $t->darkTint }} !important; }
 .es-btn { {{ $ring }} }
 .es-btn-ghost { background-color: #111827 !important; border-color: #273244 !important; }
 .es-btn-off { background-color: #1a2332 !important; border-color: #273244 !important; }
-.es-btn-off span { color: #94a3b8 !important; }
+.es-btn-off span { color: #9aa2b1 !important; }
 @foreach (\App\Utils\EmailTheme::TONES as $name => $c)
 .es-ink-{{ $name }} { color: {{ $c['dark_ink'] }} !important; }
 .es-tone-{{ $name }} { background-color: {{ $c['dark_bg'] }} !important; border-color: {{ $c['dark_border'] }} !important; }
@@ -80,9 +80,9 @@ a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !im
 [data-ogsb] .es-body, [data-ogsb] .es-page { background-color: #0b1220 !important; }
 [data-ogsb] .es-card { background-color: #111827 !important; }
 [data-ogsb] .es-panel { background-color: #1a2332 !important; }
-[data-ogsc] .es-ink { color: #f8fafc !important; }
-[data-ogsc] .es-ink-2 { color: #cbd5e1 !important; }
-[data-ogsc] .es-ink-3, [data-ogsc] .es-foot { color: #94a3b8 !important; }
+[data-ogsc] .es-ink { color: #f8f9fb !important; }
+[data-ogsc] .es-ink-2 { color: #c5cbd6 !important; }
+[data-ogsc] .es-ink-3, [data-ogsc] .es-foot { color: #9aa2b1 !important; }
 [data-ogsc] .es-link, [data-ogsc] .es-accent-ink { color: {{ $t->darkLink }} !important; }
 [data-ogsb] .es-tint { background-color: {{ $t->darkTint }} !important; }
 [data-ogsb] .es-btn-ghost { background-color: #111827 !important; }
@@ -117,7 +117,7 @@ a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !im
 @endif
 <table role="presentation" dir="{{ $t->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
-<td class="es-card-pad" style="padding: 40px 40px 16px; text-align: {{ $t->start }}; font-family: {{ \App\Utils\EmailTheme::FONT }}; color: #334155;">
+<td class="es-card-pad" style="padding: 40px 40px 16px; text-align: {{ $t->start }}; font-family: {{ \App\Utils\EmailTheme::FONT }}; color: #323640;">
 {{ $slot }}
 </td>
 </tr>
@@ -131,7 +131,7 @@ a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !im
 {{ $footer }}
 @endif
 @if ($footerBrand)
-<p class="es-foot" style="margin: {{ $hasFooter ? '12px' : '0' }} 0 0; font-size: 13px; line-height: 20px; font-weight: 600; color: #475569;">{{ $t->appName }}</p>
+<p class="es-foot" style="margin: {{ $hasFooter ? '12px' : '0' }} 0 0; font-size: 13px; line-height: 20px; font-weight: 600; color: #4b5263;">{{ $t->appName }}</p>
 @endif
 </td>
 </tr>

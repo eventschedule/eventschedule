@@ -6,7 +6,8 @@
 
 <x-email.text>{{ __('messages.ticket_trial_ending_body', ['schedule' => $role->name, 'date' => $endDate]) }}</x-email.text>
 
-<x-email.callout tone="info">{{ __('messages.ticket_trial_ending_buyers') }}</x-email.callout>
-
 <x-email.button :href="$planUrl">{{ __('messages.upgrade_to_pro_plan') }}</x-email.button>
+
+<x-email.section />
+<x-email.text variant="small">{{ __('messages.ticket_trial_ending_buyers') }}</x-email.text>
 </x-email.layout>

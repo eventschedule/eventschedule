@@ -1,9 +1,9 @@
 @php
     $theme = \App\Utils\EmailTheme::guest($role ?? null);
-    $label = 'margin: 0 0 6px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #64748b;';
-    $was = 'margin: 0; font-size: 14px; line-height: 22px; color: #64748b;';
-    $now = 'margin: 0; font-size: 15px; line-height: 24px; color: #0f172a;';
-    $plain = 'margin: 0; font-size: 15px; line-height: 24px; color: #334155;';
+    $label = 'margin: 0 0 6px; font-size: 12px; line-height: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #6a7183;';
+    $was = 'margin: 0; font-size: 14px; line-height: 22px; color: #6a7183;';
+    $now = 'margin: 0; font-size: 15px; line-height: 24px; color: #14161a;';
+    $plain = 'margin: 0; font-size: 15px; line-height: 24px; color: #323640;';
 
     // The date and the time range each isolated on its own: inside an RTL line the bidi algorithm
     // otherwise pulls the numbers into the month's run and reorders the range into
@@ -33,7 +33,7 @@
 <p class="es-ink-3" style="{{ $label }}">{{ __('messages.event_changed_whats_changed') }}</p>
 
 @if (isset($display['date']))
-<p class="es-ink" style="margin: 10px 0 4px; font-size: 15px; line-height: 22px; font-weight: 600; color: #0f172a;">{{ __('messages.event_changed_date_label') }}</p>
+<p class="es-ink" style="margin: 10px 0 4px; font-size: 15px; line-height: 22px; font-weight: 600; color: #14161a;">{{ __('messages.event_changed_date_label') }}</p>
 @if (! empty($display['date']['old']))
 <p class="es-ink-3" style="{{ $was }}">{{ __('messages.event_changed_previously') }}: <s>{{ $when($display['date']['old_parts'] ?? null, $display['date']['old'], $display['date']['old_tz']) }}</s></p>
 @endif
@@ -45,7 +45,7 @@
 
 @if (isset($display['location']))
 @php($loc = $display['location'])
-<p class="es-ink" style="margin: {{ isset($display['date']) ? '16px' : '10px' }} 0 4px; font-size: 15px; line-height: 22px; font-weight: 600; color: #0f172a;">{{ __('messages.event_changed_location_label') }}</p>
+<p class="es-ink" style="margin: {{ isset($display['date']) ? '16px' : '10px' }} 0 4px; font-size: 15px; line-height: 22px; font-weight: 600; color: #14161a;">{{ __('messages.event_changed_location_label') }}</p>
 @if ($loc['variant'] === 'moved_online')
 <p class="es-ink-2" style="{{ $plain }}">{{ __('messages.event_changed_moved_online') }}</p>
 @elseif ($loc['variant'] === 'moved_in_person')
@@ -55,7 +55,7 @@
 @else
 <p class="es-ink-2" style="{{ $plain }}">{{ __('messages.event_changed_venue') }}</p>
 @if (! empty($loc['old_venue']))
-<p class="es-ink-3" style="margin: 6px 0 0; font-size: 14px; line-height: 22px; color: #64748b;">{{ __('messages.event_changed_previously') }}: <s dir="auto">{{ $loc['old_venue'] }}</s></p>
+<p class="es-ink-3" style="margin: 6px 0 0; font-size: 14px; line-height: 22px; color: #6a7183;">{{ __('messages.event_changed_previously') }}: <s dir="auto">{{ $loc['old_venue'] }}</s></p>
 @endif
 @if (! empty($loc['new_venue']))
 <p class="es-ink" style="{{ $now }}">{{ __('messages.event_changed_now') }}: <strong dir="auto">{{ $loc['new_venue'] }}</strong></p>

@@ -58,7 +58,7 @@
 <table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
 <td style="padding: 0 0 24px;">
-<table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" class="es-panel" bgcolor="#f8fafc" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+<table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" class="es-panel" bgcolor="#f8f9fb" style="background-color: #f8f9fb; border: 1px solid #e3e6ec; border-radius: 12px;">
 <tr>
 <td style="padding: 20px;">
 <table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0">
@@ -70,23 +70,23 @@
 <td align="center" class="es-accent-ink" style="padding: 9px 0 0; text-align: center; font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: {{ $theme->accentInk }};">{{ $start->translatedFormat('M') }}</td>
 </tr>
 <tr>
-<td align="center" class="es-ink" style="padding: 0 0 9px; text-align: center; font-size: 26px; line-height: 32px; font-weight: 700; color: #0f172a;">{{ $start->format('j') }}</td>
+<td align="center" class="es-ink" style="padding: 0 0 9px; text-align: center; font-size: 26px; line-height: 32px; font-weight: 700; color: #14161a;">{{ $start->format('j') }}</td>
 </tr>
 </table>
 </td>
 @endif
 <td valign="top" style="vertical-align: top; text-align: {{ $theme->start }};{{ $start ? ' padding-'.$theme->start.': 16px;' : '' }}">
 @if ($dateLine)
-<p class="es-ink" style="margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; color: #0f172a;">{{ $dateLine }}</p>
+<p class="es-ink" style="margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; color: #14161a;">{{ $dateLine }}</p>
 @endif
 @if ($timeLine)
-<p class="es-ink-2" dir="auto" style="margin: 2px 0 0; font-size: 15px; line-height: 22px; color: #334155;">{{ $timeLine }}</p>
+<p class="es-ink-2" dir="auto" style="margin: 2px 0 0; font-size: 15px; line-height: 22px; color: #323640;">{{ $timeLine }}</p>
 @endif
 @if ($venueName !== '')
-<p class="es-ink" dir="auto" style="margin: 10px 0 0; font-size: 15px; line-height: 22px; font-weight: 600; color: #0f172a;">{{ $venueName }}</p>
+<p class="es-ink" dir="auto" style="margin: 10px 0 0; font-size: 15px; line-height: 22px; font-weight: 600; color: #14161a;">{{ $venueName }}</p>
 @endif
 @if ($address !== '' && $address !== $venueName)
-<p class="es-ink-3" dir="auto" style="margin: 0; font-size: 14px; line-height: 20px; color: #64748b;">{{ $address }}</p>
+<p class="es-ink-3" dir="auto" style="margin: 0; font-size: 14px; line-height: 20px; color: #6a7183;">{{ $address }}</p>
 @endif
 @if ($mapUrl)
 <p style="margin: 6px 0 0; font-size: 14px; line-height: 20px;"><a href="{{ $mapUrl }}" target="_blank" rel="noopener" class="es-link" style="{{ $link }} font-weight: 600;">{{ __('messages.view_map') }}</a></p>
@@ -100,10 +100,10 @@
 <td style="height: 16px; line-height: 16px; font-size: 0;">&nbsp;</td>
 </tr>
 <tr>
-<td class="es-rule es-ink-3" style="padding: 14px 0 0; border-top: 1px solid #e2e8f0; font-size: 14px; line-height: 20px; color: #64748b; text-align: {{ $theme->start }};">
+<td class="es-rule es-ink-3" style="padding: 14px 0 0; border-top: 1px solid #e3e6ec; font-size: 14px; line-height: 20px; color: #6a7183; text-align: {{ $theme->start }};">
 {{ __('messages.add_to_calendar') }}:&nbsp;
 @foreach ($calendarLinks as $label => $url)
-<a href="{{ $url }}" target="_blank" rel="noopener" class="es-link" style="{{ $link }} font-weight: 600;">{{ $label }}</a>@if (! $loop->last)<span class="es-ink-3" style="color: #94a3b8;">&nbsp;&middot;&nbsp;</span>@endif
+<a href="{{ $url }}" target="_blank" rel="noopener" class="es-link" style="{{ $link }} font-weight: 600;">{{ $label }}</a>@if (! $loop->last)<span class="es-ink-3" style="color: #9aa2b1;">&nbsp;&middot;&nbsp;</span>@endif
 @endforeach
 </td>
 </tr>

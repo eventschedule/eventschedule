@@ -82,10 +82,10 @@ class EmailThemeTest extends TestCase
         foreach (EmailTheme::TONES as $name => $c) {
             $this->assertReads($c['ink'], '#ffffff', "$name ink on the card");
             $this->assertReads($c['ink'], $c['bg'], "$name ink on its callout");
-            $this->assertReads('#334155', $c['bg'], "$name callout body text");
+            $this->assertReads('#323640', $c['bg'], "$name callout body text");
             $this->assertReads($c['dark_ink'], EmailTheme::CARD_DARK, "$name ink on the dark card");
             $this->assertReads($c['dark_ink'], $c['dark_bg'], "$name ink on its dark callout");
-            $this->assertReads('#cbd5e1', $c['dark_bg'], "$name dark callout body text");
+            $this->assertReads('#c5cbd6', $c['dark_bg'], "$name dark callout body text");
         }
     }
 

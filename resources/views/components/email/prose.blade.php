@@ -18,7 +18,7 @@
 @endphp
 <table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
-<td class="es-ink-2" dir="auto" style="padding: 0 0 16px; font-size: 16px; line-height: 26px; color: #334155; text-align: {{ $theme->start }}; word-break: break-word;">
+<td class="es-ink-2" dir="auto" style="padding: 0 0 16px; font-size: 16px; line-height: 26px; color: #323640; text-align: {{ $theme->start }}; word-break: break-word;">
 {!! $html !!}
 </td>
 </tr>

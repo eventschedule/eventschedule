@@ -15,7 +15,7 @@
 <td style="padding: 0 0 {{ (int) $gap }}px;">
 <table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0" class="es-tone-{{ $tone }}" bgcolor="{{ $c['bg'] }}" style="background-color: {{ $c['bg'] }}; border: 1px solid {{ $c['border'] }}; border-radius: 12px;">
 <tr>
-<td class="es-ink-2" style="padding: 16px 20px; font-size: 15px; line-height: 24px; color: #334155; text-align: {{ $theme->start }};">
+<td class="es-ink-2" style="padding: 16px 20px; font-size: 15px; line-height: 24px; color: #323640; text-align: {{ $theme->start }};">
 @if (filled($title))
 <p class="es-ink-{{ $tone }}" style="margin: 0 0 4px; font-size: 15px; line-height: 22px; font-weight: 600; color: {{ $c['ink'] }};">{{ $title }}</p>
 @endif

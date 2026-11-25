@@ -17,7 +17,7 @@
 @endif
 
 <x-email.section />
-<x-email.text variant="small"><strong class="es-ink" style="color: #0f172a;">{{ __('messages.signup_code_never_share') }}</strong> {{ __('messages.signup_code_never_asked') }}</x-email.text>
+<x-email.text variant="small"><strong class="es-ink" style="color: #14161a;">{{ __('messages.signup_code_never_share') }}</strong> {{ __('messages.signup_code_never_asked') }}</x-email.text>
 
 <x-slot:footer>
 <x-email.footer>{{ __('messages.signup_code_not_you', ['app' => config('app.name')]) }}</x-email.footer>

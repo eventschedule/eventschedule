@@ -23,7 +23,7 @@
 <table role="presentation" dir="{{ $theme->dir }}" width="100%" cellpadding="0" cellspacing="0" border="0">
 <tr>
 <td align="center" style="padding: 0 0 24px; text-align: center;">
-<img src="{{ $message->embedData($stallPng, 'stall-map.png', 'image/png') }}" width="{{ $imgW }}" height="{{ $imgH }}" alt="{{ __('messages.vm_mail_map_alt') }}" style="display: block; margin: 0 auto; width: 100%; max-width: {{ $imgW }}px; height: auto; border: 1px solid #e2e8f0; border-radius: 12px;">
+<img src="{{ $message->embedData($stallPng, 'stall-map.png', 'image/png') }}" width="{{ $imgW }}" height="{{ $imgH }}" alt="{{ __('messages.vm_mail_map_alt') }}" style="display: block; margin: 0 auto; width: 100%; max-width: {{ $imgW }}px; height: auto; border: 1px solid #e3e6ec; border-radius: 12px;">
 </td>
 </tr>
 </table>

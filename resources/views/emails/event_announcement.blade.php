@@ -15,7 +15,7 @@
          of where the reader is sitting. --}}
     @php
         $start = $event->starts_at ? $event->getStartDateTime(null, true) : null;
-        $rule = $loop->first ? '' : ' border-top: 1px solid #e2e8f0;';
+        $rule = $loop->first ? '' : ' border-top: 1px solid #e3e6ec;';
     @endphp
 <tr>
 @if ($start)
@@ -25,14 +25,14 @@
 <td align="center" class="es-accent-ink" style="padding: 7px 0 0; text-align: center; font-size: 11px; line-height: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: {{ $theme->accentInk }};">{{ $start->translatedFormat('M') }}</td>
 </tr>
 <tr>
-<td align="center" class="es-ink" style="padding: 0 0 7px; text-align: center; font-size: 20px; line-height: 26px; font-weight: 700; color: #0f172a;">{{ $start->format('j') }}</td>
+<td align="center" class="es-ink" style="padding: 0 0 7px; text-align: center; font-size: 20px; line-height: 26px; font-weight: 700; color: #14161a;">{{ $start->format('j') }}</td>
 </tr>
 </table>
 </td>
 @endif
 <td class="es-rule" valign="top" @if (! $start) colspan="2" @endif style="vertical-align: top; padding: 14px 0;{{ $start ? ' padding-'.$theme->start.': 14px;' : '' }}{{ $rule }} text-align: {{ $theme->start }};">
-<a href="{{ $event->getGuestUrl($role->subdomain, null, true) }}" target="_blank" rel="noopener" class="es-ink" dir="auto" style="font-size: 17px; line-height: 24px; font-weight: 600; color: #0f172a; text-decoration: none;">{{ $event->name }}</a>
-<p class="es-ink-3" style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: #64748b;">
+<a href="{{ $event->getGuestUrl($role->subdomain, null, true) }}" target="_blank" rel="noopener" class="es-ink" dir="auto" style="font-size: 17px; line-height: 24px; font-weight: 600; color: #14161a; text-decoration: none;">{{ $event->name }}</a>
+<p class="es-ink-3" style="margin: 4px 0 0; font-size: 14px; line-height: 20px; color: #6a7183;">
 @if ($start)
 {{ $event->is_multi_day ? $event->getDateRangeDisplay() : $start->localDate() }}
 @endif

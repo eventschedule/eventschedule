@@ -10,7 +10,7 @@
 --}}
 @props(['theme'])
 @php($t = $theme)
-@php($nameStyle = 'font-size: 15px; line-height: 20px; font-weight: 600; color: #0f172a; font-family: '.\App\Utils\EmailTheme::FONT.';')
+@php($nameStyle = 'font-size: 15px; line-height: 20px; font-weight: 600; color: #14161a; font-family: '.\App\Utils\EmailTheme::FONT.';')
 @if ($t->voice === 'account' && $t->senderName === 'Event Schedule')
 {{-- Our own wordmark, as the 2026-11 design draws it: the round ES mark (a white disc, so it
      stands on a dark ground too, and transparent at its corners, so Outlook needs no rounding)
@@ -30,7 +30,7 @@
 <!--[if !mso]><!-->
 <table role="presentation" cellpadding="0" cellspacing="0" border="0">
 <tr>
-<td class="es-tile" bgcolor="#ffffff" style="padding: 6px 10px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
+<td class="es-tile" bgcolor="#ffffff" style="padding: 6px 10px; background-color: #ffffff; border: 1px solid #e3e6ec; border-radius: 12px;">
 <img src="{{ $t->avatarUrl }}" width="{{ $t->avatarWidth }}" height="{{ $t->avatarHeight }}" alt="{{ $t->senderName }}" style="display: block; width: {{ $t->avatarWidth }}px; height: {{ $t->avatarHeight }}px; max-width: 100%; border: 0;">
 </td>
 </tr>
@@ -45,7 +45,7 @@
 <!--[if !mso]><!-->
 <table role="presentation" cellpadding="0" cellspacing="0" border="0">
 <tr>
-<td class="es-tile" width="44" height="44" align="center" valign="middle" style="width: 44px; height: 44px; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px;">
+<td class="es-tile" width="44" height="44" align="center" valign="middle" style="width: 44px; height: 44px; background-color: #ffffff; border: 1px solid #e3e6ec; border-radius: 12px;">
 @if ($t->avatarWidth > 0)
 <img src="{{ $t->avatarUrl }}" width="{{ $t->avatarWidth }}" height="{{ $t->avatarHeight }}" alt="" style="display: block; margin: 0 auto; width: {{ $t->avatarWidth }}px; height: {{ $t->avatarHeight }}px; border: 0; border-radius: 11px;">
 @else

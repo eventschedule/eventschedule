@@ -7,13 +7,17 @@
     phone. With no href it renders disabled, for test sends, with an optional note beneath.
 --}}
 @aware(['theme' => null])
-@props(['href' => null, 'variant' => 'primary', 'note' => null, 'align' => 'center', 'arrow' => false])
+@props(['href' => null, 'variant' => 'primary', 'note' => null, 'align' => 'center', 'arrow' => null])
 @php
     $theme ??= \App\Utils\EmailTheme::account();
     $disabled = blank($href);
+    // The mail's main action leads on, so it carries the arrow unless a caller says arrow="false";
+    // a secondary button does not.
+    $arrow ??= $variant !== 'secondary';
+    $arrow = filter_var($arrow, FILTER_VALIDATE_BOOLEAN);
     [$bg, $fg, $border] = match (true) {
-        $disabled => ['#e2e8f0', '#475569', '#e2e8f0'],
-        $variant === 'secondary' => ['#ffffff', $theme->accentInk, '#cbd5e1'],
+        $disabled => ['#e3e6ec', '#4b5263', '#e3e6ec'],
+        $variant === 'secondary' => ['#ffffff', $theme->accentInk, '#c5cbd6'],
         default => [$theme->accent, $theme->onAccent, $theme->accentBorder],
     };
     $cellAlign = $align === 'center' ? 'center' : $theme->start;
@@ -38,7 +42,7 @@
 </tr>
 </table>
 @if (filled($note))
-<p class="es-ink-3" style="margin: 10px 0 0; font-size: 13px; line-height: 20px; color: #64748b; text-align: {{ $cellAlign }};">{{ $note }}</p>
+<p class="es-ink-3" style="margin: 10px 0 0; font-size: 13px; line-height: 20px; color: #6a7183; text-align: {{ $cellAlign }};">{{ $note }}</p>
 @endif
 </td>
 </tr>

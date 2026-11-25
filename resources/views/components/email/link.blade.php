@@ -2,4 +2,4 @@
 @aware(['theme' => null])
 @props(['href', 'muted' => false])
 @php($theme ??= \App\Utils\EmailTheme::account())
-<a href="{{ $href }}" target="_blank" rel="noopener" class="{{ $muted ? 'es-foot' : 'es-link' }}" style="color: {{ $muted ? '#475569' : $theme->accentInk }}; text-decoration: underline;">{{ $slot }}</a>
+<a href="{{ $href }}" target="_blank" rel="noopener" class="{{ $muted ? 'es-foot' : 'es-link' }}" style="color: {{ $muted ? '#4b5263' : $theme->accentInk }}; text-decoration: underline;">{{ $slot }}</a>

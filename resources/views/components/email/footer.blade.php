@@ -10,12 +10,12 @@
     $links = array_values(array_filter($links, fn ($l) => filled($l[1] ?? null)));
 @endphp
 @if ($slot->hasActualContent())
-<p class="es-foot" style="margin: 0 0 8px; font-size: 13px; line-height: 20px; color: #475569;">{{ $slot }}</p>
+<p class="es-foot" style="margin: 0 0 8px; font-size: 13px; line-height: 20px; color: #4b5263;">{{ $slot }}</p>
 @endif
 @if ($links)
-<p class="es-foot" style="margin: 0; font-size: 13px; line-height: 20px; color: #475569;">
+<p class="es-foot" style="margin: 0; font-size: 13px; line-height: 20px; color: #4b5263;">
 @foreach ($links as [$label, $url])
-<a href="{{ $url }}" target="_blank" rel="noopener" class="es-foot" style="color: #475569; text-decoration: underline;">{{ $label }}</a>@if (! $loop->last)<span style="color: #94a3b8;">&nbsp;&nbsp;&middot;&nbsp;&nbsp;</span>@endif
+<a href="{{ $url }}" target="_blank" rel="noopener" class="es-foot" style="color: #4b5263; text-decoration: underline;">{{ $label }}</a>@if (! $loop->last)<span style="color: #9aa2b1;">&nbsp;&nbsp;&middot;&nbsp;&nbsp;</span>@endif
 @endforeach
 </p>
 @endif

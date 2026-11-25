@@ -24,7 +24,7 @@
 @if (filled($eyebrow))
 <p class="{{ $eyebrowClass }}" style="margin: 0 0 10px; {{ $eyebrowCase }} font-weight: 600; color: {{ $eyebrowColour }};">{{ $eyebrow }}</p>
 @endif
-<h1 class="es-ink es-h1" @if ($auto) dir="auto" @endif style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em; color: #0f172a; font-family: {{ \App\Utils\EmailTheme::FONT }};">{{ $slot }}</h1>
+<h1 class="es-ink es-h1" @if ($auto) dir="auto" @endif style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: -0.02em; color: #14161a; font-family: {{ \App\Utils\EmailTheme::FONT }};">{{ $slot }}</h1>
 @if (filled($subtitle))
 <p class="es-ink-2" style="margin: 8px 0 0; font-size: 16px; line-height: 24px; color: #4b5263;">{{ $subtitle }}</p>
 @endif

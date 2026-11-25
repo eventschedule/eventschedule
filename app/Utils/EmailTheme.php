@@ -38,12 +38,12 @@ final class EmailTheme
 
     public const WHITE = '#ffffff';
 
-    public const INK = '#0f172a';
+    public const INK = '#14161a';
 
     public const CARD_DARK = '#111827';
 
     /** The raised panel inside the card (the event block, details), light and dark. */
-    public const PANEL = '#f8fafc';
+    public const PANEL = '#f8f9fb';
 
     public const PANEL_DARK = '#1a2332';
 
@@ -65,7 +65,7 @@ final class EmailTheme
         'warning' => ['ink' => '#b45309', 'bg' => '#fffbeb', 'border' => '#fcd34d', 'dark_ink' => '#fcd34d', 'dark_bg' => '#2a2111', 'dark_border' => '#78350f'],
         'success' => ['ink' => '#15803d', 'bg' => '#f0fdf4', 'border' => '#86efac', 'dark_ink' => '#86efac', 'dark_bg' => '#10241a', 'dark_border' => '#14532d'],
         'info' => ['ink' => '#1d4ed8', 'bg' => '#eff6ff', 'border' => '#bfdbfe', 'dark_ink' => '#93c5fd', 'dark_bg' => '#111d35', 'dark_border' => '#1e3a8a'],
-        'neutral' => ['ink' => '#475569', 'bg' => '#f8fafc', 'border' => '#e2e8f0', 'dark_ink' => '#cbd5e1', 'dark_bg' => '#1a2332', 'dark_border' => '#273244'],
+        'neutral' => ['ink' => '#4b5263', 'bg' => '#f8f9fb', 'border' => '#e3e6ec', 'dark_ink' => '#c5cbd6', 'dark_bg' => '#1a2332', 'dark_border' => '#273244'],
     ];
 
     /** The identity tile's side, and a wide logo's box inside its own tile (6px top and bottom). */
@@ -163,7 +163,7 @@ final class EmailTheme
             accent: $button,
             onAccent: $onButton,
             // A near-white button would have no edge on the white card.
-            accentBorder: ColorUtils::getContrastRatio($button, self::WHITE) < 1.5 ? '#cbd5e1' : $button,
+            accentBorder: ColorUtils::getContrastRatio($button, self::WHITE) < 1.5 ? '#c5cbd6' : $button,
             accentInk: self::darkenUntil($base, [self::WHITE, self::PANEL, $tint, ...array_column(self::TONES, 'bg')]),
             accentTint: $tint,
             darkTint: $darkTint,
