@@ -1083,8 +1083,50 @@
                  * label for the panel. Nothing about price is trusted on the way back in: checkout
                  * re-reads every ticket from the database.
                  */
+                /**
+                 * The first required custom field (the event's, or a selected ticket's) left
+                 * empty, as its element on the page, or null. Multi-selects carry no `required`
+                 * on checkout either, so they are not asked here.
+                 */
+                firstMissingCustomField() {
+                    var empty = function (value) { return value === undefined || value === null || String(value).trim() === ''; };
+                    var find = function (id) { return document.getElementById(id); };
+
+                    for (var [key, field] of Object.entries(this.eventCustomFields || {})) {
+                        if (field.required && field.type !== 'multiselect' && empty(this.eventCustomValues[key])) {
+                            var el = find('event_custom_' + key);
+                            if (el) { return el; }
+                        }
+                    }
+
+                    if (this.showGuestForms) {
+                        return null;
+                    }
+
+                    for (var ticket of this.tickets) {
+                        if (! (ticket.selectedQty > 0) || ! ticket.custom_fields) {
+                            continue;
+                        }
+                        for (var [tkey, tfield] of Object.entries(ticket.custom_fields)) {
+                            if (tfield.required && tfield.type !== 'multiselect' && empty(ticket.custom_values && ticket.custom_values[tkey])) {
+                                var tel = find('ticket_custom_' + ticket.id + '_' + tkey);
+                                if (tel) { return tel; }
+                            }
+                        }
+                    }
+
+                    return null;
+                },
                 addToCart() {
                     if (this.seatsBlocked) { this.showSeatProblem(); return; }
+
+                    // Checkout has the browser refuse an empty required field; the cart posts from
+                    // another form, so the same refusal is asked for here, on the field itself.
+                    var missing = this.firstMissingCustomField();
+                    if (missing) {
+                        if (missing.reportValidity) { missing.reportValidity(); } else { missing.focus(); }
+                        return;
+                    }
 
                     var leg = {
                         event_id: @json(\App\Utils\UrlUtils::encodeId($event->id)),
@@ -1130,6 +1172,42 @@
                     if (Object.keys(leg.tickets).length === 0) {
                         return;
                     }
+
+                    // The answers to the event's and the tickets' custom fields, as the checkout
+                    // form would post them. The leg used to carry none, so a sale paid for
+                    // from the cart stored no answers while the same sale from Checkout did.
+                    var joinMulti = function (values) { return (values || []).join(', '); };
+                    var eventCustom = {};
+                    var self0 = this;
+                    Object.entries(this.eventCustomFields || {}).forEach(function ([key, field]) {
+                        var value = field.type === 'multiselect'
+                            ? joinMulti(self0.eventMultiselectValues[key])
+                            : self0.eventCustomValues[key];
+                        if (value !== undefined && value !== null && value !== '') {
+                            eventCustom[key] = value;
+                        }
+                    });
+                    leg.event_custom_values = eventCustom;
+
+                    var ticketCustom = {};
+                    this.tickets.forEach(function (ticket) {
+                        if (! (ticket.selectedQty > 0) || ! ticket.custom_fields) {
+                            return;
+                        }
+                        var values = {};
+                        Object.entries(ticket.custom_fields).forEach(function ([key, field]) {
+                            var value = field.type === 'multiselect'
+                                ? joinMulti(ticket.multiselect_values && ticket.multiselect_values[key])
+                                : ticket.custom_values && ticket.custom_values[key];
+                            if (value !== undefined && value !== null && value !== '') {
+                                values[key] = value;
+                            }
+                        });
+                        if (Object.keys(values).length) {
+                            ticketCustom[ticket.id] = values;
+                        }
+                    });
+                    leg.ticket_custom_values = ticketCustom;
 
                     window.dispatchEvent(new CustomEvent('es-cart-add', { detail: leg }));
 

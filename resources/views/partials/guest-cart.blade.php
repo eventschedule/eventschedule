@@ -150,6 +150,14 @@
                     <template v-for="(qty, ticketId) in leg.tickets">
                         <input type="hidden" :name="'legs[' + index + '][tickets][' + ticketId + ']'" :value="qty">
                     </template>
+                    <template v-for="(value, fieldKey) in (leg.event_custom_values || {})">
+                        <input type="hidden" :name="'legs[' + index + '][event_custom_values][' + fieldKey + ']'" :value="value">
+                    </template>
+                    <template v-for="(values, ticketId) in (leg.ticket_custom_values || {})">
+                        <template v-for="(value, fieldKey) in values">
+                            <input type="hidden" :name="'legs[' + index + '][ticket_custom_values][' + ticketId + '][' + fieldKey + ']'" :value="value">
+                        </template>
+                    </template>
                     <template v-for="(qty, addonId) in leg.addons">
                         <input type="hidden" :name="'legs[' + index + '][addons][' + addonId + ']'" :value="qty">
                     </template>

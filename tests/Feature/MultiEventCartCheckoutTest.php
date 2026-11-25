@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Services\EmailService;
+use App\Services\Payments\PaymentGatewayDriver;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -53,7 +56,7 @@ class MultiEventCartCheckoutTest extends TestCase
     {
         return [
             'event_id' => UrlUtils::encodeId($event->id),
-            'event_date' => \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'event_date' => Carbon::parse($event->starts_at)->format('Y-m-d'),
             'tickets' => [UrlUtils::encodeId($ticket->id) => $qty],
         ];
     }
@@ -201,7 +204,7 @@ class MultiEventCartCheckoutTest extends TestCase
         $legs = Sale::where('email', 'cart@example.com')->orderBy('id')->get();
         Sale::whereIn('id', $legs->pluck('id'))->update(['status' => 'unpaid', 'payment_method' => 'stripe']);
         $primary = $legs->first()->fresh();
-        \App\Services\Payments\PaymentGatewayDriver::markLanded($primary);
+        PaymentGatewayDriver::markLanded($primary);
 
         $order = $this->get(route('ticket.order', ['order_id' => UrlUtils::encodeId($primary->id), 'secret' => $primary->secret]))->assertOk()->getContent();
         $this->assertSame(1, preg_match('/data-ticket-state="confirming" role="status"\s+data-confirming="\d+"\s+data-status-url="\/ticket\/status\//', $order), 'the order page used to say nothing about the payment');
@@ -261,6 +264,45 @@ class MultiEventCartCheckoutTest extends TestCase
         }
     }
 
+    public function test_a_cart_stores_the_answers_to_event_and_ticket_custom_fields(): void
+    {
+        [$eventA, $eventB, $ticketA, $ticketB] = $this->twoEvents();
+
+        $eventA->custom_fields = ['field_a' => ['name' => 'Parking', 'type' => 'switch', 'required' => true, 'index' => 1]];
+        $eventA->save();
+        $ticketB->custom_fields = ['field_b' => ['name' => 'Vegan', 'type' => 'switch', 'required' => false, 'index' => 2]];
+        $ticketB->save();
+
+        $legA = $this->leg($eventA, $ticketA) + ['event_custom_values' => ['field_a' => 'Yes']];
+        $legB = $this->leg($eventB, $ticketB) + [
+            'ticket_custom_values' => [UrlUtils::encodeId($ticketB->id) => ['field_b' => 'No']],
+        ];
+
+        $this->checkout([$legA, $legB]);
+
+        $saleA = Sale::where('event_id', $eventA->id)->firstOrFail();
+        $saleB = Sale::where('event_id', $eventB->id)->firstOrFail();
+
+        $this->assertSame('Yes', $saleA->custom_value1);
+        $this->assertSame('No', $saleB->saleTickets()->firstOrFail()->custom_value2);
+    }
+
+    public function test_the_page_and_the_cart_carry_custom_field_answers(): void
+    {
+        [$eventA] = $this->twoEvents();
+
+        $html = $this->get(route('event.view_guest', [
+            'subdomain' => $this->role->subdomain,
+            'slug' => $eventA->slug,
+        ]))->assertOk()->getContent();
+
+        // addToCart() puts the answers on the leg, and the cart posts them back per leg.
+        $this->assertStringContainsString('leg.event_custom_values = eventCustom', $html);
+        $this->assertStringContainsString('leg.ticket_custom_values = ticketCustom', $html);
+        $this->assertStringContainsString("'][event_custom_values][' + fieldKey + ']'", $html);
+        $this->assertStringContainsString("'][ticket_custom_values][' + ticketId + '][' + fieldKey + ']'", $html);
+    }
+
     public function test_the_cart_widget_renders_outside_the_ticket_selector_mount(): void
     {
         [$eventA] = $this->twoEvents();
@@ -312,11 +354,11 @@ class MultiEventCartCheckoutTest extends TestCase
 
         // Recorded at the seam rather than through the mail transport, whose own gates (test
         // domains, demo schedules, configured sender) would decide the outcome instead.
-        $recorder = new class extends \App\Services\EmailService
+        $recorder = new class extends EmailService
         {
             public array $ticketed = [];
 
-            public function sendTicketEmail(Sale $sale, ?\App\Models\Role $role = null, bool $queue = true): string|true
+            public function sendTicketEmail(Sale $sale, ?Role $role = null, bool $queue = true): string|true
             {
                 $this->ticketed[] = $sale->id;
 
@@ -442,7 +484,7 @@ class MultiEventCartCheckoutTest extends TestCase
 
         $response->assertRedirect();
         $response->assertSessionHas('error', __('messages.cart_event_unavailable', ['event' => $eventB->name]));
-        $response->assertSessionHas('cart_invalid_legs', [UrlUtils::encodeId($eventB->id).'|'.\Carbon\Carbon::parse($eventB->starts_at)->format('Y-m-d')]);
+        $response->assertSessionHas('cart_invalid_legs', [UrlUtils::encodeId($eventB->id).'|'.Carbon::parse($eventB->starts_at)->format('Y-m-d')]);
 
         $this->assertSame(0, Sale::where('email', 'cart@example.com')->count());
     }
@@ -479,7 +521,7 @@ class MultiEventCartCheckoutTest extends TestCase
         // reached the server with an empty date - so a recurring event sold its series start rather
         // than the occurrence on screen. Asserted on the rendered state, which is what the browser
         // actually sends, rather than on a hand-built payload.
-        $date = \Carbon\Carbon::parse($eventA->starts_at)->format('Y-m-d');
+        $date = Carbon::parse($eventA->starts_at)->format('Y-m-d');
 
         $html = $this->get(route('event.view_guest', [
             'subdomain' => $this->role->subdomain,
@@ -501,8 +543,8 @@ class MultiEventCartCheckoutTest extends TestCase
         $owner = $this->createOwner();
         $this->role = $this->createRole($owner);
 
-        $friday = \Carbon\Carbon::now()->next(\Carbon\Carbon::FRIDAY)->format('Y-m-d');
-        $saturday = \Carbon\Carbon::now()->next(\Carbon\Carbon::SATURDAY)->format('Y-m-d');
+        $friday = Carbon::now()->next(Carbon::FRIDAY)->format('Y-m-d');
+        $saturday = Carbon::now()->next(Carbon::SATURDAY)->format('Y-m-d');
 
         // A series that has already begun, so that the coming Friday and Saturday ARE two of its
         // dates: checkout refuses a date the event does not happen on (SaleDateBelongsToTheEventTest),
@@ -510,7 +552,7 @@ class MultiEventCartCheckoutTest extends TestCase
         $event = $this->createEvent($this->role, [
             'tickets_enabled' => true, 'payment_method' => 'cash', 'ticket_currency_code' => 'USD',
             'days_of_week' => '0000011',
-            'starts_at' => \Carbon\Carbon::now()->subDays(14)->setTime(12, 0)->format('Y-m-d H:i:s'),
+            'starts_at' => Carbon::now()->subDays(14)->setTime(12, 0)->format('Y-m-d H:i:s'),
         ]);
         $ticket = $this->createTicket($event, ['price' => 0, 'quantity' => 50]);
 
