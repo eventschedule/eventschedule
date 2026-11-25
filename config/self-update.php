@@ -24,7 +24,7 @@ return [
     |
     */
 
-    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', 'v1.0.147'),
+    'version_installed' => env('SELF_UPDATER_VERSION_INSTALLED', 'v1.0.148'),
 
     /*
     | Whether the scheduler finishes an update the updater left undone (its migrations and cache
