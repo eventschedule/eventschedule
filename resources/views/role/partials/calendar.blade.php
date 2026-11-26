@@ -275,6 +275,23 @@
         }
     }
 
+    // What the page will open on, and what it will hold, as far as the server can tell before the
+    // events arrive (they come in a second request). Read by the loading state, which is also
+    // what shows before the page's script has started: every block that only has meaning once
+    // the events are in carries v-cloak, and the placeholder for the view that will open does
+    // not, so the first paint is the list's or the month's own shape and never all of them at
+    // once (a laptop drew the phone's month, "No events" and "Next month" until the script ran).
+    $initialView = $eventLayout ?? 'calendar';
+    $cloakUnless = fn (string $view) => $initialView === $view ? '' : 'v-cloak';
+    // The chips' row (role/partials/quick-pills) needs the events to know its categories, so it
+    // arrived with them and pushed the list down. Its room is kept while they load when the
+    // schedule has sub-schedules or events in more than one category (past ones included: a
+    // row that then turns out empty moves up once, which is rarer than one that appears).
+    $expectChips = $guestRows && ! $guestEmbed && isset($role) && $role->exists && (
+        count($groupsForVue) > 1
+        || $role->events()->whereNotNull('events.category_id')->distinct()->limit(2)->pluck('events.category_id')->count() > 1
+    );
+
     // Custom fields for the Vue filters and search. Pro only: custom fields are a Pro feature,
     // and the payload's custom_field_values are empty for a schedule that is not
     // (Event::publicCustomFieldValuesFor()), so a filter here would only ever offer nothing.
@@ -618,6 +635,16 @@
      picked comes before what is picked. The month on a wider screen has its own copy in the
      header, beside the month's name (gk-pills-desk-off hides this one there). --}}
 @include('role.partials.quick-pills', ['pillsInHeader' => false])
+@if ($expectChips)
+{{-- The chips' room while the events load: they are built from the events, and arrived with
+     them pushing the list down. It steps aside the moment the real row can be drawn (the
+     schedule's sub-schedules are known at once, and the events can arrive before the list has
+     finished loading), or the page drew both rows for a moment. Hidden on a laptop where the
+     month opens, as the row it stands for is (gk-pills-desk-off). --}}
+<div v-if="isLoadingEvents && quickChips.length <= 1" class="gk-pills gk-pills-wait {{ $initialView === 'calendar' ? 'gk-pills-desk-off' : '' }}" aria-hidden="true">
+    @for ($p = 0; $p < 4; $p++)<span class="gk-pill"></span>@endfor
+</div>
+@endif
 @endif
 
 @if (! request()->graphic && ! (isset($embed) && $embed))
@@ -665,7 +692,7 @@
     </div>
 
 
-    <div v-show="currentView === 'calendar'" class="{{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
+    <div v-show="currentView === 'calendar'" {{ $cloakUnless('calendar') }} class="{{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
 
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
@@ -680,7 +707,22 @@
                     @endfor
                 </div>
                 <div class="gk-cal-weeks">
-                    <div v-for="w in Math.ceil(calendarDays.length / 7)" :key="w" class="gk-cal-week">
+                    {{-- Before the script starts, a v-for is one row of one day: the server draws
+                         the opening month's weeks instead, and the script swaps them for its own. --}}
+                    @for ($w = 0; $w < intdiv((int) $startOfMonth->diffInDays($endOfMonth) + 1, 7); $w++)
+                    <div v-if="false" class="gk-cal-week">
+                        @for ($dd = 0; $dd < 7; $dd++)
+                        <div class="gk-cal-day">
+                            <i class="gk-cal-wait-bar gk-cal-wait-num"></i>
+                            @if (($tab ?? '') != 'availability')
+                            <i class="gk-cal-wait-bar gk-cal-wait-line"></i>
+                            <i class="gk-cal-wait-bar gk-cal-wait-line gk-cal-wait-short"></i>
+                            @endif
+                        </div>
+                        @endfor
+                    </div>
+                    @endfor
+                    <div v-for="w in Math.ceil(calendarDays.length / 7)" v-cloak :key="w" class="gk-cal-week">
                         <div v-for="d in 7" :key="d" class="gk-cal-day">
                             <i class="gk-cal-wait-bar gk-cal-wait-num"></i>
                             @if (($tab ?? '') != 'availability')
@@ -822,7 +864,7 @@
              upcoming event day by day with no month to page through, now as rows.
 
              v-if, so a laptop and the list view do not carry these rows as well. --}}
-        <div v-if="isNarrow && currentView === 'calendar' && !isLoadingEvents" class="gk-list" data-phone-month>
+        <div v-if="isNarrow && currentView === 'calendar' && !isLoadingEvents" v-cloak class="gk-list" data-phone-month>
             @if (! $guestEmbed)
             <div class="gk-panel gk-month bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
                 <button v-if="phoneDay" type="button" class="gk-month-fold" ref="phoneFold" @click="unfoldPhoneMonth" aria-expanded="false">
@@ -886,7 +928,7 @@
             @endif
         </div>
         @else
-        <div v-show="currentView === 'calendar' && !isLoadingEvents" class="md:hidden">
+        <div v-show="currentView === 'calendar' && !isLoadingEvents" v-cloak class="md:hidden">
             <div v-if="mobileEventsList.length">
                 <button id="showPastEventsBtn" class="text-[var(--brand-blue)] font-medium hidden mb-4 w-full text-center">
                     {{ $label('show_past_events') }}
@@ -959,7 +1001,7 @@
      as role/partials/card-ticket-badge.) The admin and the dashboard keep both lists and the
      CSS switch, as before. --}}
 {{-- List View Skeleton (Desktop) --}}
-        <div v-if="currentView === 'list' && isLoadingEvents && {{ $guestRows ? 'false' : 'true' }}" class="hidden md:block space-y-4 animate-pulse">
+        <div v-if="currentView === 'list' && isLoadingEvents && {{ $guestRows ? 'false' : 'true' }}" {{ $guestRows ? 'v-cloak' : '' }} class="hidden md:block space-y-4 animate-pulse">
             {{-- Date Header Skeleton (matches the real header's centered translucent pill) --}}
             <div class="flex items-center gap-4">
                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
@@ -1010,7 +1052,7 @@
      width, the rows below (role/partials/guest-row), which the stage lays out as the wide list
      from a tablet up (partials/guest-stage-styles). --}}
         @unless ($guestRows)
-        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && !isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="hidden md:block {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
+        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents && !isNarrow"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} v-cloak :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="hidden md:block {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
             {{-- Upcoming Events --}}
             <div v-if="allListGroups.length" class="space-y-8">
                 <template v-for="(group, groupIndex) in allListGroups" :key="'list-d-' + group.date">
@@ -1846,7 +1888,13 @@
         @endunless
 
         {{-- List View Skeleton (Mobile) --}}
-        <div v-if="currentView === 'list' && isLoadingEvents" class="{{ $guestRows ? 'gk-list' : 'md:hidden' }} animate-pulse">
+        @if ($guestRows)
+        {{-- The guest list while it loads, in the list's own shape (role/partials/guest-list-wait). --}}
+        <div v-if="currentView === 'list' && isLoadingEvents" {{ $cloakUnless('list') }} class="gk-list">
+            @include('role/partials/guest-list-wait')
+        </div>
+        @else
+        <div v-if="currentView === 'list' && isLoadingEvents" class="md:hidden animate-pulse">
             {{-- Date Header Skeleton --}}
             <div class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white dark:bg-gray-800">
                 <div class="px-4 pb-5 pt-3 flex items-center gap-4">
@@ -1883,11 +1931,12 @@
                 @endfor
             </div>
         </div>
+        @endif
 
         {{-- List View (Mobile) --}}
         {{-- v-if on a guest page, and only on a phone: a list that is not the one on screen is
              not in the page at all (the cards above are the list from a tablet up). --}}
-        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="{{ $guestRows ? 'gk-list' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
+        <div {!! $guestRows ? 'v-if="currentView === \'list\' && !isLoadingEvents"' : 'v-show="currentView === \'list\' && !isLoadingEvents"' !!} v-cloak :data-list-anim="activeListAnimation !== 'none' ? activeListAnimation : null" :data-list-rtl="isRtl ? '' : null" style="--es-accent: {{ $accentColor }}" class="{{ $guestRows ? 'gk-list' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $ownPage) }}">
             @if ($guestRows)
             {{-- The guest list on a phone: each day under its date, a card for each event
                  (partials/guest-kit-styles: .gk-day, .gk-row).

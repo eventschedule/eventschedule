@@ -403,7 +403,8 @@ class GuestListRowsTest extends TestCase
         // admin's and the dashboard's now. Only the view on screen is in the page (v-if).
         $this->assertSame(3, substr_count($html, 'class="gk-row gk-row-press"'), 'the list, its large cards and the phone month draw the same row');
         $this->assertStringNotContainsString('id="mobileEventsList"', $html);
-        $this->assertStringContainsString('<div v-if="isNarrow && currentView === \'calendar\' && !isLoadingEvents" class="gk-list" data-phone-month>', $html);
+        // v-cloak: before the script starts it is not drawn (a laptop showed its "No events").
+        $this->assertStringContainsString('<div v-if="isNarrow && currentView === \'calendar\' && !isLoadingEvents" v-cloak class="gk-list" data-phone-month>', $html);
 
         // It reads the month as the laptop's grid does, from the server's map of it: the list
         // of UPCOMING occurrences it used to read has no day that is over, no earlier month,
@@ -771,9 +772,11 @@ class GuestListRowsTest extends TestCase
         $guest = $this->get('/'.$this->role->subdomain)->assertOk()->getContent();
         // A day is not a panel: the owner's background shows between its cards, and only the
         // day's name stands on a panel of its own.
-        $this->assertSame(2, substr_count($guest, 'class="gk-day"'), 'the list and the days under a phone\'s month');
+        // Twice more for the list's loading placeholder (role/partials/guest-list-wait), which is
+        // drawn in the same boxes so nothing moves when the events arrive.
+        $this->assertSame(4, substr_count($guest, 'class="gk-day"'), 'the list, the days under a phone\'s month and the placeholder');
         $this->assertDoesNotMatchRegularExpression('~gk-panel gk-day[" ]~', $guest);
-        $this->assertSame(2, substr_count($guest, 'class="gk-panel gk-dayhead"'));
+        $this->assertSame(4, substr_count($guest, 'class="gk-panel gk-dayhead"'));
         // Each card has an edge of its own, or a white card on a white page has none.
         $this->assertMatchesRegularExpression('~\.gk-row-item \{[^}]*border: 1px solid var\(--gk-line\);[^}]*background: var\(--gk-solid\);[^}]*box-shadow: var\(--gk-shadow\);~', $guest);
         $this->assertMatchesRegularExpression('~\.gk-rows \{[^}]*gap: \.75rem;~', $guest);

@@ -247,6 +247,32 @@ if (! function_exists('font_stylesheet_url')) {
     }
 }
 
+if (! function_exists('font_preload_url')) {
+    /**
+     * The Latin file of a schedule font (the `latin` block of its local font.css), to preload
+     * beside the stylesheet: asked for only after the stylesheet has arrived and been read, the
+     * schedule's display font came in late and the name at the top of the page was drawn twice,
+     * first in the fallback and then, wider, in the font (frame by frame on the nexus, 2026-11).
+     * Null for a font with no local copy or no Latin file.
+     */
+    function font_preload_url(string $font): ?string
+    {
+        $dir = str_replace(' ', '_', trim($font));
+        $css = public_path('vendor/fonts/'.$dir.'/font.css');
+
+        if (! preg_match('/^[A-Za-z0-9_]{1,100}\z/', $dir) || ! is_file($css)) {
+            return null;
+        }
+
+        if (! preg_match('~/\* latin \*/\s*@font-face\s*\{[^}]*?url\(([A-Za-z0-9_\-]+\.woff2)\)~', (string) file_get_contents($css), $match)
+            || ! is_file(public_path('vendor/fonts/'.$dir.'/'.$match[1]))) {
+            return null;
+        }
+
+        return asset('vendor/fonts/'.$dir.'/'.$match[1]);
+    }
+}
+
 if (! function_exists('mask_emails')) {
     /**
      * Every email address in a string reduced to its first character and its domain

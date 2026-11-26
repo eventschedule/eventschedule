@@ -378,6 +378,10 @@
         @endif
         @foreach(array_filter($fonts) as $font)
             @if ($fontStylesheet = font_stylesheet_url($font))
+            {{-- Its Latin file asked for at once, as Rubik's is above (font_preload_url()). --}}
+            @if ($fontFile = font_preload_url($font))
+            <link rel="preload" as="font" type="font/woff2" href="{{ $fontFile }}" crossorigin>
+            @endif
             <link href="{{ $fontStylesheet }}" rel="stylesheet">
             @endif
         @endforeach

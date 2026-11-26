@@ -224,6 +224,12 @@
     .gk-pills { display: flex; gap: .5rem; overflow-x: auto; max-width: 46rem; margin: 0 auto .75rem; padding: .125rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
     .gk-pills::-webkit-scrollbar { display: none; }
     .gk-pills[v-cloak] { display: none; }
+    {{-- While the events load (role/partials/guest-list-wait, and the chips' row above it): the
+         list's own boxes, with a bar where each line of words will be, in the page's hairline
+         ink so it reads on every palette and on a picture behind the list. A bar is as tall as
+         the line it stands for, so a heading's bar is a heading's height. --}}
+    .gk-wait-bar { display: inline-block; height: .8em; max-width: 100%; border-radius: .25rem; background: var(--gk-line); vertical-align: middle; }
+    .gk-wait-media { background: var(--gk-line); }
     {{-- The month's own copy, in the header beside the month's name: from a tablet up only, where
          it takes the room between the name and the month's buttons and wraps rather than
          scrolling (a sideways scroll with no scrollbar is out of reach of a mouse). The copy
@@ -244,6 +250,10 @@
         .gk-pills-head { order: 3; flex: 1 0 100%; padding-top: 0; }
     }
     .gk-pill { display: inline-flex; flex: none; align-items: center; min-height: 2.25rem; padding: 0 .875rem; border: 1px solid var(--gk-line); border-radius: 999px; background: var(--gk-solid); color: var(--gk-ink); font: inherit; font-size: .875rem; font-weight: 600; white-space: nowrap; cursor: pointer; transition: background-color var(--gk-swap, 120ms) ease, color var(--gk-swap, 120ms) ease; }
+    {{-- The chips' room while the events load (role/partials/calendar): after .gk-pill, which it
+         ties with (:where() keeps it to one class, so an owner's rule still wins). --}}
+    :where(.gk-pills-wait) .gk-pill { width: 6rem; color: transparent; background: var(--gk-line); border-color: transparent; pointer-events: none; }
+    :where(.gk-pills-wait) .gk-pill:first-child { width: 4.5rem; }
     .gk-pill:focus-visible { outline: 2px solid var(--gk-ink); outline-offset: 2px; }
     .gk-pill-on { border-color: var(--es-accent-edge, transparent); background: var(--es-accent); color: var(--es-accent-text); }
 
