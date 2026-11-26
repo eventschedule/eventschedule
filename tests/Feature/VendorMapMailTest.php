@@ -131,7 +131,11 @@ class VendorMapMailTest extends TestCase
             $this->assertStringContainsString('Tomatoes and greens', $html);
             $this->assertStringNotContainsString('Old Bakery', $html);
             // Phones are for the editors' screens, never mail.
-            $this->assertStringNotContainsString('555', $html);
+            // The phone in every form it could be printed in; a bare '555' also matched a random
+            // signature or token in the mail now and then.
+            foreach (['555 0147', '5550147', '555-0147'] as $phone) {
+                $this->assertStringNotContainsString($phone, $html);
+            }
             $this->assertStringContainsString('vendor-map', $html);
             $this->assertStringContainsString('the &quot;Riverside Farmers Market&quot; schedule', $html);
 
@@ -210,7 +214,11 @@ class VendorMapMailTest extends TestCase
             ]);
             $this->assertStringContainsString(e($away), $html);
             $this->assertStringContainsString('?s='.rawurlencode($claim->spot->label), $html);
-            $this->assertStringNotContainsString('555', $html);
+            // The phone in every form it could be printed in; a bare '555' also matched a random
+            // signature or token in the mail now and then.
+            foreach (['555 0147', '5550147', '555-0147'] as $phone) {
+                $this->assertStringNotContainsString($phone, $html);
+            }
 
             // The map with the stall marked rides inside the mail, never as a remote picture.
             if (VendorMapPng::stallImage($this->map->fresh(), (int) $claim->spot_id) !== null) {

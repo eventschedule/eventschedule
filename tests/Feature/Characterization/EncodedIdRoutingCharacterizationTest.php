@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Characterization;
 
+use App\Models\Event;
 use App\Models\Newsletter;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Feature\Characterization\Concerns\SavesEventsOverHttp;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -83,7 +85,7 @@ class EncodedIdRoutingCharacterizationTest extends TestCase
             'venue_id' => 'not-a-real-hash',
         ])->assertNotFound();
 
-        $this->assertSame(0, \App\Models\Event::count());
+        $this->assertSame(0, Event::count());
     }
 
     /**
@@ -104,12 +106,18 @@ class EncodedIdRoutingCharacterizationTest extends TestCase
 
         // The other half: the guard must not cost a real id, in either of the two forms.
         $this->assertSame(4242, UrlUtils::decodeId(UrlUtils::encodeId(4242)));
-        $this->assertEquals(4242, UrlUtils::decodeId(base64_encode((string) (4242 + 389278))));
+        // The legacy form is tried second, so under an APP_KEY whose alphabet happens to make
+        // this string a valid new id too, the new id wins. That depends on the key (CI makes one
+        // per run), so the legacy half is asserted only where the string is not also a new id.
+        $legacy = base64_encode((string) (4242 + 389278));
+        if (UrlUtils::encodeId(UrlUtils::decodeId($legacy)) !== $legacy) {
+            $this->assertEquals(4242, UrlUtils::decodeId($legacy));
+        }
     }
 
     public function test_decode_id_or_fail_404s_on_a_non_scalar(): void
     {
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\NotFoundHttpException::class);
+        $this->expectException(NotFoundHttpException::class);
 
         UrlUtils::decodeIdOrFail(['1']);
     }
