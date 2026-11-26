@@ -111,7 +111,9 @@ class UseCasesPageTest extends TestCase
             $view = resource_path('views/marketing/'.$card['key'].'.blade.php');
             $this->assertFileExists($view);
 
-            preg_match_all('/sign_up\?type=([a-z]+)/', File::get($view), $own);
+            // A vendor map's own sign-up is left out: a map is always a venue's, whoever the page
+            // is for (the festival page signs its organizers up as curators and its map as a venue).
+            preg_match_all('/sign_up\?type=([a-z]++)(?!&vendor_map=)/', File::get($view), $own);
             $types = array_values(array_unique($own[1]));
 
             if ($types === []) {
