@@ -45,7 +45,7 @@ return [
     '/docs/boost' => '2026-11-23',
     '/docs/creating-events' => '2026-11-26',
     '/docs/creating-schedules' => '2026-11-26',
-    '/docs/developer/api' => '2026-11-23',
+    '/docs/developer/api' => '2026-11-26',
     '/docs/developer/webhooks' => '2026-10-23',
     '/docs/event-graphics' => '2026-11-23',
     '/docs/getting-started' => '2026-11-24',

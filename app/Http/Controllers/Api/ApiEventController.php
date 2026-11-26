@@ -14,6 +14,7 @@ use App\Repos\EventRepo;
 use App\Services\AuditService;
 use App\Services\EventLifecycleService;
 use App\Services\EventTranslationEdits;
+use App\Utils\ApiCustomFieldValues;
 use App\Utils\GeminiUtils;
 use App\Utils\ImportedTime;
 use App\Utils\RemoteImage;
@@ -340,6 +341,10 @@ class ApiEventController extends Controller
             return $refusal;
         }
 
+        if ($refusal = $this->takeCustomFieldValues($request, $role, null)) {
+            return $refusal;
+        }
+
         [$flyerUrl, , $refusal] = $this->flyerAddressFrom($request, null);
         if ($refusal) {
             return $refusal;
@@ -364,6 +369,8 @@ class ApiEventController extends Controller
             'venue_id', 'venue_name', 'venue_address1',
             'members', 'schedule', 'tickets', 'event_parts', 'addons', 'ticket_preset_id',
             'translations', 'translations_keep',
+            // By field name, already checked and laid over what is stored (takeCustomFieldValues()).
+            'custom_field_values',
         ]));
 
         // A ticket preset the caller names is applied, as pressing it on the Tickets tab does
@@ -706,6 +713,8 @@ class ApiEventController extends Controller
             'venue_id', 'venue_name', 'venue_address1',
             'members', 'schedule', 'tickets', 'event_parts', 'addons', 'ticket_preset_id', 'ticket_preset_apply',
             'translations', 'translations_keep',
+            // By field name, already checked and laid over what is stored (takeCustomFieldValues()).
+            'custom_field_values',
         ]));
 
         // A ticket preset the caller names is applied, as pressing it on the Tickets tab does
@@ -765,6 +774,11 @@ class ApiEventController extends Controller
 
         if (! $currentRole) {
             return response()->json(['error' => 'No schedule found for this event that you have access to'], 422);
+        }
+
+        // The answers are keyed by the fields of the schedule the save runs through, as on the form.
+        if ($refusal = $this->takeCustomFieldValues($request, $currentRole, $event)) {
+            return $refusal;
         }
 
         // On a talent schedule the schedule itself is the performer and preprocessEventRequest()
@@ -1821,6 +1835,28 @@ class ApiEventController extends Controller
      * that one is not a schedule the caller can see (a venue typed into a form, which nobody
      * owns, is the usual kind): without it the event ended up at both.
      */
+    /**
+     * `custom_field_values`, by field name, laid over what the event already holds for $role's
+     * fields (ApiCustomFieldValues). Absent, nothing is touched; saveEvent() reads only a sent key.
+     */
+    private function takeCustomFieldValues(Request $request, Role $role, ?Event $event): ?JsonResponse
+    {
+        if (! $request->has('custom_field_values')) {
+            return null;
+        }
+
+        $stored = $event && $event->customFieldValuesBelongTo($role, unknownCounts: true) ? (array) $event->custom_field_values : [];
+        [$values, $errors] = ApiCustomFieldValues::resolve($role, $request->input('custom_field_values'), $stored);
+
+        if ($errors) {
+            return response()->json(['error' => 'Validation failed', 'errors' => $errors], 422);
+        }
+
+        $request->merge(['custom_field_values' => $values]);
+
+        return null;
+    }
+
     private function keepAttachments(Request $request, Event $event, Role $currentRole, bool $sentVenue, bool $sentMembers): void
     {
         $listed = array_values((array) $request->input('curators', []));

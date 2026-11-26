@@ -15,6 +15,7 @@ use App\Services\MetaAdsService;
 use App\Services\SeatingMapService;
 use App\Services\TicketVolumeDiscount;
 use App\Traits\HasImageVariants;
+use App\Utils\ApiCustomFieldValues;
 use App\Utils\EventTextGenerator;
 use App\Utils\GalleryUtils;
 use App\Utils\GuestSeo;
@@ -5639,6 +5640,8 @@ class Event extends Model
         $data->cancelled_at = $this->cancelled_at?->toIso8601String();
         // The id another system knows this event by (the API sets it; see ApiEventController).
         $data->external_id = $this->external_id;
+        // By field name, the event's own schedule's fields only, never a private one (issue #141).
+        $data->custom_field_values = (object) ApiCustomFieldValues::forApi($this);
         $data->is_password_protected = $this->isPasswordProtected();
         $data->event_url = $this->event_url;
         $data->registration_url = $this->registration_url;

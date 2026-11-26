@@ -4092,6 +4092,11 @@
             "maxLength": 255,
             "description": "The id your own system gave the event. Unique for the schedule that owns the event, compared exactly"
           },
+          "custom_field_values": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The event's answers to its schedule's custom fields, keyed by field name: text and dates as strings, a Yes/No field as a boolean, a multiple choice field as a list. Fields with no answer and private fields are left out"
+          },
           "is_cancelled": {
             "type": "boolean",
             "readOnly": true,
@@ -4501,6 +4506,11 @@
             "nullable": true,
             "maxLength": 255,
             "description": "The id your own system knows this event by. Unique for the schedule that owns the event and compared exactly. On create, an id the schedule already has an event for is a 409. On update, a value sets or changes it and null clears it"
+          },
+          "custom_field_values": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Answers to the schedule's custom fields, keyed by field name (any case) or field key: a string, one of a dropdown's options, a list of a multiple choice field's options, true or false for Yes/No, YYYY-MM-DD for a date. An unknown name or a refused value is a 422. On update only the fields named change, and null or an empty string clears one"
           },
           "upsert": {
             "type": "boolean",
