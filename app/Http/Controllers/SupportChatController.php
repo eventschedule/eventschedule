@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\SendSupportReplyEmail;
 use App\Models\SupportConversation;
 use App\Models\SupportMessage;
 use App\Models\User;
 use App\Services\OneSignalService;
+use App\Services\SupportReplies;
 use App\Utils\AdminReauthUtils;
 use App\Utils\SupportPresence;
 use App\Utils\UrlUtils;
@@ -366,50 +366,20 @@ class SupportChatController extends Controller
     public function adminReply(Request $request, $id)
     {
         $request->validate([
-            'body' => 'required|string|max:2000',
+            'body' => 'required|string|max:'.SupportReplies::MAX_LENGTH,
         ]);
 
         $conversationId = UrlUtils::decodeIdOrFail($id);
         $conversation = SupportConversation::with('user')->findOrFail($conversationId);
         $body = trim((string) $request->input('body'));
 
-        $message = SupportMessage::create([
-            'support_conversation_id' => $conversation->id,
-            'user_id' => auth()->id(),
-            'body' => $body,
-            'is_from_admin' => true,
-        ]);
+        $message = SupportReplies::send($conversation, $request->user(), $body);
 
-        $conversation->update(['last_message_at' => now()]);
-        Cache::forget($conversation->typingKey());
-        // An answer ends the burst: their next message is a new question, and is emailed.
-        Cache::forget($conversation->adminMailKey());
-
-        // Queued whether or not they are in the chat right now: SendSupportReplyEmail decides
-        // when it runs, from what is still unread and whether they are still there. Deciding
-        // here instead would never email a visitor who had the page open with the chat closed
-        // and then left without reading the reply. Unique per conversation, so a run of
-        // replies arrives as one email.
+        // Answering someone is the clearest proof the admin is at the keyboard. Past the save:
+        // an error here must not make the admin send it again.
         try {
-            // Answering someone is the clearest proof the admin is at the keyboard. Inside the
-            // try: the reply is already saved, and an error here would make the admin send it
-            // again.
             if (SupportPresence::confirm($request->user())) {
                 SupportPresence::heartbeat($request->user());
-            }
-
-            if ($conversation->contactEmail()) {
-                SendSupportReplyEmail::dispatch($conversation->id)
-                    ->delay(now()->addMinutes(SendSupportReplyEmail::DELAY_MINUTES));
-            }
-
-            // A push is only worth anything while it is immediate.
-            if ($conversation->user && ! Cache::has($conversation->presenceKey())) {
-                OneSignalService::pushToUser($conversation->user, [
-                    'title_key' => 'messages.push_support_message_title',
-                    'body_key' => 'messages.push_support_message_body',
-                    'url' => app_url('/dashboard'),
-                ], null);
             }
         } catch (\Exception $e) {
             report($e);
