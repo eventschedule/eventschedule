@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\SupportConversation;
+use App\Models\SupportMessage;
 use App\Services\SupportReplies;
 use App\Utils\UrlUtils;
 use Illuminate\Console\Command;
@@ -28,7 +29,11 @@ class SupportPending extends Command
 
         $rows = SupportReplies::waiting(max(1, min(100, (int) $this->option('limit'))))
             ->map(function (SupportConversation $conversation) use ($keep) {
-                $messages = $conversation->messages()->latest('id')->limit($keep)->get()->reverse()->values();
+                // The newest $keep, oldest first. Not through messages(): that relation is already ordered
+                // oldest first, so a later latest() only breaks ties, and a long thread printed its
+                // first $keep messages instead of its last.
+                $messages = SupportMessage::where('support_conversation_id', $conversation->id)
+                    ->orderByDesc('id')->limit($keep)->get()->reverse()->values();
                 $user = $conversation->user;
 
                 return [

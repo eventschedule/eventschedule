@@ -77,6 +77,22 @@ class SupportReplyCommandTest extends TestCase
         $this->assertStringNotContainsString(str_repeat('t', 40), json_encode($json));
     }
 
+    public function test_a_long_thread_shows_its_newest_messages_oldest_first(): void
+    {
+        $conversation = $this->conversation([], 'Message 1');
+
+        // A minute apart, as a real thread is: with one timestamp the old bug hid behind a tie.
+        foreach (range(2, 15) as $n) {
+            $this->travel(1)->minutes();
+            SupportMessage::create(['support_conversation_id' => $conversation->id, 'body' => 'Message '.$n, 'is_from_admin' => false]);
+        }
+
+        Artisan::call('app:support-pending', ['--messages' => 3]);
+        $messages = json_decode(trim(Artisan::output()), true)['waiting'][0]['messages'];
+
+        $this->assertSame(['Message 13', 'Message 14', 'Message 15'], array_column($messages, 'body'));
+    }
+
     public function test_reply_sends_as_the_reply_box_does(): void
     {
         Queue::fake();

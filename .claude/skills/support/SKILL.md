@@ -33,7 +33,9 @@ Only the channels he asked for; all three for a bare `/support`.
   is not from `hillelcoren` (or that has none).
 - **Email**: what he pasted. There is no inbox to read.
 
-Say in one line what is waiting (counts per channel) before drafting.
+Say in one line what is waiting (counts per channel) before drafting. A thread whose last message
+only closes it ("thanks", "amazing, thank you") needs no reply: list it as answered and draft
+nothing, unless he asks for a sign-off.
 
 ## 2. Draft
 
