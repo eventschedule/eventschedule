@@ -97,7 +97,7 @@ class SocialAuthController extends Controller
         // The sign-up page's other exit (marketing_daily_stats.signup_google_starts), counted like
         // the code step's: once a visitor a day, bots and probes left out.
         if ($fromSignUp && $provider === 'google') {
-            $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+            $ip = \App\Models\PageView::clientIp(request());
 
             if (! PageView::isBot(request()->userAgent())
                 && ! PageView::isSuspiciousRequest(request())

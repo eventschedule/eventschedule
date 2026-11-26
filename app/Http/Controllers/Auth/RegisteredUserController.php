@@ -141,7 +141,7 @@ class RegisteredUserController extends Controller
         // suspicious headers) and deduping by IP+UA so cookieless bots cannot recount.
         // Counted on all deployments (the /sign_up page is served on the app subdomain, not
         // the nexus, so this is not gated on is_nexus).
-        $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+        $ip = \App\Models\PageView::clientIp(request());
         if (! PageView::isBot(request()->userAgent())
             && ! PageView::isSuspiciousRequest(request())
             && PageView::isFirstDailyVisit('signup_view', $ip, request()->userAgent())) {
@@ -278,7 +278,7 @@ class RegisteredUserController extends Controller
         // that IP + user agent, so a guest submission suppressed a real signup request from the
         // same browser and the pair read as a conversion loss that never happened.
         if (request()->routeIs('sign_up.send_code')) {
-            $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+            $ip = \App\Models\PageView::clientIp(request());
             if (! PageView::isBot(request()->userAgent())
                 && ! PageView::isSuspiciousRequest(request())
                 && PageView::isFirstDailyVisit('signup_code_request', $ip, request()->userAgent())) {
@@ -291,7 +291,7 @@ class RegisteredUserController extends Controller
         // The booking form asks for a code on this route too (for the few who tick "Create an
         // account" there) and says so with `form`: those are not a stage of the submit page's funnel.
         if (request()->routeIs('event.guest_send_code') && request()->input('form') !== 'booking') {
-            $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+            $ip = \App\Models\PageView::clientIp(request());
             if (! PageView::isBot(request()->userAgent())
                 && ! PageView::isSuspiciousRequest(request())
                 && PageView::isFirstDailyVisit('guest_submit_code_request', $ip, request()->userAgent())) {
@@ -374,7 +374,7 @@ class RegisteredUserController extends Controller
      */
     private function recordSignupCodeInvalid(): void
     {
-        $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+        $ip = \App\Models\PageView::clientIp(request());
 
         if (! PageView::isBot(request()->userAgent())
             && ! PageView::isSuspiciousRequest(request())
@@ -648,7 +648,7 @@ class RegisteredUserController extends Controller
             // The bot and suspicious-request filters have to match too, for the same reason:
             // the requests side drops those and this side did not, so anything that got past
             // the wall without a plausible user agent counted here and nowhere else.
-            $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+            $ip = \App\Models\PageView::clientIp(request());
 
             if (! PageView::isBot(request()->userAgent())
                 && ! PageView::isSuspiciousRequest(request())

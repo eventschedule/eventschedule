@@ -420,13 +420,35 @@ class RealtimeTracker
     }
 
     /**
-     * Only hosted installs sit behind Cloudflare; anywhere else these headers are whatever the
-     * client chose to send.
+     * The address of the person who sent the request: the one every per-visitor counter, the
+     * blocklist and signup_ip read (PageView::clientIp() is this too).
+     *
+     * Only hosted reads a header for it, because only hosted has a proxy that writes one;
+     * anywhere else a header is whatever the client chose to send. On hosted, App Platform's own
+     * `do-connecting-ip` is the visitor. CF-Connecting-IP and the socket's peer are a Cloudflare
+     * edge there (every sign-up of a month read as one, which made each IP block refuse
+     * thousands of strangers and merged their daily visits), so CF-Connecting-IP is kept only as
+     * a fallback, and only when it is not an edge address itself.
+     *
+     * App Platform's header is taken as it is, even when it is Cloudflare's: a visitor on WARP
+     * or iCloud Private Relay really does leave from one (104.28.x), and that address is still
+     * theirs rather than the edge's. Blocklist refuses to store or apply any Cloudflare address
+     * on its own (EdgeAddress).
      */
     public static function clientIp(Request $request): string
     {
-        if (config('app.hosted') && $request->header('CF-Connecting-IP')) {
-            return (string) $request->header('CF-Connecting-IP');
+        if (config('app.hosted')) {
+            $connecting = trim((string) $request->header('do-connecting-ip'));
+
+            if ($connecting !== '' && filter_var($connecting, FILTER_VALIDATE_IP) !== false) {
+                return $connecting;
+            }
+
+            $cloudflare = trim((string) $request->header('CF-Connecting-IP'));
+
+            if ($cloudflare !== '' && filter_var($cloudflare, FILTER_VALIDATE_IP) !== false && ! EdgeAddress::isCloudflare($cloudflare)) {
+                return $cloudflare;
+            }
         }
 
         return (string) $request->ip();

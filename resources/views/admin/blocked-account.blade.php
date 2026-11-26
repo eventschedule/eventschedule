@@ -67,11 +67,11 @@
                  holds (blocked, an administrator, the demo). Not spam is a bordered button: the
                  action that goes on, on this page, is the block below. --}}
             @if ($spam && $spam['total'] > 0)
-            <x-page-card :title="$spamClearance ? __('messages.spam_watch_cleared_title') : __('messages.spam_watch_title')" :lead="__('messages.spam_watch_account_lead')">
+            <x-page-card :title="$spamClearance ? __('messages.spam_watch_cleared_title') : __('messages.spam_watch_title')" :lead="collect($spam['items'])->contains(fn ($m) => ! empty($m['signal'])) ? __('messages.spam_watch_account_lead_any') : __('messages.spam_watch_account_lead')">
                 <dl class="page-kv block-facts">
                     @foreach ($spam['items'] as $match)
                     <div>
-                        <dt>{{ \App\Services\SpamWatch::kindName($match['kind']) }}</dt>
+                        <dt>{{ \App\Services\SpamWatch::kindName($match['kind']) }}@if (! empty($match['signal'])) · {{ \App\Services\SpamWatch::signalName($match['signal']) }}@endif</dt>
                         <dd><bdi>{{ \App\Services\SpamWatch::highlight($match['text'], $match['word']) }}</bdi></dd>
                     </div>
                     @endforeach

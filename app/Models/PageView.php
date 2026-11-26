@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\GeoIpService;
+use App\Utils\RealtimeTracker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -298,14 +299,12 @@ class PageView
     }
 
     /**
-     * The client IP, preferring Cloudflare's header over the socket address.
-     *
-     * Extracted from recordView() so every counter resolves the IP the same way -
-     * recordSocialClick() used a bare $request->ip() and undercounted behind Cloudflare.
+     * The visitor's address, as RealtimeTracker::clientIp() resolves it, so every counter reads
+     * the same one: on hosted the edge's CF-Connecting-IP is a Cloudflare server, not the person.
      */
     public static function clientIp(Request $request): ?string
     {
-        return $request->header('CF-Connecting-IP') ?? $request->ip();
+        return RealtimeTracker::clientIp($request) ?: null;
     }
 
     /**
@@ -397,8 +396,7 @@ class PageView
             return false;
         }
 
-        // Prefer Cloudflare's CF-Connecting-IP header for the real client IP
-        $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
+        $ip = self::clientIp($request);
         $ipHash = $ip ? self::getIpHash($ip) : null;
 
         // The role cap now suppresses only the schedule-level aggregates below; the event-level

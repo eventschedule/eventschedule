@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\BlocklistEntry;
 use App\Models\User;
 use App\Utils\CountryUtils;
+use App\Utils\EdgeAddress;
 use App\Utils\RealtimeTracker;
 use Carbon\CarbonInterface;
 use Illuminate\Database\QueryException;
@@ -261,6 +262,12 @@ class Blocklist
         // Ranges cannot be matched in SQL without storing them as numbers, and the list is an
         // operator's, a few hundred lines at most, read only when an account is being made.
         foreach (BlocklistEntry::active()->where('type', self::IP)->orderBy('id')->get() as $entry) {
+            // An entry stored before RealtimeTracker::clientIp() read App Platform's header is a
+            // Cloudflare edge, and refusing it refuses everyone that edge serves.
+            if (EdgeAddress::rangeTouchesCloudflare($entry->match_key)) {
+                continue;
+            }
+
             if (IpUtils::checkIp($ip, $entry->match_key)) {
                 return $entry;
             }
@@ -306,7 +313,9 @@ class Blocklist
     {
         $packed = is_string($ip) ? @inet_pton($ip) : false;
 
-        if ($packed === false) {
+        // A Cloudflare edge is nobody's address (an account made before clientIp() read App
+        // Platform's header has one as its signup_ip): there is no visitor to refuse.
+        if ($packed === false || EdgeAddress::isCloudflare($ip)) {
             return null;
         }
 
@@ -484,6 +493,10 @@ class Blocklist
         $prefix = (int) $prefix;
         $text = inet_ntop(self::mask($packed, $prefix));
         $entry = $prefix === $bits ? $text : $text.'/'.$prefix;
+
+        if (EdgeAddress::rangeTouchesCloudflare($entry)) {
+            throw new \InvalidArgumentException('messages.blocklist_edge_address');
+        }
 
         return ['value' => $entry, 'match_key' => $entry];
     }

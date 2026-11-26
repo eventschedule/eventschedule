@@ -308,7 +308,7 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinutes(10, 5)->by((string) $request->route('token'));
         });
 
-        // The /admin/realtime beacon. Keyed on the visitor's real IP (CF-Connecting-IP on hosted),
+        // The /admin/realtime beacon. Keyed on the visitor's real IP (RealtimeTracker::clientIp()),
         // which the default guest signature ignores: without it, everyone behind Cloudflare or on
         // one venue wifi would share a single budget and a busy event page would throttle itself.
         // HMAC'd rather than raw because Laravel stores limiter keys as an unsalted md5 in the cache,

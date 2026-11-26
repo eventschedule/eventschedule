@@ -57,6 +57,9 @@
         <div class="page-subhead" id="suspects">
             <h2>@lang('messages.spam_watch_title')</h2>
             <p>@lang('messages.spam_watch_lead')</p>
+            @if ($spamWords)
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.spam_watch_signals_note', ['days' => \App\Services\SpamWatch::SIGNAL_DAYS]) }}</p>
+            @endif
         </div>
 
         <div>
@@ -86,7 +89,7 @@
                                 </td>
                                 <td class="c-wrap" data-label="{{ __('messages.spam_watch_col_matched') }}">
                                     @forelse ($spamFound['items'] as $match)
-                                    <span class="spam-match"><span class="spam-kind">{{ \App\Services\SpamWatch::kindName($match['kind']) }}</span> <bdi>{{ \App\Services\SpamWatch::highlight($match['text'], $match['word'], 80) }}</bdi></span>
+                                    <span class="spam-match"><span class="spam-kind">{{ \App\Services\SpamWatch::kindName($match['kind']) }}@if (! empty($match['signal'])) · {{ \App\Services\SpamWatch::signalName($match['signal']) }}@endif</span> <bdi>{{ \App\Services\SpamWatch::highlight($match['text'], $match['word'], 80) }}</bdi></span>
                                     @empty
                                     {{-- Renamed since the cached scan found it: it leaves the list with the next one. --}}
                                     <span class="spam-match c-sub">@lang('messages.none')</span>

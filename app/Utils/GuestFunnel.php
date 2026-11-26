@@ -168,7 +168,7 @@ class GuestFunnel
             return;
         }
 
-        // CF-Connecting-IP only where Cloudflare is in front (hosted): anywhere else the header is
+        // A header only on hosted (RealtimeTracker::clientIp()): anywhere else the header is
         // whatever the caller typed, and a fresh one would be a fresh visitor every time.
         $ip = RealtimeTracker::clientIp($request);
 

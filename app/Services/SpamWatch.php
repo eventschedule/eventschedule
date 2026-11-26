@@ -36,6 +36,18 @@ use Illuminate\Support\HtmlString;
  * Who is blocked, an admin or cleared is asked live, so a decision shows at once and the badge
  * and the list it links to read the same rows. A new match shows within ten minutes, or one
  * page load later when the admin pages have been idle for longer than that.
+ *
+ * Beside the words, four signs that need no word (signalIn(), throwawayEmail()), read only for
+ * what was made in the last SIGNAL_DAYS days: a phone number in a schedule's or an event's name,
+ * a charge written out ("$234.99 USD"), letters from another alphabet standing in for digits or
+ * Latin letters ("$5ᒣ9", "PаyPal" with a Cyrillic а), and an owner's address at a throwaway
+ * mail service or a Gmail address padded with groups of digits ("name.7.46.6@"). Every account
+ * blocked on the nexus by 2026-11 was a support or billing scam whose schedule or event was
+ * named after the scam itself, and most of them used no word on the list: a support number and
+ * an amount are what they cannot leave out. Recent only, because a real schedule does put a
+ * number in a name now and then and the list must not fill with years of those; an account
+ * an operator looked at is cleared for good either way. They watch while the words do: an empty
+ * list still watches nothing.
  */
 class SpamWatch
 {
@@ -61,7 +73,38 @@ class SpamWatch
         'customer care',
         'helpline',
         'toll free',
+        // The support and billing scams the nexus blocked in 2026-10 and 2026-11, and the
+        // document phishing after them. "billing" alone is not here: it is in Billings.
+        'customer support',
+        'geek squad',
+        'auto-renewal',
+        'renewal notice',
+        'billing invoice',
+        'norton',
+        'mcafee',
+        'secure document',
+        'docusign',
     ];
+
+    /** How far back the signs that need no word look (signalIn(), throwawayEmail()). */
+    public const SIGNAL_DAYS = 90;
+
+    public const SIGNAL_PHONE = 'phone';
+
+    public const SIGNAL_AMOUNT = 'amount';
+
+    public const SIGNAL_LOOKALIKE = 'lookalike';
+
+    public const SIGNAL_THROWAWAY = 'throwaway';
+
+    /** What a scam says beside a bare number it wants called. */
+    private const OFFERS_A_NUMBER = '/\\b(?:support|call|contact|phone|tel|helpline|hotline|customer|toll|whatsapp|reach us)\\b|☎|📞/iu';
+
+    /** CC0, from github.com/disposable-email-domains/disposable-email-domains. */
+    public const THROWAWAY_DOMAINS_FILE = 'data/disposable-email-domains.txt';
+
+    /** @var array<string, true>|null */
+    private static ?array $throwawayDomains = null;
 
     public const MAX_WORDS = 50;
 
@@ -203,9 +246,11 @@ class SpamWatch
      * in all. Read live, for the rows on screen.
      *
      * @param  Collection<int, User>  $users
-     * @return array<int, array{items: list<array{kind: string, text: string, word: ?string}>, total: int}>
+     *                                        A sign that needs no word (signalIn()) is listed after the words, with `signal` naming it
+     *                                        and `word` null.
+     * @return array<int, array{items: list<array{kind: string, text: string, word: ?string, signal: ?string}>, total: int}>
      */
-    public static function matches(Collection $users, int $limit = 3): array
+    public static function matches(Collection $users, int $limit = 3, bool $withSignals = true): array
     {
         $words = self::words();
 
@@ -220,7 +265,7 @@ class SpamWatch
             $found[$userId]['total']++;
 
             if (count($found[$userId]['items']) < $limit) {
-                $found[$userId]['items'][] = ['kind' => $kind, 'text' => (string) $text, 'word' => self::wordIn((string) $text, $words)];
+                $found[$userId]['items'][] = ['kind' => $kind, 'text' => (string) $text, 'word' => self::wordIn((string) $text, $words), 'signal' => null];
             }
         };
 
@@ -265,13 +310,185 @@ class SpamWatch
                 : [];
 
             foreach ($names as $name) {
-                $found[$userId]['items'][] = ['kind' => self::EVENT, 'text' => (string) $name, 'word' => self::wordIn((string) $name, $words)];
+                $found[$userId]['items'][] = ['kind' => self::EVENT, 'text' => (string) $name, 'word' => self::wordIn((string) $name, $words), 'signal' => null];
             }
 
             $found[$userId]['total'] += (int) $count;
         }
 
+        // The signs, after the words. Read the same way the scan reads them (signalRows()), so
+        // what is listed is what the scan found.
+        foreach ($withSignals ? self::signalRows($ids) : [] as [$userId, $kind, $text, $signal]) {
+            $found[$userId]['total']++;
+
+            if (count($found[$userId]['items']) < $limit) {
+                $found[$userId]['items'][] = ['kind' => $kind, 'text' => $text, 'word' => null, 'signal' => $signal];
+            }
+        }
+
         return $found;
+    }
+
+    /**
+     * What a sign is called on the pages.
+     */
+    public static function signalName(string $signal): string
+    {
+        return match ($signal) {
+            self::SIGNAL_PHONE => __('messages.spam_watch_signal_phone'),
+            self::SIGNAL_AMOUNT => __('messages.spam_watch_signal_amount'),
+            self::SIGNAL_LOOKALIKE => __('messages.spam_watch_signal_lookalike'),
+            default => __('messages.spam_watch_signal_throwaway'),
+        };
+    }
+
+    /**
+     * The sign a name carries, or null: a phone number, a charge written out, or letters from
+     * another alphabet standing in for digits or Latin letters. Formats a scam's support line
+     * takes ("+1 (863) 316-4088", "+1 813 934 5805", "845 573 3428"), never a date or a year:
+     * "2026-11-26 19:00" has no run of three, three and four.
+     */
+    public static function signalIn(string $text): ?string
+    {
+        if (trim($text) === '') {
+            return null;
+        }
+
+        // A support line: "+1 (863) 316-4088" and "(863) 316-4088" on their own; a bare
+        // "845 573 3428" only beside a word that offers it, or "Room 101 102 2026" and a French
+        // "100 000 2026" would be phone numbers too.
+        if (preg_match('/\+\s?\d(?:[\s().\-]*\d){9,14}/u', $text)
+            || preg_match('/\(\d{3}\)\s*\d{3}[\s.\-]?\d{4}/u', $text)
+            || (preg_match('/(?<![\d\-.\/])(?:1[\s.\-])?\d{3}[\s.\-]\d{3}[\s.\-]\d{4}(?![\d\-.\/])/u', $text)
+                && preg_match(self::OFFERS_A_NUMBER, $text))) {
+            return self::SIGNAL_PHONE;
+        }
+
+        // A charge, not a price: "$234.99 USD" beside "charge", "payment" or "invoice". A
+        // workshop's "49.00 USD" says none of those.
+        if (preg_match('/\d[\d,]*\.\d{2}\s*(?:USD|EUR|GBP|CAD|AUD)\b|[$€£]\s?\d[\d,]*\.\d{2}/iu', $text)
+            && preg_match('/\b(?:charge[ds]?|payment|purchase|invoice|refund|renewal|subscription|billing|transaction)\b/iu', $text)) {
+            return self::SIGNAL_AMOUNT;
+        }
+
+        // Canadian syllabics standing in for a digit, right beside one or a "$": "$5ᒣ9",
+        // "+181ᗱ9ᗱ45805". Syllabics in words (an Inuktitut name beside an English one) and
+        // Japanese full-width numbers are somebody's language, not a disguise.
+        if (preg_match('/[0-9$+][\x{1400}-\x{167F}]|[\x{1400}-\x{167F}][0-9]/u', $text)) {
+            return self::SIGNAL_LOOKALIKE;
+        }
+
+        // A Cyrillic letter hidden in a Latin word ("PаyPal"): Latin letters outnumber the
+        // Cyrillic ones. The other way round is Ukrainian typed with a Latin "i" ("Вечiр"),
+        // which is everyday writing. Greek is left out: a fraternity writes its letters beside
+        // Latin ones on purpose.
+        if (preg_match_all('/[\p{L}\p{M}]+/u', $text, $words)) {
+            foreach ($words[0] as $word) {
+                $cyrillic = preg_match_all('/\p{Cyrillic}/u', $word);
+                $latin = preg_match_all('/\p{Latin}/u', $word);
+
+                if ($cyrillic > 0 && $latin > $cyrillic) {
+                    return self::SIGNAL_LOOKALIKE;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether an address is at a throwaway mail service, or is a Gmail address padded with two
+     * or more groups of digits after dots ("name.7.46.6@gmail.com"), which Gmail ignores and a
+     * script uses to make a new account from one inbox.
+     */
+    public static function throwawayEmail(?string $email): bool
+    {
+        $email = mb_strtolower(trim((string) $email));
+        $at = strrpos($email, '@');
+
+        if ($at === false) {
+            return false;
+        }
+
+        $local = explode('+', substr($email, 0, $at), 2)[0];
+        $domain = substr($email, $at + 1);
+
+        if (in_array($domain, ['gmail.com', 'googlemail.com'], true) && preg_match('/(\.\d{1,3}){2,}$/', $local)) {
+            return true;
+        }
+
+        return isset(self::throwawayDomains()[$domain]);
+    }
+
+    /** @return array<string, true> */
+    private static function throwawayDomains(): array
+    {
+        if (self::$throwawayDomains === null) {
+            $path = resource_path(self::THROWAWAY_DOMAINS_FILE);
+            $lines = is_readable($path) ? (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: []) : [];
+
+            self::$throwawayDomains = array_fill_keys(array_map(fn ($line) => mb_strtolower(trim($line)), $lines), true);
+        }
+
+        return self::$throwawayDomains;
+    }
+
+    /**
+     * Every sign in what these accounts (or, with null, every account) made in the last
+     * SIGNAL_DAYS days, as [user id, kind, text, signal]: their live schedules' names, their
+     * events' names, and an owner's own address. The SQL only narrows by date and to text with a
+     * digit or a letter outside plain ASCII; signalIn() decides.
+     *
+     * @param  list<int>|null  $userIds
+     * @return \Generator<int, array{0: int, 1: string, 2: string, 3: string}>
+     */
+    private static function signalRows(?array $userIds): \Generator
+    {
+        $since = now()->subDays(self::SIGNAL_DAYS);
+        // A digit, or a character outside plain ASCII (a lookalike never is plain ASCII: its
+        // bytes outnumber its characters), so most of a period's names are not read at all.
+        $worthReading = "(name REGEXP '[0-9]' OR CHAR_LENGTH(name) <> LENGTH(name))";
+
+        $schedules = Role::query()
+            ->owned()
+            ->where('roles.is_deleted', false)
+            ->where('roles.created_at', '>=', $since)
+            ->whereRaw(str_replace('name', 'roles.name', $worthReading))
+            ->when($userIds !== null, fn ($q) => $q->whereIn('roles.user_id', $userIds)->orderBy('roles.name'))
+            ->toBase()
+            ->select(['roles.user_id', 'roles.name']);
+
+        foreach ($schedules->cursor() as $row) {
+            if ($signal = self::signalIn((string) $row->name)) {
+                yield [(int) $row->user_id, self::SCHEDULE, (string) $row->name, $signal];
+            }
+        }
+
+        $events = DB::table('events')
+            ->whereNotNull('user_id')
+            ->where('created_at', '>=', $since)
+            ->whereRaw($worthReading)
+            // Ordered only for the accounts on screen: the whole scan reads by created_at.
+            ->when($userIds !== null, fn ($q) => $q->whereIn('user_id', $userIds)->orderByDesc('id'))
+            ->select(['user_id', 'name']);
+
+        foreach ($events->cursor() as $row) {
+            if ($signal = self::signalIn((string) $row->name)) {
+                yield [(int) $row->user_id, self::EVENT, (string) $row->name, $signal];
+            }
+        }
+
+        $owners = self::owners()
+            ->where('users.created_at', '>=', $since)
+            ->when($userIds !== null, fn ($q) => $q->whereIn('users.id', $userIds))
+            ->toBase()
+            ->select(['users.id', 'users.email']);
+
+        foreach ($owners->cursor() as $row) {
+            if (self::throwawayEmail($row->email)) {
+                yield [(int) $row->id, self::EMAIL, (string) $row->email, self::SIGNAL_THROWAWAY];
+            }
+        }
     }
 
     public static function clearance(User $user): ?SpamClearance
@@ -356,7 +573,13 @@ class SpamWatch
 
         $events = self::events($words)->distinct()->pluck('user_id');
 
-        return $accounts->merge($schedules)->merge($events)
+        $signals = collect(iterator_to_array((function () {
+            foreach (self::signalRows(null) as [$userId]) {
+                yield $userId;
+            }
+        })(), false));
+
+        return $accounts->merge($schedules)->merge($events)->merge($signals)
             ->map(fn ($id) => (int) $id)
             ->unique()
             ->values()
@@ -425,7 +648,9 @@ class SpamWatch
             return false;
         }
 
-        return (self::matches(collect([$user]), 1)[$user->id]['total'] ?? 0) > 0;
+        // The words only. A sign (signalIn()) is a reason for an operator to look and nothing
+        // more: it is far less certain than a word, and a pause sticks until somebody lifts it.
+        return (self::matches(collect([$user]), 1, false)[$user->id]['total'] ?? 0) > 0;
     }
 
     /**

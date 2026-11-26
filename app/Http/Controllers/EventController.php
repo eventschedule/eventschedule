@@ -3343,7 +3343,7 @@ class EventController extends Controller
         // which on hosted is a database write, and this runs on a public page and again after
         // the submission is already stored.
         try {
-            $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
+            $ip = \App\Models\PageView::clientIp($request);
 
             if (! PageView::isBot($request->userAgent())
                 && ! PageView::isSuspiciousRequest($request)

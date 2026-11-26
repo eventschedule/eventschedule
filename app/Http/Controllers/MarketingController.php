@@ -8688,7 +8688,7 @@ class MarketingController extends Controller
         if (! auth()->check()
             && ! PageView::isBot($request->userAgent())
             && ! PageView::isSuspiciousRequest($request, false)
-            && PageView::isFirstDailyVisit('mkt_hero_'.$event.'_'.$variant, $request->header('CF-Connecting-IP') ?? $request->ip(), $request->userAgent())) {
+            && PageView::isFirstDailyVisit('mkt_hero_'.$event.'_'.$variant, \App\Models\PageView::clientIp($request), $request->userAgent())) {
             HeroExperiment::recordEvent($variant, $event);
         }
 

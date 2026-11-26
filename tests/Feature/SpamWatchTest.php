@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AuditLog;
 use App\Models\Setting;
 use App\Models\SpamClearance;
 use App\Models\User;
@@ -12,6 +13,7 @@ use App\Services\SpamWatch;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -39,7 +41,7 @@ class SpamWatchTest extends TestCase
     {
         parent::setUp();
 
-        \Illuminate\Support\Facades\Http::preventStrayRequests();
+        Http::preventStrayRequests();
 
         config(['app.hosted' => false, 'app.is_nexus' => false]);
         $this->admin = $this->createOwner(true);
@@ -97,10 +99,10 @@ class SpamWatchTest extends TestCase
         );
 
         $found = SpamWatch::matches(User::whereIn('id', [$bySchedule->id, $bySubdomain->id, $byEvent->id])->get(), 5);
-        $this->assertSame(['kind' => SpamWatch::SCHEDULE, 'text' => 'Coinbase Help Number', 'word' => 'coinbase'], $found[$bySchedule->id]['items'][0]);
+        $this->assertSame(['kind' => SpamWatch::SCHEDULE, 'text' => 'Coinbase Help Number', 'word' => 'coinbase', 'signal' => null], $found[$bySchedule->id]['items'][0]);
         $this->assertSame('binance-desk', $found[$bySubdomain->id]['items'][0]['text'], 'the subdomain, where the word is only there');
         // The event's schedule is named "Test Schedule": only the event matched.
-        $this->assertSame([['kind' => SpamWatch::EVENT, 'text' => 'Call the Venmo desk', 'word' => 'venmo']], $found[$byEvent->id]['items']);
+        $this->assertSame([['kind' => SpamWatch::EVENT, 'text' => 'Call the Venmo desk', 'word' => 'venmo', 'signal' => null]], $found[$byEvent->id]['items']);
         $this->assertSame(1, $found[$byEvent->id]['total']);
     }
 
@@ -299,7 +301,7 @@ class SpamWatchTest extends TestCase
 
         $clearance = SpamClearance::where('user_id', $suspect->id)->sole();
         $this->assertSame($this->admin->id, $clearance->cleared_by);
-        $this->assertSame(1, \App\Models\AuditLog::where('action', 'admin.spam_clear')->where('model_id', $suspect->id)->count());
+        $this->assertSame(1, AuditLog::where('action', 'admin.spam_clear')->where('model_id', $suspect->id)->count());
 
         $this->asAdmin()->get($page)->assertOk()
             ->assertSee(__('messages.spam_watch_cleared_title'))

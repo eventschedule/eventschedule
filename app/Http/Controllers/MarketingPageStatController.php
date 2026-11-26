@@ -57,7 +57,7 @@ class MarketingPageStatController extends Controller
         if (($fetchSite === null || $fetchSite === 'same-origin')
             && ! PageView::isBot($request->userAgent())
             && ! PageView::isSuspiciousRequest($request, false)
-            && PageView::isFirstDailyVisit('mkt_page_'.$kind.'_'.$page, $request->header('CF-Connecting-IP') ?? $request->ip(), $request->userAgent())) {
+            && PageView::isFirstDailyVisit('mkt_page_'.$kind.'_'.$page, \App\Models\PageView::clientIp($request), $request->userAgent())) {
             MarketingPageDaily::record($page, MarketingPageDaily::deviceFor($width), $kind);
         }
 

@@ -142,7 +142,7 @@ class TrackMarketingVisit
         // Unique visitors: dedup by a daily-salted IP+UA hash rather than a session cookie,
         // so cookieless bots (which get a fresh session per request) cannot each be counted
         // as a new visitor. Prefer Cloudflare's real client IP, matching PageView::recordView().
-        $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
+        $ip = \App\Models\PageView::clientIp($request);
         if (PageView::isFirstDailyVisit('mkt_visit', $ip, $request->userAgent())) {
             MarketingDailyStat::record('visitors');
         }
