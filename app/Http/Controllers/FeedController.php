@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Utils\IcsUtils;
 use Carbon\Carbon;
 
 class FeedController extends Controller
@@ -187,9 +188,48 @@ class FeedController extends Controller
         if ($url) {
             $vevent .= 'URL:'.$url."\r\n";
         }
+        // The event's picture (issue #140): IMAGE is RFC 7986's, which Apple Calendar and
+        // Thunderbird read; ATTACH is what more clients show. Google Calendar reads neither.
+        if ($image = $this->icalImage($event, $role)) {
+            $type = $this->imageType($image);
+            $vevent .= 'IMAGE;VALUE=URI;DISPLAY=BADGE'.($type ? ';FMTTYPE='.$type : '').':'.$image."\r\n";
+            $vevent .= 'ATTACH'.($type ? ';FMTTYPE='.$type : '').':'.$image."\r\n";
+        }
         $vevent .= "END:VEVENT\r\n";
 
-        return $vevent;
+        // Folded to RFC 5545's 75 octets: a picture's address alone runs past it.
+        return IcsUtils::fold($vevent);
+    }
+
+    /**
+     * The flyer, else a performer's photo, as the newsletter picks one (NewsletterService::eventRow()):
+     * never the feed's own schedule's picture, which on a venue's feed would stand in for every
+     * event without a flyer. The original file, not a derivative: those are WebP, which few
+     * calendar apps draw.
+     */
+    private function icalImage(Event $event, Role $role): ?string
+    {
+        if ($event->flyer_image_url) {
+            $url = $event->flyer_image_url;
+        } elseif (($talent = $event->role()) && $talent->id !== $role->id && $talent->profile_image_url) {
+            $url = $talent->profile_image_url;
+        } else {
+            return null;
+        }
+
+        // Only an absolute http(s) address, and nothing that would end the line or the property.
+        return preg_match('~^https?://[^\s"]+$~i', $url) === 1 ? $url : null;
+    }
+
+    private function imageType(string $url): ?string
+    {
+        return match (strtolower(pathinfo((string) parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION))) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => null,
+        };
     }
 
     private function escapeIcalText(string $text): string

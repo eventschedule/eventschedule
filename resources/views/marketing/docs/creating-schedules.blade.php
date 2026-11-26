@@ -1724,7 +1724,7 @@ example.eventschedule.com/summer-concert</code></pre>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Under the template, the row gives you two read-only addresses, each with a copy button, that let anyone follow your schedule from an app of their own. They list your public, upcoming events, need no login, and pick up your changes the next time the app checks them.</p>
 
         <ul class="doc-list mb-6">
-            <li><strong class="text-gray-900 dark:text-white">iCal Feed</strong>: subscribe from any calendar app (Google Calendar, Apple Calendar, Outlook). Unlike a connected calendar, this feed lists a recurring event on every date it falls in the next 90 days, not just the first.</li>
+            <li><strong class="text-gray-900 dark:text-white">iCal Feed</strong>: subscribe from any calendar app (Google Calendar, Apple Calendar, Outlook). Unlike a connected calendar, this feed lists a recurring event on every date it falls in the next 90 days, not just the first. Each event carries its picture (its flyer, or a performer's photo), which Apple Calendar and some other apps show; Google Calendar does not.</li>
             <li><strong class="text-gray-900 dark:text-white">RSS Feed</strong>: follow your schedule from any RSS reader.</li>
         </ul>
 
