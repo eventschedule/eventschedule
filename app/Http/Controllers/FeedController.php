@@ -188,8 +188,8 @@ class FeedController extends Controller
         if ($url) {
             $vevent .= 'URL:'.$url."\r\n";
         }
-        // The event's picture (issue #140): IMAGE is RFC 7986's, which Apple Calendar and
-        // Thunderbird read; ATTACH is what more clients show. Google Calendar reads neither.
+        // The event's picture (issue #140): IMAGE is RFC 7986's own property for it, and ATTACH is
+        // the older way some clients look for one. Google Calendar reads neither.
         if ($image = $this->icalImage($event, $role)) {
             $type = $this->imageType($image);
             $vevent .= 'IMAGE;VALUE=URI;DISPLAY=BADGE'.($type ? ';FMTTYPE='.$type : '').':'.$image."\r\n";
