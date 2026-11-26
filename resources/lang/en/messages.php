@@ -7538,7 +7538,7 @@ return [
     'spam_watch_signal_amount' => 'Charge in a name',
     'spam_watch_signal_lookalike' => 'Lookalike characters',
     'spam_watch_signal_throwaway' => 'Throwaway email address',
-    'spam_watch_signals_note' => 'Also listed, for what was made in the last :days days: a phone number or a charge in a name, letters from another alphabet standing in for digits or Latin letters, and an owner\'s throwaway email address.',
+    'spam_watch_signals_note' => 'Also listed, for what was made or renamed in the last :days days: a phone number or a charge in a name, letters from another alphabet standing in for digits or Latin letters, and an owner\'s throwaway email address.',
     'spam_watch_account_lead_any' => 'Something in its name, its address or what it made looks like spam. Nothing has been done to the account.',
     'blocklist_edge_address' => 'That is one of Cloudflare\'s addresses, which many visitors share. Blocking it would refuse all of them.',
     'spam_watch_not_spam' => 'Not spam',

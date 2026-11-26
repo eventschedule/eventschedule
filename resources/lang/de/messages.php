@@ -7464,7 +7464,7 @@ return [
     'spam_watch_signal_amount' => 'Betrag in einem Namen',
     'spam_watch_signal_lookalike' => 'Täuschend ähnliche Zeichen',
     'spam_watch_signal_throwaway' => 'Wegwerf-E-Mail-Adresse',
-    'spam_watch_signals_note' => 'Außerdem aufgeführt, für alles aus den letzten :days Tagen: eine Telefonnummer oder ein Betrag in einem Namen, Buchstaben aus einem anderen Alphabet anstelle von Ziffern oder lateinischen Buchstaben und die Wegwerf-E-Mail-Adresse eines Inhabers.',
+    'spam_watch_signals_note' => 'Außerdem aufgeführt, für alles, was in den letzten :days Tagen erstellt oder umbenannt wurde: eine Telefonnummer oder ein Betrag in einem Namen, Buchstaben aus einem anderen Alphabet anstelle von Ziffern oder lateinischen Buchstaben und die Wegwerf-E-Mail-Adresse eines Inhabers.',
     'spam_watch_account_lead_any' => 'Etwas in seinem Namen, seiner Adresse oder dem, was es erstellt hat, sieht nach Spam aus. Mit dem Konto ist nichts geschehen.',
     'blocklist_edge_address' => 'Das ist eine Adresse von Cloudflare, die sich viele Besucher teilen. Sie zu sperren würde alle abweisen.',
     'spam_watch_not_spam' => 'Kein Spam',

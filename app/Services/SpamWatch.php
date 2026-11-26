@@ -38,7 +38,8 @@ use Illuminate\Support\HtmlString;
  * page load later when the admin pages have been idle for longer than that.
  *
  * Beside the words, four signs that need no word (signalIn(), throwawayEmail()), read only for
- * what was made in the last SIGNAL_DAYS days: a phone number in a schedule's or an event's name,
+ * what was made or renamed in the last SIGNAL_DAYS days (by updated_at: an old schedule renamed
+ * into a scam counts as new): a phone number in a schedule's or an event's name,
  * a charge written out ("$234.99 USD"), letters from another alphabet standing in for digits or
  * Latin letters ("$5ᒣ9", "PаyPal" with a Cyrillic а), and an owner's address at a throwaway
  * mail service or a Gmail address padded with groups of digits ("name.7.46.6@"). Every account
@@ -434,8 +435,8 @@ class SpamWatch
     }
 
     /**
-     * Every sign in what these accounts (or, with null, every account) made in the last
-     * SIGNAL_DAYS days, as [user id, kind, text, signal]: their live schedules' names, their
+     * Every sign in what these accounts (or, with null, every account) made or changed in the
+     * last SIGNAL_DAYS days, as [user id, kind, text, signal]: their live schedules' names, their
      * events' names, and an owner's own address. The SQL only narrows by date and to text with a
      * digit or a letter outside plain ASCII; signalIn() decides.
      *
@@ -452,7 +453,7 @@ class SpamWatch
         $schedules = Role::query()
             ->owned()
             ->where('roles.is_deleted', false)
-            ->where('roles.created_at', '>=', $since)
+            ->where('roles.updated_at', '>=', $since)
             ->whereRaw(str_replace('name', 'roles.name', $worthReading))
             ->when($userIds !== null, fn ($q) => $q->whereIn('roles.user_id', $userIds)->orderBy('roles.name'))
             ->toBase()
@@ -466,7 +467,7 @@ class SpamWatch
 
         $events = DB::table('events')
             ->whereNotNull('user_id')
-            ->where('created_at', '>=', $since)
+            ->where('updated_at', '>=', $since)
             ->whereRaw($worthReading)
             // Ordered only for the accounts on screen: the whole scan reads by created_at.
             ->when($userIds !== null, fn ($q) => $q->whereIn('user_id', $userIds)->orderByDesc('id'))

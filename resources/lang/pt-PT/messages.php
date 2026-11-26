@@ -2247,7 +2247,7 @@ return array_replace(require __DIR__.'/../pt/messages.php', function_exists('ope
     'spam_watch_signal_phone' => 'Número de telefone num nome',
     'spam_watch_signal_amount' => 'Cobrança num nome',
     'spam_watch_signal_throwaway' => 'Endereço de e-mail descartável',
-    'spam_watch_signals_note' => 'Também listados, para o que foi criado nos últimos :days dias: um número de telefone ou uma cobrança num nome, letras de outro alfabeto no lugar de dígitos ou letras latinas, e o endereço de e-mail descartável de um proprietário.',
+    'spam_watch_signals_note' => 'Também listados, para o que foi criado ou renomeado nos últimos :days dias: um número de telefone ou uma cobrança num nome, letras de outro alfabeto no lugar de dígitos ou letras latinas, e o endereço de e-mail descartável de um proprietário.',
     'blocklist_edge_address' => 'É um dos endereços da Cloudflare, partilhado por muitos visitantes. Bloqueá-lo recusaria todos eles.',
     'spam_watch_words_saved' => 'As palavras vigiadas foram guardadas.',
     'spam_watch_words_invalid' => 'Cada palavra tem de ter de :min a :max caracteres, e pode haver no máximo :count palavras.',

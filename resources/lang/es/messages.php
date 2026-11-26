@@ -7464,7 +7464,7 @@ return [
     'spam_watch_signal_amount' => 'Cargo en un nombre',
     'spam_watch_signal_lookalike' => 'Caracteres que imitan otros',
     'spam_watch_signal_throwaway' => 'Dirección de correo desechable',
-    'spam_watch_signals_note' => 'También aparecen, para lo creado en los últimos :days días: un número de teléfono o un cargo en un nombre, letras de otro alfabeto en lugar de dígitos o letras latinas, y la dirección de correo desechable de un propietario.',
+    'spam_watch_signals_note' => 'También aparecen, para lo creado o renombrado en los últimos :days días: un número de teléfono o un cargo en un nombre, letras de otro alfabeto en lugar de dígitos o letras latinas, y la dirección de correo desechable de un propietario.',
     'spam_watch_account_lead_any' => 'Algo en su nombre, su dirección o lo que creó parece spam. No se ha hecho nada con la cuenta.',
     'blocklist_edge_address' => 'Es una de las direcciones de Cloudflare, que comparten muchos visitantes. Bloquearla los rechazaría a todos.',
     'spam_watch_not_spam' => 'No es spam',

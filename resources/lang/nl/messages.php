@@ -7466,7 +7466,7 @@ return [
     'spam_watch_signal_amount' => 'Bedrag in een naam',
     'spam_watch_signal_lookalike' => 'Misleidende tekens',
     'spam_watch_signal_throwaway' => 'Wegwerp-e-mailadres',
-    'spam_watch_signals_note' => 'Ook vermeld, voor wat in de afgelopen :days dagen is gemaakt: een telefoonnummer of een bedrag in een naam, letters uit een ander alfabet in plaats van cijfers of Latijnse letters, en het wegwerp-e-mailadres van een eigenaar.',
+    'spam_watch_signals_note' => 'Ook vermeld, voor wat in de afgelopen :days dagen is gemaakt of hernoemd: een telefoonnummer of een bedrag in een naam, letters uit een ander alfabet in plaats van cijfers of Latijnse letters, en het wegwerp-e-mailadres van een eigenaar.',
     'spam_watch_account_lead_any' => 'Iets in de naam, het adres of wat het account heeft gemaakt lijkt op spam. Er is niets met het account gedaan.',
     'blocklist_edge_address' => 'Dat is een adres van Cloudflare dat veel bezoekers delen. Het blokkeren zou ze allemaal weigeren.',
     'spam_watch_not_spam' => 'Geen spam',

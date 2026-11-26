@@ -7465,7 +7465,7 @@ return [
     'spam_watch_signal_amount' => 'Cobrança em um nome',
     'spam_watch_signal_lookalike' => 'Caracteres enganadores',
     'spam_watch_signal_throwaway' => 'Endereço de email descartável',
-    'spam_watch_signals_note' => 'Também listados, para o que foi criado nos últimos :days dias: um número de telefone ou uma cobrança em um nome, letras de outro alfabeto no lugar de dígitos ou letras latinas, e o endereço de email descartável de um proprietário.',
+    'spam_watch_signals_note' => 'Também listados, para o que foi criado ou renomeado nos últimos :days dias: um número de telefone ou uma cobrança em um nome, letras de outro alfabeto no lugar de dígitos ou letras latinas, e o endereço de email descartável de um proprietário.',
     'spam_watch_account_lead_any' => 'Algo no nome, no endereço ou no que criou parece spam. Nada foi feito à conta.',
     'blocklist_edge_address' => 'É um dos endereços da Cloudflare, compartilhado por muitos visitantes. Bloqueá-lo recusaria todos eles.',
     'spam_watch_not_spam' => 'Não é spam',

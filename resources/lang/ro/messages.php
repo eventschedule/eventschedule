@@ -7484,7 +7484,7 @@ return [
     'spam_watch_signal_amount' => 'Sumă într-un nume',
     'spam_watch_signal_lookalike' => 'Caractere înșelătoare',
     'spam_watch_signal_throwaway' => 'Adresă de e-mail de unică folosință',
-    'spam_watch_signals_note' => 'Apar și, pentru ce a fost creat în ultimele :days zile: un număr de telefon sau o sumă într-un nume, litere din alt alfabet în locul cifrelor sau al literelor latine și adresa de e-mail de unică folosință a unui proprietar.',
+    'spam_watch_signals_note' => 'Apar și, pentru ce a fost creat sau redenumit în ultimele :days zile: un număr de telefon sau o sumă într-un nume, litere din alt alfabet în locul cifrelor sau al literelor latine și adresa de e-mail de unică folosință a unui proprietar.',
     'spam_watch_account_lead_any' => 'Ceva din numele, adresa sau ce a creat contul pare spam. Nu s-a făcut nimic contului.',
     'blocklist_edge_address' => 'Este una dintre adresele Cloudflare, folosită de mulți vizitatori. Blocarea ei i-ar refuza pe toți.',
     'spam_watch_not_spam' => 'Nu e spam',

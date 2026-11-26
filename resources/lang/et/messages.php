@@ -7465,7 +7465,7 @@ return [
     'spam_watch_signal_amount' => 'Summa nimes',
     'spam_watch_signal_lookalike' => 'Eksitavad märgid',
     'spam_watch_signal_throwaway' => 'Ühekordne e-posti aadress',
-    'spam_watch_signals_note' => 'Loetletakse ka viimase :days päeva jooksul loodu puhul: telefoninumber või summa nimes, teise tähestiku tähed numbrite või ladina tähtede asemel ning omaniku ühekordne e-posti aadress.',
+    'spam_watch_signals_note' => 'Loetletakse ka viimase :days päeva jooksul loodu või ümbernimetatu puhul: telefoninumber või summa nimes, teise tähestiku tähed numbrite või ladina tähtede asemel ning omaniku ühekordne e-posti aadress.',
     'spam_watch_account_lead_any' => 'Midagi selle nimes, aadressis või loodus näeb välja nagu rämpspost. Kontoga pole midagi tehtud.',
     'blocklist_edge_address' => 'See on üks Cloudflare\'i aadressidest, mida jagavad paljud külastajad. Selle blokeerimine keelaks kõik nad.',
     'spam_watch_not_spam' => 'Pole spämm',

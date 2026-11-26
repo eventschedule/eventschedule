@@ -148,7 +148,14 @@ class SpamSignalsAndEdgeAddressTest extends TestCase
 
         $old = $this->createOwner();
         $oldRole = $this->createRole($old, 'venue', ['name' => 'Box office 845 573 3428']);
-        DB::table('roles')->where('id', $oldRole->id)->update(['created_at' => now()->subDays(SpamWatch::SIGNAL_DAYS + 5)]);
+        DB::table('roles')->where('id', $oldRole->id)->update(['created_at' => now()->subDays(SpamWatch::SIGNAL_DAYS + 5), 'updated_at' => now()->subDays(SpamWatch::SIGNAL_DAYS + 5)]);
+
+        // Clean for months, then renamed into a scam: the window is when a name last changed, not
+        // when the schedule was made, or renaming an old schedule would get past every sign.
+        $switcher = $this->createOwner();
+        $switched = $this->createRole($switcher, 'venue', ['name' => 'Corner Stage']);
+        DB::table('roles')->where('id', $switched->id)->update(['created_at' => now()->subYear(), 'updated_at' => now()->subYear()]);
+        $switched->refresh()->forceFill(['name' => self::SCAMS[0]])->save();
 
         $eventOwner = $this->createOwner();
         $role = $this->createRole($eventOwner, 'venue', ['name' => 'The Hall']);
@@ -159,7 +166,8 @@ class SpamSignalsAndEdgeAddressTest extends TestCase
 
         $this->assertContains($scammer->id, $ids);
         $this->assertContains($eventOwner->id, $ids);
-        $this->assertNotContains($old->id, $ids, 'a number in a name made long ago is not a reason to look now');
+        $this->assertNotContains($old->id, $ids, 'a number in a name left alone for months is not a reason to look now');
+        $this->assertContains($switcher->id, $ids, 'a schedule renamed into a scam is, however old it is');
 
         $items = SpamWatch::matches(collect([$eventOwner]))[$eventOwner->id]['items'];
         $this->assertSame([SpamWatch::EVENT], array_column($items, 'kind'));

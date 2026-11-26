@@ -7463,7 +7463,7 @@ return [
     'spam_watch_signal_amount' => 'Importo in un nome',
     'spam_watch_signal_lookalike' => 'Caratteri ingannevoli',
     'spam_watch_signal_throwaway' => 'Indirizzo email usa e getta',
-    'spam_watch_signals_note' => 'Sono elencati anche, per ciò che è stato creato negli ultimi :days giorni: un numero di telefono o un importo in un nome, lettere di un altro alfabeto al posto di cifre o lettere latine, e l\'indirizzo email usa e getta di un proprietario.',
+    'spam_watch_signals_note' => 'Sono elencati anche, per ciò che è stato creato o rinominato negli ultimi :days giorni: un numero di telefono o un importo in un nome, lettere di un altro alfabeto al posto di cifre o lettere latine, e l\'indirizzo email usa e getta di un proprietario.',
     'spam_watch_account_lead_any' => 'Qualcosa nel suo nome, nel suo indirizzo o in ciò che ha creato sembra spam. Non è stato fatto nulla all\'account.',
     'blocklist_edge_address' => 'È uno degli indirizzi di Cloudflare, condiviso da molti visitatori. Bloccarlo li rifiuterebbe tutti.',
     'spam_watch_not_spam' => 'Non è spam',
