@@ -193,7 +193,7 @@ class VenueMapPageTest extends TestCase
         $html = $this->page($this->curatorWithMap());
 
         $this->assertMatchesRegularExpression('/<noscript><style[^>]*>\.gk-map-host \{ min-height: 0; \}<\/style><\/noscript>/', $html, 'no scripts, no band, no gap');
-        $this->assertStringContainsString("classList.add('is-mounted')", file_get_contents(resource_path('js/app.js')), 'a chunk that fails to load gives the room back');
+        $this->assertStringContainsString("classList.add('is-mounted')", file_get_contents(resource_path('js/app-tail.js')), 'a chunk that fails to load gives the room back');
         $this->assertStringContainsString("host.classList.add('is-mounted');\n\n        return;", file_get_contents(resource_path('js/venue-map-boot.js')), 'and so does a boot that finds nothing to mount');
     }
 
