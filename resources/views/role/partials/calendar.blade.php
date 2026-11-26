@@ -283,6 +283,20 @@
     // once (a laptop drew the phone's month, "No events" and "Next month" until the script ran).
     $initialView = $eventLayout ?? 'calendar';
     $cloakUnless = fn (string $view) => $initialView === $view ? '' : 'v-cloak';
+    // The events request the page makes as soon as its script has started (fetchCalendarEvents():
+    // the list's upcoming set, or the opening month), asked for from the head instead, with the
+    // stylesheets: it waited for the scripts to download and Vue to start, and started 1.8s into
+    // a throttled load whose HTML was done at 1.55s. The URL has to be the very one the script
+    // builds, or the browser fetches it twice; layouts/app-guest prints it (a page's body is
+    // rendered before its layout's head, as month_kit relies on).
+    if (($route ?? '') === 'guest' && ! request()->graphic && ($tab ?? '') !== 'availability' && isset($subdomain)) {
+        $eventsUrl = route('role.calendar_events', ['subdomain' => $subdomain]);
+        $eventsUrl .= (str_contains($eventsUrl, '?') ? '&' : '?')
+            .($initialView === 'list' ? 'list=1' : 'month='.$month.'&year='.$year)
+            .'&lang='.rawurlencode(isset($role) ? $role->displayLanguageCode() : 'en');
+        request()->attributes->set('calendar_events_preload', $eventsUrl);
+    }
+
     // The chips' row (role/partials/quick-pills) needs the events to know its categories, so it
     // arrived with them and pushed the list down. Its room is kept while they load when the
     // schedule has sub-schedules or events in more than one category (past ones included: a
@@ -1987,6 +2001,9 @@
                     </section>
                 </template>
             </div>
+            {{-- Where the past rows grow by themselves (growPastRows()), as the end of the list
+                 comes near: the upcoming rows' own sentinel is in list-more, above the past ones. --}}
+            <span v-if="hasMorePastRows && !fewCount" data-list-sentinel="past" aria-hidden="true"></span>
             @else
             {{-- All events grouped by date --}}
             <div v-if="allListGroups.length > 0" class="space-y-6">
@@ -2624,7 +2641,17 @@ const calendarApp = createApp({
             hidePastEvents: {{ (isset($hide_past_events) && $hide_past_events) ? 'true' : 'false' }},
             // How many upcoming rows the list draws. It was a fixed 200 with nothing after it;
             // "Show more" raises it (role/partials/list-more).
-            listRowLimit: 200,
+            // A guest's list draws its first screens and then grows by itself as the visitor nears
+            // the end (growListRows(), up to listAutoUntil), after which "Show more" is what it
+            // always was. It drew 200 occurrences at once, which on a weekly schedule was 431 rows
+            // and 11,000 elements built before the first one could be seen: 0.6s on a laptop with
+            // a slowed CPU and twice that on a phone, almost all of it below the fold.
+            listRowLimit: {{ $guestRows ? 30 : 200 }},
+            listAutoUntil: {{ $guestRows ? 200 : 0 }},
+            // The past rows under them, newest first, the same way: they were every past
+            // occurrence of the last 90 days at once (231 of the 431 rows above), and grow from
+            // their own sentinel at the end of the list (growPastRows()).
+            pastRowLimit: {{ $guestRows ? 20 : 'Infinity' }},
             // The server's row cap cut the payload: later events exist that the page does not hold.
             listTruncated: false,
             // The last load failed. Every empty state is behind this: "No scheduled events" is a
@@ -3380,6 +3407,10 @@ const calendarApp = createApp({
         // shown" is "any visible occurrence past the cut", which stops at the first one instead
         // of walking every occurrence twice. Visibility matters because the filters gate each
         // row, and a plain count would offer more when everything past the cut is filtered out.
+        // Past rows not drawn yet (pastRowLimit): the end of the list grows into them.
+        hasMorePastRows() {
+            return !this.hidePastEvents && this.flatPastEvents.length > this.pastRowLimit;
+        },
         hasMoreListRows() {
             return this.allMobileOccurrences.slice(this.listRowLimit).some(e => this.isEventVisible(e));
         },
@@ -3562,7 +3593,7 @@ const calendarApp = createApp({
                 groups[date].events.push({...event, _isPast: false});
             });
             if (!this.hidePastEvents) {
-                this.flatPastEvents.forEach(event => {
+                this.flatPastEvents.slice(0, this.pastRowLimit).forEach(event => {
                     const date = event.occurrenceDate || 'no-date';
                     if (!groups[date]) groups[date] = {date, events: [], hasPast: true};
                     groups[date].events.push({...event, _isPast: true});
@@ -3591,6 +3622,7 @@ const calendarApp = createApp({
             const left = this.listToRestore;
             this.listToRestore = null;
             this.listRowLimit = Math.max(this.listRowLimit, left.limit || 0);
+            this.pastRowLimit = Math.max(this.pastRowLimit, left.pastLimit || 0);
             this.phoneShowPast = !!left.past;
             this.phoneDay = left.day || '';
             this.$nextTick(() => requestAnimationFrame(() => window.scrollTo(0, left.y || 0)));
@@ -3845,6 +3877,39 @@ const calendarApp = createApp({
         showMoreListRows() {
             this.listRowLimit += 200;
         },
+        // The next rows, as the end of the list comes near (the sentinel in role/partials/
+        // list-more, watched by listGrowObserver): never past listAutoUntil, so how far the list
+        // runs by itself is what it drew at once before.
+        growListRows() {
+            if (this.listRowLimit < this.listAutoUntil) {
+                this.listRowLimit = Math.min(this.listAutoUntil, this.listRowLimit + 40);
+                // The sentinel is the same element after the draw, and an observer only speaks
+                // when reach CHANGES: one still in reach would never grow the list again.
+                this.listSentinelSeen = null;
+                this.$nextTick(() => this.watchListSentinel());
+            }
+        },
+        // Watch the sentinel the last draw left (there is at most one on screen, the list's).
+        // Observing an element reports it at once, so a sentinel still in reach after a growth
+        // grows the list again, until the list runs past the screen or reaches listAutoUntil.
+        growPastRows() {
+            if (this.hasMorePastRows) {
+                this.pastRowLimit += 40;
+                this.listSentinelSeen = null;
+                this.$nextTick(() => this.watchListSentinel());
+            }
+        },
+        // Watch the sentinels the last draw left: the upcoming rows' (role/partials/list-more)
+        // and the past rows' at the end of the list. Skipped when they are the same elements as
+        // last time, as most redraws leave them.
+        watchListSentinel() {
+            if (!this.listGrowObserver) { return; }
+            const seen = Array.from(document.querySelectorAll('[data-list-sentinel]'));
+            if (this.listSentinelSeen && seen.length === this.listSentinelSeen.length && seen.every((el, i) => el === this.listSentinelSeen[i])) { return; }
+            this.listGrowObserver.disconnect();
+            this.listSentinelSeen = seen;
+            seen.forEach(el => this.listGrowObserver.observe(el));
+        },
         // Where the list is being left: how far down, how many rows, the phone month's day.
         // Kept for this tab only, under this page's own address (filters are in the address).
         listMemoryKey() {
@@ -3860,7 +3925,7 @@ const calendarApp = createApp({
                     return;
                 }
                 sessionStorage.setItem(this.listMemoryKey(), JSON.stringify({
-                    y: Math.round(window.scrollY), limit: this.listRowLimit, day: this.phoneDay, past: this.phoneShowPast, at: Date.now(),
+                    y: Math.round(window.scrollY), limit: this.listRowLimit, pastLimit: Number.isFinite(this.pastRowLimit) ? this.pastRowLimit : 0, day: this.phoneDay, past: this.phoneShowPast, at: Date.now(),
                 }));
             } catch (e) {}
         },
@@ -5202,6 +5267,21 @@ const calendarApp = createApp({
             this.recallList();
             window.addEventListener('pagehide', () => this.rememberList());
         }
+        if (this.listAutoUntil > 0 && 'IntersectionObserver' in window) {
+            // Not reactive on purpose: only the rows it adds are.
+            this.listGrowObserver = new IntersectionObserver(
+                (entries) => {
+                    entries.filter(entry => entry.isIntersecting).forEach(entry => {
+                        if (entry.target.dataset.listSentinel === 'past') { this.growPastRows(); } else { this.growListRows(); }
+                    });
+                },
+                { rootMargin: '0px 0px 1500px 0px' }
+            );
+            this.listSentinelSeen = null;
+        } else {
+            // Nothing to grow the past rows by: draw them all, as the list always did.
+            this.pastRowLimit = Infinity;
+        }
         // The overlay embed.js opened for an event from here was closed: the focus comes back to
         // what was pressed (partials/embed-frame raises this on the host's word).
         if (this.embedOnsite) {
@@ -5311,6 +5391,9 @@ const calendarApp = createApp({
             }
         });
 
+    },
+    updated() {
+        this.watchListSentinel();
     }
 });
 

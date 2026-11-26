@@ -94,4 +94,33 @@ class GuestPageLoadingStateTest extends TestCase
         $role = $this->createRole($this->createOwner(), 'venue', ['font_family' => 'Alfa Slab One']);
         $this->assertStringContainsString('<link rel="preload" as="font" type="font/woff2" href="'.font_preload_url('Alfa Slab One').'" crossorigin>', $this->page($role));
     }
+
+    public function test_the_events_are_asked_for_from_the_head_with_the_url_the_script_builds(): void
+    {
+        $list = $this->createRole($this->createOwner(), 'venue', ['event_layout' => 'list']);
+        $html = $this->page($list);
+        $url = route('role.calendar_events', ['subdomain' => $list->subdomain]).'?list=1&lang='.$list->displayLanguageCode();
+
+        $this->assertStringContainsString('<link rel="preload" as="fetch" href="'.e($url).'" crossorigin>', $html);
+        // The script's own request, built the same way: a mismatch would fetch twice.
+        $this->assertStringContainsString("url += separator + 'list=1';", $html);
+
+        $calendar = $this->createRole($this->createOwner(), 'venue', ['event_layout' => 'calendar']);
+        $this->assertMatchesRegularExpression('~<link rel="preload" as="fetch" href="[^"]*\?month=\d{1,2}&amp;year=\d{4}&amp;lang=[a-zA-Z-]+" crossorigin>~', $this->page($calendar));
+    }
+
+    public function test_the_list_draws_its_first_screens_and_grows_from_there(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue', ['event_layout' => 'list']);
+        $html = $this->page($role);
+
+        $this->assertStringContainsString('listRowLimit: 30,', $html);
+        $this->assertStringContainsString('listAutoUntil: 200,', $html);
+        $this->assertStringContainsString('pastRowLimit: 20,', $html);
+        $this->assertStringContainsString('this.flatPastEvents.slice(0, this.pastRowLimit)', $html);
+        $this->assertStringContainsString('data-list-sentinel aria-hidden="true"', $html);
+        $this->assertStringContainsString('data-list-sentinel="past" aria-hidden="true"', $html);
+        // Never past what it drew at once before: "Show more" takes over from there.
+        $this->assertStringContainsString('this.listRowLimit = Math.min(this.listAutoUntil, this.listRowLimit + 40);', $html);
+    }
 }

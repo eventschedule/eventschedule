@@ -19,6 +19,12 @@ class AppLayout extends Component
          */
         public bool $themeVariants = false,
         /**
+         * Serve resources/js/guest.js instead of app.js: the same without the Markdown editors
+         * (EasyMDE, a third of a megabyte). layouts/app-guest passes it for a page that drew no
+         * editor; everything else keeps app.js.
+         */
+        public bool $lightScripts = false,
+        /**
          * What the /admin/realtime beacon reports this page as. app-guest passes 'gp' with its
          * schedule and event, app-admin passes 'ap'; a page using this shell directly
          * (getting-started, ticket views, ...) falls back to 'ap' when signed in and 'gp' when not.

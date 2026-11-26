@@ -4,6 +4,10 @@
      whatever came later could not be reached by scrolling. Now the cut is a number the visitor can
      raise, and when the rows run out because the SERVER's row cap cut the payload, the list says
      that later events exist instead of ending as though the schedule did. --}}
+{{-- Where a guest's list grows by itself (growListRows()): an empty mark the list's script watches
+     as the end of the list comes near. "Show more" below stays for a keyboard and past the point
+     the list stops growing by itself. --}}
+<span v-if="hasMoreListRows && listRowLimit < listAutoUntil" data-list-sentinel aria-hidden="true"></span>
 <div v-if="hasMoreListRows" data-list-more class="mt-6 text-center">
     <button type="button" @click.stop="showMoreListRows"
             class="inline-flex items-center px-6 py-2.5 text-sm font-semibold rounded-xl border-2 shadow-sm {{ ($guestRows ?? false) ? 'gk-fill-btn' : 'transition-all duration-200 hover:shadow-lg' }}"

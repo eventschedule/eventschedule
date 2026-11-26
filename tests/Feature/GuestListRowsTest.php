@@ -437,12 +437,14 @@ class GuestListRowsTest extends TestCase
         // Noted as the page is put away, under this page's own address, for this tab only.
         $this->assertStringContainsString("window.addEventListener('pagehide', () => this.rememberList());", $html);
         $this->assertStringContainsString("return 'es_list_' + window.location.pathname + window.location.search;", $html);
-        $this->assertStringContainsString('y: Math.round(window.scrollY), limit: this.listRowLimit, day: this.phoneDay, past: this.phoneShowPast, at: Date.now(),', $html);
+        $this->assertStringContainsString('y: Math.round(window.scrollY), limit: this.listRowLimit, pastLimit: Number.isFinite(this.pastRowLimit) ? this.pastRowLimit : 0, day: this.phoneDay, past: this.phoneShowPast, at: Date.now(),', $html);
         // Put back only on the browser's Back or Forward, never on a fresh visit or a reload.
         $this->assertStringContainsString("entry.type === 'back_forward' && left && Date.now() - left.at < 30 * 60 * 1000", $html);
         // And only once the rows are in: before that there is nothing to scroll to.
         $this->assertSame(1, preg_match('/isLoadingEvents\(loading\) \{\s*if \(loading \|\| !this\.listToRestore\) \{ return; \}/', $html));
         $this->assertStringContainsString('this.listRowLimit = Math.max(this.listRowLimit, left.limit || 0);', $html);
+        // As far as the past rows had grown, too: the page would come back shorter than it was left.
+        $this->assertStringContainsString('this.pastRowLimit = Math.max(this.pastRowLimit, left.pastLimit || 0);', $html);
 
         // A venue, Free, Online and a search are not in the address: Back returns the list
         // without them, so a place measured in the narrowed list is not kept.

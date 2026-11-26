@@ -21,6 +21,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/js/app.js',
+                'resources/js/guest.js',
                 'resources/js/marketing.js',
                 'resources/js/marketing-home.js',
                 'resources/js/docs.js',

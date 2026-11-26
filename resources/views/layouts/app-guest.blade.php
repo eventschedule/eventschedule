@@ -1,4 +1,12 @@
-<x-app-layout :title="$guestTitle()" :icon="$role->isPro() && $role->profile_image_url ? $role->profile_image_url : null" realtime-surface="gp" :realtime-role="$role" :realtime-event="$event" :force-mode="request()->embed ? null : \App\Utils\GuestTheme::pageMode($role, $otherRole ?? null, $event ?? null)" :mode-chosen="! request()->embed && \App\Utils\GuestTheme::pagePalette($role, $otherRole ?? null, $event ?? null) !== null" :carry-hosts="request()->embed ? [] : \App\Utils\GuestTheme::carryHosts($role, $otherRole ?? null, $event ?? null)">
+{{-- A page with no Markdown editor on it is served the bundle without the editors (resources/js/
+     guest.js). Decided from what the page drew, which is rendered before this layout, so a guest
+     page that gains an editor (the submit and booking forms, the import page) keeps them without
+     anyone having to list it. --}}
+@php
+    $pageText = (string) $slot;
+    $needsEditors = str_contains($pageText, 'html-editor') || str_contains($pageText, 'initTinyMDE') || str_contains($pageText, 'initHtmlEditors');
+@endphp
+<x-app-layout :light-scripts="! $needsEditors" :title="$guestTitle()" :icon="$role->isPro() && $role->profile_image_url ? $role->profile_image_url : null" realtime-surface="gp" :realtime-role="$role" :realtime-event="$event" :force-mode="request()->embed ? null : \App\Utils\GuestTheme::pageMode($role, $otherRole ?? null, $event ?? null)" :mode-chosen="! request()->embed && \App\Utils\GuestTheme::pagePalette($role, $otherRole ?? null, $event ?? null) !== null" :carry-hosts="request()->embed ? [] : \App\Utils\GuestTheme::carryHosts($role, $otherRole ?? null, $event ?? null)">
 
     <noscript>
       <div class="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 p-4 text-center text-base">
@@ -395,6 +403,11 @@
         @include('partials.aurora-styles')
         @endif
         {{-- The month's kit, on a page that draws a calendar (role/partials/calendar says so). --}}
+        {{-- The schedule's events, asked for beside the stylesheets rather than once the page's
+             script has started (role/partials/calendar sets the URL, the very one it fetches). --}}
+        @if ($eventsPreload = request()->attributes->get('calendar_events_preload'))
+        <link rel="preload" as="fetch" href="{{ $eventsPreload }}" crossorigin>
+        @endif
         @if (request()->attributes->get('month_kit'))
         @include('partials.month-kit-styles')
         @endif

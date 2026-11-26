@@ -507,7 +507,7 @@
 
     @vite([
     'resources/css/app.css',
-    'resources/js/app.js',
+    $lightScripts ? 'resources/js/guest.js' : 'resources/js/app.js',
     ])
 
     <style {!! nonce_attr() !!}>
