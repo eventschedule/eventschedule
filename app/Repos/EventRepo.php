@@ -752,7 +752,7 @@ class EventRepo
         $venue->name_en = $details['name_en'] ?? null;
         $venue->email = $details['email'] ?? null;
         $venue->phone = ($details['phone'] ?? null) ?: null;
-        $venue->subdomain = Role::generateSubdomain($details['name'] ?? null, $details['name_en'] ?? null);
+        $venue->subdomain = Role::generateSubdomain($details['name'] ?? null, $details['name_en'] ?? null, shortest: false);
         $venue->type = 'venue';
         $venue->address1 = $details['address1'] ?? null;
         $venue->address2 = $details['address2'] ?? null;
@@ -1144,7 +1144,7 @@ class EventRepo
                     $role->name = $member['name'];
                     $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
                     $role->phone = isset($member['phone']) && $member['phone'] !== '' ? $member['phone'] : null;
-                    $role->subdomain = Role::generateSubdomain($member['name']);
+                    $role->subdomain = Role::generateSubdomain($member['name'], shortest: false);
                     $role->type = $request->role_type ? $request->role_type : 'talent';
                     $role->timezone = $captureTimezone;
                     $role->language_code = $request->language_code ? $request->language_code : $currentRole->language_code;

@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Feature\Characterization\Concerns\SavesEventsOverHttp;
+use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -17,6 +19,7 @@ use Tests\TestCase;
 class RoleGenerateSubdomainTest extends TestCase
 {
     use CreatesScheduleData;
+    use SavesEventsOverHttp;
     use RefreshDatabase;
 
     protected function setUp(): void
@@ -42,6 +45,30 @@ class RoleGenerateSubdomainTest extends TestCase
     {
         // The shortening itself is deliberate and unchanged: an empty install hands out "blue".
         $this->assertSame('blue', Role::generateSubdomain('Blue Note'));
+    }
+
+    public function test_a_schedule_made_for_somebody_takes_its_whole_name(): void
+    {
+        // Issue #139: a participant "Type Of Negative" was handed "type", which its listing read
+        // as a link cut at the first space.
+        $this->assertSame('type-of-negative', Role::generateSubdomain('Type Of Negative', shortest: false));
+        $this->assertSame('type', Role::generateSubdomain('Type Of Negative'), 'a schedule a person makes for themselves keeps the shortest');
+
+        $this->createRole($this->createOwner(), 'talent', ['subdomain' => 'type-of-negative']);
+        $this->assertSame('type-of-negative1', Role::generateSubdomain('Type Of Negative', shortest: false), 'taken: a number, never a shorter start');
+    }
+
+    public function test_a_participant_added_to_an_event_takes_its_whole_name(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Goldmine', 'country_code' => 'de']);
+
+        $this->postCreateEvent($owner, $venue, [
+            'name' => 'Anniversary',
+            'members' => ['new_a' => ['name' => 'Type Of Negative']],
+        ])->assertRedirect();
+
+        $this->assertSame('type-of-negative', Role::where('name', 'Type Of Negative')->value('subdomain'));
     }
 
     public function test_no_reserved_name_is_ever_handed_out(): void

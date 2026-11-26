@@ -225,10 +225,10 @@ class GuestAccountService
         // generateSubdomain already handles uniqueness, but retry on the off chance two
         // same-named talents are created at once (mirrors the venue auto-create in
         // ConvertsLocationToVenue) so a race can't surface as a raw UNIQUE-index 500.
-        $subdomain = Role::generateSubdomain($name);
+        $subdomain = Role::generateSubdomain($name, shortest: false);
         $attempts = 0;
         while (Role::where('subdomain', $subdomain)->exists() && $attempts < 10) {
-            $subdomain = Role::generateSubdomain($name.'-'.++$attempts);
+            $subdomain = Role::generateSubdomain($name.'-'.++$attempts, shortest: false);
         }
         $talent->subdomain = $subdomain;
 

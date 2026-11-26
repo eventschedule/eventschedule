@@ -3343,7 +3343,7 @@ class EventController extends Controller
         // which on hosted is a database write, and this runs on a public page and again after
         // the submission is already stored.
         try {
-            $ip = \App\Models\PageView::clientIp($request);
+            $ip = PageView::clientIp($request);
 
             if (! PageView::isBot($request->userAgent())
                 && ! PageView::isSuspiciousRequest($request)
@@ -3795,7 +3795,7 @@ class EventController extends Controller
         } elseif ($request->venue_name || $request->venue_address1 || $request->venue_city) {
             $venue = new Role;
             $venue->name = $request->venue_name ?? null;
-            $venue->subdomain = Role::generateSubdomain($request->venue_name, $request->venue_name_en);
+            $venue->subdomain = Role::generateSubdomain($request->venue_name, $request->venue_name_en, shortest: false);
             $venue->type = 'venue';
             $venue->address1 = $request->venue_address1;
             $venue->city = $request->venue_city;

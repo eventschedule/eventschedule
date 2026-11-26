@@ -162,10 +162,10 @@ trait ConvertsLocationToVenue
 
             // Create new venue with a unique subdomain
             // generateSubdomain already handles uniqueness, but retry in case of a race condition
-            $subdomain = Role::generateSubdomain($location);
+            $subdomain = Role::generateSubdomain($location, shortest: false);
             $attempts = 0;
             while (Role::where('subdomain', $subdomain)->exists() && $attempts < 10) {
-                $subdomain = Role::generateSubdomain($location.'-'.++$attempts);
+                $subdomain = Role::generateSubdomain($location.'-'.++$attempts, shortest: false);
             }
 
             $venue = new Role;

@@ -3252,7 +3252,16 @@ class Role extends Model implements MustVerifyEmail
         return $result === false ? '' : $result;
     }
 
-    public static function generateSubdomain($name = '', $fallbackEnglish = null)
+    /**
+     * A free address for a new schedule called $name.
+     *
+     * $shortest: a schedule a person makes for themselves takes the shortest free start of its
+     * name ("Live Music Shop" is "live"), which they chose and can change. One made FOR somebody
+     * (a participant or a venue named on an event, an import, a guest form) takes its whole name
+     * instead: "Type Of Negative" was handed "type", which its listing read as a broken link
+     * (issue #139), and a placeholder took a short word ("the") nobody had chosen it for.
+     */
+    public static function generateSubdomain($name = '', $fallbackEnglish = null, bool $shortest = true)
     {
         if (! $name) {
             $name = strtolower(\Str::random(8));
@@ -3261,7 +3270,7 @@ class Role extends Model implements MustVerifyEmail
         $subdomain = self::cleanSubdomain($name, $fallbackEnglish);
 
         // Check variations of the subdomain
-        $parts = explode('-', $subdomain);
+        $parts = $shortest ? explode('-', $subdomain) : [$subdomain];
         $variations = [];
 
         // Build variations from left to right (live, live-music, live-music-shop)
