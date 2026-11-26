@@ -8487,6 +8487,8 @@ return [
     'webhook_test_redirected' => 'أجاب :host بإعادة توجيه (HTTP :status). لا تتبع الـ webhooks عمليات إعادة التوجيه، لذا أدخل العنوان الذي يعيد التوجيه إليه.',
     'newsletter_events_sub_schedule' => 'جدول فرعي',
     'newsletter_events_all_sub_schedules' => 'كل الجداول الفرعية',
+    'newsletter_events_detail' => 'تحت كل اسم',
+    'newsletter_events_detail_none' => 'لا شيء',
     'graphic_row_link' => 'رابط عام',
     'graphic_sum_link_locked' => 'على عنوان خاص بها',
     'graphic_link_toggle' => 'إبقاء الصورة على عنوان عام',

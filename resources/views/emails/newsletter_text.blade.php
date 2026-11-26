@@ -32,6 +32,9 @@
 @elseif ($type === 'events' && collect($data['resolvedEvents'] ?? [])->isNotEmpty())
 @foreach ($data['resolvedEvents'] as $e)
 * {!! $e['name'] !!}
+@if (filled($e['blurb'] ?? null))
+  {!! $e['blurb'] !!}
+@endif
   {!! implode(' | ', array_filter([$e['date'], $e['time'], $e['venue'], $e['repeat'], $e['price']])) !!}
   {!! $e['url'] !!}
 

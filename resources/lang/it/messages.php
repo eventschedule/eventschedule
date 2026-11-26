@@ -8486,6 +8486,8 @@ return [
     'webhook_test_redirected' => ':host ha risposto con un reindirizzamento (HTTP :status). I webhook non seguono i reindirizzamenti, quindi inserisci l’indirizzo a cui reindirizza.',
     'newsletter_events_sub_schedule' => 'Sotto-calendario',
     'newsletter_events_all_sub_schedules' => 'Tutti i sotto-calendari',
+    'newsletter_events_detail' => 'Sotto ogni nome',
+    'newsletter_events_detail_none' => 'Niente',
     'graphic_row_link' => 'Link pubblico',
     'graphic_sum_link_locked' => 'A un indirizzo tutto suo',
     'graphic_link_toggle' => 'Tieni l\'immagine a un indirizzo pubblico',

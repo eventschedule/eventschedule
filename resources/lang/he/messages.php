@@ -8486,6 +8486,8 @@ return [
     'webhook_test_redirected' => ':host ענה בהפניה (HTTP :status). Webhooks לא עוקבים אחרי הפניות, לכן הזן את הכתובת שאליה הוא מפנה.',
     'newsletter_events_sub_schedule' => 'תת-לוח זמנים',
     'newsletter_events_all_sub_schedules' => 'כל תת-לוחות הזמנים',
+    'newsletter_events_detail' => 'מתחת לכל שם',
+    'newsletter_events_detail_none' => 'כלום',
     'graphic_row_link' => 'קישור ציבורי',
     'graphic_sum_link_locked' => 'בכתובת משלה',
     'graphic_link_toggle' => 'השאר את התמונה זמינה בכתובת ציבורית',

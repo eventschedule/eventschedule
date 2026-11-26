@@ -16,6 +16,7 @@ use App\Models\Role;
 use App\Models\RoleSubscriber;
 use App\Models\User;
 use App\Repos\EventRepo;
+use App\Utils\CustomFieldDisplay;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -912,7 +913,12 @@ class NewsletterService
                     };
                 }
 
-                $block['data']['resolvedEvents'] = $pairs->map(fn (array $pair) => $this->eventRow($pair['event'], $pair['date'], $role))->values();
+                $detail = $role ? self::blockDetailKey($block['data'] ?? []) : '';
+                if (str_starts_with($detail, 'field:')) {
+                    // forEventPage() reads which schedules have accepted the event.
+                    \Illuminate\Database\Eloquent\Collection::make($pairs->pluck('event')->all())->loadMissing('roles');
+                }
+                $block['data']['resolvedEvents'] = $pairs->map(fn (array $pair) => $this->eventRow($pair['event'], $pair['date'], $role, $detail))->values();
                 $block['data']['scheduleUrl'] = $role?->getGuestUrl(true);
             }
 
@@ -1193,6 +1199,42 @@ class NewsletterService
         $key = $data['groupId'] ?? '';
 
         return is_string($key) && preg_match('/^[A-Za-z0-9_-]{1,64}$/', $key) === 1 ? $key : '';
+    }
+
+    /**
+     * What an Events block prints under each event's name (issue #138), as stored: '' for nothing,
+     * 'short_description', or 'field:<key>' for one of the sending schedule's custom fields.
+     */
+    public static function blockDetailKey(array $data): string
+    {
+        $key = $data['detail'] ?? '';
+
+        return is_string($key) && ($key === 'short_description' || preg_match('/^field:[A-Za-z0-9_-]{1,64}$/', $key) === 1) ? $key : '';
+    }
+
+    /**
+     * The choices for an Events block's "Under the name" select: the short description, then each
+     * of the schedule's custom fields its event pages show. A field the page does not show is
+     * never offered, because the mail must not print what the page keeps to the owner; and a plan
+     * without custom fields offers none (CustomFieldDisplay::forEventPage() asks the same).
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    public static function detailChoices(Role $role): array
+    {
+        $choices = [['value' => 'short_description', 'label' => __('messages.short_description')]];
+
+        if (! $role->isPro()) {
+            return $choices;
+        }
+
+        foreach ($role->getEventCustomFields() as $key => $field) {
+            if (is_array($field) && Role::isEventCustomFieldOnEventPage($field) && preg_match('/^[A-Za-z0-9_-]{1,64}$/', (string) $key) === 1) {
+                $choices[] = ['value' => 'field:'.$key, 'label' => $role->customFieldLabel($field, (string) $key)];
+            }
+        }
+
+        return $choices;
     }
 
     /**
@@ -1510,7 +1552,7 @@ class NewsletterService
      * The clock is the event's own schedule's (getStartDateTime() with no override), and the
      * names of months and days are the mail's language: this runs inside inScheduleLocale().
      */
-    private function eventRow(Event $event, ?string $date, Role $role): array
+    private function eventRow(Event $event, ?string $date, Role $role, string $detail = ''): array
     {
         // An event with no owning schedule (older rows) has no clock of its own and would print
         // on the app's: the sender's is the one its page on this schedule has always used.
@@ -1575,7 +1617,40 @@ class NewsletterService
             // Whether the action sells: Bold fills that button and outlines one that only opens the page.
             'buy' => $buy,
             'cta' => $buy ? __('messages.get_tickets') : __('messages.view_event'),
+            'blurb' => $this->eventBlurb($event, $role, $detail),
         ];
+    }
+
+    /**
+     * The line an Events block prints under an event's name, or null (blockDetailKey()).
+     *
+     * A custom field is printed only as the event page prints it (CustomFieldDisplay::
+     * forEventPage(): ticked "On event page", never a private one, a Yes/No only where it is Yes,
+     * a Pro schedule that has accepted the event) and only from answers written by the SENDING
+     * schedule's form: field keys collide across schedules, every schedule's first field being
+     * new_0, so a venue's newsletter must not print an act's "new_0" as its own field. A Yes is
+     * printed as the field's name ("Step-free access") and a date beside it ("Sign up by: Dec 3"),
+     * as the event page leads a lone one with its name: "Yes" or a bare date says nothing.
+     */
+    private function eventBlurb(Event $event, Role $role, string $detail): ?string
+    {
+        $text = '';
+
+        if ($detail === 'short_description') {
+            $text = (string) $event->short_description;
+        } elseif (str_starts_with($detail, 'field:') && $event->customFieldValuesBelongTo($role)) {
+            $row = collect(CustomFieldDisplay::forEventPage($event, $role))->firstWhere('key', substr($detail, 6));
+            $text = match (true) {
+                ! $row => '',
+                $row['type'] === 'switch' => $row['label'],
+                $row['type'] === 'date' => $row['label'].': '.$row['value'],
+                default => $row['value'],
+            };
+        }
+
+        $text = trim(preg_replace('/\s+/u', ' ', $text));
+
+        return $text === '' ? null : Str::limit($text, 200);
     }
 
     /** "Nov 1 - 3", "Oct 30 - Nov 1", with the year only when it is not this one. */

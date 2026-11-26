@@ -185,6 +185,16 @@
                                                     <option v-for="group in subSchedules" :key="group.value" :value="group.value">{{ group.label }}</option>
                                                 </select>
                                             </div>
+                                            <!-- A line under each event's name: its short description, or one of the schedule's custom fields its event pages show (issue #138). -->
+                                            <div v-if="eventDetails.length">
+                                                <label :for="'nb-events-detail-' + block.id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ t.events_detail }}</label>
+                                                <select :id="'nb-events-detail-' + block.id" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm"
+                                                    :value="block.data.detail || ''"
+                                                    @change="updateBlockData(block.id, 'detail', $event.target.value)">
+                                                    <option value="">{{ t.events_detail_none }}</option>
+                                                    <option v-for="choice in eventDetails" :key="choice.value" :value="choice.value">{{ choice.label }}</option>
+                                                </select>
+                                            </div>
                                             <div v-show="block.data.useAllEvents === false">
                                                 <div v-if="events.length" class="space-y-2 max-h-60 overflow-y-auto">
                                                     <div v-for="evt in events" :key="evt.id" class="flex items-center gap-3 p-2 border border-gray-200 dark:border-gray-600 rounded-lg">
@@ -979,6 +989,7 @@ const props = defineProps({
     events: { type: Array, default: () => [] },
     // The schedule's sub-schedules, [{ value, label }], for narrowing an Events block.
     subSchedules: { type: Array, default: () => [] },
+    eventDetails: { type: Array, default: () => [] },
     segments: { type: Array, default: () => [] },
     csrfToken: { type: String, default: '' },
     translations: { type: Object, default: () => ({}) },

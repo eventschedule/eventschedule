@@ -8487,6 +8487,8 @@ return [
     'webhook_test_redirected' => ':host hat mit einer Weiterleitung geantwortet (HTTP :status). Webhooks folgen keinen Weiterleitungen, also gib die Adresse ein, auf die weitergeleitet wird.',
     'newsletter_events_sub_schedule' => 'Unterzeitplan',
     'newsletter_events_all_sub_schedules' => 'Alle Unterzeitpläne',
+    'newsletter_events_detail' => 'Unter jedem Namen',
+    'newsletter_events_detail_none' => 'Nichts',
     'graphic_row_link' => 'Öffentlicher Link',
     'graphic_sum_link_locked' => 'Unter einer eigenen Adresse',
     'graphic_link_toggle' => 'Bild unter einer öffentlichen Adresse bereitstellen',

@@ -53,6 +53,9 @@
 <p style="margin: 0 0 5px; {{ $nl->labelType() }}">{!! $when !!}</p>
 @endif
 <p dir="auto" style="margin: 0; word-break: break-word;"><a href="{{ $e['url'] }}" target="_blank" rel="noopener" style="{{ $title }} text-decoration: none;">{{ $e['name'] }}</a></p>
+@if (filled($e['blurb'] ?? null))
+<p dir="auto" style="margin: 4px 0 0; word-break: break-word; {{ $nl->smallType($nl->ink2) }}">{{ $e['blurb'] }}</p>
+@endif
 @if ($meta !== '')
 <p style="margin: 5px 0 0; {{ $nl->smallType($nl->ink3) }}">{!! $meta !!}</p>
 @endif

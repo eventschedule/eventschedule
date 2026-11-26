@@ -8489,6 +8489,8 @@ return [
     'webhook_test_redirected' => ':host antwoordde met een doorverwijzing (HTTP :status). Webhooks volgen geen doorverwijzingen, dus vul het adres in waarnaar wordt doorverwezen.',
     'newsletter_events_sub_schedule' => 'Sub-agenda',
     'newsletter_events_all_sub_schedules' => 'Alle sub-agenda\'s',
+    'newsletter_events_detail' => 'Onder elke naam',
+    'newsletter_events_detail_none' => 'Niets',
     'graphic_row_link' => 'Openbare link',
     'graphic_sum_link_locked' => 'Op een eigen adres',
     'graphic_link_toggle' => 'De afbeelding op een openbaar adres houden',

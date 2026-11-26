@@ -8487,6 +8487,8 @@ return [
     'webhook_test_redirected' => ':host respondió con una redirección (HTTP :status). Los webhooks no siguen redirecciones, así que introduce la dirección a la que redirige.',
     'newsletter_events_sub_schedule' => 'Subagenda',
     'newsletter_events_all_sub_schedules' => 'Todas las subagendas',
+    'newsletter_events_detail' => 'Debajo de cada nombre',
+    'newsletter_events_detail_none' => 'Nada',
     'graphic_row_link' => 'Enlace público',
     'graphic_sum_link_locked' => 'En una dirección propia',
     'graphic_link_toggle' => 'Mantener la imagen en una dirección pública',

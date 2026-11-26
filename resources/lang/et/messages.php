@@ -8488,6 +8488,8 @@ return [
     'webhook_test_redirected' => ':host vastas ümbersuunamisega (HTTP :status). Veebihaagid ümbersuunamisi ei järgi, seega sisesta aadress, kuhu suunatakse.',
     'newsletter_events_sub_schedule' => 'Alamajakava',
     'newsletter_events_all_sub_schedules' => 'Kõik alamajakavad',
+    'newsletter_events_detail' => 'Iga nime all',
+    'newsletter_events_detail_none' => 'Mitte midagi',
     'graphic_row_link' => 'Avalik link',
     'graphic_sum_link_locked' => 'Oma aadressil',
     'graphic_link_toggle' => 'Hoia pilti avalikul aadressil',

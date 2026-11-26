@@ -8488,6 +8488,8 @@ return [
     'webhook_test_redirected' => ':host respondeu com um redirecionamento (HTTP :status). Webhooks não seguem redirecionamentos, então informe o endereço para onde ele redireciona.',
     'newsletter_events_sub_schedule' => 'Sub-agenda',
     'newsletter_events_all_sub_schedules' => 'Todas as sub-agendas',
+    'newsletter_events_detail' => 'Abaixo de cada nome',
+    'newsletter_events_detail_none' => 'Nada',
     'graphic_row_link' => 'Link público',
     'graphic_sum_link_locked' => 'Em um endereço próprio',
     'graphic_link_toggle' => 'Manter a imagem em um endereço público',

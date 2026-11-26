@@ -8560,6 +8560,8 @@ return [
     'webhook_test_redirected' => ':host answered with a redirect (HTTP :status). Webhooks do not follow redirects, so enter the address it redirects to.',
     'newsletter_events_sub_schedule' => 'Sub-schedule',
     'newsletter_events_all_sub_schedules' => 'All sub-schedules',
+    'newsletter_events_detail' => 'Under each name',
+    'newsletter_events_detail_none' => 'Nothing',
     'graphic_row_link' => 'Public link',
     'graphic_sum_link_locked' => 'At an address of its own',
     'graphic_link_toggle' => 'Keep the image at a public address',

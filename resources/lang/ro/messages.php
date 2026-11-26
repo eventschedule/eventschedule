@@ -8507,6 +8507,8 @@ return [
     'webhook_test_redirected' => ':host a răspuns cu o redirecționare (HTTP :status). Webhook-urile nu urmează redirecționările, așa că introdu adresa către care redirecționează.',
     'newsletter_events_sub_schedule' => 'Sub-program',
     'newsletter_events_all_sub_schedules' => 'Toate sub-programele',
+    'newsletter_events_detail' => 'Sub fiecare nume',
+    'newsletter_events_detail_none' => 'Nimic',
     'graphic_row_link' => 'Link public',
     'graphic_sum_link_locked' => 'La o adresă proprie',
     'graphic_link_toggle' => 'Păstrează imaginea la o adresă publică',

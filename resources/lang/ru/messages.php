@@ -8489,6 +8489,8 @@ return [
     'webhook_test_redirected' => ':host ответил перенаправлением (HTTP :status). Вебхуки не следуют перенаправлениям, поэтому укажите адрес, на который оно ведёт.',
     'newsletter_events_sub_schedule' => 'Подрасписание',
     'newsletter_events_all_sub_schedules' => 'Все подрасписания',
+    'newsletter_events_detail' => 'Под каждым названием',
+    'newsletter_events_detail_none' => 'Ничего',
     'graphic_row_link' => 'Публичная ссылка',
     'graphic_sum_link_locked' => 'По собственному адресу',
     'graphic_link_toggle' => 'Сделать изображение доступным по публичному адресу',
