@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\BlocklistEntry;
 use App\Models\Setting;
+use App\Rules\NotBlocklisted;
 use App\Services\AudienceMailGuard;
 use App\Services\Blocklist;
 use App\Services\SpamWatch;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Validator;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -263,5 +265,24 @@ class SpamSignalsAndEdgeAddressTest extends TestCase
         foreach (['Billings Jazz Club', 'Northern Lights', 'Documentary Night', 'Renewal Church', 'Squadron Ball'] as $name) {
             $this->assertNull(SpamWatch::wordInText($name), $name);
         }
+    }
+
+    public function test_on_hosted_a_new_account_cannot_be_made_with_a_throwaway_address(): void
+    {
+        $passes = fn (string $email) => Validator::make(['email' => $email], ['email' => [new NotBlocklisted]])->passes();
+
+        config(['app.hosted' => true]);
+        $this->assertFalse($passes('someone@anonmart.com'), 'on the throwaway list, not on NoFakeEmail\'s');
+        $this->assertFalse($passes('Someone@ANONMART.com'));
+        $this->assertTrue($passes('someone@gmail.com'));
+        $this->assertTrue($passes('name.7.46.6@gmail.com'), 'the Gmail digit rule is a reason to look, never to refuse');
+        $this->assertTrue($passes('abc@privaterelay.appleid.com'), 'a privacy relay forwards to a real inbox');
+        $this->assertTrue($passes('abc@duck.com'));
+
+        $message = Validator::make(['email' => 'someone@anonmart.com'], ['email' => [new NotBlocklisted]])->errors()->first('email');
+        $this->assertSame(__('messages.email_not_permanent'), $message);
+
+        config(['app.hosted' => false]);
+        $this->assertTrue($passes('someone@anonmart.com'), 'a selfhost install decides for itself');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Rules;
 
 use App\Services\Blocklist;
+use App\Services\SpamWatch;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -14,6 +15,10 @@ use Illuminate\Contracts\Validation\ValidationRule;
  * On the email field of every form that makes an account a person can sign in to, and with
  * `address: false` on the form that changes an account's address, where who is asking is
  * already known. Not on checkout or a newsletter form: the list is about accounts.
+ *
+ * On hosted it also refuses an address at a throwaway mail service (SpamWatch::throwawayDomain()):
+ * the support and billing scams that were blocked in 2026-11 signed up with them, and nobody else
+ * did. Checkout keeps NoFakeEmail's shorter list, because a ticket is not an account.
  *
  * The sentence says which of the two it was. Whoever is refused finds that out by trying
  * anyway, and somebody who shares an office's address with a spammer should not be told their
@@ -30,6 +35,12 @@ class NotBlocklisted implements ValidationRule
 
         if ($entry) {
             $fail(self::sentence($entry->type));
+
+            return;
+        }
+
+        if (config('app.hosted') && is_string($value) && SpamWatch::throwawayDomain($value)) {
+            $fail(__('messages.email_not_permanent'));
         }
     }
 

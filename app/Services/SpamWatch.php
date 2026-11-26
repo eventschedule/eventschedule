@@ -418,7 +418,22 @@ class SpamWatch
             return true;
         }
 
-        return isset(self::throwawayDomains()[$domain]);
+        return self::throwawayDomain($email);
+    }
+
+    /**
+     * Whether an address is at a throwaway mail service (resources/data/disposable-email-domains.txt),
+     * and nothing more: the Gmail rule above is a reason to look, never to refuse, because real
+     * people have digits in their addresses. This half refuses a new account on hosted
+     * (NotBlocklisted). Privacy relays (Hide My Email, Firefox Relay, DuckDuckGo, SimpleLogin) are
+     * not on the list and must not be added: they forward to a real inbox.
+     */
+    public static function throwawayDomain(?string $email): bool
+    {
+        $email = mb_strtolower(trim((string) $email));
+        $at = strrpos($email, '@');
+
+        return $at !== false && isset(self::throwawayDomains()[substr($email, $at + 1)]);
     }
 
     /** @return array<string, true> */
