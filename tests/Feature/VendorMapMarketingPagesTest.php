@@ -67,10 +67,10 @@ class VendorMapMarketingPagesTest extends TestCase
         $this->assertStringNotContainsString('Name them as participants on the event', $body);
     }
 
-    public function test_the_festival_page_offers_a_food_festival_map_on_its_own_kind_of_schedule(): void
+    public function test_the_festival_page_offers_a_food_festival_map_on_a_venue(): void
     {
         $body = $this->get(route('marketing.for_festivals'))->assertOk()->getContent();
 
-        $this->assertStringContainsString('/sign_up?type=curator&amp;vendor_map=food_festival', $body);
+        $this->assertStringContainsString('/sign_up?type=venue&amp;vendor_map=food_festival', $body);
     }
 }

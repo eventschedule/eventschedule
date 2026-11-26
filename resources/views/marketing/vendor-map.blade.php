@@ -4,7 +4,7 @@
     <x-slot name="breadcrumbTitle">Vendor Map</x-slot>
 
     {{-- Claims on this page, checked against the code and docs/FEATURES.md ("Vendor Map"):
-         - One map per venue or curator schedule (VendorMapController::roleFor() refuses the other
+         - One map per venue schedule (VendorMapController::roleFor() refuses the other
            type), for one event the schedule runs. Kinds: VendorMapKinds::KINDS.
          - Free: drawing by hand (the designer), the visitors' map page /{schedule}/map, the A4
            entrance sign with its QR and a 300 dpi PNG, the "this week" band on the schedule and
@@ -33,7 +33,7 @@
 
         $vmFaqs = [
             ['q' => 'What is a vendor map?', 'a' => 'A plan of your market, fair or expo with every stall, table or booth on it, and who is standing at each one on a given day. You keep it on the Vendor map tab of your schedule, your vendors keep their own spot up to date from one link, and shoppers open it on their phones to find the honey stall or the coffee.'],
-            ['q' => 'Which kinds of event is it for?', 'a' => 'Five, and each one is worded for itself: a farmers market (stalls), a craft fair (tables), a flea market (stalls), a food festival (stands) and a conference or expo (booths). The map lives on a venue or curator schedule and serves one of its events, usually the weekly market day or the dates of the fair.'],
+            ['q' => 'Which kinds of event is it for?', 'a' => 'Five, and each one is worded for itself: a farmers market (stalls), a craft fair (tables), a flea market (stalls), a food festival (stands) and a conference or expo (booths). The map lives on a venue schedule and serves one of its events, usually the weekly market day or the dates of the fair.'],
             ['q' => 'Do my vendors need an account?', 'a' => 'A vendor who claims a spot from the vendor link signs in with a code sent to their email or with Google, so only they can change their place later. Nobody sets a password. A vendor you add yourself, for the season or for one day, needs no account at all.'],
             ['q' => 'How does the AI draw the map?', 'a' => 'You take a few photos of the market, or upload the map you already print, and it reads the spots, the areas and the names on the signs into a first draft. It takes about a minute. A photo from above or a printed map gives a near-final map; photos from the aisles give a rough layout and the vendors\' names, which you then check. It is part of Pro, and each photo counts against the daily AI allowance.'],
             ['q' => 'Can I draw the map myself instead?', 'a' => 'Yes, on every plan. Add a row of spots in one go and number them in walking order, place single spots anywhere (along a path, around a square), group them into areas, and add the entrance, restrooms, parking, a stage and where the "You are here" sign hangs. It works on a computer and on a phone.'],
@@ -453,8 +453,8 @@
                     </div>
                 @endforeach
                 <div class="hp-card es-vm-kind" data-reveal>
-                    <h3>On a venue or curator schedule</h3>
-                    <p class="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-300">The map belongs to the schedule that runs the market: a venue that owns the ground, or a curator that organizes it somewhere else. It serves one of that schedule's events, often the weekly market day.</p>
+                    <h3>On a venue schedule</h3>
+                    <p class="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-300">The map belongs to the venue schedule of the market's ground, whether you own the place or organize the market there. It serves one of that schedule's events, often the weekly market day.</p>
                     <a href="{{ marketing_url('/docs/vendor-maps') }}#turning-it-on" class="hp-more">
                         Turning it on
                         <svg aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>

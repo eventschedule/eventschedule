@@ -93,7 +93,7 @@
                     @php
                         $vendorMapKind = request('vendor_map', old('vendor_map'));
                     @endphp
-                    @if (! $role->isTalent() && in_array($vendorMapKind, \App\Services\VendorMaps\VendorMapKinds::KINDS, true))
+                    @if ($role->isVenue() && in_array($vendorMapKind, \App\Services\VendorMaps\VendorMapKinds::KINDS, true))
                     <input type="hidden" name="vendor_map" value="{{ $vendorMapKind }}">
                     @endif
                     <input type="hidden" name="email" value="{{ $user->email }}">

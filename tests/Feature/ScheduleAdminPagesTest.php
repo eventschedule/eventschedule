@@ -74,12 +74,12 @@ class ScheduleAdminPagesTest extends TestCase
         $owner = $this->createOwner();
 
         // Each kind of schedule has tabs the others do not: an act has Availability, a venue has
-        // Seating plans, a curator has Videos. Promoters is there on Pro (these schedules are Enterprise).
+        // Seating plans and Vendor map, a curator has Videos. Promoters is there on Pro (these schedules are Enterprise).
         // The strip and the dropdown are drawn from one list,
         // so a tab cannot be in one and missing from the other.
         $expected = [
             'talent' => ['schedule', 'templates', 'availability', 'appointments', 'followers', 'team', 'promoters', 'plan'],
-            'venue' => ['schedule', 'templates', 'appointments', 'seating', 'followers', 'team', 'promoters', 'plan'],
+            'venue' => ['schedule', 'templates', 'appointments', 'seating', 'vendor', 'followers', 'team', 'promoters', 'plan'],
             'curator' => ['schedule', 'templates', 'videos', 'appointments', 'followers', 'team', 'promoters', 'plan'],
         ];
 

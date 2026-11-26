@@ -139,7 +139,7 @@ return [
     '/for-dance-groups' => '2026-11-20',
     '/for-djs' => '2026-11-20',
     '/for-farmers-markets' => '2026-11-23',
-    '/for-festivals' => '2026-11-23',
+    '/for-festivals' => '2026-11-26',
     '/for-fitness-and-yoga' => '2026-11-20',
     '/for-flea-markets' => '2026-11-26',
     '/for-food-trucks-and-vendors' => '2026-11-23',

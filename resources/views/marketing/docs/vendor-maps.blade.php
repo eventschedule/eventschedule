@@ -25,7 +25,7 @@
             Turning it on
         </h2>
 
-        <p class="text-gray-600 dark:text-gray-300 mb-4">A vendor map is a plan of a market, a fair or an expo: every <strong class="text-gray-900 dark:text-white">spot</strong> (a stall, a table, a stand or a booth) and who is standing at it on each date. It belongs to a <strong class="text-gray-900 dark:text-white">venue</strong> or <strong class="text-gray-900 dark:text-white">curator</strong> schedule, which has one map, and it serves one of that schedule's events: usually the weekly market day, or the dates of the fair.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A vendor map is a plan of a market, a fair or an expo: every <strong class="text-gray-900 dark:text-white">spot</strong> (a stall, a table, a stand or a booth) and who is standing at it on each date. It belongs to a <strong class="text-gray-900 dark:text-white">venue</strong> schedule, which has one map, and it serves one of that schedule's events: usually the weekly market day, or the dates of the fair.</p>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">Vendors on the map are not the event's participants. They live on the map, date by date, so a vendor who comes every week, one who comes once, and one who cannot make it this Saturday are all kept apart without touching the event itself.</p>
 
@@ -38,7 +38,7 @@
 
         <ul class="doc-list mb-6">
             <li><strong class="text-gray-900 dark:text-white">With a new schedule.</strong> Where you choose what kind of schedule to make, choose <strong class="text-gray-900 dark:text-white">Venue</strong>, turn on <strong class="text-gray-900 dark:text-white">Running a market, fair or expo?</strong> under it and press <strong class="text-gray-900 dark:text-white">Continue with venue</strong>. It opens the form for a venue schedule, and once you save it you land on the schedule's <strong class="text-gray-900 dark:text-white">Vendor map</strong> tab, ready to set the map up.</li>
-            <li><strong class="text-gray-900 dark:text-white">With a schedule you already have.</strong> A venue or curator schedule lists the Vendor map tab once it has a map. To start its first one, open the schedule in the admin panel and choose <strong>Actions</strong> &gt; <strong>Set up a vendor map</strong>.</li>
+            <li><strong class="text-gray-900 dark:text-white">With a schedule you already have.</strong> Every venue schedule has a <strong>Vendor map</strong> tab in the admin panel, beside Seating plans. Open it to start the venue's first map.</li>
         </ul>
 
         <p class="text-gray-600 dark:text-gray-300 mb-4">The tab first asks two quick questions:</p>

@@ -482,7 +482,7 @@ class VendorMapController extends Controller
         abort_unless($user && $user->isEditor($subdomain), 403);
 
         $role = Role::subdomain($subdomain)->where('is_deleted', false)->firstOrFail();
-        abort_unless($role->isVenue() || $role->isCurator(), 404);
+        abort_unless($role->isVenue(), 404);
 
         return $role;
     }

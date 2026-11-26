@@ -249,7 +249,7 @@ the sentence naming the service. Not in embeds, not in `?graphic=1`.
 ## Vendor Map (markets, fairs, expos)
 
 A plan of a market, fair or expo whose spots (stalls, tables, booths) vendors take date by date,
-on a venue or curator schedule (`vendor_maps`, one per schedule, serving one event the schedule
+on a venue schedule (`vendor_maps`, one per schedule, serving one event the schedule
 runs). Vendors are NOT event participants: they live on the map's own rows
 (`vendor_map_occupants`). Not the venue map above, which places venues on a street map.
 

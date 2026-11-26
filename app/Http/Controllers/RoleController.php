@@ -3996,15 +3996,14 @@ class RoleController extends Controller
             // A seating plan is a drawing of a ROOM, so only a venue owns one. Above the plan
             // load below, so a talent or curator schedule never runs the query either.
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
-        } elseif ($tab == 'vendor-map' && ! $role->isVenue() && ! $role->isCurator()) {
-            // A vendor map is a market's, a fair's or an expo's: a place or an organizer.
+        } elseif ($tab == 'vendor-map' && ! $role->isVenue()) {
+            // A vendor map is a market's, a fair's or an expo's ground, so only a venue has one.
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
         }
 
-        // The Vendor map tab is listed once a schedule has a map (or while it is open, which is
-        // how the first one is made), with the vendors waiting for an answer as its count.
+        // The Vendor map tab's count: the vendors waiting for an answer, on a venue that has a map.
         $vendorMapWaiting = null;
-        if ($role->isVenue() || $role->isCurator()) {
+        if ($role->isVenue()) {
             $vendorMapId = VendorMap::where('role_id', $role->id)->value('id');
             if ($vendorMapId) {
                 $vendorMapWaiting = VendorMapOccupant::where('vendor_map_id', $vendorMapId)->where('status', 'pending')->count();
@@ -5516,7 +5515,7 @@ class RoleController extends Controller
         // "Running a market, fair or expo?": the map is made now and the schedule opens on its
         // Vendor map tab, where "When is the market?" makes the market's event.
         $vendorMapKind = $request->input('vendor_map');
-        if (in_array($vendorMapKind, VendorMapKinds::KINDS, true) && ($role->isVenue() || $role->isCurator())) {
+        if (in_array($vendorMapKind, VendorMapKinds::KINDS, true) && $role->isVenue()) {
             return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'vendor-map']).'?kind='.$vendorMapKind)
                 ->with('message', $message);
         }

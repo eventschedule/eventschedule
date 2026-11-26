@@ -388,6 +388,23 @@ class VendorMapTest extends TestCase
         $this->actingAs($this->createOwner())->get(route('vendor_map.design', ['subdomain' => $this->market->subdomain]))->assertForbidden();
     }
 
+    public function test_a_venue_finds_its_vendor_map_as_a_tab_and_no_other_schedule_is_offered_one(): void
+    {
+        $venue = $this->createRole($owner = $this->createOwner(), 'venue');
+        $html = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $venue->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
+        $this->assertStringContainsString('href="'.route('role.view_admin', ['subdomain' => $venue->subdomain, 'tab' => 'vendor-map']).'"', $html, 'a tab beside Seating plans, before it has a map');
+        $this->assertStringNotContainsString(__('messages.vm_start_map'), $html, 'not in the Actions menu');
+
+        foreach (['curator', 'talent'] as $type) {
+            $other = $this->createRole($owner, $type);
+            $html = $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $other->subdomain, 'tab' => 'schedule']))->assertOk()->getContent();
+            $this->assertStringNotContainsString(route('role.view_admin', ['subdomain' => $other->subdomain, 'tab' => 'vendor-map']), $html, "no tab on a {$type} schedule");
+
+            $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $other->subdomain, 'tab' => 'vendor-map']))->assertRedirect();
+            $this->actingAs($owner)->get(route('vendor_map.design', ['subdomain' => $other->subdomain]))->assertNotFound();
+        }
+    }
+
     public function test_a_vendor_who_joined_by_the_link_and_is_not_coming_is_absent_on_the_map(): void
     {
         VendorMapStructure::save($this->map, $this->payload(['1']));

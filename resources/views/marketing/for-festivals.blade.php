@@ -964,7 +964,7 @@
             </div>
 
             {{-- The traders' side of the field: the vendor map, as a food festival (VendorMapKinds
-                 'food_festival', stands). A curator schedule can hold one, which is what this page
+                 'food_festival', stands). Only a venue schedule holds one, which is what this page
                  signs up. The phone is the app's real shoppers' map. --}}
             <div class="es-fest-card mt-4 grid items-center gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" data-reveal="panel">
                 <div>
@@ -987,7 +987,7 @@
                         @endforeach
                     </ul>
                     <div class="mt-6 flex flex-wrap gap-3">
-                        <a href="{{ app_url('/sign_up?type=curator&vendor_map=food_festival') }}" class="es-fest-btn inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold">Map your festival's stands</a>
+                        <a href="{{ app_url('/sign_up?type=venue&vendor_map=food_festival') }}" class="es-fest-btn inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold">Map your festival's stands</a>
                         <a href="{{ marketing_url('/features/vendor-map') }}" class="es-fest-ink inline-flex items-center gap-1 px-2 py-3 text-sm font-semibold underline underline-offset-4">How the vendor map works</a>
                     </div>
                 </div>
