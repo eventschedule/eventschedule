@@ -962,9 +962,22 @@ class VendorMapPng
     // ---------------------------------------------------------------------------------------
     // GD plumbing
 
-    private static function available(): bool
+    /** A test's answer for available(), standing in for an install without GD or FreeType. */
+    private static ?bool $fakeAvailable = null;
+
+    /**
+     * Whether this install can draw: GD with FreeType. A selfhost PHP can lack either, and the
+     * entrance sign's PNG is then not offered (the printable page needs neither).
+     */
+    public static function available(): bool
     {
-        return function_exists('imagecreatetruecolor') && function_exists('imagettftext');
+        return self::$fakeAvailable ?? (function_exists('imagecreatetruecolor') && function_exists('imagettftext'));
+    }
+
+    /** For tests: answer available() with $available, or with the truth again when null. */
+    public static function fakeAvailable(?bool $available): void
+    {
+        self::$fakeAvailable = $available;
     }
 
     private static function canvas(int $w, int $h, array $bg): GdImage

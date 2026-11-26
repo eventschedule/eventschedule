@@ -681,7 +681,7 @@ class HomeDashboard
             : collect($this->coming($user, $following, 30, numbers: false, publicOnly: true)['rows']);
 
         // Any ticket at all, a past one included: its holder is an attendee, with a way to it.
-        $holdsTickets = $tickets->isNotEmpty() || $user->tickets()->where('is_deleted', false)->exists();
+        $holdsTickets = $tickets->isNotEmpty() || $user->holdsTickets();
 
         if (! $holdsTickets && $following->isEmpty()) {
             return null;

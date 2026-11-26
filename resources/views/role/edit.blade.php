@@ -4264,15 +4264,20 @@
                              span of a row is the word's own name: the page script sorts and restores
                              options by it. --}}
                         <div id="custom-labels-list" class="event-list sched-list">
-                            @foreach(collect($role->custom_labels ?? [])->sortBy(fn($v, $k) => __('messages.' . $k), SORT_LOCALE_STRING) as $labelKey => $labelData)
+                            {{-- A word's name as the add list above names it: "lineup" is ScheduleTypeLabel's, so an
+                                 operator's own word for the performers is kept here too. --}}
+                            @php
+                                $labelName = fn ($k) => $k === 'lineup' ? \App\Utils\ScheduleTypeLabel::lineup() : __('messages.' . $k);
+                            @endphp
+                            @foreach(collect($role->custom_labels ?? [])->sortBy(fn($v, $k) => $labelName($k), SORT_LOCALE_STRING) as $labelKey => $labelData)
                             <div class="event-list-row custom-label-item" data-list-row data-label-key="{{ $labelKey }}">
-                                <span class="sched-label-name" data-row-name>{{ __('messages.' . $labelKey) }}</span>
+                                <span class="sched-label-name" data-row-name>{{ $labelName($labelKey) }}</span>
                                 <div class="sched-label-fields {{ $role->language_code !== 'en' ? 'has-second' : '' }}">
                                     <x-text-input type="text" name="custom_labels[{{ $labelKey }}][value]"
                                         value="{{ $labelData['value'] ?? '' }}"
                                         class="block w-full"
-                                        aria-label="{{ __('messages.' . $labelKey) }}"
-                                        placeholder="{{ __('messages.' . $labelKey) }}"
+                                        aria-label="{{ $labelName($labelKey) }}"
+                                        placeholder="{{ $labelName($labelKey) }}"
                                         maxlength="200" />
                                     @if($role->language_code !== 'en')
                                     <x-text-input type="text" name="custom_labels[{{ $labelKey }}][value_en]"

@@ -99,6 +99,31 @@ class ThemeVariantGatingTest extends TestCase
     }
 
     /**
+     * The portal's fields (the 2026-11 redesign: 12px corners, the platform blue's focus ring)
+     * are printed by the same shell. Their selectors outrank the guest kit's own (.gk-input's
+     * radius, .gk-pg-input's focus in the schedule's accent), so printed on a guest page they
+     * painted the platform's blue over the owner's colours. They ride on the same opt-in.
+     */
+    public function test_the_portals_field_styles_stay_off_guest_pages(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $ring = 'box-shadow: 0 0 0 3px var(--ap-focus-ring';
+
+        $guest = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+        $this->assertStringNotContainsString($ring, $guest);
+        $this->assertStringContainsString('font-size: 1.15rem !important;', $guest, 'a guest page keeps the fields it had');
+
+        $portal = $this->actingAs($owner)->get('/dashboard')->assertOk()->getContent();
+        $this->assertStringContainsString($ring, $portal);
+        $this->assertStringContainsString('font-size: 1rem !important;', $portal);
+
+        // The onboarding pages on the bare shell are the portal's too.
+        $newcomer = $this->createOwner();
+        $this->assertStringContainsString($ring, $this->actingAs($newcomer)->get('/getting-started')->assertOk()->getContent());
+    }
+
+    /**
      * The guest page still gets light/dark, just not the palettes - the shared script
      * is included either way, only its $variants argument differs.
      */

@@ -282,6 +282,25 @@ window.addEventListener('DOMContentLoaded', function () {
 
     var storageKey = 'es_cart_' + @json($role->subdomain);
     var buyerKey = storageKey + '_buyer';
+
+    // How long the answers to an event's custom fields stay in a stored cart: as long as the
+    // buyer's own details (restoreBuyer()), since they can be as private. A shared or borrowed
+    // device should not keep them for as long as nobody empties the cart. The tickets stay.
+    var answersMaxAge = 30 * 24 * 60 * 60 * 1000;
+    function answersExpired(leg, now) {
+        var has = !! (leg && (leg.event_custom_values || leg.ticket_custom_values));
+        return has && ! (leg.custom_values_saved_at && now - leg.custom_values_saved_at <= answersMaxAge);
+    }
+    function withoutExpiredAnswers(legs, now) {
+        return legs.map(function (leg) {
+            if (! answersExpired(leg, now)) return leg;
+            var kept = Object.assign({}, leg);
+            delete kept.event_custom_values;
+            delete kept.ticket_custom_values;
+            delete kept.custom_values_saved_at;
+            return kept;
+        });
+    }
     var invalidLegs = @json(array_values((array) $cartInvalidLegs));
 
     Vue.createApp({
@@ -445,7 +464,15 @@ window.addEventListener('DOMContentLoaded', function () {
                     var raw = localStorage.getItem(storageKey);
                     var parsed = raw ? JSON.parse(raw) : [];
 
-                    return Array.isArray(parsed) ? parsed : [];
+                    if (! Array.isArray(parsed)) return [];
+
+                    // Answers past their 30 days leave storage now, not at the next change.
+                    var kept = withoutExpiredAnswers(parsed, Date.now());
+                    if (JSON.stringify(kept) !== JSON.stringify(parsed)) {
+                        try { localStorage.setItem(storageKey, JSON.stringify(kept)); } catch (e) {}
+                    }
+
+                    return kept;
                 } catch (e) {
                     return [];
                 }

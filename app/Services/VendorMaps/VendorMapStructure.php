@@ -7,6 +7,7 @@ use App\Models\VendorMapArea;
 use App\Models\VendorMapLandmark;
 use App\Models\VendorMapOccupant;
 use App\Models\VendorMapSpot;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -101,15 +102,15 @@ class VendorMapStructure
             // Areas first: spots point at them, by id or by the temporary key a new one carries.
             $areaKeys = [];
             $keptAreas = [];
+            // Each read once, not once per row (a market has up to 30 areas and 100 landmarks).
+            $existingAreas = VendorMapArea::where('vendor_map_id', $map->id)->get()->keyBy('id');
             foreach ($areas as $i => $a) {
                 $name = trim((string) ($a['name'] ?? ''));
                 if ($name === '') {
                     continue;
                 }
                 $color = preg_match('/^#[0-9a-fA-F]{6}$/', (string) ($a['color'] ?? '')) ? $a['color'] : '#4E81FA';
-                $area = isset($a['id']) && is_numeric($a['id'])
-                    ? VendorMapArea::where('vendor_map_id', $map->id)->find((int) $a['id'])
-                    : null;
+                $area = isset($a['id']) && is_numeric($a['id']) ? $existingAreas->get((int) $a['id']) : null;
                 $area ??= new VendorMapArea(['vendor_map_id' => $map->id]);
                 $area->fill(['name' => mb_substr($name, 0, 80), 'color' => $color, 'sort_order' => $i])->save();
                 $areaKeys[(string) ($a['id'] ?? $a['key'] ?? '')] = $area->id;
@@ -119,6 +120,9 @@ class VendorMapStructure
 
             // Spots.
             $existing = VendorMapSpot::where('vendor_map_id', $map->id)->whereNull('retired_at')->get()->keyBy('id');
+            // The spots that have (or had) an approved vendor on them, for "renumbered".
+            $withVendor = VendorMapOccupant::where('vendor_map_id', $map->id)->where('status', 'approved')->where('kind', 'present')
+                ->distinct()->pluck('spot_id')->map(fn ($id) => (int) $id)->flip();
             $kept = [];
             $renumbered = 0;
             $placeholders = [];
@@ -131,7 +135,7 @@ class VendorMapStructure
                 $isNew = ! $spot;
                 $spot ??= new VendorMapSpot(['vendor_map_id' => $map->id]);
 
-                if (! $isNew && $spot->label !== $label && self::hasVendor($spot->id)) {
+                if (! $isNew && $spot->label !== $label && $withVendor->has((int) $spot->id)) {
                     $renumbered++;
                 }
 
@@ -157,19 +161,16 @@ class VendorMapStructure
                 }
             }
 
-            foreach ($existing->except($kept) as $gone) {
-                self::removeSpot($gone);
-            }
+            self::removeSpots($existing->except($kept));
 
             self::syncPlaceholders($map, $placeholders);
 
             // Landmarks: small, nothing points at them, so replaced as sent.
             $keptLandmarks = [];
+            $existingLandmarks = VendorMapLandmark::where('vendor_map_id', $map->id)->get()->keyBy('id');
             foreach ($landmarks as $l) {
                 $kind = in_array($l['kind'] ?? null, VendorMapLandmark::KINDS, true) ? $l['kind'] : 'text';
-                $landmark = isset($l['id']) && is_numeric($l['id'])
-                    ? VendorMapLandmark::where('vendor_map_id', $map->id)->find((int) $l['id'])
-                    : null;
+                $landmark = isset($l['id']) && is_numeric($l['id']) ? $existingLandmarks->get((int) $l['id']) : null;
                 $landmark ??= new VendorMapLandmark(['vendor_map_id' => $map->id]);
                 $landmark->fill([
                     'kind' => $kind,
@@ -197,35 +198,46 @@ class VendorMapStructure
         });
     }
 
-    /** A spot has (or had) an approved vendor on it. */
-    private static function hasVendor(int $spotId): bool
+    /**
+     * The spots a save no longer sends, all in a few queries (taking out a whole area is one
+     * save). Refused while one has a season vendor with a page.
+     *
+     * @param  Collection<int, VendorMapSpot>  $spots
+     */
+    private static function removeSpots(Collection $spots): void
     {
-        return VendorMapOccupant::where('spot_id', $spotId)->where('status', 'approved')->where('kind', 'present')->exists();
-    }
+        if ($spots->isEmpty()) {
+            return;
+        }
 
-    private static function removeSpot(VendorMapSpot $spot): void
-    {
-        $seasonVendor = VendorMapOccupant::where('spot_id', $spot->id)
+        $ids = $spots->map(fn ($spot) => (int) $spot->id)->values()->all();
+
+        $held = VendorMapOccupant::whereIn('spot_id', $ids)
             ->where('event_date', VendorMapOccupant::SEASON)
             ->where('kind', 'present')
             ->where('status', 'approved')
             ->whereNotNull('vendor_role_id')
-            ->exists();
+            ->distinct()
+            ->pluck('spot_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
 
-        if ($seasonVendor) {
-            throw ValidationException::withMessages(['spots' => __('messages.vm_cannot_remove_spot', ['number' => $spot->label])]);
+        if ($held !== []) {
+            $first = $spots->first(fn ($spot) => in_array((int) $spot->id, $held, true));
+            throw ValidationException::withMessages(['spots' => __('messages.vm_cannot_remove_spot', ['number' => $first->label])]);
         }
 
         // Names only (no vendor page) go with the spot; claims waiting on it are declined.
-        VendorMapOccupant::where('spot_id', $spot->id)->whereNull('vendor_role_id')->delete();
-        VendorMapOccupant::where('spot_id', $spot->id)->where('status', 'pending')
+        VendorMapOccupant::whereIn('spot_id', $ids)->whereNull('vendor_role_id')->delete();
+        VendorMapOccupant::whereIn('spot_id', $ids)->where('status', 'pending')
             ->update(['status' => 'declined', 'decided_at' => now()]);
 
-        if (VendorMapOccupant::where('spot_id', $spot->id)->exists()) {
-            $spot->forceFill(['retired_at' => now()])->save();
-        } else {
-            $spot->delete();
+        // A spot somebody has stood on is retired, so a past date still says where; the rest go.
+        $history = VendorMapOccupant::whereIn('spot_id', $ids)->distinct()->pluck('spot_id')->all();
+        if ($history !== []) {
+            VendorMapSpot::whereIn('id', $history)->update(['retired_at' => now()]);
         }
+        VendorMapSpot::whereIn('id', array_diff($ids, $history))->delete();
     }
 
     /**

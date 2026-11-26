@@ -555,7 +555,8 @@ class AdminPortalKitTest extends TestCase
         $this->assertStringContainsString("'ap-btn px-4 py-3 text-base'", $brand);
         $this->assertStringNotContainsString('min-h-0', $brand, 'a small button is still 44px');
 
-        // Fields: the blue border and the ring, in the shell every page shares.
+        // Fields: the blue border and the ring, in the shell, for the portal's pages only
+        // (ThemeVariantGatingTest holds that a guest page keeps its own).
         $shell = file_get_contents(resource_path('views/layouts/app.blade.php'));
         $this->assertMatchesRegularExpression('/textarea:focus \{[^}]*border-color: var\(--brand-blue\);[^}]*box-shadow: 0 0 0 3px var\(--ap-focus-ring/s', $shell);
 

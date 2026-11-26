@@ -2,6 +2,9 @@
 
 namespace App\Services\VendorMaps;
 
+use App\Models\VendorMap;
+use App\Models\VendorMapDraft;
+use App\Models\VendorMapOccupant;
 use App\Utils\ImageUtils;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
@@ -173,6 +176,68 @@ class VendorMapImages
     {
         if (is_string($filename) && preg_match('/^(vmthumb|vmpic)_[a-z0-9]{32}\.jpg$/', $filename) === 1) {
             self::disk()->delete(ImageUtils::storagePathFor($filename));
+        }
+    }
+
+    /**
+     * Every file the vendor maps keep for these schedules, deleted before their rows go: a
+     * schedule's map, drafts and occupants go by a database cascade (roles -> vendor_maps ->
+     * the rest), which runs no model event. As a market: its share card, its picture (both
+     * copies), its drafts' photos and its vendors' photos. As a vendor: the photos on its own
+     * rows on other markets' maps. A photo another row still shows (a one-day move copies the
+     * thumbnail) is kept. The private files would be swept within a day anyway
+     * (app:prune-vendor-map-drafts); the public ones would stay on the public store for good.
+     *
+     * Called by Role's `deleting` hook and by AccountDeletionService (an account's schedules
+     * go by the roles.user_id cascade, which runs no hook either).
+     *
+     * @param  array<int, int|string>  $roleIds
+     */
+    public static function forgetSchedules(array $roleIds): void
+    {
+        $roleIds = array_values(array_filter(array_map('intval', $roleIds)));
+        if ($roleIds === []) {
+            return;
+        }
+
+        $maps = VendorMap::whereIn('role_id', $roleIds)->get(['id', 'share_image_path', 'background_path']);
+        $mapIds = $maps->pluck('id')->all();
+
+        foreach ($maps as $map) {
+            if (is_string($map->share_image_path) && preg_match('/^vmshare_[a-z0-9]{32}\.png$/', $map->share_image_path) === 1) {
+                self::disk()->delete(ImageUtils::storagePathFor($map->share_image_path));
+            }
+            if ($map->background_path) {
+                self::deletePublic(self::pictureName($map->background_path));
+                self::deletePrivate($map->background_path);
+            }
+        }
+
+        if ($mapIds !== []) {
+            foreach (VendorMapDraft::whereIn('vendor_map_id', $mapIds)->pluck('images') as $images) {
+                self::deletePaths(array_filter((array) $images, 'is_string'));
+            }
+        }
+
+        $going = VendorMapOccupant::query()
+            ->where(fn ($q) => $q->whereIn('vendor_role_id', $roleIds)->when($mapIds !== [], fn ($q) => $q->orWhereIn('vendor_map_id', $mapIds)))
+            ->where(fn ($q) => $q->whereNotNull('photo_path')->orWhereNotNull('photo_thumb_path'))
+            ->get(['id', 'photo_path', 'photo_thumb_path']);
+
+        foreach (['photo_path', 'photo_thumb_path'] as $column) {
+            $paths = $going->pluck($column)->filter()->unique()->values();
+            if ($paths->isEmpty()) {
+                continue;
+            }
+
+            $kept = VendorMapOccupant::whereIn($column, $paths->all())
+                ->whereNotIn('id', $going->pluck('id')->all())
+                ->pluck($column)
+                ->all();
+
+            foreach ($paths->diff($kept) as $path) {
+                $column === 'photo_path' ? self::deletePrivate($path) : self::deletePublic($path);
+            }
         }
     }
 

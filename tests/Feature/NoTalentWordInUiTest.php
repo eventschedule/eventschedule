@@ -117,6 +117,30 @@ class NoTalentWordInUiTest extends TestCase
         }
     }
 
+    public function test_the_schedule_form_names_a_stored_lineup_label_with_the_operators_word(): void
+    {
+        // The add list and a row already stored name the word the same way: a row read
+        // messages.lineup ("Lineup") while the add list said the operator's "Artist".
+        $dir = storage_path('framework/testing/lang-'.Str::random(8));
+        File::ensureDirectoryExists($dir.'/en');
+        File::put($dir.'/en/messages.php', "<?php\nreturn ['talent' => 'Artist', 'talents' => 'Artists'];\n");
+        config(['app.lang_overrides_path' => $dir]);
+
+        try {
+            $owner = $this->createOwner();
+            $role = $this->createRole($owner, 'venue', ['name' => 'Harbor Room']);
+            $role->forceFill(['custom_labels' => ['lineup' => ['value' => 'Vendors']]])->save();
+
+            $html = $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $role->subdomain]))->assertOk()->getContent();
+
+            $this->assertStringContainsString('<span class="sched-label-name" data-row-name>Artist</span>', $html);
+            $this->assertStringContainsString('placeholder="Artist"', $html);
+            $this->assertStringNotContainsString('data-row-name>'.__('messages.lineup').'</span>', $html);
+        } finally {
+            File::deleteDirectory($dir);
+        }
+    }
+
     public function test_the_label_helper(): void
     {
         $this->assertSame(__('messages.schedule_type_talent'), ScheduleTypeLabel::for('talent'));

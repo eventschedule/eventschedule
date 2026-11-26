@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
+use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
@@ -58,7 +59,7 @@ class MarkdownReservedIdsTest extends TestCase
     public function test_every_element_a_page_mounts_by_id_is_an_id_a_description_cannot_carry(): void
     {
         $mounted = [];
-        foreach (\Illuminate\Support\Facades\File::allFiles(resource_path('views')) as $file) {
+        foreach (File::allFiles(resource_path('views')) as $file) {
             if (preg_match_all('/\.mount\(\s*[\'"]#([A-Za-z0-9_-]+)/', $file->getContents(), $m)) {
                 $mounted = array_merge($mounted, $m[1]);
             }
@@ -66,6 +67,22 @@ class MarkdownReservedIdsTest extends TestCase
         $mounted = array_values(array_unique($mounted));
 
         $this->assertGreaterThan(25, count($mounted), 'sanity check: the views were read');
+        $this->assertSame([], array_values(array_diff($mounted, MarkdownUtils::RESERVED_IDS)));
+    }
+
+    public function test_every_element_a_script_module_mounts_is_an_id_a_description_cannot_carry(): void
+    {
+        // The scan above reads .mount('#x') in the views; a module that finds its element with
+        // querySelector('#x[data-vue-root]') and mounts the element itself is read here.
+        $mounted = [];
+        foreach (File::allFiles(resource_path('js')) as $file) {
+            if (preg_match_all('/#([A-Za-z0-9_-]+)\[data-vue-root\]/', $file->getContents(), $m)) {
+                $mounted = array_merge($mounted, $m[1]);
+            }
+        }
+        $mounted = array_values(array_unique($mounted));
+
+        $this->assertContains('vendor-claim-app', $mounted, 'sanity check: the modules were read');
         $this->assertSame([], array_values(array_diff($mounted, MarkdownUtils::RESERVED_IDS)));
     }
 

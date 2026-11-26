@@ -453,6 +453,23 @@ class EventFormSectionsTest extends TestCase
         $this->assertStringContainsString('if (this.anyTicketPriced && this.paymentWarning) {', $html, 'and only once a price is typed');
     }
 
+    /**
+     * The form is unsaved while these are on screen: Connect Stripe (whose onboarding returns to
+     * Settings) and the free plan's "See what Pro adds" open in a new tab, as the Payment pane's
+     * own button does, so a new event is not left behind half typed.
+     */
+    public function test_the_ways_out_of_the_tickets_tab_open_in_a_new_tab(): void
+    {
+        config(['services.stripe_platform.secret' => null]);
+        $free = $this->createRole($this->owner, 'talent', ['plan_type' => 'free', 'plan_expires' => null]);
+        $html = $this->page($this->createUrl($free));
+
+        foreach (['event-warn-band-act', 'event-pro-note-link'] as $class) {
+            $this->assertMatchesRegularExpression('/<a href="[^"]+" target="_blank" rel="noopener" class="'.$class.'">/', $html, "{$class} opens in a new tab");
+            $this->assertDoesNotMatchRegularExpression('/<a href="[^"]+" class="'.$class.'">/', $html, "{$class} never navigates the form away");
+        }
+    }
+
     /** Asked for by name: the venue picker and the email and phone lookup moved, and must not be lost. */
     public function test_location_keeps_the_saved_venue_list_and_the_lookup_by_email_or_phone(): void
     {
@@ -511,6 +528,11 @@ class EventFormSectionsTest extends TestCase
         $this->assertLessThan(strpos($edit, 'id="event-location"'), strpos($edit, 'id="flyer_image"'));
         $this->assertStringContainsString('<div class="event-tickets-wide">', $this->slice($edit, '<div id="section-tickets"', 'id="ticket_choice_rsvp"'));
         $this->assertStringContainsString('class="event-save-bar"', $edit);
+
+        // The user guide says the same: it described every new event as the one column.
+        $guide = file_get_contents(resource_path('views/marketing/docs/creating-events.blade.php'));
+        $this->assertStringContainsString('Adding an event uses the same page as editing one, with the tabs beside the form. The very first event you create is laid out differently, as one column', $guide);
+        $this->assertStringNotContainsString('A new event is added on one page', $guide);
     }
 
     public function test_the_recent_venues_are_the_ones_this_schedule_was_last_at(): void

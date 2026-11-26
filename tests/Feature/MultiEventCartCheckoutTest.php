@@ -10,6 +10,7 @@ use App\Services\Payments\PaymentGatewayDriver;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\Process\Process;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
@@ -301,6 +302,52 @@ class MultiEventCartCheckoutTest extends TestCase
         $this->assertStringContainsString('leg.ticket_custom_values = ticketCustom', $html);
         $this->assertStringContainsString("'][event_custom_values][' + fieldKey + ']'", $html);
         $this->assertStringContainsString("'][ticket_custom_values][' + ticketId + '][' + fieldKey + ']'", $html);
+    }
+
+    /**
+     * The stored cart forgets custom field answers after 30 days, as it forgets the buyer's own
+     * details, and keeps the tickets. Run in Node against the rendered page's own function.
+     */
+    public function test_a_stored_cart_forgets_custom_field_answers_after_30_days(): void
+    {
+        [$eventA] = $this->twoEvents();
+
+        $html = $this->get(route('event.view_guest', [
+            'subdomain' => $this->role->subdomain,
+            'slug' => $eventA->slug,
+        ]))->assertOk()->getContent();
+
+        // Add to cart dates the answers it puts on the leg.
+        $this->assertStringContainsString('leg.custom_values_saved_at = Date.now();', $html);
+        $this->assertSame(1, preg_match('/var answersMaxAge.*?function withoutExpiredAnswers\(legs, now\) \{.*?\n    \}\n/s', $html, $m), 'the cart\'s expiry is on the page');
+
+        $day = 24 * 60 * 60 * 1000;
+        $now = 100 * $day;
+        $legs = [
+            ['event_id' => 'fresh', 'tickets' => ['t' => 1], 'event_custom_values' => ['f' => 'Yes'], 'custom_values_saved_at' => $now - 29 * $day],
+            ['event_id' => 'stale', 'tickets' => ['t' => 2], 'event_custom_values' => ['f' => 'Yes'], 'ticket_custom_values' => ['t' => ['g' => 'No']], 'custom_values_saved_at' => $now - 31 * $day],
+            ['event_id' => 'undated', 'tickets' => ['t' => 3], 'ticket_custom_values' => ['t' => ['g' => 'No']]],
+            ['event_id' => 'none', 'tickets' => ['t' => 4]],
+        ];
+
+        $harness = $m[0]."\nprocess.stdout.write(JSON.stringify(withoutExpiredAnswers(".json_encode($legs).', '.$now.')));';
+        $file = tempnam(sys_get_temp_dir(), 'cartjs').'.js';
+
+        try {
+            file_put_contents($file, $harness);
+            $process = new Process(['node', $file]);
+            $process->run();
+            // Not skipped when node is missing: CI's runner has it (SentryJsFilterTest leans on it too).
+            $this->assertTrue($process->isSuccessful(), $process->getErrorOutput());
+            $kept = json_decode($process->getOutput(), true);
+        } finally {
+            @unlink($file);
+        }
+
+        $this->assertSame($legs[0], $kept[0], 'answers younger than 30 days stay');
+        $this->assertSame(['event_id' => 'stale', 'tickets' => ['t' => 2]], $kept[1], 'older ones go, and the tickets stay');
+        $this->assertSame(['event_id' => 'undated', 'tickets' => ['t' => 3]], $kept[2], 'answers nobody dated go too');
+        $this->assertSame($legs[3], $kept[3]);
     }
 
     public function test_the_cart_widget_renders_outside_the_ticket_selector_mount(): void

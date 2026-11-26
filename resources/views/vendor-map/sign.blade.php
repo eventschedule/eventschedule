@@ -145,7 +145,9 @@
     <nav class="toolbar" lang="{{ $viewerLocale }}" dir="{{ $viewerRtl ? 'rtl' : 'ltr' }}">
         <a class="back" href="{{ $backUrl }}">{{ __('messages.back') }}</a>
         <span class="spacer"></span>
-        <a class="secondary" href="{{ $imageUrl }}" download>{{ __('messages.vm_sign_download') }}</a>
+        @if ($pngAvailable ?? true)
+            <a class="secondary" href="{{ $imageUrl }}" download>{{ __('messages.vm_sign_download') }}</a>
+        @endif
         <button type="button" class="primary" id="vm-sign-print">{{ __('messages.print') }}</button>
     </nav>
 

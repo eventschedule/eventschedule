@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\GalleryImage;
 use App\Models\Role;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -266,6 +267,32 @@ class GuestSocialImageTest extends TestCase
 
         $this->assertStringContainsString('profile_bluenote.png', (string) $this->ogImage($content));
         $this->assertStringNotContainsString('header_bluenote.png', (string) $this->twitterImage($content));
+    }
+
+    /**
+     * A header too small for a preview hands its turn to the gallery's wide photo, as no header
+     * would, not straight to the square logo a large card crops badly.
+     */
+    public function test_a_header_too_small_for_a_preview_gives_way_to_the_gallery(): void
+    {
+        $role = $this->role([
+            'profile_image_url' => 'profile_bluenote.png',
+            'header_image' => '',
+            'header_image_url' => 'header_bluenote.png',
+            'header_image_variants' => ['src' => ['w' => 975, 'h' => 180]],
+        ]);
+        $photo = GalleryImage::create([
+            'role_id' => $role->id,
+            'user_id' => $role->user_id,
+            'filename' => 'gallery_bluenote_stage.jpg',
+            'width' => 1200,
+            'height' => 800,
+        ]);
+
+        $content = $this->get('/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertSame($photo->url(), $this->ogImage($content));
+        $this->assertStringNotContainsString('profile_bluenote.png', (string) $this->twitterImage($content));
     }
 
     /** With nothing else uploaded, a small header is still better than no picture at all. */

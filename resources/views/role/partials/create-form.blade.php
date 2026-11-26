@@ -4,7 +4,7 @@
     // disagree about whether this person is new.
     $isFirstRun = ! is_demo_mode()
         && auth()->user()->member()->doesntExist()
-        && auth()->user()->tickets()->count() === 0;
+        && ! auth()->user()->holdsTickets();
 
     // Whether saving this form starts a setup guide: a first OWN schedule, outside the guest-submit
     // flow. The same test RoleController::store() pins the guide on, so the line above the heading
@@ -50,7 +50,7 @@
 
         {{-- "Create Account / Create Schedule / Create Event" is noise on somebody's tenth
              schedule, so it is gated - but on the SAME condition HomeController::gettingStarted()
-             uses, not a near-miss. That one also bounces on tickets()->count(), so a visitor who
+             uses, not a near-miss. That one also bounces on holdsTickets(), so a visitor who
              bought a ticket and later came back to run their own schedule was being shown the
              onboarding bar and a "choose a different type" link that silently redirected them to
              the dashboard. Resolved once, here, and passed down. The band is the guest-submit

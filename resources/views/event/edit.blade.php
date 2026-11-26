@@ -3870,7 +3870,9 @@
                                     <p><span v-text="paymentWarning"></span></p>
                                     @endif
                                     @if ($paymentRowWarning === __('messages.connect_stripe_to_get_paid') && config('app.hosted'))
-                                    <a href="{{ route('stripe.link') }}" class="event-warn-band-act">{{ __('messages.connect_stripe') }} <span aria-hidden="true">&rarr;</span></a>
+                                    {{-- A new tab, as the Payment pane's own button: this form is unsaved, and Stripe's
+                                         onboarding returns to Settings, not here. --}}
+                                    <a href="{{ route('stripe.link') }}" target="_blank" rel="noopener" class="event-warn-band-act">{{ __('messages.connect_stripe') }} <span aria-hidden="true">&rarr;</span></a>
                                     @else
                                     <button type="button" class="event-warn-band-act" @click="activeTicketTab = 'payment'">{{ __('messages.payment') }} <span aria-hidden="true">&rarr;</span></button>
                                     @endif
@@ -3899,7 +3901,7 @@
                                      the plan gate below, with its trial button, in its place once one is. --}}
                                 <div v-cloak v-show="ticketChoice === 'tickets' && ! ticketsNeedPro" class="event-pro-note">
                                     <p><strong>{{ __('messages.paid_tickets_pro_note') }}</strong> {{ __('messages.paid_tickets_free_note') }}</p>
-                                    <a href="{{ $sellingRole->user_id === $user->id ? route('role.view_admin', ['subdomain' => $sellingRole->subdomain, 'tab' => 'plan']) : marketing_url('/pricing') }}" class="event-pro-note-link">{{ __('messages.ticket_see_pro') }}</a>
+                                    <a href="{{ $sellingRole->user_id === $user->id ? route('role.view_admin', ['subdomain' => $sellingRole->subdomain, 'tab' => 'plan']) : marketing_url('/pricing') }}" target="_blank" rel="noopener" class="event-pro-note-link">{{ __('messages.ticket_see_pro') }}</a>
                                 </div>
                                 @endif
                             </fieldset>
@@ -8350,12 +8352,6 @@
           e.seating_plan_id = input.seating_plan_id || '';
         }
         if (input.tickets_enabled) {
-          document.querySelectorAll('#section-tickets textarea[name^="tickets["]').forEach(function (field) {
-            if (field._easyMDE) {
-              field._easyMDE._stopEditorObserver?.();
-              field._easyMDE.toTextArea();
-            }
-          });
           document.querySelectorAll('.datepicker-ticket-sales-start, .datepicker-ticket-sales-end').forEach(function (field) {
             if (field._flatpickr) { field._flatpickr.destroy(); }
           });
@@ -8397,11 +8393,6 @@
         this.$nextTick(function () {
           self.presetApplying = false;
           self.presetEditedSince = false;
-          // The rebuilt types are new rows: their description boxes want an editor too, which the
-          // tickets.length watcher misses when the count did not change.
-          if (typeof window.initHtmlEditors === 'function') {
-            window.initHtmlEditors();
-          }
         });
       },
       chooseTickets(choice) {
@@ -9914,12 +9905,6 @@
         document.querySelectorAll('.datepicker-ticket-sales-end').forEach(input => {
           if (input._flatpickr) input._flatpickr.destroy();
         });
-        // Dispose the removed row's markdown editor so it isn't orphaned
-        const removedDesc = document.querySelector('textarea[name="tickets[' + index + '][description]"]');
-        if (removedDesc && removedDesc._easyMDE) {
-          removedDesc._easyMDE._stopEditorObserver?.();
-          removedDesc._easyMDE.toTextArea();
-        }
         this.tickets.splice(index, 1);
         if (this.tickets.length > 0) {
           this.$nextTick(() => {
@@ -11438,13 +11423,6 @@
         if (! this.presetApplying) {
           this.presetMethodNote = '';
         }
-      },
-      'tickets.length'() {
-        this.$nextTick(() => {
-          if (typeof window.initHtmlEditors === 'function') {
-            window.initHtmlEditors();
-          }
-        });
       },
       venueType() {
         this.venueEmail = "";

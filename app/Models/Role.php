@@ -14,6 +14,7 @@ use App\Services\DemoService;
 use App\Services\GeocodingService;
 use App\Services\MetaAdsService;
 use App\Services\UsageTrackingService;
+use App\Services\VendorMaps\VendorMapImages;
 use App\Support\HomeSchedule;
 use App\Traits\HasImageVariants;
 use App\Traits\RoleBillable;
@@ -796,6 +797,14 @@ class Role extends Model implements MustVerifyEmail
                 $query->where('role_id', $model->id)
                     ->orWhereIn('event_id', Event::where('creator_role_id', $model->id)->select('id'));
             }));
+
+            // The vendor map's files, which its cascading rows would leave behind (some on the
+            // public store). A file that cannot be deleted must not stop the deletion.
+            try {
+                VendorMapImages::forgetSchedules([$model->id]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
 
             // Cancel active boost campaigns on Meta and issue refunds
             $activeCampaigns = $model->boostCampaigns()
@@ -3015,10 +3024,17 @@ class Role extends Model implements MustVerifyEmail
             ? $this->background_image_url
             : '';
 
-        $gallery = $header ? null : ($this->showsGallery() ? $this->galleryImages->first() : null);
+        $headerImage = $header ? SeoUtils::imageObject($header, $this->imageSourceDimensions('header')) : null;
+
+        // Looked up only when the header will not do: a usable header wins, and the gallery is a
+        // query. A header too small for a preview must not cost the gallery its turn either, or
+        // a 975x180 banner previewed as the square profile photo with a gallery right there.
+        $gallery = ($headerImage && self::shareImageIsUsable($headerImage))
+            ? null
+            : ($this->showsGallery() ? $this->galleryImages->first() : null);
 
         $candidates = array_values(array_filter([
-            $header ? SeoUtils::imageObject($header, $this->imageSourceDimensions('header')) : null,
+            $headerImage,
             // A wide photo the page shows (#gp-gallery) before the square profile photo, which a
             // large link-preview card crops badly.
             $gallery ? SeoUtils::imageObject($gallery->url(), $gallery->width && $gallery->height ? [$gallery->width, $gallery->height] : null) : null,

@@ -980,7 +980,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::get('/{subdomain}/seating/box-office/{hash}/report.csv', [BoxOfficeController::class, 'reportCsv'])->name('box_office.report_csv');
     // The vendor map, owner side. Every one is editor-only and scoped to the schedule
     // (VendorMapController::mapFor()); the AI and the vendor link are Pro, decided there too.
-    Route::post('/{subdomain}/vendor-map/setup', [VendorMapController::class, 'setup'])->name('vendor_map.setup');
+    Route::post('/{subdomain}/vendor-map/setup', [VendorMapController::class, 'setup'])->name('vendor_map.setup')->middleware('throttle:10,1,vendor_map_setup');
     Route::post('/{subdomain}/vendor-map/settings', [VendorMapController::class, 'settings'])->name('vendor_map.settings');
     Route::get('/{subdomain}/vendor-map/design', [VendorMapController::class, 'design'])->name('vendor_map.design');
     Route::get('/{subdomain}/vendor-map/structure', [VendorMapController::class, 'structure'])->name('vendor_map.structure');
@@ -989,7 +989,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/{subdomain}/vendor-map/photos', [VendorMapController::class, 'uploadPhotos'])->name('vendor_map.photos')->middleware('throttle:30,1,vendor_map_ai');
     Route::get('/{subdomain}/vendor-map/draft', [VendorMapController::class, 'latestDraft'])->name('vendor_map.draft');
     Route::post('/{subdomain}/vendor-map/draft/{draft}/parse', [VendorMapController::class, 'parseDraft'])->name('vendor_map.draft.parse')->middleware('throttle:20,1,vendor_map_ai');
-    Route::get('/{subdomain}/vendor-map/private/{kind}/{id}/{index?}', [VendorMapController::class, 'privateImage'])->name('vendor_map.private_image');
+    Route::get('/{subdomain}/vendor-map/private/{kind}/{id}/{index?}', [VendorMapController::class, 'privateImage'])->name('vendor_map.private_image')->where('index', '[0-9]+');
     Route::post('/{subdomain}/vendor-map/occupants/{occupant}/{action}', [VendorMapController::class, 'decide'])->name('vendor_map.decide')->where('action', 'approve|decline|undo|absent|present|remove');
     Route::post('/{subdomain}/vendor-map/approve-all', [VendorMapController::class, 'approveAll'])->name('vendor_map.approve_all');
     Route::post('/{subdomain}/vendor-map/move', [VendorMapController::class, 'move'])->name('vendor_map.move');

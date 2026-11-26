@@ -654,7 +654,14 @@ const currentDateLabel = computed(() => day.dates.find((d) => d.date === day.dat
 
 const whatsappText = ref('');
 const whatsappHref = computed(() => 'https://wa.me/?text=' + encodeURIComponent(whatsappText.value));
-const embedCode = computed(() => `<iframe src="${state.publicUrl}?embed=1" width="100%" height="560" style="border:0;border-radius:12px" loading="lazy" title="${state.scheduleName}"></iframe>`);
+// The snippet is HTML the owner pastes into their own website, so the schedule's name (which any
+// editor can set) and the address are escaped for an attribute: a quote in the name used to end
+// the title and leave the rest of it as markup on that site.
+const attr = (value) => String(value ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const embedCode = computed(() => {
+    const src = (state.publicUrl || '') + ((state.publicUrl || '').includes('?') ? '&' : '?') + 'embed=1';
+    return `<iframe src="${attr(src)}" width="100%" height="560" style="border:0;border-radius:12px" loading="lazy" title="${attr(state.scheduleName)}"></iframe>`;
+});
 
 function waLink(phone, text) {
     return 'https://wa.me/' + String(phone).replace(/[^\d]/g, '') + (text ? '?text=' + encodeURIComponent(text) : '');
@@ -791,6 +798,7 @@ const ClaimCard = defineComponent({
 .vma-link { font-size: 0.875rem; font-weight: 500; color: var(--brand-blue); align-self: flex-start; text-align: start; }
 .vma-muted { font-size: 0.875rem; color: rgb(var(--ap-ink-3)); }
 .vma-error { color: #b91c1c; font-size: 0.875rem; }
+.dark .vma-error { color: #fca5a5; }
 .vma-warn { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.75rem; border-radius: 0.6rem; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; font-size: 0.875rem; }
 .dark .vma-warn { background: rgba(120, 53, 15, 0.2); border-color: #b45309; color: #fde68a; }
 .vma-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }

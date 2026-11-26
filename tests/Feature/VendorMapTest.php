@@ -4,21 +4,28 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\UsageDaily;
 use App\Models\User;
 use App\Models\VendorMap;
+use App\Models\VendorMapArea;
 use App\Models\VendorMapDraft;
+use App\Models\VendorMapLandmark;
 use App\Models\VendorMapOccupant;
 use App\Models\VendorMapSpot;
+use App\Services\UsageTrackingService;
 use App\Services\VendorMaps\VendorMapAi;
 use App\Services\VendorMaps\VendorMapClaims;
+use App\Services\VendorMaps\VendorMapImages;
 use App\Services\VendorMaps\VendorMapOccupancy;
 use App\Services\VendorMaps\VendorMapPresenter;
 use App\Services\VendorMaps\VendorMapStructure;
 use App\Utils\GeminiUtils;
+use App\Utils\ImageUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -300,6 +307,65 @@ class VendorMapTest extends TestCase
         $this->assertTrue($venue->ownEvents()->where('events.id', $event->id)->exists());
     }
 
+    public function test_the_market_path_asks_the_daily_event_cap_and_counts_toward_it(): void
+    {
+        config([
+            'app.hosted' => true,
+            'usage.event_create_daily_limit_trial' => 1, 'usage.event_create_daily_limit_pro' => 1, 'usage.event_create_daily_limit_enterprise' => 1,
+            'usage.event_create_user_daily_limit_trial' => 50, 'usage.event_create_user_daily_limit_pro' => 50, 'usage.event_create_user_daily_limit_enterprise' => 50,
+        ]);
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Harbor Market']);
+        $body = ['kind' => 'market', 'days' => [5], 'starts' => '08:00', 'ends' => '14:00'];
+
+        $this->actingAs($owner)->postJson(route('vendor_map.setup', ['subdomain' => $venue->subdomain]), $body)->assertOk();
+        $this->assertSame(1, (int) UsageDaily::where('role_id', $venue->id)->where('operation', UsageTrackingService::EVENT_CREATE)->sum('count'), 'the event counts toward the cap');
+
+        // The cap is spent: a second schedule's setup is refused, and leaves no map behind.
+        $other = $this->createRole($owner, 'venue', ['name' => 'Corner Market']);
+        UsageDaily::record(UsageTrackingService::EVENT_CREATE, $other->id);
+        $this->actingAs($owner)->postJson(route('vendor_map.setup', ['subdomain' => $other->subdomain]), $body)
+            ->assertStatus(422)->assertJsonPath('code', 'event_create_limit');
+        $this->assertFalse(VendorMap::where('role_id', $other->id)->exists());
+        $this->assertSame(0, Event::where('creator_role_id', $other->id)->count());
+    }
+
+    public function test_a_second_setup_keeps_the_map_and_its_event(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Harbor Market']);
+        $body = ['kind' => 'market', 'days' => [5], 'starts' => '08:00', 'ends' => '14:00'];
+
+        $this->actingAs($owner)->postJson(route('vendor_map.setup', ['subdomain' => $venue->subdomain]), $body)->assertOk();
+        $first = VendorMap::where('role_id', $venue->id)->sole()->event_id;
+
+        // A double tap, or a tab opened before the first setup.
+        $this->actingAs($owner)->postJson(route('vendor_map.setup', ['subdomain' => $venue->subdomain]), $body)->assertOk();
+
+        $this->assertSame($first, VendorMap::where('role_id', $venue->id)->sole()->event_id);
+        $this->assertSame(1, Event::where('creator_role_id', $venue->id)->count(), 'no second weekly event');
+    }
+
+    public function test_two_setups_at_once_meet_on_one_map(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Harbor Market']);
+
+        // The other request inserts its row between this one's look for a map and its insert.
+        $raced = false;
+        DB::listen(function ($query) use (&$raced, $venue) {
+            if (! $raced && str_starts_with($query->sql, 'select * from `vendor_maps` where (`role_id` = ?)')) {
+                $raced = true;
+                DB::table('vendor_maps')->insert(['role_id' => $venue->id, 'kind' => 'market', 'created_at' => now(), 'updated_at' => now()]);
+            }
+        });
+
+        $this->actingAs($owner)->postJson(route('vendor_map.setup', ['subdomain' => $venue->subdomain]), ['kind' => 'craft_fair'])->assertOk();
+
+        $this->assertTrue($raced);
+        $this->assertSame('craft_fair', VendorMap::where('role_id', $venue->id)->sole()->kind);
+    }
+
     public function test_a_map_cannot_serve_an_event_the_schedule_only_lists(): void
     {
         $other = $this->createRole($this->createOwner(), 'venue', ['name' => 'Elsewhere Hall']);
@@ -430,6 +496,12 @@ class VendorMapTest extends TestCase
         $this->actingAs($this->createOwner())->get(route('vendor_map.private_image', [
             'subdomain' => $this->market->subdomain, 'kind' => 'draft', 'id' => $upload['draft'], 'index' => 0,
         ]))->assertForbidden();
+
+        // The editor can, by number; an address with anything else there matches nothing.
+        $this->actingAs($this->owner)->get(route('vendor_map.private_image', [
+            'subdomain' => $this->market->subdomain, 'kind' => 'draft', 'id' => $upload['draft'], 'index' => 0,
+        ]))->assertOk();
+        $this->actingAs($this->owner)->get('/'.$this->market->subdomain.'/vendor-map/private/draft/'.$upload['draft'].'/first')->assertNotFound();
     }
 
     public function test_a_large_place_sends_its_photos_in_batches_to_one_draft(): void
@@ -503,6 +575,109 @@ class VendorMapTest extends TestCase
 
         config(['services.google.gemini_key' => 'test-key', 'services.ai.text_provider' => 'openai']);
         $this->assertFalse(VendorMapAi::available($this->map));
+    }
+
+    public function test_a_big_save_reads_each_table_once_not_once_per_row(): void
+    {
+        $labels = array_map('strval', range(1, 24));
+        $payload = $this->payload($labels);
+        for ($i = 0; $i < 12; $i++) {
+            $payload['areas'][] = ['key' => 'a'.$i, 'name' => 'Area '.$i, 'color' => '#4E81FA'];
+            $payload['landmarks'][] = ['kind' => 'restroom', 'x' => 10 * $i, 'y' => 10];
+        }
+        VendorMapStructure::save($this->map, $payload);
+        $spots = $this->spots();
+        foreach (array_slice($spots, 0, 12) as $i => $spot) {
+            $this->approvedSeason($spot, $this->vendor('Vendor '.$i)[1]);
+        }
+        // Of the spots taken out: one somebody stood on (retired), one with a name only (deleted).
+        $declined = new VendorMapOccupant(['vendor_map_id' => $this->map->id, 'spot_id' => $spots[12]->id, 'event_date' => '*', 'kind' => 'present', 'vendor_role_id' => $this->vendor('Late')[1]->id]);
+        $declined->status = 'declined';
+        $declined->save();
+        $this->dated($spots[13], '2026-11-27', 'Guest Baker');
+
+        // Every vendor's stall renumbered, the other twelve spots taken out.
+        $s = VendorMapStructure::toArray($this->map->fresh());
+        $s['spots'] = array_values(array_filter($s['spots'], fn ($x) => (int) $x['label'] <= 12));
+        foreach ($s['spots'] as &$x) {
+            $x['label'] = 'B'.$x['label'];
+            unset($x['name']);
+        }
+        unset($x);
+
+        $selects = 0;
+        DB::listen(function ($query) use (&$selects) {
+            if (str_starts_with(strtolower($query->sql), 'select')) {
+                $selects++;
+            }
+        });
+        $result = VendorMapStructure::save($this->map->fresh(), $s);
+
+        $this->assertSame(12, $result['renumbered']);
+        $this->assertLessThanOrEqual(10, $selects, 'one read per table, not one per area, landmark or spot');
+        $this->assertNotNull(VendorMapSpot::find($spots[12]->id)?->retired_at, 'a spot somebody stood on is retired');
+        $this->assertNull(VendorMapSpot::find($spots[13]->id), 'a spot with a name only goes');
+        $this->assertSame(0, VendorMapOccupant::where('spot_id', $spots[13]->id)->count());
+        $this->assertSame(12, VendorMapArea::where('vendor_map_id', $this->map->id)->count());
+        $this->assertSame(12, VendorMapLandmark::where('vendor_map_id', $this->map->id)->count());
+    }
+
+    // ---- files left behind by a cascade ----
+
+    public function test_deleting_a_market_deletes_its_public_and_private_files(): void
+    {
+        $disk = Storage::fake(config('filesystems.default'));
+        VendorMapStructure::save($this->map, $this->payload(['1', '2']));
+        [$one] = $this->spots();
+        [, $vendor] = $this->vendor('Hilltop Honey');
+
+        $background = VendorMapImages::storePrivate('bg', 'jpg');
+        $picture = ImageUtils::storagePathFor(VendorMapImages::pictureName($background));
+        $disk->put($picture, 'public copy');
+        $share = 'vmshare_'.str_repeat('a', 32).'.png';
+        $disk->put(ImageUtils::storagePathFor($share), 'card');
+        $this->map->forceFill(['background_path' => $background, 'background_public' => true, 'share_image_path' => $share])->save();
+
+        $photo = VendorMapImages::storePrivate('photo', 'jpg');
+        $thumb = 'vmthumb_'.str_repeat('b', 32).'.jpg';
+        $disk->put(ImageUtils::storagePathFor($thumb), 'thumb');
+        $this->approvedSeason($one, $vendor)->forceFill(['photo_path' => $photo, 'photo_thumb_path' => $thumb])->save();
+        $draftPhoto = VendorMapImages::storePrivate('draft', 'jpg');
+        VendorMapDraft::create(['vendor_map_id' => $this->map->id, 'images' => [$draftPhoto]]);
+
+        $this->market->delete();
+
+        $this->assertFalse(VendorMap::whereKey($this->map->id)->exists(), 'sanity check: the cascade ran');
+        foreach ([$background, $picture, ImageUtils::storagePathFor($share), $photo, ImageUtils::storagePathFor($thumb), $draftPhoto] as $path) {
+            $disk->assertMissing($path);
+        }
+    }
+
+    public function test_deleting_a_vendors_account_deletes_its_photos_on_other_markets_maps(): void
+    {
+        $disk = Storage::fake(config('filesystems.default'));
+        VendorMapStructure::save($this->map, $this->payload(['1', '2']));
+        [$one, $two] = $this->spots();
+        [$user, $vendor] = $this->vendor('Hilltop Honey');
+        [, $other] = $this->vendor('Valley Flowers');
+
+        $thumb = 'vmthumb_'.str_repeat('c', 32).'.jpg';
+        $disk->put(ImageUtils::storagePathFor($thumb), 'thumb');
+        $photo = VendorMapImages::storePrivate('photo', 'jpg');
+        $this->approvedSeason($one, $vendor)->forceFill(['photo_path' => $photo, 'photo_thumb_path' => $thumb])->save();
+
+        // Another vendor's photo on the same market stays.
+        $theirs = 'vmthumb_'.str_repeat('d', 32).'.jpg';
+        $disk->put(ImageUtils::storagePathFor($theirs), 'thumb');
+        $this->approvedSeason($two, $other)->forceFill(['photo_thumb_path' => $theirs])->save();
+
+        $this->actingAs($user)->delete(route('profile.destroy'), ['password' => 'password']);
+
+        $this->assertNull(User::find($user->id), 'sanity check: the account was deleted');
+        $disk->assertMissing(ImageUtils::storagePathFor($thumb));
+        $disk->assertMissing($photo);
+        $disk->assertExists(ImageUtils::storagePathFor($theirs));
+        $this->assertTrue(VendorMap::whereKey($this->map->id)->exists(), 'the market is somebody else\'s');
     }
 
     // ---- helpers ----

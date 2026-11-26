@@ -243,6 +243,8 @@ class VendorMapPresenter
             'mapUrl' => self::publicUrl($role, true),
             'qrUrl' => self::signQrUrl($role, $map),
             'strings' => VendorMapKinds::stringsFor($map->kind),
+            // The print-shop PNG needs GD with FreeType; the page itself does not.
+            'pngAvailable' => VendorMapPng::available(),
         ];
     }
 

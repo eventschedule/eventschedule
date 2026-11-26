@@ -337,6 +337,7 @@ onBeforeUnmount(() => {
 .vmp-add svg { width: 1.6rem; height: 1.6rem; }
 .vmp-honest { font-size: 0.8125rem; color: rgb(var(--ap-ink-3)); }
 .vmp-error { font-size: 0.875rem; color: #b91c1c; }
+:global(.dark) .vmp-error { color: #fca5a5; }
 .vmp-notes summary { cursor: pointer; font-size: 0.875rem; color: rgb(var(--ap-ink-2)); }
 .vmp-notes textarea { margin-top: 0.5rem; width: 100%; border-radius: 0.7rem; border: 1px solid rgb(var(--ap-border-strong)); background: rgb(var(--ap-bg)); color: rgb(var(--ap-ink)); padding: 0.6rem 0.75rem; }
 .vmp-actions { display: flex; align-items: center; justify-content: flex-end; gap: 1rem; }

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\GrowthDataController;
 use App\Models\AnalyticsDaily;
 use App\Models\Event;
 use App\Models\EventInterest;
@@ -90,7 +92,13 @@ class GrowthExportTest extends TestCase
 
         $this->adminActing($admin)->getJson('/admin/growth/stamp')->assertOk()->assertJson(['stamp' => $m[1]]);
 
+        // A sign-up, a schedule and a sale (an abandoned checkout writes one too) are no trial:
+        // on hosted they happen all day, and each used to rebuild the whole page.
         $role = $this->freeRole();
+        $event = $this->createEvent($role);
+        $this->createSale($event, $role, ['status' => 'unpaid'], $this->createTicket($event, ['price' => 10, 'quantity' => 10]));
+        $this->adminActing($admin)->getJson('/admin/growth/stamp')->assertJson(['stamp' => $m[1]]);
+
         DB::table('subscriptions')->insert(['role_id' => $role->id, 'type' => 'default', 'stripe_id' => 'sub_live_test',
             'stripe_status' => 'trialing', 'stripe_price' => 'price_x', 'quantity' => 1,
             'trial_ends_at' => now()->addDays(14), 'created_at' => now(), 'updated_at' => now()]);
@@ -102,6 +110,24 @@ class GrowthExportTest extends TestCase
         $this->assertNotSame($trialing, $this->adminActing($admin)->getJson('/admin/growth/stamp')->json('stamp'), 'a trial that converts moves it again');
 
         $this->assertNotSame(200, $this->actingAs($this->createOwner())->get('/admin/growth/stamp')->status(), 'not for a schedule owner');
+    }
+
+    /** The live redraw builds under the pull's lock, and skips rather than builds beside one. */
+    public function test_the_live_redraw_never_builds_beside_a_pull(): void
+    {
+        $admin = $this->createOwner(true);
+        $live = [AdminController::GROWTH_LIVE_HEADER => '1'];
+
+        $lock = Cache::lock(GrowthDataController::LOCK_KEY, 60);
+        $this->assertTrue($lock->get());
+
+        $this->adminActing($admin)->get('/admin/growth', $live)->assertStatus(429);
+        $this->adminActing($admin)->get('/admin/growth')->assertOk();
+
+        $lock->release();
+
+        $this->adminActing($admin)->get('/admin/growth', $live)->assertOk();
+        $this->assertTrue(Cache::lock(GrowthDataController::LOCK_KEY, 60)->get(), 'the redraw lets the lock go');
     }
 
     public function test_the_page_says_whether_the_activation_nudges_ever_ran(): void

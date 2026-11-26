@@ -593,6 +593,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Sale::class);
     }
 
+    /**
+     * Whether this person holds a ticket, which is what makes them an attendee rather than
+     * somebody new. A deleted sale is no ticket: the dashboard (HomeDashboard::attendee()) never
+     * counted one, while the onboarding chooser's bounce (HomeController::gettingStarted()) did,
+     * so somebody whose only sale was deleted was shown the chooser on the dashboard and sent
+     * back to the dashboard by its Continue. Every one of those questions asks this.
+     */
+    public function holdsTickets(): bool
+    {
+        return $this->tickets()->where('is_deleted', false)->exists();
+    }
+
     public function webhooks()
     {
         return $this->hasMany(Webhook::class);

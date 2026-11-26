@@ -83,6 +83,9 @@ class AccountDeletionService
         // A quote on the marketing homepage, and the name of the person who said it, are kept in
         // a Setting keyed to the schedule: they go with the schedules the account owned.
         $this->attempt(fn () => \App\Utils\HomeQuotes::forget($ownedRoleIds));
+        // The vendor maps' pictures and vendor photos, some of them on the public store: their
+        // rows go by the same cascade, which runs no model event.
+        $this->attempt(fn () => \App\Services\VendorMaps\VendorMapImages::forgetSchedules($ownedRoleIds));
         $this->attempt(fn () => $this->purgePhotos($user, $cascadingEventIds));
         $this->attempt(fn () => $this->forgetAccountRows($user));
         if ($this->addressIsProven($user)) {

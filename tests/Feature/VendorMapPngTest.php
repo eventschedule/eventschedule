@@ -164,6 +164,26 @@ class VendorMapPngTest extends TestCase
         $this->actingAs($this->createOwner())->get('/'.$role->subdomain.'/vendor-map/sign.png')->assertForbidden();
     }
 
+    public function test_without_gd_the_sign_page_offers_no_png_and_the_png_address_does_not_fail(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['name' => 'Riverside Farmers Market']);
+        $this->mapFor($role);
+        $png = route('vendor_map.sign_image', ['subdomain' => $role->subdomain]);
+
+        VendorMapPng::fakeAvailable(false);
+        try {
+            $body = $this->actingAs($owner)->get('/'.$role->subdomain.'/vendor-map/sign')->assertOk()->getContent();
+            $this->assertStringNotContainsString($png, $body, 'no download where there is no PNG');
+            $this->assertStringContainsString('vm-sign-print', $body, 'the printable page is still there');
+
+            $this->actingAs($owner)->get('/'.$role->subdomain.'/vendor-map/sign.png')
+                ->assertRedirect(route('vendor_map.sign', ['subdomain' => $role->subdomain]));
+        } finally {
+            VendorMapPng::fakeAvailable(null);
+        }
+    }
+
     public function test_the_sign_page_follows_the_schedules_direction(): void
     {
         $owner = $this->createOwner();

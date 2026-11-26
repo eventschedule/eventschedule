@@ -109,6 +109,31 @@ class ScheduleTypeChooserTest extends TestCase
             ->assertRedirect(route('new', ['type' => 'talent']));
     }
 
+    /**
+     * A deleted sale is no ticket. The dashboard has always read it so and offers the chooser to
+     * somebody whose only sale was deleted; /getting-started counted it and sent their Continue
+     * straight back to the dashboard, so they could never make a schedule from there.
+     */
+    public function test_a_deleted_sale_does_not_turn_the_chooser_into_a_dead_end(): void
+    {
+        $organizer = $this->createOwner();
+        $schedule = $this->createRole($organizer, 'talent');
+        $event = $this->createEvent($schedule);
+
+        $user = $this->createOwner();
+        $sale = $this->createSale($event, $schedule, ['user_id' => $user->id, 'is_deleted' => true]);
+        $this->actingAs($user);
+
+        $this->get('/dashboard?skip_onboarding=1')->assertOk()->assertSee('id="schedule-type-talent"', false);
+        $this->get('/getting-started?type=talent')->assertRedirect(route('new', ['type' => 'talent']));
+        $this->get('/getting-started')->assertOk();
+
+        // A ticket that stands still makes them an attendee, and the chooser is not for them.
+        $sale->is_deleted = false;
+        $sale->save();
+        $this->get('/getting-started?type=talent')->assertRedirect(route('home'));
+    }
+
     public function test_the_dashboard_panel_nests_its_card_titles_under_its_own_heading(): void
     {
         // /getting-started has the page's h1 above the cards, so they are h2. On the dashboard

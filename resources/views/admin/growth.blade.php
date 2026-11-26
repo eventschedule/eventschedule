@@ -396,7 +396,7 @@
         @endif
     </div>
 
-    {{-- Live: a trial that starts or converts (or a sign-up, a schedule, a sale) shows without a
+    {{-- Live: a trial that starts or converts shows without a
          reload. The page asks a cheap stamp every 30 seconds while it is in view and redraws its
          figures only when the stamp moved; never while a field or button in it has focus. --}}
     <script {!! nonce_attr() !!}>
@@ -407,7 +407,9 @@
         var busy = false;
 
         function redraw() {
-            return fetch(window.location.href, { headers: { 'Accept': 'text/html' }, credentials: 'same-origin' })
+            // The header makes this build take the pull's lock (AdminController::growth()); a 429
+            // means one is already running, and the next check asks again.
+            return fetch(window.location.href, { headers: { 'Accept': 'text/html', 'X-Growth-Live': '1' }, credentials: 'same-origin' })
                 // A lapsed admin window answers the page with a redirect to confirm the password:
                 // that is no page to swap in.
                 .then(function (r) { return r.ok && !r.redirected ? r.text() : null; })

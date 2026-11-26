@@ -201,6 +201,80 @@ class VendorMapClaims
     }
 
     /**
+     * The dates among $dates on which a season vendor stands on another spot: a one-date move
+     * (move()) wrote an absent row on their own spot and a present row on the other.
+     *
+     * @param  string[]  $dates
+     * @return string[]
+     */
+    public static function movedDates(VendorMap $map, VendorMapOccupant $season, array $dates): array
+    {
+        if (! $season->vendor_role_id || $dates === []) {
+            return [];
+        }
+
+        return self::movedRows($map, $season, $dates)->pluck('event_date')->unique()->values()->all();
+    }
+
+    /**
+     * "Not coming" said by the VENDOR (their home, or the link in their mail). On a date a move
+     * put them on another spot, they leave that spot too, or the map kept showing them there.
+     *
+     * @param  string[]  $dates
+     */
+    public static function vendorAbsent(VendorMap $map, VendorMapOccupant $season, array $dates, ?User $by = null): int
+    {
+        $dates = self::validDates($map, $dates) ?? [];
+
+        if ($season->vendor_role_id && $dates !== []) {
+            self::movedRows($map, $season, $dates)->each->delete();
+        }
+
+        return self::markAbsent($map, $season, $dates, $by);
+    }
+
+    /**
+     * "I'm coming after all", said by the VENDOR. On a date a move put them on another spot they
+     * are coming already, and the absent row on their own spot is the move's: it stays, or they
+     * stood on two spots that day. Their own spot given to somebody else that day (the other
+     * half of a swap they then said no to) is the organizer's to sort out.
+     *
+     * @throws ValidationException
+     */
+    public static function vendorPresent(VendorMap $map, VendorMapOccupant $season, string $date): void
+    {
+        if (self::movedDates($map, $season, [$date]) !== []) {
+            return;
+        }
+
+        $taken = VendorMapOccupant::where('vendor_map_id', $map->id)
+            ->where('spot_id', $season->spot_id)
+            ->where('event_date', $date)
+            ->where('kind', 'present')
+            ->where('status', 'approved')
+            ->where(fn ($q) => $q->whereNull('vendor_role_id')->orWhere('vendor_role_id', '!=', (int) $season->vendor_role_id))
+            ->exists();
+
+        if ($taken) {
+            throw ValidationException::withMessages(['date' => __('messages.vm_spot_taken')]);
+        }
+
+        self::clearAbsent($map, $season, $date);
+    }
+
+    /** @param  string[]  $dates */
+    private static function movedRows(VendorMap $map, VendorMapOccupant $season, array $dates)
+    {
+        return VendorMapOccupant::where('vendor_map_id', $map->id)
+            ->where('vendor_role_id', $season->vendor_role_id)
+            ->where('kind', 'present')
+            ->where('status', 'approved')
+            ->whereIn('event_date', $dates)
+            ->where('spot_id', '!=', $season->spot_id)
+            ->get();
+    }
+
+    /**
      * Move a season vendor to another spot, for one date or for the rest of the season. Onto a
      * spot that has its own season vendor, the two swap.
      */

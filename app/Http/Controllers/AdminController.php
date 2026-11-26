@@ -1092,10 +1092,29 @@ class AdminController extends Controller
         $range = $request->input('range', 'last_30_days');
         $dates = $this->getDateRange($range);
 
-        $growth = app(GrowthExportService::class);
-        // Not $full: the page renders none of the analysis-only sections, and it builds on every
-        // view without the endpoint's one-at-a-time lock.
-        $data = $growth->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end'], full: false);
+        // Read before the build, so a trial that starts while the page is being built moves the
+        // stamp the page carries and is picked up by the next check rather than missed.
+        $stamp = $this->growthState();
+
+        // The open page's own redraw (growth.blade.php) takes the build lock the pull endpoint
+        // holds (GrowthDataController), so a tab left open never builds beside a pull or beside
+        // another tab. A redraw that finds it taken is skipped: the stamp it was answering stays
+        // unseen, and the next check asks again. A person opening the page is never refused.
+        $lock = null;
+        if ($request->header(self::GROWTH_LIVE_HEADER) === '1') {
+            $lock = Cache::lock(GrowthDataController::LOCK_KEY, GrowthDataController::LOCK_SECONDS);
+            if (! $lock->get()) {
+                return response('', 429, ['Retry-After' => '30']);
+            }
+        }
+
+        try {
+            $growth = app(GrowthExportService::class);
+            // Not $full: the page renders none of the analysis-only sections.
+            $data = $growth->build($dates['start'], $dates['end'], $dates['previous_start'], $dates['previous_end'], full: false);
+        } finally {
+            $lock?->release();
+        }
 
         return view('admin.growth', [
             'range' => $range,
@@ -1104,15 +1123,22 @@ class AdminController extends Controller
             // it has seen since then. Only the nexus serves the homepage the test runs on. The
             // payload already carries it (null off the nexus), so it is not computed twice.
             'heroTest' => $data['hero_test'],
-            'stamp' => $this->growthState(),
+            'stamp' => $stamp,
         ]);
     }
 
+    /** The header the growth page's live redraw sends, which makes its build take the lock. */
+    public const GROWTH_LIVE_HEADER = 'X-Growth-Live';
+
     /**
-     * What the open page asks every half minute: has anything it counts changed? A trial that
-     * starts or converts writes a `subscriptions` row; a sign-up, a schedule and a sale add a row.
-     * Cheap on purpose (primary keys and the small subscriptions table), so the page rebuilds
-     * the whole payload only when there is something new to show.
+     * What the open page asks every half minute: has a trial started or converted? Both write
+     * the `subscriptions` table (a new row, or a status change that moves its updated_at), so the
+     * stamp is that table alone. It used to take the newest user, schedule and sale as well, and
+     * on hosted every checkout (abandoned ones too) and every buyer's account moved it, so nearly
+     * every check rebuilt the whole payload. Cheap on purpose: one aggregate over a small table.
+     *
+     * Each check is an admin request, so it restarts the admin idle window like any other
+     * (EnsureUserIsAdmin); the max-lifetime ceiling still ends it, as for /admin/support.
      */
     public function growthStamp(): JsonResponse
     {
@@ -1123,11 +1149,12 @@ class AdminController extends Controller
 
     private function growthState(): string
     {
-        $subscriptions = DB::table('subscriptions')->selectRaw('COUNT(*) AS n, MAX(id) AS id, MAX(updated_at) AS at')->first();
+        $subscriptions = DB::table('subscriptions')
+            ->selectRaw("COUNT(*) AS n, MAX(id) AS id, MAX(updated_at) AS at, SUM(stripe_status = 'trialing') AS trialing")
+            ->first();
 
         return md5(implode('|', [
-            $subscriptions->n ?? 0, $subscriptions->id ?? 0, $subscriptions->at ?? '',
-            DB::table('users')->max('id'), DB::table('roles')->max('id'), DB::table('sales')->max('id'),
+            $subscriptions->n ?? 0, $subscriptions->id ?? 0, $subscriptions->at ?? '', $subscriptions->trialing ?? 0,
         ]));
     }
 

@@ -102,7 +102,7 @@ class HomeController extends Controller
     {
         $user = $request->user();
 
-        if (is_demo_mode() || $user->member()->exists() || $user->tickets()->count() > 0) {
+        if (is_demo_mode() || $user->member()->exists() || $user->holdsTickets()) {
             return redirect()->route('home');
         }
 
@@ -203,7 +203,7 @@ class HomeController extends Controller
             && ! session('onboarding_skipped')
             && in_array($user->signup_intent, [null, 'organizer'], true)
             && ! $user->roles()->exists()
-            && $user->tickets()->count() === 0
+            && ! $user->holdsTickets()
             && $this->incomingTransfers($user)->isEmpty()) {
             if (in_array($signupType, ['talent', 'venue', 'curator'], true)) {
                 return redirect()->route('new', ['type' => $signupType]);

@@ -46,6 +46,9 @@ class MarkdownUtils
         'vendor-map-admin', 'vendor-map-designer',
         // The visitors' map (vendor-map-public.js, on [data-vue-root]).
         'vendor-map-public',
+        // The vendor link (vendor-map-claim.js, by querySelector on [data-vue-root], so the
+        // .mount('#x') scan in MarkdownReservedIdsTest does not see it).
+        'vendor-claim-app',
     ];
 
     public static function convertToHtml($markdown, bool $tables = false)

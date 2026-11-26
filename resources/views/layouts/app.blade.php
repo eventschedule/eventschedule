@@ -747,6 +747,11 @@
          layout can reuse them; kept in place here so the cascade is unchanged. --}}
     @include('partials.custom-content-styles')
 
+    {{-- The admin portal's fields (below) or the guest pages' own: the theme variants are the
+         portal's opt-in, never a guest page's (CLAUDE.md, "Theme variants are opt-in per layout"). --}}
+    @php
+        $apFields = (bool) ($themeVariants ?? false);
+    @endphp
     <style {!! nonce_attr() !!}>
 
         .cm-s-easymde .cm-header-1 { font-size: 1.8rem !important; }
@@ -766,11 +771,16 @@
             text-align: right;
         }
 
-        /* Fields as the 2026-11 redesign draws them: 16px type, 52px tall, 12px corners, the
-           palette's strong border, and on focus the design-language review's blue border and
-           3px ring (--ap-focus-ring, which the buttons share). The corners and the border are
-           said without !important, so a field that is meant to be a pill (rounded-full) or
-           borderless keeps its own. */
+        {{-- Fields as the 2026-11 redesign draws them, in the admin portal and its onboarding
+             (the pages that opt into the theme variants: layouts/app-admin, /getting-started,
+             the first schedule's form): 16px type, 52px tall, 12px corners, the palette's strong
+             border, and on focus the design-language review's blue border and 3px ring
+             (--ap-focus-ring, which the buttons share). The corners and the border are said
+             without !important, so a field that is meant to be a pill (rounded-full) or
+             borderless keeps its own. A guest page shares this shell and keeps the fields it had:
+             these selectors outrank its own (.gk-input's radius, .gk-pg-input's focus in the
+             schedule's accent), so there they would paint the platform's blue over the owner's
+             colours. --}}
         input[type="text"],
         input[type="email"],
         input[type="password"],
@@ -779,11 +789,12 @@
         select,
         textarea {
             transition: border-color 0.2s, box-shadow 0.2s;
-            font-size: 1rem !important;
+            font-size: {{ $apFields ? '1rem' : '1.15rem' }} !important;
             line-height: 1.5 !important;
-            padding: 0.8125rem 0.875rem !important;
+            padding: {{ $apFields ? '0.8125rem 0.875rem' : '0.75rem 1rem' }} !important;
             font-family: inherit !important;
         }
+        @if ($apFields)
         input:is([type="text"], [type="email"], [type="password"], [type="number"], [type="url"], [type="tel"], [type="search"]):not(.rounded-full):not(.rounded-none),
         select:not(.rounded-full),
         textarea:not(.rounded-none) {
@@ -796,6 +807,7 @@
             border-color: var(--brand-blue);
             box-shadow: 0 0 0 3px var(--ap-focus-ring, rgba(36, 86, 230, 0.18));
         }
+        @endif
 
         /* A phone field is the size of the fields beside it. It has a rule of its own because the
            country widget (intl-tel-input) makes room for its flag and dial code with an inline
@@ -803,15 +815,15 @@
            would be typed under the flag. So only top and bottom are said firmly. */
         input[type="tel"] {
             transition: border-color 0.2s, box-shadow 0.2s;
-            font-size: 1rem !important;
+            font-size: {{ $apFields ? '1rem' : '1.15rem' }} !important;
             line-height: 1.5 !important;
-            padding-block: 0.8125rem !important;
+            padding-block: {{ $apFields ? '0.8125rem' : '0.75rem' }} !important;
             padding-inline: 1rem;
             font-family: inherit !important;
         }
         /* The dial code is read as part of the number, so it is the number's size. */
         .iti__selected-dial-code {
-            font-size: 1rem;
+            font-size: {{ $apFields ? '1rem' : '1.15rem' }};
             line-height: 1.5;
         }
         /* The flag is a button, and a page's own rule for its buttons (the event form's

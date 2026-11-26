@@ -7,6 +7,8 @@ use App\Models\Role;
 use App\Models\VendorMap;
 use App\Models\VendorMapOccupant;
 use App\Models\VendorMapSpot;
+use App\Services\VendorMaps\VendorMapClaims;
+use App\Services\VendorMaps\VendorMapOccupancy;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -325,6 +327,54 @@ class VendorSpotClaimTest extends TestCase
 
         $this->postJson($this->url('vendor_map.claim.home'), ['action' => 'stop'])->assertOk()->assertJsonPath('stopped', true);
         $this->assertNull(VendorMapOccupant::find($season->id));
+    }
+
+    public function test_a_vendor_moved_for_one_date_stands_on_one_stall_whatever_they_say(): void
+    {
+        [$user, $pages] = $this->vendorUser();
+        $vendor = $pages[0]->id;
+        $season = $this->approved($this->spots['12'], ['vendor_role_id' => $vendor]);
+        $friday = $this->event->nextOccurrenceFrom();
+        $where = fn () => collect(VendorMapOccupancy::on($this->map->fresh(), $friday))
+            ->filter(fn ($s) => $s['state'] === 'present' && (int) $s['occupant']->vendor_role_id === $vendor)
+            ->keys()->all();
+
+        // The organizer puts them on 13 for this Friday only.
+        VendorMapClaims::move($this->map, $season, $this->spots['13'], $friday);
+        $this->assertSame([$this->spots['13']->id], $where());
+
+        $props = $this->props($this->actingAs($user)->get($this->url())->assertOk());
+        $this->assertFalse($props['home']['dates'][0]['absent'], 'moved is coming, not away');
+
+        // "Coming after all" changes nothing: they were coming, on 13.
+        $this->postJson($this->url('vendor_map.claim.home'), ['action' => 'present', 'date' => $friday])->assertOk();
+        $this->assertSame([$this->spots['13']->id], $where(), 'never on two stalls');
+
+        // "Not coming" takes them off 13 as well as 12.
+        $this->postJson($this->url('vendor_map.claim.home'), ['action' => 'absent', 'date' => $friday])
+            ->assertOk()->assertJsonPath('home.dates.0.absent', true);
+        $this->assertSame([], $where());
+
+        // And back again, on their own stall, once.
+        $this->postJson($this->url('vendor_map.claim.home'), ['action' => 'present', 'date' => $friday])->assertOk();
+        $this->assertSame([$this->spots['12']->id], $where());
+    }
+
+    public function test_coming_after_all_onto_a_stall_given_away_that_day_is_refused(): void
+    {
+        [$user, $pages] = $this->vendorUser();
+        [, $theirs] = $this->vendorUser();
+        $season = $this->approved($this->spots['12'], ['vendor_role_id' => $pages[0]->id]);
+        $this->approved($this->spots['13'], ['vendor_role_id' => $theirs[0]->id]);
+        $friday = $this->event->nextOccurrenceFrom();
+
+        // A swap for this Friday, then the mover says they are not coming.
+        VendorMapClaims::move($this->map, $season, $this->spots['13'], $friday);
+        $this->actingAs($user)->postJson($this->url('vendor_map.claim.home'), ['action' => 'absent', 'date' => $friday])->assertOk();
+
+        $this->postJson($this->url('vendor_map.claim.home'), ['action' => 'present', 'date' => $friday])->assertStatus(422);
+        $day = VendorMapOccupancy::on($this->map->fresh(), $friday);
+        $this->assertSame($theirs[0]->id, (int) $day[$this->spots['12']->id]['occupant']->vendor_role_id, 'the other vendor keeps the stall that day');
     }
 
     public function test_the_home_needs_a_stall_of_ones_own(): void

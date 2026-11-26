@@ -199,7 +199,11 @@
             </div>
             <div class="doc-field">
                 <h4>Cancel this day</h4>
-                <p>Rained off, a holiday, anything else: choose why and confirm. The date comes off the calendar, and the shoppers' map says there is no market that day, with the reason.</p>
+                <p>Rained off, a holiday, anything else: choose why and confirm. The shoppers' map says there is no market that day, with the reason. For a market that repeats every week the date also comes off the calendar. A one-day or multi-day event (a fair, an expo) is called off on the map only: the event itself stays as it is, and cancelling it, with the email to anyone holding a ticket, is still done from the event.</p>
+            </div>
+            <div class="doc-field">
+                <h4>Open this day again</h4>
+                <p>A cancelled day reads <strong>Cancelled</strong> on the tab, with <strong>Open this day again</strong> beside it. Press it when the day goes ahead after all: the shoppers' map shows the market again, and a weekly market's date is back on the calendar.</p>
             </div>
         </div>
 

@@ -41,7 +41,10 @@ class GrowthDataController extends Controller
      * The finally below releases it the moment a build ends; the TTL only matters when a worker
      * dies mid-build, and then it blocks pulls for at most this long.
      */
-    private const LOCK_SECONDS = 600;
+    public const LOCK_SECONDS = 600;
+
+    /** One build at a time: a pull here, or the admin growth page's live redraw (AdminController::growth()). */
+    public const LOCK_KEY = 'growth_data_build';
 
     public function show(Request $request, GrowthExportService $growth): JsonResponse
     {
@@ -73,7 +76,7 @@ class GrowthDataController extends Controller
 
         // Hosted is one small container: a build holds an FPM worker for its whole run, so even
         // the limiter's ten a minute could otherwise take several workers at once.
-        $lock = Cache::lock('growth_data_build', self::LOCK_SECONDS);
+        $lock = Cache::lock(self::LOCK_KEY, self::LOCK_SECONDS);
         if (! $lock->get()) {
             return response()->json(['error' => 'A pull is already running.'], 429, ['Retry-After' => '30']);
         }

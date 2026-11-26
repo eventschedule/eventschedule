@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\EventCreationLimitException;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\VendorMap;
 use App\Models\VendorMapDraft;
 use App\Models\VendorMapOccupant;
 use App\Models\VendorMapSpot;
+use App\Services\UsageTrackingService;
 use App\Services\VendorMaps\VendorMapAi;
 use App\Services\VendorMaps\VendorMapClaims;
 use App\Services\VendorMaps\VendorMapImages;
@@ -51,20 +53,36 @@ class VendorMapController extends Controller
             'last_date' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
-        $map = VendorMap::firstOrNew(['role_id' => $role->id]);
-        $map->fill(['kind' => $data['kind'], 'enabled' => true]);
+        // Everything that can refuse the setup is asked before the map row exists, so a refusal
+        // leaves nothing behind.
+        $event = ! empty($data['event_id']) ? $this->ownEvent($role, $data['event_id']) : null;
+        $makesEvent = ! $event && (! empty($data['days']) || ! empty($data['first_date']));
 
-        $event = null;
-        if (! empty($data['event_id'])) {
-            $event = $this->ownEvent($role, $data['event_id']);
-        } elseif (! empty($data['days']) || ! empty($data['first_date'])) {
-            $event = $this->createMarketEvent($role, $data);
+        // The market's event is made here and not through EventRepo::saveEvent(), so the daily
+        // cap that one asks is asked here too.
+        if ($makesEvent && ! $role->canCreateEvent($request->user())) {
+            throw new EventCreationLimitException;
         }
 
-        if ($event) {
-            $map->event_id = $event->id;
-        }
-        $map->save();
+        // createOrFirst underneath: two setups at once (a double tap) meet on one row instead of
+        // the second ending on the unique role_id.
+        $map = VendorMap::firstOrCreate(['role_id' => $role->id], ['kind' => $data['kind']]);
+
+        DB::transaction(function () use ($map, $role, $data, $event, $makesEvent) {
+            $map = VendorMap::whereKey($map->id)->lockForUpdate()->first();
+
+            // A map that already serves an event keeps it: the setup card is shown only while
+            // there is no map, so this is the second of two taps, or a tab opened before the first.
+            if ($makesEvent && ! $map->event_id) {
+                $event = $this->createMarketEvent($role, $data);
+            }
+
+            $map->fill(['kind' => $data['kind'], 'enabled' => true]);
+            if ($event) {
+                $map->event_id = $event->id;
+            }
+            $map->save();
+        });
 
         return $request->wantsJson()
             ? response()->json(['ok' => true, 'props' => VendorMapPresenter::adminProps($role->fresh())])
@@ -426,7 +444,20 @@ class VendorMapController extends Controller
     {
         [$role, $map] = $this->mapFor($subdomain);
 
-        $png = VendorMapPng::sign($role, $map);
+        // Without GD or FreeType (some selfhost PHPs) there is no PNG, and the sign page does not
+        // offer one; the printable page itself needs neither.
+        $printable = redirect()->route('vendor_map.sign', ['subdomain' => $role->subdomain]);
+        if (! VendorMapPng::available()) {
+            return $printable;
+        }
+
+        try {
+            $png = VendorMapPng::sign($role, $map);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return $printable;
+        }
 
         return response($png, 200, [
             'Content-Type' => 'image/png',
@@ -584,6 +615,9 @@ class VendorMapController extends Controller
 
             $event->save();
             $event->roles()->attach($role->id, ['is_accepted' => true]);
+
+            // Counted toward the daily cap setup() asked, as EventRepo::saveEvent() counts its own.
+            UsageTrackingService::track(UsageTrackingService::EVENT_CREATE, $role->id);
 
             return $event;
         });

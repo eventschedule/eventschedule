@@ -1208,6 +1208,10 @@
                         }
                     });
                     leg.ticket_custom_values = ticketCustom;
+                    // The cart keeps its legs in localStorage, and answers can be private (a
+                    // field not on the event page): dated, so the cart forgets them after 30 days
+                    // as it forgets the buyer's details (guest-cart's answersExpired()).
+                    leg.custom_values_saved_at = Date.now();
 
                     window.dispatchEvent(new CustomEvent('es-cart-add', { detail: leg }));
 

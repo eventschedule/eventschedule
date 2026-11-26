@@ -269,13 +269,13 @@ class VendorSpotController extends Controller
         switch ($action) {
             case 'absent':
                 $date = $this->upcomingDate($map, $request->input('date'));
-                VendorMapClaims::markAbsent($map, $season, [$date], $user);
+                VendorMapClaims::vendorAbsent($map, $season, [$date], $user);
                 $this->stampVendorMark($map, $season, [$date]);
                 break;
 
             case 'present':
                 $date = $this->upcomingDate($map, $request->input('date'));
-                VendorMapClaims::clearAbsent($map, $season, $date);
+                VendorMapClaims::vendorPresent($map, $season, $date);
                 break;
 
             case 'update':
@@ -345,7 +345,11 @@ class VendorSpotController extends Controller
         $by = $row->vendor?->user_id ? User::find($row->vendor->user_id) : null;
 
         if (is_string($come = $request->input('come')) && in_array($come, $offered, true)) {
-            VendorMapClaims::clearAbsent($map, $row, $come);
+            try {
+                VendorMapClaims::vendorPresent($map, $row, $come);
+            } catch (ValidationException $e) {
+                return $back->with('error', collect($e->errors())->flatten()->first());
+            }
 
             return $back->with('vm_status', 'present');
         }
@@ -356,7 +360,7 @@ class VendorSpotController extends Controller
             return $back->with('error', __('messages.vm_claim_pick_date'));
         }
 
-        VendorMapClaims::markAbsent($map, $row, $dates, $by);
+        VendorMapClaims::vendorAbsent($map, $row, $dates, $by);
         $this->stampVendorMark($map, $row, $dates);
 
         return $back->with('vm_status', 'absent');
@@ -673,6 +677,8 @@ class VendorSpotController extends Controller
             ->whereIn('event_date', array_column($dates, 'date') ?: ['-'])
             ->pluck('event_date')
             ->all();
+        // Moved to another spot for a date: coming, whatever the move wrote on their own spot.
+        $absent = array_diff($absent, VendorMapClaims::movedDates($map, $season, $absent));
 
         return [
             'spotId' => $season->spot_id,
@@ -846,6 +852,7 @@ class VendorSpotController extends Controller
             ->when($row->vendor_role_id, fn ($q) => $q->where('vendor_role_id', $row->vendor_role_id), fn ($q) => $q->whereNull('vendor_role_id'))
             ->pluck('event_date')
             ->all();
+        $absent = array_diff($absent, VendorMapClaims::movedDates($map, $row, $absent));
 
         return [
             'role' => $role,
