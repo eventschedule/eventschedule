@@ -11155,7 +11155,14 @@
       },
       // A chosen venue on one line: its name, street and city, whichever it has.
       pickedVenueLine() {
-        return [this.venueName, this.venueAddress1, this.venueCity].filter(Boolean).join(', ');
+        // A venue named after its address says the street once, not "street, street, town".
+        const seen = new Set();
+        return [this.venueName, this.venueAddress1, this.venueCity].filter((part) => {
+          const key = (part || '').trim().toLowerCase();
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        }).join(', ');
       },
       galleryStripCount() {
         const count = this.galleryStore.state.images.length;

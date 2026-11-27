@@ -89,14 +89,14 @@ class ScheduleAlwaysNamedTest extends TestCase
         $this->assertFalse($town->hasOwnName());
         $this->assertTrue($hall->hasOwnName());
         $this->assertSame('Harbour Hall', $hall->ownName());
-        $this->assertFalse($hallInTown->hasOwnName(), 'a venue named after its town says its address instead, which loses nothing');
+        $this->assertTrue($hallInTown->hasOwnName(), 'a hall on a street may be named after its town by choice');
 
         $ids = [$street->id, $town->id, $hall->id, $hallInTown->id];
         $act = $this->createRole($owner, 'talent', ['name' => 'Springfield', 'city' => 'Springfield']);
         $this->assertTrue($act->hasOwnName(), 'an act called after its town is not a place');
         $ids[] = $act->id;
 
-        $this->assertEqualsCanonicalizing([$hall->id, $act->id], Role::whereIn('id', $ids)->withOwnName()->pluck('id')->all(), 'the SQL says what hasOwnName() says');
+        $this->assertEqualsCanonicalizing([$hall->id, $hallInTown->id, $act->id], Role::whereIn('id', $ids)->withOwnName()->pluck('id')->all(), 'the SQL says what hasOwnName() says');
 
         $this->assertSame('12  harbour road', $street->shortVenue(false), 'said by its address once, not "address | address"');
     }
@@ -160,5 +160,61 @@ class ScheduleAlwaysNamedTest extends TestCase
 
         $this->assertSame('14 Harbour Road', $venue->fresh()->name);
         $this->assertNotSame('Old translation', $venue->fresh()->name_en);
+    }
+
+    public function test_a_hall_named_after_its_town_keeps_its_name_when_its_street_changes(): void
+    {
+        $hall = $this->createRole($this->createOwner(), 'venue', ['name' => 'Springfield', 'address1' => '1 Main Street', 'city' => 'Springfield']);
+
+        $hall->fresh()->fill(['address1' => '2 Main Street'])->save();
+
+        $this->assertSame('Springfield', $hall->fresh()->name);
+    }
+
+    public function test_a_venue_with_nothing_to_be_named_after_is_not_called_by_its_type(): void
+    {
+        $talent = $this->createRole($this->createOwner(), 'talent');
+
+        $venue = app(EventRepo::class)->makeVenue(['address1' => 'https://zoom.us/j/1?pwd=x'], $talent, 'UTC');
+
+        $this->assertNotSame('', trim((string) $venue->name));
+        $this->assertFalse($venue->hasOwnName(), 'the type word is no name of its own');
+        $this->assertDoesNotMatchRegularExpression('~^venue\d*$~', $venue->subdomain, 'and the address stays random');
+    }
+
+    public function test_a_name_given_in_english_alone_is_the_name(): void
+    {
+        $talent = $this->createRole($this->createOwner(), 'talent');
+
+        $venue = app(EventRepo::class)->makeVenue(['name_en' => 'Harbour Hall', 'address1' => '12 Harbour Road'], $talent, 'UTC');
+
+        $this->assertSame('Harbour Hall', $venue->name);
+        $this->assertTrue($venue->hasOwnName());
+    }
+
+    public function test_the_header_of_a_venue_named_after_its_town_says_the_town_once(): void
+    {
+        $owner = $this->createOwner();
+        $talent = $this->createRole($owner, 'talent');
+        $venue = app(EventRepo::class)->makeVenue(['city' => 'Shelbyville'], $talent, 'UTC');
+        $this->assertSame('', $venue->placeBesideName());
+
+        $street = app(EventRepo::class)->makeVenue(['address1' => '12 Harbour Road', 'city' => 'Springfield'], $talent, 'UTC');
+        $this->assertSame('Springfield', $street->placeBesideName(), 'beside a street, the town');
+    }
+
+    public function test_a_claimed_venue_named_after_its_street_is_still_linked_from_the_event_page(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['name' => '12 Harbour Road', 'address1' => '12 Harbour Road', 'city' => 'Springfield', 'website' => 'https://example.com', 'formatted_address' => '12 Harbour Road, Springfield']);
+        $talent = $this->createRole($owner, 'talent');
+        $event = $this->createEvent($talent, ['creator_role_id' => $talent->id]);
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+        $this->assertTrue($venue->fresh()->isClaimed());
+
+        $html = $this->get($event->fresh()->getGuestUrl($talent->subdomain))->assertOk()->getContent();
+
+        $this->assertStringContainsString('href="'.$venue->fresh()->getGuestUrl(true), $html);
+        $this->assertStringNotContainsString('<span class="gk-venue-addr">12 Harbour Road', $html, 'the street is said once');
     }
 }

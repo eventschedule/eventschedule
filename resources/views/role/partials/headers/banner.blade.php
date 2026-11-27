@@ -28,9 +28,7 @@
     $headName = $role->translatedName();
     // A venue's place is its address, as before. An act or a curator says where it is based. A
     // venue that is only an address is named after its street, so its place is the town.
-    $headPlace = trim((string) ($role->isVenue()
-        ? ($role->hasOwnName() ? $role->shortAddress() : ($role->translatedCity() ?: $role->shortAddress()))
-        : $role->translatedCity()));
+    $headPlace = trim((string) ($role->isVenue() ? $role->placeBesideName() : $role->translatedCity()));
     $headUpcoming = \App\Utils\GuestHeader::upcomingFact($role, $event ? 0 : count($upcoming ?? []));
     $headGallery = ($galleryImages ?? collect());
     // The second row: what else a visitor may do. A member's Manage joins it on a phone, so for

@@ -3674,6 +3674,13 @@ class Role extends Model implements MustVerifyEmail
             return;
         }
 
+        // A name given only in English is still the name it was given.
+        if (trim((string) $this->name_en) !== '') {
+            $this->name = mb_substr(trim((string) $this->name_en), 0, 255);
+
+            return;
+        }
+
         $name = $this->nameFromAddress();
         $staleTranslation = $this->exists && $this->isDirty('address1') && ! $this->isDirty('address1_en');
 
@@ -3690,7 +3697,7 @@ class Role extends Model implements MustVerifyEmail
 
     /**
      * Whether a venue's name is its own, and not its address standing in for one: a venue named
-     * after its street or its town is only an address. Until 2026-11 such a venue had no name at
+     * after its street (or, with no street, its town) is only an address. Until 2026-11 such a venue had no name at
      * all, and every check that read an empty name as "only an address" asks this now, so a page
      * that prints the name and then the address does not print the address twice. Any other
      * kind of schedule always has a name of its own: an act called "Berlin" is not a place.
@@ -3708,7 +3715,16 @@ class Role extends Model implements MustVerifyEmail
             return false;
         }
 
-        foreach ([$this->address1, $this->city, $this->nameFromAddress()] as $part) {
+        // Its street as written (a calendar sync stub holds the whole location there), the name
+        // fillNameFromAddress() gives it (the town only when there is no usable street), and the
+        // type's word it is given when there is neither. Never the town beside a street: a hall
+        // called "Springfield" at 1 Main Street, Springfield, is named after its town by choice.
+        $standIns = [$this->address1, $this->nameFromAddress(), ScheduleTypeLabel::for($this->type)];
+        if (app()->getLocale() !== 'en') {
+            $standIns[] = app('translator')->get('messages.venue', [], 'en');
+        }
+
+        foreach ($standIns as $part) {
             if ($name === GeminiUtils::normalizeForMatch($part)) {
                 return false;
             }
@@ -3720,6 +3736,23 @@ class Role extends Model implements MustVerifyEmail
     public function isOnlyAnAddress(): bool
     {
         return ! $this->hasOwnName();
+    }
+
+    /**
+     * Where a venue is, for a line under its name: its short address, or for a venue named after
+     * its address only what the name does not already say (the town beside a street, nothing
+     * beside a town).
+     */
+    public function placeBesideName(): string
+    {
+        if ($this->hasOwnName()) {
+            return (string) $this->shortAddress();
+        }
+
+        $town = trim((string) $this->translatedCity());
+        $name = GeminiUtils::normalizeForMatch($this->name);
+
+        return $town !== '' && GeminiUtils::normalizeForMatch($this->city) !== $name && GeminiUtils::normalizeForMatch($town) !== $name ? $town : '';
     }
 
     /** The name when it is the schedule's own (hasOwnName()), null when it only restates the address. */
@@ -3746,7 +3779,7 @@ class Role extends Model implements MustVerifyEmail
             ->where(fn ($q) => $q->where("{$t}.type", '!=', 'venue')
                 ->orWhere(fn ($q) => $q->whereNotNull("{$t}.name_normalized")
                     ->whereRaw("NOT ({$t}.name_normalized <=> {$t}.address1_normalized)")
-                    ->whereRaw("NOT ({$t}.name_normalized <=> {$t}.city_normalized)")));
+                    ->whereRaw("NOT ({$t}.address1_normalized IS NULL AND {$t}.name_normalized <=> {$t}.city_normalized)")));
     }
 
     public function getDisplayName($translate = true)

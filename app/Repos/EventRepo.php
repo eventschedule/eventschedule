@@ -759,9 +759,10 @@ class EventRepo
         $venue->state = $details['state'] ?? null;
         $venue->postal_code = $details['postal_code'] ?? null;
         // A place given by its address alone is named after it, and its address is made from that
-        // name rather than from eight random letters.
+        // name rather than from eight random letters, unless there was nothing to name it after.
+        $named = trim((string) $venue->name) !== '' || trim((string) $venue->name_en) !== '' || $venue->nameFromAddress() !== null;
         $venue->fillNameFromAddress();
-        $venue->subdomain = Role::generateSubdomain($venue->name, $venue->name_en, shortest: false);
+        $venue->subdomain = Role::generateSubdomain($named ? $venue->name : null, $venue->name_en, shortest: false);
         $venue->country_code = $countryCode ? strtolower($countryCode) : null;
         $venue->language_code = ($details['language_code'] ?? null) ?: $for?->language_code;
         $venue->timezone = $timezone;

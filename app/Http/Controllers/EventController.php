@@ -3800,9 +3800,11 @@ class EventController extends Controller
             $venue->city = $request->venue_city;
             $venue->state = $request->venue_state;
             $venue->postal_code = $request->venue_postal_code;
-            // Named after the address when the visitor gave none (Role::fillNameFromAddress()).
+            // Named after the address when the visitor gave none (Role::fillNameFromAddress()). Its
+            // public address stays random then: a booking names a place before anyone accepts it,
+            // and that place is often somebody's home.
+            $venue->subdomain = Role::generateSubdomain($request->venue_name, $request->venue_name_en, shortest: false);
             $venue->fillNameFromAddress();
-            $venue->subdomain = Role::generateSubdomain($venue->name, $request->venue_name_en, shortest: false);
             $countryCode = $request->venue_country_code ?: $role->country_code;
             $venue->country_code = $countryCode ? strtolower($countryCode) : null;
             $venue->language_code = $role->language_code;

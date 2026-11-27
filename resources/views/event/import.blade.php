@@ -799,15 +799,15 @@
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                     <option v-if="venueGroupCount > 1 && memberVenues.length" disabled>── {{ __('messages.member') }} ──</option>
                                     <option v-for="venue in memberVenues" :key="venue.id" :value="venue.id">
-                                        @{{ (venue.name || venue.address1) + (venue.city ? ', ' + venue.city : '') }}
+                                        @{{ (venue.name || venue.address1) + (venue.city && venue.city !== (venue.name || venue.address1) ? ', ' + venue.city : '') }}
                                     </option>
                                     <option v-if="venueGroupCount > 1 && followingVenues.length" disabled>── {{ __('messages.following') }} ──</option>
                                     <option v-for="venue in followingVenues" :key="venue.id" :value="venue.id">
-                                        @{{ (venue.name || venue.address1) + (venue.city ? ', ' + venue.city : '') }}
+                                        @{{ (venue.name || venue.address1) + (venue.city && venue.city !== (venue.name || venue.address1) ? ', ' + venue.city : '') }}
                                     </option>
                                     <option v-if="venueGroupCount > 1 && connectedVenues.length" disabled>── {{ __('messages.from_past_events') }} ──</option>
                                     <option v-for="venue in connectedVenues" :key="venue.id" :value="venue.id">
-                                        @{{ (venue.name || venue.address1) + (venue.city ? ', ' + venue.city : '') }}
+                                        @{{ (venue.name || venue.address1) + (venue.city && venue.city !== (venue.name || venue.address1) ? ', ' + venue.city : '') }}
                                     </option>
                                 </select>
                                 <p v-if="preview.parsed[idx].matched_venue_name" class="mt-1 text-sm text-green-600 dark:text-green-400">

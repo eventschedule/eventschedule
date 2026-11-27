@@ -411,8 +411,13 @@
                 <img class="gk-venue-logo" src="{{ $event->venue->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="" loading="lazy" decoding="async"/>
               @endif
               <div class="gk-venue-id">
-              {{-- hasOwnName(): a venue that is only an address shows the address once, as its title. --}}
-              @if ($event->venue->hasOwnName())
+              {{-- hasOwnName(): a venue that is only an address shows the address once, as its title,
+                   and a claimed one is still the link to its own page. --}}
+              @php
+                $venueTitled = $event->venue->hasOwnName() || $event->venue->isClaimed();
+                $venueLine = $event->venue->hasOwnName() ? $event->venue->shortAddress() : ($venueTitled ? $event->venue->placeBesideName() : '');
+              @endphp
+              @if ($venueTitled)
                 @if ($event->venue->isClaimed())
                   @php
                     $venuePanelUrl = $event->venue->getGuestUrl(true);
@@ -435,8 +440,8 @@
                   {{ $event->venue->shortAddress() }}
                 </p>
               @endif
-              @if ($event->venue->hasOwnName() && $event->venue->shortAddress())
-                <span class="gk-venue-addr">{{ $event->venue->shortAddress() }}</span>
+              @if ($venueLine)
+                <span class="gk-venue-addr">{{ $venueLine }}</span>
               @endif
               </div>
               </div>
@@ -864,7 +869,7 @@
             </div>
             <div class="flex flex-col">
               <span>
-                @if ($event->venue && $event->venue->hasOwnName() && $event->venue->nameInLanguage($displayLang))
+                @if ($event->venue && ($event->venue->hasOwnName() || $event->venue->isClaimed()) && $event->venue->nameInLanguage($displayLang))
                   @if ($event->venue->isClaimed())
                     @php
                       $venueUrl = $event->venue->getGuestUrl(true);
@@ -906,7 +911,8 @@
               @if ($event->venue && $event->venue->shortAddress())
               <span class="gk-fact-sub">
                 <x-link href="https://www.google.com/maps/search/?api=1&query={{ urlencode($event->venue->bestAddress()) }}" target="_blank" :nofollow="true">
-                  {{ $event->venue->shortAddress() }}
+                  {{-- A claimed venue named after its street says that street above: here the rest. --}}
+                  {{ ! $event->venue->hasOwnName() && $event->venue->isClaimed() ? ($event->venue->placeBesideName() ?: $event->venue->shortAddress()) : $event->venue->shortAddress() }}
                 </x-link>
               </span>
               @endif
