@@ -90,11 +90,12 @@ final class GuestHeader
 
     /**
      * The class that steps a long name down, so the name never runs to four lines. Decided here
-     * and not in the browser, so the name is drawn once at its size.
+     * and not in the browser, so the name is drawn once at its size. A schedule's name is a
+     * nullable column, and one with none still has a page to draw.
      */
-    public static function nameStep(string $name): string
+    public static function nameStep(?string $name): string
     {
-        $length = mb_strlen(trim($name));
+        $length = mb_strlen(trim((string) $name));
 
         return $length > 40 ? 'gk-head-name-s' : ($length > 26 ? 'gk-head-name-m' : '');
     }

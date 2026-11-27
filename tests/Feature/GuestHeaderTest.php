@@ -269,5 +269,14 @@ class GuestHeaderTest extends TestCase
         $this->assertSame('', GuestHeader::nameStep('Moe\'s Tavern'));
         $this->assertSame('gk-head-name-m', GuestHeader::nameStep('The Simpsons - Springfield Events'));
         $this->assertSame('gk-head-name-s', GuestHeader::nameStep('Capital City Arena and Convention Centre East'));
+        $this->assertSame('', GuestHeader::nameStep(null), 'a schedule with no name still draws');
+    }
+
+    public function test_a_schedule_with_no_name_still_draws_its_page(): void
+    {
+        $role = $this->createRole($this->createOwner(), 'venue');
+        $role->forceFill(['name' => null, 'name_en' => null])->saveQuietly();
+
+        $this->assertStringContainsString('class="gk-head-name "', $this->header($this->page($role)));
     }
 }
