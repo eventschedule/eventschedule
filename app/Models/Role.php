@@ -4093,7 +4093,9 @@ class Role extends Model implements MustVerifyEmail
      */
     public function schemaPlace(string $lang): ?array
     {
-        $name = SeoUtils::cleanText($this->nameInLanguage($lang)) ?: implode(', ', array_filter([
+        // A venue that is only an address is named by its street and its town, as before it had
+        // a name of its own (hasOwnName()).
+        $name = ($this->hasOwnName() ? SeoUtils::cleanText($this->nameInLanguage($lang)) : '') ?: implode(', ', array_filter([
             SeoUtils::cleanText($this->textInLanguage('address1', $lang)),
             SeoUtils::cleanText($this->textInLanguage('city', $lang)),
         ]));
