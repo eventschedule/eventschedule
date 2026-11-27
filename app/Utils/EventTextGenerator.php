@@ -3,6 +3,7 @@
 namespace App\Utils;
 
 use App\Models\Role;
+use Carbon\Carbon;
 
 class EventTextGenerator
 {
@@ -158,7 +159,7 @@ class EventTextGenerator
     {
         // Set Carbon locale for translated date formats
         $locale = $forceEnglish ? 'en' : ($role->language_code ?: 'en');
-        \Carbon\Carbon::setLocale($locale);
+        Carbon::setLocale($locale);
 
         $tz = $timezone ?? $role->timezone ?? 'UTC';
         $startDate = $event->getStartDateTime($date, true, $tz);
@@ -172,7 +173,7 @@ class EventTextGenerator
         // list (e.g. a Jul 2027 event renders as "11/7" and appears to precede a
         // Jul 2026 "19/7"). Append a 2-digit year only when the event's year
         // differs from the current year in the schedule timezone.
-        $showYear = $startDate->year !== \Carbon\Carbon::now($tz)->year;
+        $showYear = $startDate->year !== Carbon::now($tz)->year;
         $dmyFormat = $showYear ? 'j/n/y' : 'j/n';
         $mdyFormat = $showYear ? 'n/j/y' : 'n/j';
 
@@ -228,7 +229,8 @@ class EventTextGenerator
             '{url}' => $eventUrl,
 
             // Venue variables
-            '{venue}' => $event->venue ? ($event->venue->textInLanguage('name', $locale) ?? '') : '',
+            // hasOwnName(): a venue that is only an address is {address} and {city}, never {venue} too.
+            '{venue}' => $event->venue?->hasOwnName() ? ($event->venue->textInLanguage('name', $locale) ?? '') : '',
             '{city}' => $event->venue ? ($event->venue->textInLanguage('city', $locale) ?? '') : '',
             '{address}' => $event->venue ? ($event->venue->textInLanguage('address1', $locale) ?? '') : '',
             '{state}' => $event->venue ? ($event->venue->textInLanguage('state', $locale) ?? '') : '',
@@ -341,10 +343,10 @@ class EventTextGenerator
         }
 
         $locale = $forceEnglish ? 'en' : ($role->language_code ?? 'en');
-        \Carbon\Carbon::setLocale($locale);
+        Carbon::setLocale($locale);
 
         $tz = $role->timezone ?? 'UTC';
-        $now = \Carbon\Carbon::now($tz);
+        $now = Carbon::now($tz);
 
         $firstEventDate = '';
         $lastEventDate = '';

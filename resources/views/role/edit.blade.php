@@ -2057,7 +2057,7 @@
                                     <option value="">{{ __('messages.please_select') }}</option>
                                     @foreach ($mergeCandidates as $candidate)
                                     <option value="{{ $candidate->subdomain }}" {{ $mergeSuggestion && $mergeSuggestion->id === $candidate->id ? 'selected' : '' }}>
-                                        {{ $candidate->name }}@if ($candidate->city), {{ $candidate->city }}@endif
+                                        {{ $candidate->name }}@if ($candidate->city && $candidate->city !== $candidate->name), {{ $candidate->city }}@endif
                                     </option>
                                     @endforeach
                                 </select>

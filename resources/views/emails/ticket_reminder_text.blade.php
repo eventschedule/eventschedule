@@ -14,8 +14,8 @@
 {!! __('messages.date') !!}: {!! $event->is_multi_day ? $event->getDateRangeDisplay($occurrence) : $start->localDate() !!}
 {!! __('messages.time') !!}: {!! $event->getStartEndTime($occurrence, (bool) ($role?->use_24_hour_time)) !!}
 @endif
-@if ($event->venue && trim((string) $event->venue->name) !== '')
-{!! trim((string) $event->venue->name) !!}
+@if ($event->venue && trim((string) $event->venue->ownName()) !== '')
+{!! trim((string) $event->venue->ownName()) !!}
 @endif
 @if ($event->venue && trim((string) $event->venue->bestAddress()) !== '')
 {!! trim((string) $event->venue->bestAddress()) !!}

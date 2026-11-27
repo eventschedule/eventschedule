@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Utils\Aurora;
 use App\Utils\EventTextGenerator;
 use App\Utils\ImageUtils;
 use App\Utils\UrlUtils;
@@ -1184,7 +1185,7 @@ abstract class AbstractEventDesign
      */
     protected function applyAuroraBackground(): void
     {
-        [$top, $bottom] = \App\Utils\Aurora::for($this->role)->graphicColors();
+        [$top, $bottom] = Aurora::for($this->role)->graphicColors();
 
         $topColor = $this->hexToColor($top);
         $bottomColor = $this->hexToColor($bottom);
@@ -2246,7 +2247,7 @@ abstract class AbstractEventDesign
                 '{description}' => strip_tags($event->descriptionHtmlInLanguage($this->contentLocale(), $this->role) ?? ''),
 
                 // Venue variables
-                '{venue}' => $event->venue ? ($event->venue->textInLanguage('name', $this->contentLocale()) ?? '') : '',
+                '{venue}' => $event->venue?->hasOwnName() ? ($event->venue->textInLanguage('name', $this->contentLocale()) ?? '') : '',
                 '{city}' => $event->venue ? ($event->venue->textInLanguage('city', $this->contentLocale()) ?? '') : '',
                 '{address}' => $event->venue ? ($event->venue->textInLanguage('address1', $this->contentLocale()) ?? '') : '',
                 '{state}' => $event->venue ? ($event->venue->textInLanguage('state', $this->contentLocale()) ?? '') : '',

@@ -862,7 +862,7 @@ class GraphicController extends Controller
                 $fields = [
                     'name' => $forceEnglish ? $event->englishName() : $event->name,
                     'short_description' => ($forceEnglish ? $event->englishShortDescription() : $event->short_description) ?? '',
-                    'venue' => $event->venue ? (($forceEnglish ? $event->venue->englishName() : $event->venue->name) ?? '') : '',
+                    'venue' => $event->venue?->hasOwnName() ? (($forceEnglish ? $event->venue->englishName() : $event->venue->name) ?? '') : '',
                     'city' => $event->venue ? (($forceEnglish ? $event->venue->englishCity() : $event->venue->city) ?? '') : '',
                     'address' => $event->venue ? (($forceEnglish ? $event->venue->englishAddress1() : $event->venue->address1) ?? '') : '',
                     'state' => $event->venue ? (($forceEnglish ? $event->venue->englishState() : $event->venue->state) ?? '') : '',

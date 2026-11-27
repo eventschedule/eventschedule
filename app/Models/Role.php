@@ -18,6 +18,7 @@ use App\Services\VendorMaps\VendorMapImages;
 use App\Support\HomeSchedule;
 use App\Traits\HasImageVariants;
 use App\Traits\RoleBillable;
+use App\Utils\CalendarPrivacy;
 use App\Utils\CountryUtils;
 use App\Utils\CssUtils;
 use App\Utils\CustomFieldUtils;
@@ -685,6 +686,23 @@ class Role extends Model implements MustVerifyEmail
                 $model->agenda_ai_prompt = TextUtils::clamp(
                     TextUtils::normalizeNewlines($model->agenda_ai_prompt), 500
                 );
+            }
+
+            // Every schedule has a name: one made without (a venue given only by its address) is
+            // named after the address. Only on a create or a change of the name, so a row that did
+            // not load the column is never renamed by an unrelated save.
+            if ((! $model->exists || $model->isDirty('name')) && trim((string) $model->name) === '') {
+                $model->fillNameFromAddress();
+            } elseif ($model->exists && $model->type === 'venue' && ! $model->isDirty('name') && $model->isDirty(['address1', 'city'])
+                && self::columnsLoaded($model, ['type', 'name', 'name_en', 'address1', 'address1_en', 'city'])
+                && ! (clone $model)->setRawAttributes($model->getRawOriginal())->hasOwnName()) {
+                // A venue that is only an address keeps saying its address when the address is
+                // corrected, or it would be named after a street it is no longer on.
+                if (trim((string) $model->name_en) !== '' && trim((string) $model->name_en) === trim((string) $model->getOriginal('address1_en'))) {
+                    $model->name_en = null;
+                }
+                $model->name = null;
+                $model->fillNameFromAddress();
             }
 
             // Recompute the *_normalized columns used by the venue dedup lookup
@@ -1643,6 +1661,11 @@ class Role extends Model implements MustVerifyEmail
             $name = $translate ? $this->translatedName() : $this->name;
             $city = $translate ? $this->translatedCity() : $this->city;
             $address = $translate ? $this->translatedAddress1() : $this->address1;
+        }
+
+        // A venue that is only an address is said by the address alone, not "address | address".
+        if (! $this->hasOwnName()) {
+            $name = null;
         }
 
         if ($name && $city) {
@@ -3605,6 +3628,125 @@ class Role extends Model implements MustVerifyEmail
             return 300;
         }
 
+    }
+
+    /**
+     * What a schedule made without a name is called: the place, as its address gives it.
+     *
+     * Every schedule has a name, because the guest page's header, the venue picker, mail and
+     * wallet passes all print one, and a guest page with none was a 500 (EVENTSCHEDULE-PHP-52).
+     * The forms and the API that make a schedule require it; the only schedules made without one
+     * are venues made from an event that gave the place by its address alone (the event form,
+     * the submit form, imports and feeds). Those are named after the street, or the town when
+     * there is no street, which is also what calendar sync has always done
+     * (ConvertsLocationToVenue). Such a venue has no name of its OWN (hasOwnName()), and every
+     * place that used to read "no name" as "only an address" asks that instead.
+     *
+     * Null when the row carries neither.
+     */
+    public function nameFromAddress(): ?string
+    {
+        // A street line that is a meeting link names, at most, the place beside the link: a link
+        // with its password in it must never become a public name and address.
+        $street = trim((string) $this->address1);
+        if ($street !== '' && preg_match('~https?://|www\.~i', $street)) {
+            $street = trim((string) CalendarPrivacy::venueFromLocation($street));
+        }
+
+        foreach ([$street, trim((string) $this->city)] as $value) {
+            if ($value !== '') {
+                return mb_substr($value, 0, 255);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Give a schedule that has no name the one nameFromAddress() finds, or its type's word as a
+     * last resort, so nothing is ever stored nameless. A name taken from address1 takes that
+     * line's translation too, so the two keep saying the same thing in either language, unless
+     * the line has just changed and its old translation is still on the row.
+     */
+    public function fillNameFromAddress(): void
+    {
+        if (trim((string) $this->name) !== '') {
+            return;
+        }
+
+        $name = $this->nameFromAddress();
+        $staleTranslation = $this->exists && $this->isDirty('address1') && ! $this->isDirty('address1_en');
+
+        if ($name !== null && $name === trim((string) $this->address1) && ! $staleTranslation) {
+            $translated = trim((string) $this->address1_en);
+
+            if ($translated !== '' && trim((string) $this->name_en) === '') {
+                $this->name_en = mb_substr($translated, 0, 255);
+            }
+        }
+
+        $this->name = $name ?? ScheduleTypeLabel::for($this->type);
+    }
+
+    /**
+     * Whether a venue's name is its own, and not its address standing in for one: a venue named
+     * after its street or its town is only an address. Until 2026-11 such a venue had no name at
+     * all, and every check that read an empty name as "only an address" asks this now, so a page
+     * that prints the name and then the address does not print the address twice. Any other
+     * kind of schedule always has a name of its own: an act called "Berlin" is not a place.
+     * withOwnName() is the same rule in SQL.
+     */
+    public function hasOwnName(): bool
+    {
+        if ($this->type !== 'venue') {
+            return trim((string) $this->name) !== '';
+        }
+
+        $name = GeminiUtils::normalizeForMatch($this->name);
+
+        if ($name === '') {
+            return false;
+        }
+
+        foreach ([$this->address1, $this->city, $this->nameFromAddress()] as $part) {
+            if ($name === GeminiUtils::normalizeForMatch($part)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public function isOnlyAnAddress(): bool
+    {
+        return ! $this->hasOwnName();
+    }
+
+    /** The name when it is the schedule's own (hasOwnName()), null when it only restates the address. */
+    public function ownName(): ?string
+    {
+        return $this->hasOwnName() ? $this->name : null;
+    }
+
+    /** translatedName() when the name is the schedule's own (hasOwnName()), null otherwise. */
+    public function ownTranslatedName(): ?string
+    {
+        return $this->hasOwnName() ? $this->translatedName() : null;
+    }
+
+    /**
+     * hasOwnName() in SQL, on the *_normalized columns the saving hook keeps. A street that is a
+     * meeting link is compared as written, which is the one place the two can differ.
+     */
+    public function scopeWithOwnName($query)
+    {
+        $t = $query->getModel()->getTable();
+
+        return $query->whereNotNull("{$t}.name")->where("{$t}.name", '!=', '')
+            ->where(fn ($q) => $q->where("{$t}.type", '!=', 'venue')
+                ->orWhere(fn ($q) => $q->whereNotNull("{$t}.name_normalized")
+                    ->whereRaw("NOT ({$t}.name_normalized <=> {$t}.address1_normalized)")
+                    ->whereRaw("NOT ({$t}.name_normalized <=> {$t}.city_normalized)")));
     }
 
     public function getDisplayName($translate = true)

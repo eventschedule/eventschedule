@@ -22,7 +22,8 @@
     $timeLine ??= ($time && $start) ? $event->getStartEndTime($date, $use24) : null;
 
     $venue = $event->venue;
-    $venueName = $venue ? trim((string) $venue->name) : '';
+    // ownName(): a venue that is only an address is said once, by the address line.
+    $venueName = $venue ? trim((string) $venue->ownName()) : '';
     $address = $venue ? trim((string) $venue->bestAddress()) : '';
     $mapUrl = $map && $address !== '' ? 'https://www.google.com/maps/search/?api=1&query='.urlencode($address) : null;
 

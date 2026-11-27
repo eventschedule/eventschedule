@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use App\Models\Event;
 use App\Models\Role;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 class SlugPatternUtils
@@ -113,7 +114,7 @@ class SlugPatternUtils
 
             // Set locale for translated date formats
             $locale = $role?->language_code ?? 'en';
-            \Carbon\Carbon::setLocale($locale);
+            Carbon::setLocale($locale);
 
             // Determine time format based on role's 24h setting
             $timeFormat = $role?->use_24_hour_time ? 'H-i' : 'g-i-A';
@@ -161,7 +162,7 @@ class SlugPatternUtils
 
         // Add venue variables
         $replacements = array_merge($replacements, [
-            '{venue}' => $venue ? ($venue->translatedName() ?? '') : '',
+            '{venue}' => $venue ? ($venue->ownTranslatedName() ?? '') : '',
             '{city}' => $venue ? ($venue->translatedCity() ?? '') : '',
             '{address}' => $venue ? ($venue->address1 ?? '') : '',
             '{state}' => $venue ? ($venue->state ?? '') : '',

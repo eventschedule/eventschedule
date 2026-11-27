@@ -476,7 +476,7 @@ class ListWording
                 'event_name' => $event->nameInLanguage($lang, $role),
                 'short_description' => (string) $event->shortDescriptionInLanguage($lang, $role),
                 'description' => Str::limit(trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags(str_replace(['</p>', '<br>', '<br/>', '<br />'], ' ', (string) $event->descriptionHtmlInLanguage($lang, $role))), ENT_QUOTES | ENT_HTML5, 'UTF-8'))), self::DESCRIPTION_LIMIT),
-                'venue' => $ownVenue ? '' : ($venue ? (string) $venue->textInLanguage('name', $lang) : (string) $event->getVenueDisplayName(true, $lang)),
+                'venue' => $ownVenue ? '' : ($venue ? ($venue->hasOwnName() ? (string) $venue->textInLanguage('name', $lang) : '') : (string) $event->getVenueDisplayName(true, $lang)),
                 'city' => $ownVenue || ! $venue ? '' : (string) $venue->textInLanguage('city', $lang),
                 'address' => $ownVenue || ! $venue ? '' : (string) $venue->textInLanguage('address1', $lang),
                 'state' => $ownVenue || ! $venue ? '' : (string) $venue->textInLanguage('state', $lang),

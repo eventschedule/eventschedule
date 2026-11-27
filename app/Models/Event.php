@@ -5646,7 +5646,9 @@ class Event extends Model
         $data->event_url = $this->event_url;
         $data->registration_url = $this->registration_url;
         $data->venue_id = $this->venue ? UrlUtils::encodeId($this->venue->id) : null;
-        $data->venue_name = $this->venue?->name;
+        // ownName(): a venue that is only an address has always read as no name here, and a client
+        // that sends back what it read must not have a street looked up as a venue's name.
+        $data->venue_name = $this->venue?->ownName();
         $data->venue_address1 = $this->venue?->address1;
         $data->venue_subdomain = $this->venue?->subdomain;
 

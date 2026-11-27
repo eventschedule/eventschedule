@@ -139,7 +139,7 @@ class FeedVenueResolver
         $wanted = array_filter(array_unique([GeminiUtils::normalizeForMatch($address), GeminiUtils::normalizeForMatch($asWritten)]), fn ($form) => $form !== '');
         $there = $candidates->filter(fn (Role $venue) => in_array(GeminiUtils::normalizeForMatch((string) $venue->address1), $wanted, true));
 
-        return $there->first(fn (Role $venue) => trim((string) $venue->name) === '') ?? $there->first();
+        return $there->first(fn (Role $venue) => $venue->isOnlyAnAddress()) ?? $there->first();
     }
 
     /**

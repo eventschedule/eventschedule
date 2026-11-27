@@ -667,7 +667,7 @@ class HomeDashboard
                     'image' => $this->safe(fn () => $sale->event->getImageUrl(ImageUtils::VARIANT_WIDTH)) ?: null,
                     'url' => route('ticket.view', ['event_id' => UrlUtils::encodeId($sale->event_id), 'secret' => $sale->secret]),
                     'start' => $row['start'],
-                    'place' => $venue?->name ?: $sale->event->creatorRole?->name,
+                    'place' => $venue?->ownName() ?: $sale->event->creatorRole?->name,
                     // Tickets, not add-ons; the whole group's where this is the row that bought it.
                     'quantity' => max(1, (int) ($sale->group_id && (int) $sale->group_id === (int) $sale->id
                         ? $sale->groupTotalQuantity()

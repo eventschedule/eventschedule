@@ -160,7 +160,7 @@ class FeedVenueTest extends TestCase
         $again = $resolver->resolve($feed, $talent, $this->row('', 'hauptplatz 1,  8570 voitsberg'), $known)['venue'];
         $other = $resolver->resolve($feed, $talent, $this->row('', 'Hauptplatz 2, 8570 Voitsberg'), $known)['venue'];
 
-        $this->assertNull($first->name);
+        $this->assertSame('Hauptplatz 1, 8570 Voitsberg', $first->name, 'named after its address');
         $this->assertSame('Hauptplatz 1, 8570 Voitsberg', $first->address1);
         $this->assertSame($first->id, $again->id);
         $this->assertNotSame($first->id, $other->id);

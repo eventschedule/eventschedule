@@ -389,7 +389,7 @@
               && ! (! $event->is_draft && $event->tickets_enabled)
               && ! ($event->venue->formatted_address && config('services.google.maps') && ! request()->attributes->get('custom_domain_host'));
         @endphp
-        @if ($event->venue && ($event->venue->name || $event->venue->formatted_address) && ! $venueBare)
+        @if ($event->venue && ($event->venue->hasOwnName() || $event->venue->formatted_address) && ! $venueBare)
         @php
           // As for the talent cards above: the header the venue's own page shows, or none.
           $venueHeaderUrl = $event->venue->headerImageUrl(960);
@@ -411,7 +411,8 @@
                 <img class="gk-venue-logo" src="{{ $event->venue->getProfileImageUrl(\App\Utils\ImageUtils::VARIANT_WIDTH) }}" alt="" loading="lazy" decoding="async"/>
               @endif
               <div class="gk-venue-id">
-              @if ($event->venue->name)
+              {{-- hasOwnName(): a venue that is only an address shows the address once, as its title. --}}
+              @if ($event->venue->hasOwnName())
                 @if ($event->venue->isClaimed())
                   @php
                     $venuePanelUrl = $event->venue->getGuestUrl(true);
@@ -434,7 +435,7 @@
                   {{ $event->venue->shortAddress() }}
                 </p>
               @endif
-              @if ($event->venue->name && $event->venue->shortAddress())
+              @if ($event->venue->hasOwnName() && $event->venue->shortAddress())
                 <span class="gk-venue-addr">{{ $event->venue->shortAddress() }}</span>
               @endif
               </div>
@@ -605,7 +606,7 @@
 
         {{-- Calendar links dropdown (fallback when no venue). Not plan-gated, same reason as the
              copy inside the venue card above. --}}
-        @if (!$event->is_draft && !($event->venue && ($event->venue->name || $event->venue->formatted_address)) && $event->tickets_enabled)
+        @if (!$event->is_draft && !($event->venue && ($event->venue->hasOwnName() || $event->venue->formatted_address)) && $event->tickets_enabled)
         <div class="relative {{ $role->isRtl() ? 'rtl' : '' }}">
           <button type="button"
               class="gk-card-btn calendar-card-toggle inline-flex justify-center gap-x-1.5 px-6 py-3 text-base font-semibold"
@@ -848,7 +849,7 @@
 
         {{-- Location icon badge. An online event shows the domain of its link, or "Online" when
              the link is free text or has no public domain - never the link itself. --}}
-        @if (($event->venue && ($event->venue->name || $event->venue->shortAddress())) || $event->event_url)
+        @if (($event->venue && ($event->venue->hasOwnName() || $event->venue->shortAddress())) || $event->event_url)
         <div id="gp-event-location" class="gk-fact-cell" data-label="{{ __('messages.location') }}">
           <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
             <div class="gk-tile flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
@@ -863,7 +864,7 @@
             </div>
             <div class="flex flex-col">
               <span>
-                @if ($event->venue && $event->venue->nameInLanguage($displayLang))
+                @if ($event->venue && $event->venue->hasOwnName() && $event->venue->nameInLanguage($displayLang))
                   @if ($event->venue->isClaimed())
                     @php
                       $venueUrl = $event->venue->getGuestUrl(true);

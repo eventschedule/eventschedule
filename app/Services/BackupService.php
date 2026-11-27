@@ -47,6 +47,7 @@ use App\Utils\Aurora;
 use App\Utils\CountryUtils;
 use App\Utils\CssUtils;
 use App\Utils\GalleryUtils;
+use App\Utils\GeminiUtils;
 use App\Utils\JsonUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\TextUtils;
@@ -1964,6 +1965,14 @@ class BackupService
         // restore, failing the whole import.
         $role->website = TextUtils::clamp(UrlUtils::normalizeWebsiteUrl($role->website), 255);
         $role->agenda_ai_prompt = TextUtils::clamp(TextUtils::normalizeNewlines($role->agenda_ai_prompt), 500);
+
+        // And the hook is where a schedule with no name is named after its address, and where the
+        // *_normalized columns the venue lookups and Role::withOwnName() read are kept.
+        $role->fillNameFromAddress();
+        foreach (['name', 'name_en', 'city', 'address1', 'address1_en'] as $source) {
+            $normalized = GeminiUtils::normalizeForMatch($role->{$source});
+            $role->{$source.'_normalized'} = $normalized === '' ? null : $normalized;
+        }
 
         if ($role->custom_css) {
             $role->custom_css = CssUtils::sanitizeCss($role->custom_css);

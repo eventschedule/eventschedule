@@ -3795,12 +3795,14 @@ class EventController extends Controller
         } elseif ($request->venue_name || $request->venue_address1 || $request->venue_city) {
             $venue = new Role;
             $venue->name = $request->venue_name ?? null;
-            $venue->subdomain = Role::generateSubdomain($request->venue_name, $request->venue_name_en, shortest: false);
             $venue->type = 'venue';
             $venue->address1 = $request->venue_address1;
             $venue->city = $request->venue_city;
             $venue->state = $request->venue_state;
             $venue->postal_code = $request->venue_postal_code;
+            // Named after the address when the visitor gave none (Role::fillNameFromAddress()).
+            $venue->fillNameFromAddress();
+            $venue->subdomain = Role::generateSubdomain($venue->name, $request->venue_name_en, shortest: false);
             $countryCode = $request->venue_country_code ?: $role->country_code;
             $venue->country_code = $countryCode ? strtolower($countryCode) : null;
             $venue->language_code = $role->language_code;

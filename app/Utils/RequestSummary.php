@@ -51,7 +51,8 @@ class RequestSummary
             $venue = null;
         }
         $where = implode(' · ', array_filter([
-            $venue ? implode(', ', array_filter([$venue->name, $venue->city])) : null,
+            // array_unique(): a venue that is only a town is named after it (Role::fillNameFromAddress()).
+            $venue ? implode(', ', array_unique(array_filter([$venue->name, $venue->city]))) : null,
             $submitter && $event->event_url ? __('messages.online') : null,
         ])) ?: null;
 

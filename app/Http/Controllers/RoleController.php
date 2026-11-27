@@ -5684,7 +5684,8 @@ class RoleController extends Controller
             // The twelve it shares the most events with, and never one with no name: ordered by
             // name, the nameless placeholders a calendar import leaves (a random subdomain and a
             // null name) sorted first and filled every slot with an empty "+" (a curator with 410
-            // connected schedules, 19 of them nameless, 2026-11-22).
+            // connected schedules, 19 of them nameless, 2026-11-22). Those are named after their
+            // address now, and withOwnName() still leaves them out.
             if ($connectedIds->isNotEmpty()) {
                 $shared = DB::table('event_role as mine')
                     ->join('event_role as theirs', 'theirs.event_id', '=', 'mine.event_id')
@@ -5695,8 +5696,7 @@ class RoleController extends Controller
                     ->pluck('n', 'theirs.role_id');
 
                 $suggestedSources = Role::whereIn('id', $connectedIds)
-                    ->whereNotNull('name')
-                    ->where('name', '!=', '')
+                    ->withOwnName()
                     ->get(['id', 'subdomain', 'name'])
                     ->sortBy([fn ($a, $b) => ($shared[$b->id] ?? 0) <=> ($shared[$a->id] ?? 0), fn ($a, $b) => strcmp($a->name, $b->name)])
                     ->take(12)

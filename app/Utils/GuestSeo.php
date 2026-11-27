@@ -159,7 +159,7 @@ class GuestSeo
      * and, while there is room, the next few events by name. The old "View the event schedule for
      * X" is the fallback only for a schedule with nothing at all to say.
      *
-     * @param  \Illuminate\Support\Collection<int, array{event: Event, date: string}>|null  $upcoming  EventRepo::upcomingForGuest()
+     * @param  Collection<int, array{event: Event, date: string}>|null  $upcoming  EventRepo::upcomingForGuest()
      */
     public static function scheduleDescription(Role $role, ?Collection $upcoming = null): string
     {
@@ -238,7 +238,8 @@ class GuestSeo
         }
 
         return array_values(array_filter([
-            self::unlessContained(SeoUtils::cleanText($venue->nameInLanguage($lang)), $already),
+            // A venue that is only an address is placed by its town, as before it had a name.
+            $venue->hasOwnName() ? self::unlessContained(SeoUtils::cleanText($venue->nameInLanguage($lang)), $already) : null,
             self::unlessContained(SeoUtils::cleanText($venue->textInLanguage('city', $lang)), $already),
         ]));
     }

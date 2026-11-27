@@ -11,6 +11,7 @@ use App\Utils\SetupGuide;
 use App\Utils\TimezoneUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -191,7 +192,7 @@ class FederationService
         // than a dashboard that 500s on an unknown column.
         try {
             $counted = $this->countInvite($user, $now);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             report($e);
 
             return false;

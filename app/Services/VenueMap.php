@@ -4,9 +4,15 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\Group;
+use App\Models\PlaceLookup;
 use App\Models\Role;
+use App\Models\User;
+use App\Models\VenueMapMark;
+use App\Models\VenueMapSetting;
 use App\Repos\EventRepo;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -94,7 +100,7 @@ class VenueMap
      */
     public static function saveSettings(Role $role, bool $enabled, bool $startsOpen): void
     {
-        \App\Models\VenueMapSetting::updateOrCreate(['role_id' => $role->id], ['enabled' => $enabled, 'starts_open' => $enabled && $startsOpen]);
+        VenueMapSetting::updateOrCreate(['role_id' => $role->id], ['enabled' => $enabled, 'starts_open' => $enabled && $startsOpen]);
         $role->unsetRelation('venueMapSetting');
         self::changed($role);
     }
@@ -140,7 +146,7 @@ class VenueMap
         // a place: it is on nobody's map and in nobody's list, the owner's included.
         $venues = $venues->reject(fn (Role $venue) => $addresses[$venue->id]['why'] === 'online')->values();
         $rows = PlaceLookupService::rows($addresses->pluck('hash')->all());
-        $marks = \App\Models\VenueMapMark::where('role_id', $role->id)->whereIn('venue_id', $venues->pluck('id'))->get()->keyBy('venue_id');
+        $marks = VenueMapMark::where('role_id', $role->id)->whereIn('venue_id', $venues->pluck('id'))->get()->keyBy('venue_id');
 
         if ($register) {
             // A venue its owner took off the map is not asked about: nobody will see the answer.
@@ -150,7 +156,7 @@ class VenueMap
             // Not ->only(): on an Eloquent collection that reads its argument as PRIMARY keys,
             // whatever the collection itself is keyed by, and no row here has a hash for an id.
             $wantedHashes = $wanted->pluck('hash')->flip();
-            PlaceLookupService::stillNeeded($rows->filter(fn (\App\Models\PlaceLookup $row) => $wantedHashes->has($row->address_hash)));
+            PlaceLookupService::stillNeeded($rows->filter(fn (PlaceLookup $row) => $wantedHashes->has($row->address_hash)));
         }
 
         return $venues->map(function (Role $venue) use ($addresses, $rows, $upcoming, $register, $marks) {
@@ -326,6 +332,12 @@ class VenueMap
             $name = $venue->nameInLanguage($lang);
             $street = $v['street'] ? trim((string) $venue->textInLanguage('address1', $lang)) : '';
             $town = trim((string) $venue->textInLanguage('city', $lang));
+            // A venue that is only an address is named after its street (or its town), so the
+            // line under the name says what the name does not.
+            if (! $venue->hasOwnName()) {
+                $town = trim((string) $venue->address1) !== '' ? $town : '';
+                $street = '';
+            }
             $where = implode(', ', array_filter([$street, $town]));
 
             $event = function (array $row) use ($role, $lang, $use24) {
@@ -402,7 +414,7 @@ class VenueMap
      * oct.". The short sibling of DateUtils::dayLabel(), with the same fallback where the intl
      * extension is missing.
      */
-    private static function shortDay(\Carbon\CarbonInterface $day, string $locale): string
+    private static function shortDay(CarbonInterface $day, string $locale): string
     {
         $withYear = ! $day->isSameYear(Carbon::now($day->getTimezone()));
 
@@ -427,7 +439,7 @@ class VenueMap
      *
      * @return array{ready: bool, total: int, asked: int, placed: int, venues: array<int, array<string, mixed>>}
      */
-    public static function status(Role $role, ?\App\Models\User $viewer = null): array
+    public static function status(Role $role, ?User $viewer = null): array
     {
         $venues = self::venues($role);
         $onMap = $venues->reject(fn (array $v) => $v['hidden'])->values();
@@ -451,10 +463,11 @@ class VenueMap
 
                 return [
                     // The handle the mark endpoints take: an id is never shown raw.
-                    'id' => \App\Utils\UrlUtils::encodeId($venue->id),
+                    'id' => UrlUtils::encodeId($venue->id),
                     'key' => $venue->subdomain,
                     'name' => $venue->nameInLanguage($lang),
-                    'address' => implode(', ', array_filter(array_map(fn ($part) => trim((string) ($raw[$part] ?? '')), ['address1', 'city']))),
+                    // A venue that is only an address is named after it: the line under says the rest.
+                    'address' => implode(', ', array_filter(array_map(fn ($part) => trim((string) ($raw[$part] ?? '')), $venue->hasOwnName() ? ['address1', 'city'] : (trim((string) ($raw['address1'] ?? '')) !== '' ? ['city'] : [])))),
                     'state' => $v['state'],
                     'why' => $v['why'],
                     'hidden' => $v['hidden'],
@@ -490,7 +503,7 @@ class VenueMap
             return false;
         }
 
-        \App\Models\VenueMapSetting::where('role_id', $role->id)->update(['ready_at' => now()]);
+        VenueMapSetting::where('role_id', $role->id)->update(['ready_at' => now()]);
         $role->unsetRelation('venueMapSetting');
         self::changed($role);
 
