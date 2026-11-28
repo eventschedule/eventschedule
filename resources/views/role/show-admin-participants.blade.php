@@ -69,8 +69,12 @@
                         $action = $profileVideo ? route('role.participants.profile_video', $params) : route('role.participants.item', $params + ['kind' => $kind, 'item' => $item ? $encode($item->id) : null]);
                         $retry = old('_directory_form') === $action;
                     @endphp
+                    @if ($kind === 'links')
+                    <div class="py-2">
+                    @else
                     <details class="py-2" @if ($retry) open @endif>
-                        <summary class="cursor-pointer"><bdi>{{ $item ? ($item->name ?? $item->url ?? $item->label ?? $item->filename) : __('messages.add') }}</bdi></summary>
+                        <summary class="cursor-pointer"><bdi>{{ $item ? ($item->name ?? $item->label ?? $item->filename) : __('messages.add') }}</bdi></summary>
+                    @endif
                         @if ($kind === 'links' && $item)
                             @if ($profileVideo)<span class="event-chip">{{ __('messages.profile') }}</span>@endif
                             <x-link :href="$item->url" target="_blank" rel="noopener noreferrer"><bdi>{{ $item->url }}</bdi></x-link>
@@ -79,7 +83,7 @@
                             <x-link :href="route('role.participants.download', $params + ['item' => $encode($item->id)])"><bdi>{{ $item->filename }}</bdi> ({{ number_format($item->bytes / 1024) }} KB)</x-link>
                         @endif
                         @if ($editable)
-                        <form method="post" action="{{ $action }}" class="space-y-3" @if ($kind === 'files' && ! $item) enctype="multipart/form-data" @endif>
+                        <form method="post" action="{{ $action }}" class="{{ $kind === 'links' ? 'page-filters' : 'space-y-3' }}" @if ($kind === 'files' && ! $item) enctype="multipart/form-data" @endif>
                             @csrf
                             @if ($profileVideo)<input type="hidden" name="original_url" value="{{ $item->url }}">@endif
                             <input type="hidden" name="_directory_form" value="{{ $action }}">
@@ -103,7 +107,11 @@
                             </form>
                         @endif
                         @endif
+                    @if ($kind === 'links')
+                    </div>
+                    @else
                     </details>
+                    @endif
                 @endforeach
             </x-page-card>
         @endforeach
