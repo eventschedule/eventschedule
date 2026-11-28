@@ -57,8 +57,8 @@ class ParticipantDirectory
                 $details[$kind] = DB::table('backstage_'.$kind)->where('entry_id', $entry->entry_id)->orderBy('id')->get();
             }
             $details['events'] = Event::query()->with(['creatorRole', 'roles', 'venue'])
-                ->whereHas('roles', fn ($q) => $q->where('roles.id', $schedule->id)->wherePivot('is_accepted', true))
-                ->whereHas('roles', fn ($q) => $q->where('roles.id', $entry->id)->wherePivot('is_accepted', true))
+                ->whereHas('roles', fn ($q) => $q->where('roles.id', $schedule->id)->where('event_role.is_accepted', true))
+                ->whereHas('roles', fn ($q) => $q->where('roles.id', $entry->id)->where('event_role.is_accepted', true))
                 ->orderByDesc('events.starts_at')->limit(50)->get()
                 ->map(fn (Event $event) => (object) [
                     'name' => $event->name,
