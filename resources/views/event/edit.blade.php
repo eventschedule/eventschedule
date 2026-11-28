@@ -5721,12 +5721,15 @@
                                         <label for="selected_member" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.your_schedules') }}</label>
                                         <button type="button" class="event-link" @click="memberType = 'create_new'">{{ __('messages.someone_new') }}</button>
                                     </div>
-                                    <select v-model="selectedMember" @change="addExistingMember" id="selected_member" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <label for="member_picker_search" class="sr-only">{{ __('messages.search') }}</label>
+                                    <x-text-input id="member_picker_search" v-model="memberPickerSearch" @keydown.enter.prevent type="search" class="mt-1 block w-full" autocomplete="off" :placeholder="__('messages.search')" />
+                                    <select v-model="selectedMember" @change="addExistingMember" id="selected_member" class="mt-2 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>
-                                        <option v-for="member in filteredMembers" :key="member.id" :value="member">
+                                        <option v-for="member in matchingMembers" :key="member.id" :value="member">
                                             @{{ member.name }} <template v-if="member.email">(@{{ member.email }})</template>
                                         </option>
                                     </select>
+                                    <p v-if="memberPickerSearch.trim() && !matchingMembers.length" class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.no_results_found') }}</p>
                                     <div class="mt-3" v-if="selectedMembers.length > 0">
                                         <button type="button" class="event-link event-link-quiet" @click="cancelAddMember">{{ __('messages.cancel') }}</button>
                                     </div>
@@ -7637,6 +7640,7 @@
         members: @json($members ?? []),
         venueType: "{{ count($venues) > 0 ? 'use_existing' : 'create_new' }}",
         memberType: "{{ 'use_existing' }}",
+        memberPickerSearch: '',
         venueName: @json($selectedVenue ? $selectedVenue->name : ''),
         venueEmail: @json($selectedVenue ? $selectedVenue->email : ''),
         venueAddress1: @json($selectedVenue ? $selectedVenue->address1 : ''),
@@ -8909,6 +8913,7 @@
           }
           this.$nextTick(() => {
             this.selectedMember = "";
+            this.memberPickerSearch = '';
           });
           this.showMemberTypeRadio = false;
         }
@@ -8982,9 +8987,10 @@
         this.$nextTick(() => {
           if (this.memberType === 'create_new') {
             const nameInput = document.getElementById('member_name');
-            if (nameInput) {
-              nameInput.focus();
-            }
+            if (nameInput) nameInput.focus();
+          } else {
+            const searchInput = document.getElementById('member_picker_search');
+            if (searchInput) searchInput.focus();
           }
         });
       },
@@ -9003,6 +9009,7 @@
         if (this.editMemberId) {
           this.closeMemberEdit();
         }
+        this.memberPickerSearch = '';
         this.showMemberTypeRadio = true;
         if (this.filteredMembers.length === 0) {
           this.memberType = 'create_new';
@@ -11302,6 +11309,12 @@
       },
       filteredMembers() {
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
+      },
+      matchingMembers() {
+        const query = this.memberPickerSearch.trim().toLocaleLowerCase();
+        if (!query) return this.filteredMembers;
+        return this.filteredMembers.filter(member => [member.name, member.email]
+          .some(value => String(value || '').toLocaleLowerCase().includes(query)));
       },
       hasLimitedPaidTickets() {
         return this.tickets.some(ticket => ticket.price > 0 && ticket.quantity > 0);
