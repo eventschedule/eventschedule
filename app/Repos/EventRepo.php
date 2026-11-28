@@ -27,6 +27,7 @@ use App\Services\CuratorSourceService;
 use App\Services\EventChangeNotifier;
 use App\Services\EventTranslationEdits;
 use App\Services\InstallmentService;
+use App\Services\ParticipantDirectory;
 use App\Services\SeatingMapService;
 use App\Services\SmsService;
 use App\Services\TicketPresets;
@@ -1266,6 +1267,9 @@ class EventRepo
         }
 
         // Ensure current role is included if it's not already in the list
+        // Capture only the submitted lineup, before the venue and listing schedules join it.
+        $lineupIds = collect($roles)->filter(fn ($person) => $person->isTalent() && ! $person->is_deleted)->pluck('id')->all();
+
         if ($currentRole && ! in_array($currentRole->id, $roleIds)) {
             $roles[] = $currentRole;
             $roleIds[] = $currentRole->id;
@@ -2128,6 +2132,16 @@ class EventRepo
             : collect();
 
         $event->roles()->sync($roleIds);
+        if ($lineupIds) {
+            $ownerId = $event->creator_role_id ?: $event->roles()->orderBy('event_role.id')->value('roles.id');
+            $participants = array_intersect($lineupIds, $roleIds);
+            if ($ownerId) {
+                ParticipantDirectory::register($ownerId, array_diff($participants, [$ownerId]));
+            }
+            if ($currentRole && $currentRole->id != $ownerId && ! $isGuestSubmission && $user->isEditor($currentRole->subdomain)) {
+                ParticipantDirectory::register($currentRole->id, array_diff($participants, [$currentRole->id]));
+            }
+        }
 
         $curatorGroups = $request->input('curator_groups', []);
 

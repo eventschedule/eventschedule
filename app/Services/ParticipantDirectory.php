@@ -9,6 +9,18 @@ use Illuminate\Support\Facades\DB;
 
 class ParticipantDirectory
 {
+    /** Idempotent across bookings and both entry points. Never replace private details. */
+    public static function register(int $scheduleId, array $participantIds): void
+    {
+        $rows = [];
+        foreach (array_unique($participantIds) as $id) {
+            $rows[] = ['schedule_id' => $scheduleId, 'participant_id' => $id];
+        }
+        if ($rows) {
+            DB::table('backstage_entries')->insertOrIgnore($rows);
+        }
+    }
+
     public static function choices(Role $schedule, User $user)
     {
         return Role::where('type', 'talent')->where('is_deleted', false)->where(function ($q) use ($schedule, $user) {

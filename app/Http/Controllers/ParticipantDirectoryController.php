@@ -47,9 +47,9 @@ class ParticipantDirectoryController extends Controller
                 $person->country_code = $schedule->country_code;
                 $person->save();
             }
-            $key = ['schedule_id' => $schedule->id, 'participant_id' => $person->id];
+            ParticipantDirectory::register($schedule->id, [$person->id]);
 
-            return DB::table('backstage_entries')->where($key)->value('id') ?? DB::table('backstage_entries')->insertGetId($key);
+            return DB::table('backstage_entries')->where(['schedule_id' => $schedule->id, 'participant_id' => $person->id])->lockForUpdate()->firstOrFail()->id;
         });
 
         return $this->page($schedule, $id);

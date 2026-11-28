@@ -54,6 +54,26 @@ class ParticipantDirectoryTest extends TestCase
         $this->get(route('role.view_admin', [$schedule->subdomain, 'participants']))->assertOk()->assertSee('Evening Trio'); // eligible to add again
     }
 
+    public function test_historical_lineups_get_one_private_record_for_the_owner_not_the_listing_curator(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner);
+        $person = $this->createRole($owner, 'talent');
+        $curator = $this->createRole($owner, 'curator');
+        foreach ([null, $venue->id] as $creator) {
+            $event = $this->createEvent($venue, ['creator_role_id' => $creator]);
+            $event->roles()->attach([$person->id, $curator->id], ['is_accepted' => true]);
+        }
+        $migration = require database_path('migrations/2026_11_28_000001_register_existing_lineup_participants.php');
+        $migration->up();
+        $key = ['schedule_id' => $venue->id, 'participant_id' => $person->id];
+        $this->assertDatabaseHas('backstage_entries', $key);
+        DB::table('backstage_entries')->where($key)->update(['promotion' => 'Keep me']);
+        $migration->up();
+        $this->assertDatabaseHas('backstage_entries', $key + ['promotion' => 'Keep me']);
+        $this->assertDatabaseMissing('backstage_entries', ['schedule_id' => $curator->id]);
+    }
+
     public function test_name_search_lists_existing_and_available_participants_without_a_dropdown(): void
     {
         $owner = $this->createOwner();
