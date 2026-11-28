@@ -54,6 +54,21 @@ class ParticipantDirectoryTest extends TestCase
         $this->get(route('role.view_admin', [$schedule->subdomain, 'participants']))->assertOk()->assertSee('Evening Trio'); // eligible to add again
     }
 
+    public function test_name_search_lists_existing_and_available_participants_without_a_dropdown(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner);
+        $this->actingAs($owner);
+        $params = $this->add($venue, ['name' => 'Night Quartet']);
+        $band = $this->createRole($owner, 'talent', ['name' => 'Night Trio']);
+        $this->createRole($owner, 'talent', ['name' => 'Morning Duo']);
+        $this->createRole($this->createOwner(), 'talent', ['name' => 'Night Stranger']);
+        $url = route('role.view_admin', [$venue->subdomain, 'participants']);
+        $this->get($url.'?q=Night')->assertOk()->assertSee('Night Quartet')->assertSee('Night Trio')->assertDontSee('Morning Duo')->assertDontSee('Night Stranger')
+            ->assertSee('entry='.$params[1], false)->assertSee('name="participant" value="'.UrlUtils::encodeId($band->id).'"', false)->assertDontSee('<select name="participant"', false);
+        $this->get($url.'?q=%25')->assertOk()->assertSee(__('messages.no_results_found'))->assertDontSee('Night Quartet');
+    }
+
     public function test_private_file_download_quota_and_cross_schedule_boundaries(): void
     {
         $owner = $this->createOwner();

@@ -6,29 +6,36 @@
     <div class="page-head"><p class="page-lead">{{ __('backstage.lead') }}</p></div>
     @if (! $entry)
         <x-page-card :title="__('messages.add_participant')">
-            @if ($choices->isNotEmpty())
-                <form method="post" action="{{ route('role.participants.store', $subdomain) }}" class="page-filters">
-                    @csrf
-                    <label>{{ __('messages.use_existing') }}
-                        <select name="participant" required>
-                            <option value=""></option>
-                            @foreach ($choices as $choice)<option value="{{ $encode($choice->id) }}">{{ $choice->name }}</option>@endforeach
-                        </select>
-                    </label>
-                    <x-secondary-button type="submit">{{ __('messages.add') }}</x-secondary-button>
-                </form>
-            @endif
             <form method="post" action="{{ route('role.participants.store', $subdomain) }}" class="page-filters">
                 @csrf
                 <label>{{ __('messages.someone_new') }} <x-text-input name="name" maxlength="255" :value="old('name')" required /></label>
                 <x-brand-button type="submit">{{ __('messages.add_participant') }}</x-brand-button>
             </form>
         </x-page-card>
+        <form method="get" action="{{ $directoryUrl }}" class="page-filters">
+            <label>{{ __('messages.name') }} <x-text-input type="search" name="q" maxlength="255" :value="$search" /></label>
+            @if ($search !== '')<x-secondary-link :href="$directoryUrl">{{ __('messages.clear') }}</x-secondary-link>@endif
+            <x-secondary-button type="submit">{{ __('messages.search') }}</x-secondary-button>
+        </form>
         @if ($rows->isEmpty())
-            <x-page-empty :title="__('backstage.empty')" />
+            <x-page-empty :title="$search !== '' ? __('messages.no_results_found') : __('backstage.empty')" />
         @else
-            <x-page-card flush><table class="page-table"><thead><tr><th>{{ __('messages.name') }}</th></tr></thead><tbody>
-                @foreach ($rows as $row)<tr><td><x-link :href="route('role.view_admin', [$subdomain, 'participants', 'entry' => $encode($row->id)])"><bdi>{{ $row->name }}</bdi></x-link></td></tr>@endforeach
+            <x-page-card flush><table class="page-table"><thead><tr><th>{{ __('messages.name') }}</th><th class="c-actions">{{ __('messages.actions') }}</th></tr></thead><tbody>
+                @foreach ($rows as $row)
+                    <tr>
+                        <td><bdi>{{ $row->name }}</bdi></td>
+                        <td class="c-actions">
+                            @if ($row->entry_id)
+                                <x-link :href="route('role.view_admin', [$subdomain, 'participants', 'entry' => $encode($row->entry_id)])">{{ __('messages.edit') }}</x-link>
+                            @else
+                                <form method="post" action="{{ route('role.participants.store', $subdomain) }}">@csrf
+                                    <input type="hidden" name="participant" value="{{ $encode($row->participant_id) }}">
+                                    <x-secondary-button type="submit">{{ __('messages.add') }}</x-secondary-button>
+                                </form>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
             </tbody></table></x-page-card>
             {{ $rows->links() }}
         @endif

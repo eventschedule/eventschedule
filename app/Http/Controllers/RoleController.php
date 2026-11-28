@@ -4274,7 +4274,11 @@ class RoleController extends Controller
             ];
         }
 
-        $directory = $tab === 'participants' ? ParticipantDirectory::page($role, $request->user(), $request->query('entry')) : null;
+        $directory = null;
+        if ($tab === 'participants') {
+            $query = $request->query('q');
+            $directory = ParticipantDirectory::page($role, $request->user(), $request->query('entry'), is_string($query) ? mb_substr(trim($query), 0, 255) : '');
+        }
 
         return view('role/show-admin', compact(
             'directory',

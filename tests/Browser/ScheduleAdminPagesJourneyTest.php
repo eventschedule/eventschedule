@@ -83,7 +83,8 @@ class ScheduleAdminPagesJourneyTest extends DuskTestCase
                 ->waitFor('textarea[name="promotion"]')->type('promotion', 'Private draft for the next show')
                 ->click('form:has(textarea[name="promotion"]) button[type="submit"]')
                 ->waitFor('textarea[name="promotion"]')->assertInputValue('promotion', 'Private draft for the next show')
-                ->visit('/'.$venue->subdomain.'/participants')->clickLink('Evening Trio')
+                ->visit('/'.$venue->subdomain.'/participants')->type('q', 'Trio')->press(__('messages.search'))
+                ->waitForText('Evening Trio')->clickLink(__('messages.edit'))
                 ->assertInputValue('promotion', 'Private draft for the next show');
         });
         $this->assertDatabaseHas('backstage_entries', ['schedule_id' => $venue->id, 'promotion' => 'Private draft for the next show']);

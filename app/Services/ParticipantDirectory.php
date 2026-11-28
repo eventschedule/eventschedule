@@ -28,11 +28,9 @@ class ParticipantDirectory
         return $members->concat($extra)->unique('id')->sortBy('name')->values()->all();
     }
 
-    public static function page(Role $schedule, User $user, $selected): array
+    public static function page(Role $schedule, User $user, $selected, string $search): array
     {
-        $rows = DB::table('backstage_entries as e')->join('roles as p', 'p.id', '=', 'e.participant_id')
-            ->where('e.schedule_id', $schedule->id)->select('e.id', 'p.name')->orderBy('p.name')->orderBy('e.id')->paginate(30);
-        $choices = self::choices($schedule, $user)->whereNotIn('id', DB::table('backstage_entries')->select('participant_id')->where('schedule_id', $schedule->id))->orderBy('name')->get(['id', 'name']);
+        $rows = null;
         $entry = null;
         $details = [];
         if ($selected !== null) {
@@ -40,8 +38,14 @@ class ParticipantDirectory
             foreach (['contacts', 'links', 'files'] as $kind) {
                 $details[$kind] = DB::table('backstage_'.$kind)->where('entry_id', $entry->id)->orderBy('id')->get();
             }
+        } else {
+            $rows = DB::table('roles as p')->leftJoin('backstage_entries as e', fn ($join) => $join
+                ->on('e.participant_id', '=', 'p.id')->where('e.schedule_id', $schedule->id))
+                ->where(fn ($q) => $q->whereNotNull('e.id')->orWhereIn('p.id', self::choices($schedule, $user)->select('roles.id')))
+                ->when($search !== '', fn ($q) => $q->whereRaw("p.name LIKE ? ESCAPE '!'", ['%'.strtr($search, ['!' => '!!', '%' => '!%', '_' => '!_']).'%']))
+                ->orderBy('p.name')->orderBy('p.id')->paginate(30, ['p.id as participant_id', 'p.name', 'e.id as entry_id'])->appends(['q' => $search]);
         }
 
-        return compact('rows', 'choices', 'entry', 'details');
+        return compact('rows', 'search', 'entry', 'details');
     }
 }
