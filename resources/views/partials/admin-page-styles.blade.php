@@ -1012,6 +1012,25 @@
        beside it when the page is one form). Inside it the portal's older capitals-and-letterspacing
        buttons (secondary, danger, primary) speak in the brand button's sentence case, as they do
        inside the three forms. */
+    .participant-directory {
+      color: rgb(var(--ap-ink));
+    }
+    .participant-directory label {
+      color: rgb(var(--ap-ink-2));
+    }
+    .participant-directory input:not([type="hidden"]),
+    .participant-directory textarea {
+      color: rgb(var(--ap-ink));
+      background-color: rgb(var(--ap-surface));
+      border-color: rgb(var(--ap-border-strong));
+    }
+    .participant-directory input::file-selector-button {
+      color: rgb(var(--ap-ink));
+      background-color: rgb(var(--ap-surface-hover));
+      border: 1px solid rgb(var(--ap-border-strong));
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem;
+    }
     .page-shell button.uppercase,
     .page-shell a.uppercase {
       font-size: 0.875rem;

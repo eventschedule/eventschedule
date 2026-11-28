@@ -2,13 +2,13 @@
     $directoryUrl = route('role.view_admin', [$subdomain, 'participants']);
     $encode = fn ($id) => \App\Utils\UrlUtils::encodeId($id);
 @endphp
-<div class="page-shell space-y-4">
+<div class="page-shell participant-directory space-y-4">
     <div class="page-head"><p class="page-lead">{{ __('backstage.lead') }}</p></div>
     @if (! $entry)
         <x-page-card :title="__('messages.add_participant')">
             <form method="post" action="{{ route('role.participants.store', $subdomain) }}" class="page-filters">
                 @csrf
-                <label>{{ __('messages.someone_new') }} <x-text-input name="name" maxlength="255" :value="old('name')" required /></label>
+                <label>{{ __('messages.someone_new') }} <x-text-input type="text" name="name" maxlength="255" :value="old('name')" required /></label>
                 <x-brand-button type="submit">{{ __('messages.add_participant') }}</x-brand-button>
             </form>
         </x-page-card>
