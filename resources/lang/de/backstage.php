@@ -7,6 +7,7 @@ return [
     'contacts' => 'Weitere Kontakte',
     'files' => 'Dateien',
     'platform' => 'Soziale Medien',
+    'basic_info' => 'Grundlegende Teilnehmerdaten',
     'quota' => 'Das Speicherlimit für Teilnehmende dieses Zeitplans ist erreicht.',
     'removal' => 'Den privaten Eintrag und alle zugehörigen Dateien entfernen? Die Besetzung der Veranstaltungen bleibt unverändert.',
 ];

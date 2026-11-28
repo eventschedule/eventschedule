@@ -63,6 +63,20 @@ class ParticipantDirectoryController extends Controller
         return $this->page($schedule);
     }
 
+    public function basicInfo(Request $request, string $subdomain, string $entry)
+    {
+        $schedule = $this->schedule($request, $subdomain);
+        $id = $this->entry($schedule, $entry)->id;
+        $data = $request->validate([
+            'participant_email' => 'present|nullable|email|max:255',
+            'participant_phone' => 'present|nullable|string|max:80',
+            'participant_website' => 'present|nullable|url:http,https|max:2048',
+        ]);
+        DB::table('backstage_entries')->where('id', $id)->update($data);
+
+        return $this->page($schedule, $id);
+    }
+
     public function profileVideo(Request $request, string $subdomain, string $entry)
     {
         $schedule = $this->schedule($request, $subdomain);

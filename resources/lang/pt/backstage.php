@@ -7,6 +7,7 @@ return [
     'contacts' => 'Contatos adicionais',
     'files' => 'Arquivos',
     'platform' => 'Rede social',
+    'basic_info' => 'Informações básicas do participante',
     'quota' => 'Esta agenda atingiu o limite de armazenamento para participantes.',
     'removal' => 'Remover o registro privado e todos os seus arquivos? Os participantes dos eventos não mudarão.',
 ];

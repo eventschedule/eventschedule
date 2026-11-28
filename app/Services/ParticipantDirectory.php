@@ -12,10 +12,13 @@ class ParticipantDirectory
     /** Idempotent across bookings and both entry points. Never replace private details. */
     public static function register(int $scheduleId, array $participantIds): void
     {
-        $rows = [];
-        foreach (array_unique($participantIds) as $id) {
-            $rows[] = ['schedule_id' => $scheduleId, 'participant_id' => $id];
+        $ids = array_values(array_unique($participantIds));
+        if (! $ids) {
+            return;
         }
+        $rows = DB::table('roles')->whereIn('id', $ids)->where('is_deleted', false)
+            ->selectRaw('? as schedule_id, id as participant_id, email as participant_email, phone as participant_phone, website as participant_website', [$scheduleId])
+            ->get()->map(fn ($row) => (array) $row)->all();
         if ($rows) {
             DB::table('backstage_entries')->insertOrIgnore($rows);
         }
@@ -48,7 +51,7 @@ class ParticipantDirectory
         if ($selected !== null) {
             $entry = Role::query()->join('backstage_entries as e', 'roles.id', '=', 'e.participant_id')
                 ->where('e.schedule_id', $schedule->id)->where('e.id', UrlUtils::decodeIdOrFail($selected))
-                ->firstOrFail(['e.id as entry_id', 'e.promotion', 'roles.id', 'roles.name', 'roles.email', 'roles.phone', 'roles.youtube_links', 'roles.subdomain', 'roles.user_id', 'roles.email_verified_at', 'roles.phone_verified_at']);
+                ->firstOrFail(['e.id as entry_id', 'e.promotion', 'e.participant_email', 'e.participant_phone', 'e.participant_website', 'roles.id', 'roles.name', 'roles.youtube_links', 'roles.subdomain', 'roles.user_id', 'roles.email_verified_at', 'roles.phone_verified_at']);
             foreach (['contacts', 'links', 'files'] as $kind) {
                 $details[$kind] = DB::table('backstage_'.$kind)->where('entry_id', $entry->entry_id)->orderBy('id')->get();
             }

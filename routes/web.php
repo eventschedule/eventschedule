@@ -1024,6 +1024,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::prefix('/{subdomain}/participants')->name('role.participants.')->controller(ParticipantDirectoryController::class)->group(function () {
         Route::post('/', 'store')->name('store');
         Route::delete('/{entry}', 'destroy')->name('destroy');
+        Route::put('/{entry}/basic-info', 'basicInfo')->name('basic_info');
         Route::match(['post', 'delete'], '/{entry}/profile-video', 'profileVideo')->name('profile_video');
         Route::put('/{entry}/promotion', 'promotion')->name('promotion');
         Route::match(['post', 'delete'], '/{entry}/{kind}/{item?}', 'item')->whereIn('kind', ['contacts', 'links', 'files'])->name('item');

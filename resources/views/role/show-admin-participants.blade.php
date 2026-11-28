@@ -45,14 +45,17 @@
         @endphp
         <x-link :href="$directoryUrl">{{ __('messages.participants') }}</x-link>
         <h2 class="text-xl font-semibold"><bdi>{{ $entry->name }}</bdi></h2>
-        @if ($entry->email || $entry->phone)
-            <x-page-card :title="__('messages.details')">
-                <dl class="page-kv">
-                    @if ($entry->email)<div><dt>{{ __('messages.email') }}</dt><dd><bdi>{{ $entry->email }}</bdi></dd></div>@endif
-                    @if ($entry->phone)<div><dt>{{ __('messages.phone_number') }}</dt><dd><bdi dir="ltr">{{ $entry->phone }}</bdi></dd></div>@endif
-                </dl>
-            </x-page-card>
-        @endif
+        <x-page-card :title="__('backstage.basic_info')">
+            <form method="post" action="{{ route('role.participants.basic_info', $params) }}" class="space-y-3">
+                @csrf @method('put')
+                @foreach (['participant_email' => ['messages.email', 'email'], 'participant_phone' => ['messages.phone_number', 'tel'], 'participant_website' => ['messages.website', 'url']] as $field => [$label, $type])
+                    <label class="block">{{ __($label) }} {{ __('messages.label_optional_suffix') }}
+                        <x-text-input class="block w-full" :type="$type" :name="$field" :value="old($field, $entry->$field)" />
+                    </label>
+                @endforeach
+                <div class="page-form-actions"><x-brand-button type="submit">{{ __('messages.save') }}</x-brand-button></div>
+            </form>
+        </x-page-card>
         <x-page-card :title="__('backstage.promotion')">
             <form method="post" action="{{ route('role.participants.promotion', $params) }}">
                 @csrf @method('put')

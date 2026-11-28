@@ -7,6 +7,7 @@ return [
     'contacts' => 'Contactos adicionales',
     'files' => 'Archivos',
     'platform' => 'Red social',
+    'basic_info' => 'Datos básicos del participante',
     'quota' => 'Este calendario ha alcanzado el límite de almacenamiento de participantes.',
     'removal' => '¿Eliminar la ficha privada y todos sus archivos? No cambiarán los participantes de los eventos.',
 ];

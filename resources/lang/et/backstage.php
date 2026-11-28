@@ -7,6 +7,7 @@ return [
     'contacts' => 'Lisakontaktid',
     'files' => 'Failid',
     'platform' => 'Sotsiaalmeedia',
+    'basic_info' => 'Osaleja põhiandmed',
     'quota' => 'Selle ajakava osalejate salvestusruum on täis.',
     'removal' => 'Kas eemaldada privaatne kirje ja kõik selle failid? Ürituste esinejate nimekirjad ei muutu.',
 ];

@@ -54,21 +54,30 @@ class ParticipantDirectoryTest extends TestCase
         $this->get(route('role.view_admin', [$schedule->subdomain, 'participants']))->assertOk()->assertSee('Evening Trio'); // eligible to add again
     }
 
-    public function test_detail_page_reads_the_current_participant_profile_without_copying_it(): void
+    public function test_basic_participant_details_are_prefilled_and_edited_privately(): void
     {
         $owner = $this->createOwner();
         $venue = $this->createRole($owner);
-        $this->actingAs($owner);
-        [, $entry] = $this->add($venue, ['name' => 'Evening Trio']);
-        $band = Role::where('name', 'Evening Trio')->firstOrFail();
         $video = 'https://youtu.be/dQw4w9WgXcQ';
-        $band->email = 'booking@trio.test';
-        $band->phone = '+1 555 0123';
-        $band->youtube_links = json_encode([['url' => $video]]);
-        $band->save();
-
-        $this->get(route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $entry]))
-            ->assertOk()->assertSee($band->email)->assertSee($band->phone)->assertSee('href="'.$video.'"', false);
+        $band = $this->createRole($owner, 'talent', [
+            'email' => 'booking@trio.test', 'phone' => '+1 555 0123', 'website' => 'https://trio.test',
+            'youtube_links' => json_encode([['url' => $video]]),
+        ]);
+        $this->actingAs($owner);
+        [, $entry] = $this->add($venue, ['participant' => UrlUtils::encodeId($band->id)]);
+        $page = route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $entry]);
+        $this->get($page)->assertOk()->assertSee('value="booking@trio.test"', false)->assertSee('value="+1 555 0123"', false)
+            ->assertSee('value="https://trio.test"', false)->assertSee('href="'.$video.'"', false);
+        $update = route('role.participants.basic_info', [$venue->subdomain, $entry]);
+        $this->put($update, ['participant_email' => 'manager@venue.test', 'participant_phone' => '+1 555 0199', 'participant_website' => 'https://manager.test'])
+            ->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertDatabaseHas('backstage_entries', [
+            'id' => DB::table('backstage_entries')->where('schedule_id', $venue->id)->value('id'),
+            'participant_email' => 'manager@venue.test', 'participant_phone' => '+1 555 0199', 'participant_website' => 'https://manager.test',
+        ]);
+        $this->assertSame('booking@trio.test', $band->fresh()->email);
+        $this->assertSame('+1 555 0123', $band->fresh()->phone);
+        $this->assertSame('https://trio.test', $band->fresh()->website);
         $this->assertDatabaseCount('backstage_contacts', 0);
         $this->assertDatabaseCount('backstage_links', 0);
     }

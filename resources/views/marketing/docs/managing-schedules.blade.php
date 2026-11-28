@@ -298,7 +298,7 @@
     <section id="participants" class="doc-section">
         <h2 class="doc-heading">Participants</h2>
         <p>Use the Participants tab to keep a private record before, between and after bookings. Search the list by name. Adding a participant to an event lineup also adds them to the schedule's directory. Choose Edit to open the same private record across bookings. To add someone before their first booking, choose Add beside a known performer or enter a new name. This directory belongs to the schedule, not to the event: another venue that books the same band cannot see your record.</p>
-        <p>Add a named contact for each booking agent, tour manager or other contact. Their label, email, phone and website are optional. These contacts do not replace the participant's own contact details or send anyone an invitation.</p>
+        <p>The participant's email, phone and website are prefilled from their profile. Editing these fields changes the private copy for this schedule only, not the participant's profile or another schedule's copy. Add a named contact for each booking agent, tour manager or other contact. Their label, email, phone and website are optional. These contacts do not replace the participant's basic details or send anyone an invitation.</p>
         <p>Upload a file and give it a label such as “Tech rider” or “Press photo”. PDF, JPEG, PNG and Word, Excel and PowerPoint documents are supported. Keep promotion text and social links here too. None of this material appears on the guest page. Removing the directory entry deletes its private files and details, not the participant or any event lineup.</p>
     </section>
 
