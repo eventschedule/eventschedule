@@ -5723,7 +5723,7 @@
                                     </div>
                                     <label for="member_picker_search" class="sr-only">{{ __('messages.search') }}</label>
                                     <x-text-input id="member_picker_search" v-model="memberPickerSearch" @keydown.enter.prevent type="search" class="mt-1 block w-full" autocomplete="off" :placeholder="__('messages.search')" />
-                                    <select v-model="selectedMember" @change="addExistingMember" id="selected_member" class="mt-2 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <select v-if="memberPickerSearch.trim()" v-model="selectedMember" @change="addExistingMember" id="selected_member" class="mt-2 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                         <option v-for="member in matchingMembers" :key="member.id" :value="member">
                                             @{{ member.name }} <template v-if="member.email">(@{{ member.email }})</template>
@@ -11312,9 +11312,9 @@
       },
       matchingMembers() {
         const query = this.memberPickerSearch.trim().toLocaleLowerCase();
-        if (!query) return this.filteredMembers;
+        if (!query) return [];
         return this.filteredMembers.filter(member => [member.name, member.email]
-          .some(value => String(value || '').toLocaleLowerCase().includes(query)));
+          .some(value => String(value || '').toLocaleLowerCase().includes(query))).slice(0, 50);
       },
       hasLimitedPaidTickets() {
         return this.tickets.some(ticket => ticket.price > 0 && ticket.quantity > 0);
