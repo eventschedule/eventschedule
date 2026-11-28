@@ -156,7 +156,8 @@ class ParticipantDirectoryTest extends TestCase
         $this->createRole($this->createOwner(), 'talent', ['name' => 'Night Stranger']);
         $url = route('role.view_admin', [$venue->subdomain, 'participants']);
         $this->get($url.'?q=Night')->assertOk()->assertSee('Night Quartet')->assertSee('Night Trio')->assertDontSee('Morning Duo')->assertDontSee('Night Stranger')
-            ->assertSee('entry='.$params[1], false)->assertSee('name="participant" value="'.UrlUtils::encodeId($band->id).'"', false)->assertDontSee('<select name="participant"', false);
+            ->assertSee('entry='.$params[1], false)->assertSee('edit=1', false)->assertSee(__('messages.view'))->assertSee(__('messages.edit'))
+            ->assertSee('name="participant" value="'.UrlUtils::encodeId($band->id).'"', false)->assertDontSee('<select name="participant"', false);
         $this->get($url.'?q=%25')->assertOk()->assertSee(__('messages.no_results_found'))->assertDontSee('Night Quartet');
     }
 

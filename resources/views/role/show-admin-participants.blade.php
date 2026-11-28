@@ -26,7 +26,10 @@
                         <td><bdi>{{ $row->name }}</bdi></td>
                         <td class="c-actions">
                             @if ($row->entry_id)
-                                <x-link :href="route('role.view_admin', [$subdomain, 'participants', 'entry' => $encode($row->entry_id)])">{{ __('messages.edit') }}</x-link>
+                                <span class="inline-flex items-center gap-3">
+                                    <x-link :href="route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'participants', 'entry' => $encode($row->entry_id)])">{{ __('messages.view') }}</x-link>
+                                    <x-link :href="route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'participants', 'entry' => $encode($row->entry_id), 'edit' => 1])">{{ __('messages.edit') }}</x-link>
+                                </span>
                             @else
                                 <form method="post" action="{{ route('role.participants.store', $subdomain) }}">@csrf
                                     <input type="hidden" name="participant" value="{{ $encode($row->participant_id) }}">
