@@ -350,9 +350,12 @@ class EventFormSectionsTest extends TestCase
         $this->assertSame(1, substr_count($html, '<p class="event-hint">'.e(__('messages.participants_help')).'</p>'));
         $this->assertStringContainsString('id="member_picker_search"', $html);
         $this->assertStringContainsString('v-model="memberPickerSearch"', $html);
-        $this->assertStringContainsString('v-if="memberPickerSearch.trim()" v-model="selectedMember"', $html);
-        $this->assertStringContainsString('v-for="member in matchingMembers"', $html);
+        $this->assertStringContainsString('role="combobox"', $html);
+        $this->assertStringContainsString('role="listbox"', $html);
+        $this->assertStringContainsString('v-for="(member, index) in matchingMembers"', $html);
+        $this->assertStringNotContainsString('id="selected_member"', $html);
         $this->assertStringContainsString('member.name, member.email', $html);
+        $this->assertStringContainsString('memberPickerKeydown(event)', $html);
         $this->assertStringContainsString('.slice(0, 50)', $html);
         $this->assertStringContainsString('v-if="eventParts.length && ! agendaShowTimes" class="event-hint">'.e(__('messages.agenda_show_times_help')), $html);
     }

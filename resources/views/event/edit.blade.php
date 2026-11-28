@@ -5723,18 +5723,20 @@
                             <fieldset v-cloak v-show="showMemberTypeRadio" :disabled="! showMemberTypeRadio" class="event-fieldset event-add-box">
                                 <div v-if="memberType === 'use_existing' && filteredMembers.length > 0">
                                     <div class="flex items-center justify-between gap-3">
-                                        <label for="selected_member" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.your_schedules') }}</label>
+                                        <label for="member_picker_search" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.your_schedules') }}</label>
                                         <button type="button" class="event-link" @click="memberType = 'create_new'">{{ __('messages.someone_new') }}</button>
                                     </div>
                                     <label for="member_picker_search" class="sr-only">{{ __('messages.search') }}</label>
-                                    <input id="member_picker_search" v-model="memberPickerSearch" @keydown.enter.prevent="void 0" type="search" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" autocomplete="off" placeholder="{{ __('messages.search') }}">
-                                    <select v-if="memberPickerSearch.trim()" v-model="selectedMember" @change="addExistingMember" id="selected_member" class="mt-2 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                        <option value="" disabled selected>{{ __('messages.please_select') }}</option>
-                                        <option v-for="member in matchingMembers" :key="member.id" :value="member">
-                                            @{{ member.name }} <template v-if="member.email">(@{{ member.email }})</template>
-                                        </option>
-                                    </select>
-                                    <p v-if="memberPickerSearch.trim() && !matchingMembers.length" class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.no_results_found') }}</p>
+                                    <div class="relative mt-1">
+                                        <input id="member_picker_search" v-model="memberPickerSearch" @input="openMemberPicker" @focus="memberPickerOpen = true" @blur="closeMemberPicker" @keydown="memberPickerKeydown" type="search" role="combobox" aria-autocomplete="list" aria-controls="member-picker-listbox" :aria-expanded="memberPickerOpen && matchingMembers.length > 0" :aria-activedescendant="memberPickerOpen && matchingMembers.length && memberPickerActiveIndex >= 0 ? 'member-option-' + matchingMembers[memberPickerActiveIndex]?.id : null" class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" autocomplete="off" placeholder="{{ __('messages.search') }}">
+                                        <div v-if="memberPickerOpen && matchingMembers.length" id="member-picker-listbox" role="listbox" class="absolute z-30 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg">
+                                            <button v-for="(member, index) in matchingMembers" :key="member.id" :id="'member-option-' + member.id" type="button" role="option" :aria-selected="memberPickerActiveIndex === index" @mousedown.prevent @click="addExistingMember(member)" :class="{ 'bg-gray-100 dark:bg-gray-700': memberPickerActiveIndex === index }" class="block w-full px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                <span class="block truncate">@{{ member.name }}</span>
+                                                <span v-if="member.email" class="block truncate text-sm text-gray-600 dark:text-gray-400">@{{ member.email }}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p v-if="memberPickerSearch.trim() && memberPickerOpen && !matchingMembers.length" class="mt-2 text-sm text-gray-600 dark:text-gray-400">{{ __('messages.no_results_found') }}</p>
                                     <div class="mt-3" v-if="selectedMembers.length > 0">
                                         <button type="button" class="event-link event-link-quiet" @click="cancelAddMember">{{ __('messages.cancel') }}</button>
                                     </div>
@@ -7646,6 +7648,8 @@
         venueType: "{{ count($venues) > 0 ? 'use_existing' : 'create_new' }}",
         memberType: "{{ 'use_existing' }}",
         memberPickerSearch: '',
+        memberPickerOpen: false,
+        memberPickerActiveIndex: 0,
         venueName: @json($selectedVenue ? $selectedVenue->name : ''),
         venueEmail: @json($selectedVenue ? $selectedVenue->email : ''),
         venueAddress1: @json($selectedVenue ? $selectedVenue->address1 : ''),
@@ -8905,7 +8909,31 @@
         this.editMemberId = "";
         this.editMemberSnapshot = null;
       },
-      addExistingMember() {
+      openMemberPicker() {
+        this.memberPickerOpen = true;
+        this.memberPickerActiveIndex = 0;
+      },
+      closeMemberPicker() {
+        this.memberPickerOpen = false;
+      },
+      memberPickerKeydown(event) {
+        if (event.key === 'ArrowDown' && this.matchingMembers.length) {
+          event.preventDefault();
+          this.memberPickerOpen = true;
+          this.memberPickerActiveIndex = Math.min(this.memberPickerActiveIndex + 1, this.matchingMembers.length - 1);
+        } else if (event.key === 'ArrowUp' && this.matchingMembers.length) {
+          event.preventDefault();
+          this.memberPickerOpen = true;
+          this.memberPickerActiveIndex = Math.max(this.memberPickerActiveIndex - 1, 0);
+        } else if (event.key === 'Enter' && this.memberPickerOpen && this.matchingMembers.length) {
+          event.preventDefault();
+          this.addExistingMember(this.matchingMembers[this.memberPickerActiveIndex] || this.matchingMembers[0]);
+        } else if (event.key === 'Escape') {
+          this.closeMemberPicker();
+        }
+      },
+      addExistingMember(member) {
+        this.selectedMember = member || this.selectedMember;
         if (this.selectedMember && !this.selectedMembers.some(m => m.id === this.selectedMember.id)) {
           this.selectedMembers.push(this.selectedMember);
           // Initialize sendEmailToMembers/sendSmsToMembers for selected member
@@ -8919,6 +8947,8 @@
           this.$nextTick(() => {
             this.selectedMember = "";
             this.memberPickerSearch = '';
+            this.memberPickerOpen = false;
+            this.memberPickerActiveIndex = 0;
           });
           this.showMemberTypeRadio = false;
         }
@@ -9015,6 +9045,8 @@
           this.closeMemberEdit();
         }
         this.memberPickerSearch = '';
+        this.memberPickerOpen = false;
+        this.memberPickerActiveIndex = 0;
         this.showMemberTypeRadio = true;
         if (this.filteredMembers.length === 0) {
           this.memberType = 'create_new';
