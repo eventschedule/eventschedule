@@ -62,7 +62,7 @@
             </div>
         </div>
         <x-page-card :title="__('backstage.basic_info')">
-            @if ($editing && $entry->isEditableBy(auth()->user()))
+            @if ($editing)
                 <form method="post" action="{{ route('role.participants.basic_info', $params) }}" class="space-y-3">
                     @csrf @method('put')
                     @foreach (['email' => ['messages.email', 'email'], 'phone' => ['messages.phone_number', 'tel'], 'website' => ['messages.website', 'text']] as $field => [$label, $type])

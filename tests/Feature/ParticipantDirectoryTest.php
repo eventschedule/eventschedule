@@ -71,6 +71,26 @@ class ParticipantDirectoryTest extends TestCase
             ->assertSee('name="name"', false)->assertSee('value="'.route('role.participants.item', [$venue->subdomain, $entry, 'contacts']).'"', false);
     }
 
+    public function test_schedule_editor_can_update_a_listed_participants_shared_profile(): void
+    {
+        $scheduleOwner = $this->createOwner();
+        $participantOwner = $this->createOwner();
+        $venue = $this->createRole($scheduleOwner);
+        $participant = $this->createRole($participantOwner, 'talent', ['email' => 'before@trio.test']);
+        $entryId = DB::table('backstage_entries')->insertGetId([
+            'schedule_id' => $venue->id, 'participant_id' => $participant->id,
+        ]);
+        $entry = UrlUtils::encodeId($entryId);
+        $this->actingAs($scheduleOwner);
+
+        $this->get(route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $entry, 'edit' => 1]))
+            ->assertOk()->assertSee('name="email"', false)->assertSee('value="before@trio.test"', false);
+        $this->put(route('role.participants.basic_info', [$venue->subdomain, $entry]), [
+            'email' => 'after@trio.test', 'phone' => '+15550123', 'website' => 'https://trio.test',
+        ])->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame('after@trio.test', $participant->fresh()->email);
+    }
+
     public function test_basic_participant_details_use_the_shared_profile_record(): void
     {
         $owner = $this->createOwner();

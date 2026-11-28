@@ -69,7 +69,6 @@ class ParticipantDirectoryController extends Controller
         $schedule = $this->schedule($request, $subdomain);
         $record = $this->entry($schedule, $entry);
         $person = Role::where('is_deleted', false)->findOrFail($record->participant_id);
-        abort_unless($person->isEditableBy($request->user()), 403);
         $data = $request->validate([
             'email' => array_merge(['present', 'nullable', 'email', 'max:255'], config('app.hosted') ? [new NoFakeEmail] : []),
             'phone' => ['present', 'nullable', 'string', 'max:20', 'regex:/^\\+[1-9]\\d{1,14}$/'],
