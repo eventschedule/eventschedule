@@ -54,6 +54,23 @@ class ParticipantDirectoryTest extends TestCase
         $this->get(route('role.view_admin', [$schedule->subdomain, 'participants']))->assertOk()->assertSee('Evening Trio'); // eligible to add again
     }
 
+    public function test_extra_contacts_are_folded_under_show_more_while_add_contact_stays_visible(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner);
+        $this->actingAs($owner);
+        [, $entry] = $this->add($venue, ['name' => 'Evening Trio']);
+        $record = DB::table('backstage_entries')->where('schedule_id', $venue->id)->firstOrFail();
+        for ($i = 1; $i <= 5; $i++) {
+            DB::table('backstage_contacts')->insert(['entry_id' => $record->id, 'name' => 'Contact '.$i]);
+        }
+
+        $this->get(route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $entry]))
+            ->assertOk()->assertSee(__('messages.pending_action_show_more', ['count' => 1]))
+            ->assertSee('Contact 1')->assertSee('Contact 4')->assertSee('Contact 5')
+            ->assertSee('name="name"', false)->assertSee('value="'.route('role.participants.item', [$venue->subdomain, $entry, 'contacts']).'"', false);
+    }
+
     public function test_basic_participant_details_are_prefilled_and_edited_privately(): void
     {
         $owner = $this->createOwner();

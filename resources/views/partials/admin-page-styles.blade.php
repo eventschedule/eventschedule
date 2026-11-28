@@ -1024,6 +1024,24 @@
       background-color: rgb(var(--ap-surface));
       border-color: rgb(var(--ap-border-strong));
     }
+    .participant-directory .participant-contacts-more {
+      margin-block: 0.25rem 0.75rem;
+    }
+    .participant-directory .participant-contacts-more > summary {
+      display: inline-flex;
+      cursor: pointer;
+      list-style: none;
+      color: rgb(var(--ap-ink-3));
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+    .participant-directory .participant-contacts-more > summary:hover {
+      color: rgb(var(--ap-ink));
+      text-decoration: underline;
+    }
+    .participant-directory .participant-contacts-more > summary::-webkit-details-marker {
+      display: none;
+    }
     .participant-directory .participant-social-item,
     .participant-directory .participant-social-row {
       display: flex;
