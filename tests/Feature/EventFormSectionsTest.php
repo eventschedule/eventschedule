@@ -352,6 +352,7 @@ class EventFormSectionsTest extends TestCase
         $this->assertStringContainsString('v-model="memberPickerSearch"', $html);
         $this->assertStringContainsString('role="combobox"', $html);
         $this->assertStringContainsString('role="listbox"', $html);
+        $this->assertStringContainsString('text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700', $html);
         $this->assertStringContainsString('v-for="(member, index) in matchingMembers"', $html);
         $this->assertStringNotContainsString('id="selected_member"', $html);
         $this->assertStringContainsString('member.name, member.email', $html);
