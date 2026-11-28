@@ -40,6 +40,7 @@ class PersonalDataExportService
      * PersonalDataExportTest fails when a table appears that is in neither list.
      */
     public const NOT_EXPORTED = [
+        'backstage_contacts' => 'Private organizer contacts, not accounts. Matching an email does not grant access to a schedule’s directory.',
         'account_blocks' => 'An operator\'s record of a blocked account. A blocked account cannot sign in to ask for this file, and the row is deleted when the block is lifted; the fact and its date are in account.blocked_at.',
         'backup_jobs' => 'Job bookkeeping; the archives are the user\'s own downloads.',
         'calendar_exposures' => 'Which of a schedule\'s events look like a private calendar to the operator\'s check (CalendarExposureWatch): kinds and a hash, no text. Bookkeeping about the schedule\'s own events, deleted with the event.',

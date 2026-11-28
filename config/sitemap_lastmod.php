@@ -50,7 +50,7 @@ return [
     '/docs/event-graphics' => '2026-11-23',
     '/docs/getting-started' => '2026-11-24',
     '/docs/gift-cards' => '2026-10-23',
-    '/docs/managing-schedules' => '2026-11-24',
+    '/docs/managing-schedules' => '2026-11-28',
     '/docs/newsletters' => '2026-11-26',
     '/docs/referral-program' => '2026-11-23',
     '/docs/saas' => '2026-11-24',

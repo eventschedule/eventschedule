@@ -55,6 +55,7 @@ use App\Services\EventLifecycleService;
 use App\Services\GuestAccountService;
 use App\Services\LinkImportService;
 use App\Services\OneSignalService;
+use App\Services\ParticipantDirectory;
 use App\Services\RequestNotifier;
 use App\Services\TicketPresets;
 use App\Services\UsageTrackingService;
@@ -672,7 +673,7 @@ class EventController extends Controller
             return $item->toData();
         });
 
-        $members = array_values($members->sortBy('name')->toArray());
+        $members = ParticipantDirectory::picker($role, $members);
 
         $currencies = file_get_contents(base_path('storage/currencies.json'));
         $currencies = json_decode($currencies);
@@ -899,7 +900,7 @@ class EventController extends Controller
             return $item->toData();
         });
 
-        $members = array_values($members->sortBy('name')->toArray());
+        $members = ParticipantDirectory::picker($role, $members);
 
         $currencies = file_get_contents(base_path('storage/currencies.json'));
         $currencies = json_decode($currencies);

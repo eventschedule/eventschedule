@@ -73,6 +73,22 @@ class ScheduleAdminPagesJourneyTest extends DuskTestCase
         ]);
     }
 
+    public function test_a_participant_can_be_managed_before_their_first_booking(): void
+    {
+        $owner = $this->person('Venue Owner', 'venueowner@gmail.com');
+        $venue = $this->role($owner, 'venue', 'backstagevenue', 'Backstage Venue');
+        $this->browse(function (Browser $browser) use ($owner, $venue) {
+            $browser->loginAs($owner)->visit('/'.$venue->subdomain.'/participants')
+                ->type('form.page-filters input[name="name"]', 'Evening Trio')->press(__('messages.add_participant'))
+                ->waitFor('textarea[name="promotion"]')->type('promotion', 'Private draft for the next show')
+                ->click('form:has(textarea[name="promotion"]) button[type="submit"]')
+                ->waitFor('textarea[name="promotion"]')->assertInputValue('promotion', 'Private draft for the next show')
+                ->visit('/'.$venue->subdomain.'/participants')->clickLink('Evening Trio')
+                ->assertInputValue('promotion', 'Private draft for the next show');
+        });
+        $this->assertDatabaseHas('backstage_entries', ['schedule_id' => $venue->id, 'promotion' => 'Private draft for the next show']);
+    }
+
     public function test_the_tabs_take_you_there_on_a_laptop_and_on_a_phone(): void
     {
         $owner = $this->person('Lisa Simpson', 'lisa@gmail.com');

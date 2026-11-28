@@ -121,6 +121,7 @@
         $isEditorHere = auth()->user()->isEditor($role->subdomain);
         $adminTabs = array_filter([
             'schedule' => ['label' => __('messages.schedule'), 'params' => $tab == 'schedule' ? [] : $monthParams],
+            'participants' => $isEditorHere ? ['label' => __('messages.participants')] : null,
             'templates' => $isEditorHere ? ['label' => __('messages.templates')] : null,
             'videos' => $isEditorHere && $role->isCurator() ? ['label' => __('messages.videos')] : null,
             'availability' => $role->isTalent() ? ['label' => __('messages.availability'), 'params' => $tab == 'availability' ? [] : $monthParams] : null,
@@ -464,6 +465,8 @@
     @include('role.show-admin-followers')
     @elseif ($tab == 'team')
     @include('role.show-admin-team')
+    @elseif ($tab == 'participants')
+    @include('role.show-admin-participants', $directory)
     @elseif ($tab == 'promoters')
     @include('role.show-admin-promoters')
     @elseif ($tab == 'videos')
