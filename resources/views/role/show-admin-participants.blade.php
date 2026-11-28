@@ -81,6 +81,22 @@
                 </dl>
             @endif
         </x-page-card>
+        @unless ($editing)
+            <x-page-card :title="__('messages.events')">
+                @if ($details['events']->isNotEmpty())
+                    <ul class="space-y-2">
+                        @foreach ($details['events'] as $event)
+                            <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                                <x-link :href="$event->url"><bdi>{{ $event->name }}</bdi></x-link>
+                                <time class="text-sm text-[rgb(var(--ap-ink-3))]">{{ $event->date }}</time>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="text-[rgb(var(--ap-ink-3))]">{{ __('messages.none') }}</p>
+                @endif
+            </x-page-card>
+        @endunless
         <x-page-card :title="__('backstage.promotion')">
             @if ($editing)
                 <form method="post" action="{{ route('role.participants.promotion', $params) }}">

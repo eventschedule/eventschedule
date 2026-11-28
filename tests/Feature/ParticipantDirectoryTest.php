@@ -91,6 +91,24 @@ class ParticipantDirectoryTest extends TestCase
         $this->assertSame('after@trio.test', $participant->fresh()->email);
     }
 
+    public function test_participant_view_lists_events_on_its_own_schedule_only(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue', ['name' => 'Main Venue']);
+        $otherVenue = $this->createRole($owner, 'venue', ['name' => 'Other Venue']);
+        $band = $this->createRole($owner, 'talent', ['name' => 'Evening Trio']);
+        $thisEvent = $this->createEvent($venue, ['name' => 'Main Venue Show']);
+        $thisEvent->roles()->attach($band->id, ['is_accepted' => true]);
+        $otherEvent = $this->createEvent($otherVenue, ['name' => 'Other Venue Show']);
+        $otherEvent->roles()->attach($band->id, ['is_accepted' => true]);
+        $this->actingAs($owner);
+        [, $entry] = $this->add($venue, ['participant' => UrlUtils::encodeId($band->id)]);
+
+        $this->get(route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $entry]))
+            ->assertOk()->assertSee('Main Venue Show')->assertDontSee('Other Venue Show')
+            ->assertSee($thisEvent->getGuestUrl($venue->subdomain, false), false);
+    }
+
     public function test_basic_participant_details_use_the_shared_profile_record(): void
     {
         $owner = $this->createOwner();

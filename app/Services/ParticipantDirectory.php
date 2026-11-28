@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Event;
 use App\Models\Role;
 use App\Models\User;
 use App\Utils\UrlUtils;
@@ -55,6 +56,15 @@ class ParticipantDirectory
             foreach (['contacts', 'links', 'files'] as $kind) {
                 $details[$kind] = DB::table('backstage_'.$kind)->where('entry_id', $entry->entry_id)->orderBy('id')->get();
             }
+            $details['events'] = Event::query()->with(['creatorRole', 'roles', 'venue'])
+                ->whereHas('roles', fn ($q) => $q->where('roles.id', $schedule->id)->wherePivot('is_accepted', true))
+                ->whereHas('roles', fn ($q) => $q->where('roles.id', $entry->id)->wherePivot('is_accepted', true))
+                ->orderByDesc('events.starts_at')->limit(50)->get()
+                ->map(fn (Event $event) => (object) [
+                    'name' => $event->name,
+                    'date' => $event->getStartDateTime()->translatedFormat('M j, Y'),
+                    'url' => $event->getGuestUrl($schedule->subdomain, false),
+                ]);
             $video = $entry->getFirstVideoUrl();
             if (is_string($video) && filter_var($video, FILTER_VALIDATE_URL) && in_array(strtolower(parse_url($video, PHP_URL_SCHEME)), ['http', 'https'], true)) {
                 $details['links']->prepend((object) ['profileVideo' => true, 'url' => $video, 'editable' => $entry->isEditableBy($user)]);
