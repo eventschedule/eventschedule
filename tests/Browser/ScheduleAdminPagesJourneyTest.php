@@ -80,8 +80,9 @@ class ScheduleAdminPagesJourneyTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($owner, $venue) {
             $browser->loginAs($owner)->visit('/'.$venue->subdomain.'/participants')
                 ->type('form.page-filters input[name="name"]', 'Evening Trio')->press(__('messages.add_participant'))
-                ->waitFor('textarea[name="promotion"]')->type('promotion', 'Private draft for the next show')
+                ->waitForText('Evening Trio')->clickLink(__('messages.edit'))->waitFor('textarea[name="promotion"]')->type('promotion', 'Private draft for the next show')
                 ->click('form:has(textarea[name="promotion"]) button[type="submit"]')
+                ->waitForText('Private draft for the next show')->clickLink(__('messages.edit'))
                 ->waitFor('textarea[name="promotion"]')->assertInputValue('promotion', 'Private draft for the next show')
                 ->visit('/'.$venue->subdomain.'/participants')->type('q', 'Trio')->press(__('messages.search'))
                 ->waitForText('Evening Trio')->clickLink(__('messages.edit'))

@@ -83,8 +83,11 @@ class ParticipantDirectoryTest extends TestCase
         $this->actingAs($owner);
         [, $entry] = $this->add($venue, ['participant' => UrlUtils::encodeId($band->id)]);
         $page = route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $entry]);
-        $this->get($page)->assertOk()->assertSee('value="booking@trio.test"', false)->assertSee('value="+1 555 0123"', false)
-            ->assertSee('value="https://trio.test"', false)->assertSee('href="'.$video.'"', false);
+        $this->get($page)->assertOk()->assertSee('href="mailto:booking@trio.test"', false)->assertSee('href="tel:+15550123"', false)
+            ->assertSee('href="https://trio.test"', false)->assertSee('href="'.$video.'"', false)->assertSee('edit=1', false)
+            ->assertDontSee('name="participant_email"', false)->assertDontSee('textarea name="promotion"', false);
+        $this->get($page.'&edit=1')->assertOk()->assertSee('value="booking@trio.test"', false)->assertSee('value="+1 555 0123"', false)
+            ->assertSee('value="https://trio.test"', false)->assertSee(__('messages.cancel'));
         $update = route('role.participants.basic_info', [$venue->subdomain, $entry]);
         $this->put($update, ['participant_email' => 'manager@venue.test', 'participant_phone' => '+1 555 0199', 'participant_website' => 'https://manager.test'])
             ->assertSessionHasNoErrors()->assertRedirect();
@@ -111,7 +114,7 @@ class ParticipantDirectoryTest extends TestCase
         $params = $this->add($venue, ['participant' => UrlUtils::encodeId($band->id)]);
         $action = route('role.participants.profile_video', $params);
         $page = route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $params[1]]);
-        $this->get($page)->assertOk()->assertSee($action);
+        $this->get($page.'?edit=1')->assertOk()->assertSee($action);
         $this->post($action, ['url' => $replacement, 'original_url' => $first])->assertSessionHasNoErrors()->assertRedirect();
         $this->assertSame($replacement, $band->fresh()->getFirstVideoUrl());
         $other = $this->createOwner();
@@ -173,6 +176,8 @@ class ParticipantDirectoryTest extends TestCase
         $this->post($files, ['file' => $upload(), 'label' => 'Technical'])->assertRedirect()->assertSessionHasNoErrors();
         $file = UrlUtils::encodeId(DB::table('backstage_files')->value('id'));
         $download = route('role.participants.download', [...$params, $file]);
+        $this->get(route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $params[1]]))
+            ->assertOk()->assertSee('Technical')->assertSee('rider.pdf')->assertSee($download);
         $this->assertSame($pdf, $this->get($download)->assertOk()->streamedContent());
         $this->get(route('role.participants.download', [...$second, $file]))->assertNotFound();
         $this->delete(route('role.participants.item', [...$second, 'files', $file]))->assertNotFound();

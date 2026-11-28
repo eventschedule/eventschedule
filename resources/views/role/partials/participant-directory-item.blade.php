@@ -19,7 +19,7 @@
         <x-link :href="route('role.participants.download', $params + ['item' => $encode($item->id)])"><bdi>{{ $item->filename }}</bdi> ({{ number_format($item->bytes / 1024) }} KB)</x-link>
     @endif
     @if ($editable)
-        @if (! ($kind === 'links' && $item))
+        @if (! ($kind === 'links' && $item && ! $profileVideo))
             <form method="post" action="{{ $action }}" class="{{ $kind === 'links' ? 'participant-social-row' : 'space-y-3' }}" @if ($kind === 'files' && ! $item) enctype="multipart/form-data" @endif>
                 @csrf
                 @if ($profileVideo)<input type="hidden" name="original_url" value="{{ $item->url }}">@endif
@@ -39,12 +39,13 @@
                     @else
                         <span>{{ $platformLabels[$item->platform] ?? $item->platform }}</span>
                     @endif
-                    @if ($item)
-                        <x-link class="min-w-0 flex-1 truncate" :href="$item->url" target="_blank" rel="noopener noreferrer"><bdi>{{ $item->url }}</bdi></x-link>
-                    @else
+                                        @if ($profileVideo)
+                        <x-text-input class="min-w-0 flex-1" type="url" name="url" required :value="$retry ? old('url') : $item->url" />
+                        <x-secondary-button type="submit">{{ __('messages.save') }}</x-secondary-button>
+                    @elseif (! $item)
                         <x-text-input class="min-w-0 flex-1" type="url" name="url" required :value="$retry ? old('url') : ''" />
+                        <x-secondary-button type="submit">{{ __('messages.add') }}</x-secondary-button>
                     @endif
-                    @if (! $item)<x-secondary-button type="submit">{{ __('messages.add') }}</x-secondary-button>@endif
                 @else
                     @foreach (match($kind) { 'contacts' => ['name','label','email','phone','website'], default => ['label'] } as $field)
                         <label class="block">{{ __('messages.'.(['label' => 'seating_text_label','phone' => 'phone_number'][$field] ?? $field)) }}
