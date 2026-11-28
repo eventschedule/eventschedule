@@ -2049,18 +2049,23 @@
             }
         }
 
+        var startTimeEl = document.getElementById('start_time');
+        var endTimeEl = document.getElementById('end_time');
+        var startDropdownEl = document.getElementById('start_time_dropdown');
+        var endDropdownEl = document.getElementById('end_time_dropdown');
+        if (!startTimeEl || !endTimeEl || !startDropdownEl || !endDropdownEl) {
+            return;
+        }
+
         // Track duration for auto-adjust
         var lastDurationMinutes = 60;
-        var initStart = parseTimeToMinutes(document.getElementById('start_time').value);
-        var initEnd = parseTimeToMinutes(document.getElementById('end_time').value);
+        var initStart = parseTimeToMinutes(startTimeEl.value);
+        var initEnd = parseTimeToMinutes(endTimeEl.value);
         if (initStart !== null && initEnd !== null) {
             var diff = initEnd - initStart;
             if (diff < 0) diff += 1440;
             lastDurationMinutes = diff;
         }
-
-        var startTimeEl = document.getElementById('start_time');
-        var endTimeEl = document.getElementById('end_time');
 
         startTimeEl.addEventListener('blur', function() {
             normalizeTimeInput(startTimeEl);
@@ -2239,8 +2244,8 @@
         // Where the start-time list opens when nothing is picked yet: 8 PM for a new event, which
         // is also the time EventController::create() gives a day clicked on the calendar. It only
         // scrolls the list; no value is filled in.
-        initTimePicker(startTimeEl, document.getElementById('start_time_dropdown'), function() { return {{ $event->exists ? 540 : 1200 }}; });
-        initTimePicker(endTimeEl, document.getElementById('end_time_dropdown'), function() {
+        initTimePicker(startTimeEl, startDropdownEl, function() { return {{ $event->exists ? 540 : 1200 }}; });
+        initTimePicker(endTimeEl, endDropdownEl, function() {
             var startMinutes = parseTimeToMinutes(startTimeEl.value);
             if (startMinutes === null) return 600;
             return (startMinutes + 60) % 1440;
