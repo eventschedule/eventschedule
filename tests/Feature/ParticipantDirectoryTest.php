@@ -44,9 +44,9 @@ class ParticipantDirectoryTest extends TestCase
         $this->post($contacts, ['label' => 'Booking'])->assertSessionHasErrors('name');
         $this->post($contacts, ['name' => 'Sam', 'label' => 'Tour manager', 'email' => 'manager@test.invalid', 'phone' => '+1 555 0100', 'website' => 'https://manager.test'])->assertSessionHasNoErrors();
         $this->post($contacts, ['name' => 'Alex'])->assertSessionHasNoErrors();
-        $this->post(route('role.participants.item', [...$params, 'links']), ['url' => 'https://band.test/social'])->assertSessionHasNoErrors();
+        $this->post(route('role.participants.item', [...$params, 'links']), ['platform' => 'instagram', 'url' => 'https://band.test/social'])->assertSessionHasNoErrors();
         $this->put(route('role.participants.promotion', $params), ['promotion' => 'Private preview'])->assertSessionHasNoErrors();
-        $this->get(route('role.view_admin', [$schedule->subdomain, 'participants', 'entry' => $params[1]]))->assertOk()->assertSee('Tour manager')->assertSee('Private preview')->assertSee('https://band.test/social')->assertSee('Alex');
+        $this->get(route('role.view_admin', [$schedule->subdomain, 'participants', 'entry' => $params[1]]))->assertOk()->assertSee('Tour manager')->assertSee('Private preview')->assertSee('https://band.test/social')->assertSee('Instagram')->assertSee('Alex');
         $this->assertNull($band->fresh()->email);
         $this->delete(route('role.participants.destroy', $params))->assertRedirect();
         $this->assertDatabaseCount('backstage_contacts', 0);

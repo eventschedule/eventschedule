@@ -120,7 +120,7 @@ class ParticipantDirectoryController extends Controller
         } else {
             $data = $request->validate(match ($kind) {
                 'contacts' => ['name' => 'required|string|max:255', 'label' => 'nullable|string|max:255', 'email' => 'nullable|email|max:255', 'phone' => 'nullable|string|max:80', 'website' => 'nullable|url:http,https|max:2048'],
-                'links' => ['url' => 'required|url:http,https|max:2048'],
+                'links' => ['platform' => 'required|in:spotify,apple_music,bandcamp,soundcloud,instagram,facebook,tiktok,linktree', 'url' => 'required|url:http,https|max:2048'],
                 'files' => ['label' => 'present|nullable|string|max:255'],
             });
             if ($item === null) {

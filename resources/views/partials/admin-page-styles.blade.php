@@ -1024,6 +1024,76 @@
       background-color: rgb(var(--ap-surface));
       border-color: rgb(var(--ap-border-strong));
     }
+    .participant-directory .participant-social-item,
+    .participant-directory .participant-social-row {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding-block: 0.5rem;
+      min-width: 0;
+    }
+    .participant-directory .participant-social-name,
+    .participant-directory .participant-social-row > span {
+      flex: 0 0 7.25rem;
+      color: rgb(var(--ap-ink-2));
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+    .participant-directory .participant-social-row input {
+      min-width: 0;
+      height: 2.75rem;
+      padding: 0.5rem 0.75rem !important;
+      font-size: 0.875rem !important;
+    }
+    .participant-directory .participant-social-url {
+      flex: 1 1 0;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .participant-directory .participant-social-delete {
+      flex: 0 0 auto;
+      margin: 0;
+    }
+    .participant-directory .participant-social-trash {
+      display: inline-flex;
+      width: 2.75rem;
+      height: 2.75rem;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgb(var(--ap-border-strong));
+      border-radius: 0.75rem;
+      color: rgb(var(--ap-ink-3));
+      transition: color 200ms, border-color 200ms, background-color 200ms;
+    }
+    .participant-directory .participant-social-trash:hover {
+      color: rgb(var(--ap-danger, 185 28 28));
+      border-color: rgb(var(--ap-border-strong));
+      background-color: rgb(var(--ap-surface-hover));
+    }
+    .participant-directory .participant-social-trash svg {
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+    .participant-directory .participant-social-row select {
+      flex: 0 0 8.5rem;
+      width: 8.5rem;
+      height: 2.75rem;
+      padding: 0.5rem 2rem 0.5rem 0.75rem !important;
+      font-size: 0.8125rem !important;
+    }
+    @media (max-width: 639.98px) {
+      .participant-directory .participant-social-item,
+      .participant-directory .participant-social-row { gap: 0.375rem; }
+      .participant-directory .participant-social-name,
+      .participant-directory .participant-social-row > span,
+      .participant-directory .participant-social-row select {
+        flex-basis: 6.25rem;
+        width: 6.25rem;
+      }
+      .participant-directory .participant-social-row input { flex: 1 1 0; }
+    }
     .participant-directory input::file-selector-button {
       color: rgb(var(--ap-ink));
       background-color: rgb(var(--ap-surface-hover));

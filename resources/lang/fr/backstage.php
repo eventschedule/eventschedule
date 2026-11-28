@@ -6,6 +6,7 @@ return [
     'promotion' => 'Texte promotionnel',
     'contacts' => 'Contacts supplémentaires',
     'files' => 'Fichiers',
+    'platform' => 'Réseau social',
     'quota' => 'La limite de stockage des participants de ce calendrier est atteinte.',
     'removal' => 'Supprimer la fiche privée et tous ses fichiers ? La programmation des événements ne changera pas.',
 ];

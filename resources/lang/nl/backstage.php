@@ -6,6 +6,7 @@ return [
     'promotion' => 'Promotietekst',
     'contacts' => 'Extra contactpersonen',
     'files' => 'Bestanden',
+    'platform' => 'Sociale media',
     'quota' => 'De opslagruimte voor deelnemers van deze agenda is vol.',
     'removal' => 'De privégegevens en alle bijbehorende bestanden verwijderen? De bezetting van evenementen blijft hetzelfde.',
 ];
