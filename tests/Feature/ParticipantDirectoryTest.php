@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Role;
-use App\Services\ParticipantDirectory;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -72,31 +71,7 @@ class ParticipantDirectoryTest extends TestCase
             ->assertSee('name="name"', false)->assertSee('value="'.route('role.participants.item', [$venue->subdomain, $entry, 'contacts']).'"', false);
     }
 
-    public function test_directory_syncs_new_profile_contact_details_until_the_schedule_edits_them(): void
-    {
-        $owner = $this->createOwner();
-        $venue = $this->createRole($owner);
-        $band = $this->createRole($owner, 'talent');
-        $this->add($venue, ['participant' => UrlUtils::encodeId($band->id)]);
-        $entry = DB::table('backstage_entries')->where('schedule_id', $venue->id)->value('id');
-
-        $band->update(['email' => 'new-booking@trio.test']);
-        ParticipantDirectory::register($venue->id, [$band->id]);
-        $this->assertDatabaseHas('backstage_entries', [
-            'id' => $entry, 'participant_email' => 'new-booking@trio.test',
-        ]);
-
-        DB::table('backstage_entries')->where('id', $entry)->update([
-            'participant_email' => 'private@venue.test', 'participant_info_updated_at' => now(),
-        ]);
-        $band->update(['email' => 'changed-again@trio.test']);
-        ParticipantDirectory::register($venue->id, [$band->id]);
-        $this->assertDatabaseHas('backstage_entries', [
-            'id' => $entry, 'participant_email' => 'private@venue.test',
-        ]);
-    }
-
-    public function test_basic_participant_details_are_prefilled_and_edited_privately(): void
+    public function test_basic_participant_details_use_the_shared_profile_record(): void
     {
         $owner = $this->createOwner();
         $venue = $this->createRole($owner);
@@ -110,25 +85,18 @@ class ParticipantDirectoryTest extends TestCase
         $page = route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $entry]);
         $this->get($page)->assertOk()->assertSee('href="mailto:booking@trio.test"', false)->assertSee('href="tel:+15550123"', false)
             ->assertSee('href="https://trio.test"', false)->assertSee('href="'.$video.'"', false)->assertSee('edit=1', false)
-            ->assertDontSee('name="participant_email"', false)->assertDontSee('textarea name="promotion"', false);
-        $this->get($page.'&edit=1')->assertOk()->assertSee('value="booking@trio.test"', false)->assertSee('value="+1 555 0123"', false)
+            ->assertDontSee('name="email"', false)->assertDontSee('textarea name="promotion"', false);
+        $this->get($page.'&edit=1')->assertOk()->assertSee('value="booking@trio.test"', false)->assertSee('value="+15550123"', false)
             ->assertSee('value="https://trio.test"', false)->assertSee(__('messages.cancel'));
         $update = route('role.participants.basic_info', [$venue->subdomain, $entry]);
-        $this->put($update, ['participant_email' => 'manager@venue.test', 'participant_phone' => '+1 555 0199', 'participant_website' => 'https://manager.test'])
+        $this->put($update, ['email' => 'manager@venue.test', 'phone' => '+15550199', 'website' => 'https://manager.test'])
             ->assertSessionHasNoErrors()->assertRedirect();
-        $this->assertDatabaseHas('backstage_entries', [
-            'id' => DB::table('backstage_entries')->where('schedule_id', $venue->id)->value('id'),
-            'participant_email' => 'manager@venue.test', 'participant_phone' => '+1 555 0199', 'participant_website' => 'https://manager.test',
-        ]);
-        $this->assertNotNull(DB::table('backstage_entries')->where('schedule_id', $venue->id)->value('participant_info_updated_at'));
-        $this->assertSame('booking@trio.test', $band->fresh()->email);
-        $this->assertSame('+1 555 0123', $band->fresh()->phone);
-        $this->assertSame('https://trio.test', $band->fresh()->website);
+        $this->assertSame('manager@venue.test', $band->fresh()->email);
+        $this->assertSame('+15550199', $band->fresh()->phone);
+        $this->assertSame('https://manager.test', $band->fresh()->website);
+        $this->assertDatabaseHas('backstage_entries', ['id' => DB::table('backstage_entries')->where('schedule_id', $venue->id)->value('id')]);
         $band->update(['email' => 'new-booking@trio.test']);
-        ParticipantDirectory::register($venue->id, [$band->id]);
-        $this->assertDatabaseHas('backstage_entries', [
-            'participant_id' => $band->id, 'participant_email' => 'manager@venue.test',
-        ]);
+        $this->get($page)->assertOk()->assertSee('href="mailto:new-booking@trio.test"', false);
         $this->assertDatabaseCount('backstage_contacts', 0);
         $this->assertDatabaseCount('backstage_links', 0);
     }

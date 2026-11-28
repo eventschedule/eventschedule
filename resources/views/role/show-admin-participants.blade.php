@@ -46,7 +46,7 @@
         @php
             $params = ['subdomain' => $subdomain, 'entry' => $encode($entry->entry_id)];
             $editing = request()->boolean('edit') || $errors->any();
-            $website = $entry->participant_website;
+            $website = $entry->website;
             $websiteLinkable = is_string($website) && filter_var($website, FILTER_VALIDATE_URL) && in_array(strtolower(parse_url($website, PHP_URL_SCHEME)), ['http', 'https'], true);
             $phoneHref = fn ($number) => 'tel:'.preg_replace('/[^0-9+*#,;]/', '', $number);
         @endphp
@@ -62,10 +62,10 @@
             </div>
         </div>
         <x-page-card :title="__('backstage.basic_info')">
-            @if ($editing)
+            @if ($editing && $entry->isEditableBy(auth()->user()))
                 <form method="post" action="{{ route('role.participants.basic_info', $params) }}" class="space-y-3">
                     @csrf @method('put')
-                    @foreach (['participant_email' => ['messages.email', 'email'], 'participant_phone' => ['messages.phone_number', 'tel'], 'participant_website' => ['messages.website', 'url']] as $field => [$label, $type])
+                    @foreach (['email' => ['messages.email', 'email'], 'phone' => ['messages.phone_number', 'tel'], 'website' => ['messages.website', 'text']] as $field => [$label, $type])
                         <label class="block">{{ __($label) }} {{ __('messages.label_optional_suffix') }}
                             <x-text-input class="block w-full" :type="$type" :name="$field" :value="old($field, $entry->$field)" />
                         </label>
@@ -74,10 +74,10 @@
                 </form>
             @else
                 <dl class="page-kv">
-                    @if ($entry->participant_email)<div><dt>{{ __('messages.email') }}</dt><dd><x-link :href="'mailto:'.$entry->participant_email"><bdi>{{ $entry->participant_email }}</bdi></x-link></dd></div>@endif
-                    @if ($entry->participant_phone)<div><dt>{{ __('messages.phone_number') }}</dt><dd><x-link :href="$phoneHref($entry->participant_phone)"><bdi dir="ltr">{{ $entry->participant_phone }}</bdi></x-link></dd></div>@endif
-                    @if ($entry->participant_website)<div><dt>{{ __('messages.website') }}</dt><dd>@if ($websiteLinkable)<x-link :href="$website" target="_blank" rel="noopener noreferrer"><bdi>{{ $website }}</bdi></x-link>@else<bdi>{{ $website }}</bdi>@endif</dd></div>@endif
-                    @if (! $entry->participant_email && ! $entry->participant_phone && ! $entry->participant_website)<div><dd class="text-[rgb(var(--ap-ink-3))]">{{ __('messages.none') }}</dd></div>@endif
+                    @if ($entry->email)<div><dt>{{ __('messages.email') }}</dt><dd><x-link :href="'mailto:'.$entry->email"><bdi>{{ $entry->email }}</bdi></x-link></dd></div>@endif
+                    @if ($entry->phone)<div><dt>{{ __('messages.phone_number') }}</dt><dd><x-link :href="$phoneHref($entry->phone)"><bdi dir="ltr">{{ $entry->phone }}</bdi></x-link></dd></div>@endif
+                    @if ($entry->website)<div><dt>{{ __('messages.website') }}</dt><dd>@if ($websiteLinkable)<x-link :href="$website" target="_blank" rel="noopener noreferrer"><bdi>{{ $website }}</bdi></x-link>@else<bdi>{{ $website }}</bdi>@endif</dd></div>@endif
+                    @if (! $entry->email && ! $entry->phone && ! $entry->website)<div><dd class="text-[rgb(var(--ap-ink-3))]">{{ __('messages.none') }}</dd></div>@endif
                 </dl>
             @endif
         </x-page-card>

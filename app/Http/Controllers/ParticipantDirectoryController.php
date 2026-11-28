@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Rules\NoFakeEmail;
 use App\Services\ParticipantDirectory;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -66,15 +67,18 @@ class ParticipantDirectoryController extends Controller
     public function basicInfo(Request $request, string $subdomain, string $entry)
     {
         $schedule = $this->schedule($request, $subdomain);
-        $id = $this->entry($schedule, $entry)->id;
+        $record = $this->entry($schedule, $entry);
+        $person = Role::where('is_deleted', false)->findOrFail($record->participant_id);
+        abort_unless($person->isEditableBy($request->user()), 403);
         $data = $request->validate([
-            'participant_email' => 'present|nullable|email|max:255',
-            'participant_phone' => 'present|nullable|string|max:80',
-            'participant_website' => 'present|nullable|url:http,https|max:2048',
+            'email' => array_merge(['present', 'nullable', 'email', 'max:255'], config('app.hosted') ? [new NoFakeEmail] : []),
+            'phone' => ['present', 'nullable', 'string', 'max:20', 'regex:/^\\+[1-9]\\d{1,14}$/'],
+            'website' => 'present|nullable|string|max:255',
         ]);
-        DB::table('backstage_entries')->where('id', $id)->update([...$data, 'participant_info_updated_at' => now()]);
+        $data['website'] = UrlUtils::normalizeWebsiteUrl($data['website']);
+        $person->fill($data)->save();
 
-        return $this->page($schedule, $id);
+        return $this->page($schedule, $record->id);
     }
 
     public function profileVideo(Request $request, string $subdomain, string $entry)

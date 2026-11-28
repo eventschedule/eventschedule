@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class ParticipantDirectory
 {
-    /** Sync profile contact details until the schedule explicitly edits its private copy. */
+    /** Ensure a schedule has one directory record per participant. */
     public static function register(int $scheduleId, array $participantIds): void
     {
         $ids = array_values(array_unique($participantIds));
@@ -17,20 +17,10 @@ class ParticipantDirectory
             return;
         }
         $rows = DB::table('roles')->whereIn('id', $ids)->where('is_deleted', false)
-            ->selectRaw('? as schedule_id, id as participant_id, email as participant_email, phone as participant_phone, website as participant_website', [$scheduleId])
+            ->selectRaw('? as schedule_id, id as participant_id', [$scheduleId])
             ->get()->map(fn ($row) => (array) $row)->all();
         if ($rows) {
             DB::table('backstage_entries')->insertOrIgnore($rows);
-            DB::table('backstage_entries as e')
-                ->join('roles as p', 'p.id', '=', 'e.participant_id')
-                ->where('e.schedule_id', $scheduleId)
-                ->whereIn('e.participant_id', $ids)
-                ->whereNull('e.participant_info_updated_at')
-                ->update([
-                    'e.participant_email' => DB::raw('p.email'),
-                    'e.participant_phone' => DB::raw('p.phone'),
-                    'e.participant_website' => DB::raw('p.website'),
-                ]);
         }
     }
 
@@ -61,7 +51,7 @@ class ParticipantDirectory
         if ($selected !== null) {
             $entry = Role::query()->join('backstage_entries as e', 'roles.id', '=', 'e.participant_id')
                 ->where('e.schedule_id', $schedule->id)->where('e.id', UrlUtils::decodeIdOrFail($selected))
-                ->firstOrFail(['e.id as entry_id', 'e.promotion', 'e.participant_email', 'e.participant_phone', 'e.participant_website', 'roles.id', 'roles.name', 'roles.youtube_links', 'roles.subdomain', 'roles.user_id', 'roles.email_verified_at', 'roles.phone_verified_at']);
+                ->firstOrFail(['e.id as entry_id', 'e.promotion', 'roles.id', 'roles.name', 'roles.email', 'roles.phone', 'roles.website', 'roles.youtube_links', 'roles.subdomain', 'roles.user_id', 'roles.email_verified_at', 'roles.phone_verified_at']);
             foreach (['contacts', 'links', 'files'] as $kind) {
                 $details[$kind] = DB::table('backstage_'.$kind)->where('entry_id', $entry->entry_id)->orderBy('id')->get();
             }
