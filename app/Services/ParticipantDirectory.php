@@ -48,9 +48,13 @@ class ParticipantDirectory
         if ($selected !== null) {
             $entry = Role::query()->join('backstage_entries as e', 'roles.id', '=', 'e.participant_id')
                 ->where('e.schedule_id', $schedule->id)->where('e.id', UrlUtils::decodeIdOrFail($selected))
-                ->firstOrFail(['e.id as entry_id', 'e.promotion', 'roles.id', 'roles.name', 'roles.email', 'roles.phone', 'roles.youtube_links']);
+                ->firstOrFail(['e.id as entry_id', 'e.promotion', 'roles.id', 'roles.name', 'roles.email', 'roles.phone', 'roles.youtube_links', 'roles.subdomain', 'roles.user_id', 'roles.email_verified_at', 'roles.phone_verified_at']);
             foreach (['contacts', 'links', 'files'] as $kind) {
                 $details[$kind] = DB::table('backstage_'.$kind)->where('entry_id', $entry->entry_id)->orderBy('id')->get();
+            }
+            $video = $entry->getFirstVideoUrl();
+            if (is_string($video) && filter_var($video, FILTER_VALIDATE_URL) && in_array(strtolower(parse_url($video, PHP_URL_SCHEME)), ['http', 'https'], true)) {
+                $details['links']->prepend((object) ['profileVideo' => true, 'url' => $video, 'editable' => $entry->isEditableBy($user)]);
             }
         } else {
             $rows = DB::table('roles as p')->leftJoin('backstage_entries as e', fn ($join) => $join

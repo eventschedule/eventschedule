@@ -63,6 +63,36 @@ class ParticipantDirectoryController extends Controller
         return $this->page($schedule);
     }
 
+    public function profileVideo(Request $request, string $subdomain, string $entry)
+    {
+        $schedule = $this->schedule($request, $subdomain);
+        $record = $this->entry($schedule, $entry);
+        DB::transaction(function () use ($request, $record) {
+            $person = Role::where('is_deleted', false)->lockForUpdate()->findOrFail($record->participant_id);
+            abort_unless($person->isEditableBy($request->user()), 403);
+            $request->validate(['original_url' => 'required|string']);
+            abort_unless($person->getFirstVideoUrl() === $request->original_url, 409);
+            $links = json_decode($person->youtube_links, true);
+            if ($request->isMethod('delete')) {
+                array_shift($links);
+            } else {
+                $url = $request->validate(['url' => 'required|url:http,https|max:2048'])['url'];
+                $videoId = UrlUtils::extractYouTubeVideoId($url);
+                if (! $videoId) {
+                    throw ValidationException::withMessages(['url' => __('messages.invalid_youtube_url')]);
+                }
+                if ($url === $request->original_url) {
+                    return;
+                }
+                $links[0] = ['url' => $url, 'name' => '', 'thumbnail_url' => UrlUtils::getYouTubeThumbnail($url)];
+            }
+            $person->youtube_links = $links ? json_encode($links) : null;
+            $person->save();
+        });
+
+        return $this->page($schedule, $record->id);
+    }
+
     public function promotion(Request $request, string $subdomain, string $entry)
     {
         $schedule = $this->schedule($request, $subdomain);

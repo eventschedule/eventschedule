@@ -73,6 +73,29 @@ class ParticipantDirectoryTest extends TestCase
         $this->assertDatabaseCount('backstage_links', 0);
     }
 
+    public function test_profile_video_row_obeys_participant_permissions_and_keeps_other_videos(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner);
+        $first = 'https://youtu.be/dQw4w9WgXcQ';
+        $next = 'https://youtu.be/abcdefghijk';
+        $replacement = 'https://youtu.be/01234567890';
+        $band = $this->createRole($owner, 'talent', ['youtube_links' => json_encode([['url' => $first], ['url' => $next]])]);
+        $this->actingAs($owner);
+        $params = $this->add($venue, ['participant' => UrlUtils::encodeId($band->id)]);
+        $action = route('role.participants.profile_video', $params);
+        $page = route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $params[1]]);
+        $this->get($page)->assertOk()->assertSee($action);
+        $this->post($action, ['url' => $replacement, 'original_url' => $first])->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame($replacement, $band->fresh()->getFirstVideoUrl());
+        $other = $this->createOwner();
+        $venue->users()->attach($other->id, ['level' => 'admin']);
+        $this->actingAs($other)->get($page)->assertOk()->assertSee($replacement)->assertDontSee($action);
+        $this->delete($action, ['original_url' => $replacement])->assertForbidden();
+        $this->actingAs($owner)->delete($action, ['original_url' => $replacement])->assertRedirect();
+        $this->assertSame($next, $band->fresh()->getFirstVideoUrl());
+    }
+
     public function test_historical_lineups_get_one_private_record_for_the_owner_not_the_listing_curator(): void
     {
         $owner = $this->createOwner();

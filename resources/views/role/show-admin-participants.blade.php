@@ -42,8 +42,6 @@
     @else
         @php
             $params = ['subdomain' => $subdomain, 'entry' => $encode($entry->entry_id)];
-            $video = $entry->getFirstVideoUrl();
-            $hasVideo = is_string($video) && filter_var($video, FILTER_VALIDATE_URL) && in_array(strtolower(parse_url($video, PHP_URL_SCHEME)), ['https', 'http'], true);
         @endphp
         <x-link :href="$directoryUrl">{{ __('messages.participants') }}</x-link>
         <h2 class="text-xl font-semibold"><bdi>{{ $entry->name }}</bdi></h2>
@@ -64,22 +62,26 @@
         </x-page-card>
         @foreach (['contacts' => __('backstage.contacts'), 'files' => __('backstage.files'), 'links' => __('messages.social_links')] as $kind => $heading)
             <x-page-card :title="$heading">
-                @if ($kind === 'links' && $hasVideo)
-                    <dl class="page-kv"><div><dt>{{ __('messages.youtube_video_url') }}</dt><dd><x-link :href="$video" target="_blank" rel="noopener noreferrer"><bdi>{{ $video }}</bdi></x-link></dd></div></dl>
-                @endif
                 @foreach ($details[$kind]->concat([null]) as $item)
                     @php
-                        $itemParams = $params + ['kind' => $kind, 'item' => $item ? $encode($item->id) : null];
-                        $action = route('role.participants.item', $itemParams);
+                        $profileVideo = $item->profileVideo ?? false;
+                        $editable = $item->editable ?? true;
+                        $action = $profileVideo ? route('role.participants.profile_video', $params) : route('role.participants.item', $params + ['kind' => $kind, 'item' => $item ? $encode($item->id) : null]);
                         $retry = old('_directory_form') === $action;
                     @endphp
                     <details class="py-2" @if ($retry) open @endif>
                         <summary class="cursor-pointer"><bdi>{{ $item ? ($item->name ?? $item->url ?? $item->label ?? $item->filename) : __('messages.add') }}</bdi></summary>
+                        @if ($kind === 'links' && $item)
+                            @if ($profileVideo)<span class="event-chip">{{ __('messages.profile') }}</span>@endif
+                            <x-link :href="$item->url" target="_blank" rel="noopener noreferrer"><bdi>{{ $item->url }}</bdi></x-link>
+                        @endif
                         @if ($kind === 'files' && $item)
                             <x-link :href="route('role.participants.download', $params + ['item' => $encode($item->id)])"><bdi>{{ $item->filename }}</bdi> ({{ number_format($item->bytes / 1024) }} KB)</x-link>
                         @endif
+                        @if ($editable)
                         <form method="post" action="{{ $action }}" class="space-y-3" @if ($kind === 'files' && ! $item) enctype="multipart/form-data" @endif>
                             @csrf
+                            @if ($profileVideo)<input type="hidden" name="original_url" value="{{ $item->url }}">@endif
                             <input type="hidden" name="_directory_form" value="{{ $action }}">
                             @if ($kind === 'files' && ! $item)
                                 <label class="block">{{ __('messages.choose_file') }} ({{ config('backstage.file_mb') }} MB)
@@ -96,8 +98,10 @@
                         </form>
                         @if ($item)
                             <form method="post" action="{{ $action }}" class="mt-2">@csrf @method('delete')
+                                @if ($profileVideo)<input type="hidden" name="original_url" value="{{ $item->url }}">@endif
                                 <x-danger-button>{{ __('messages.remove') }}</x-danger-button>
                             </form>
+                        @endif
                         @endif
                     </details>
                 @endforeach

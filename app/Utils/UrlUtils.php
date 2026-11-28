@@ -1093,7 +1093,7 @@ class UrlUtils
         }
 
         if ($host === 'youtu.be') {
-            $videoId = ltrim($parsedUrl['path'], '/');
+            $videoId = ltrim($parsedUrl['path'] ?? '', '/');
         } else {
             if (isset($parsedUrl['path'])) {
                 $path = ltrim($parsedUrl['path'], '/');
@@ -1114,7 +1114,7 @@ class UrlUtils
             }
         }
 
-        if (isset($videoId) && $videoId && preg_match('/^[a-zA-Z0-9_-]{11}$/', $videoId)) {
+        if (isset($videoId) && is_string($videoId) && preg_match('/^[a-zA-Z0-9_-]{11}$/D', $videoId)) {
             return $videoId;
         }
 
