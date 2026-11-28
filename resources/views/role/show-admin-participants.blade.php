@@ -47,12 +47,11 @@
         @endphp
         <x-link :href="$directoryUrl">{{ __('messages.participants') }}</x-link>
         <h2 class="text-xl font-semibold"><bdi>{{ $entry->name }}</bdi></h2>
-        @if ($entry->email || $entry->phone || $hasVideo)
+        @if ($entry->email || $entry->phone)
             <x-page-card :title="__('messages.details')">
                 <dl class="page-kv">
                     @if ($entry->email)<div><dt>{{ __('messages.email') }}</dt><dd><bdi>{{ $entry->email }}</bdi></dd></div>@endif
                     @if ($entry->phone)<div><dt>{{ __('messages.phone_number') }}</dt><dd><bdi dir="ltr">{{ $entry->phone }}</bdi></dd></div>@endif
-                    @if ($hasVideo)<div><dt>{{ __('messages.video_link') }}</dt><dd><x-link :href="$video" target="_blank" rel="noopener noreferrer"><bdi>{{ $video }}</bdi></x-link></dd></div>@endif
                 </dl>
             </x-page-card>
         @endif
@@ -65,6 +64,9 @@
         </x-page-card>
         @foreach (['contacts' => __('backstage.contacts'), 'files' => __('backstage.files'), 'links' => __('messages.social_links')] as $kind => $heading)
             <x-page-card :title="$heading">
+                @if ($kind === 'links' && $hasVideo)
+                    <dl class="page-kv"><div><dt>{{ __('messages.youtube_video_url') }}</dt><dd><x-link :href="$video" target="_blank" rel="noopener noreferrer"><bdi>{{ $video }}</bdi></x-link></dd></div></dl>
+                @endif
                 @foreach ($details[$kind]->concat([null]) as $item)
                     @php
                         $itemParams = $params + ['kind' => $kind, 'item' => $item ? $encode($item->id) : null];
