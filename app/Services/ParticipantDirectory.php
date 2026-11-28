@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class ParticipantDirectory
 {
-    /** Idempotent across bookings and both entry points. Never replace private details. */
+    /** Sync profile contact details until the schedule explicitly edits its private copy. */
     public static function register(int $scheduleId, array $participantIds): void
     {
         $ids = array_values(array_unique($participantIds));
@@ -21,6 +21,16 @@ class ParticipantDirectory
             ->get()->map(fn ($row) => (array) $row)->all();
         if ($rows) {
             DB::table('backstage_entries')->insertOrIgnore($rows);
+            DB::table('backstage_entries as e')
+                ->join('roles as p', 'p.id', '=', 'e.participant_id')
+                ->where('e.schedule_id', $scheduleId)
+                ->whereIn('e.participant_id', $ids)
+                ->whereNull('e.participant_info_updated_at')
+                ->update([
+                    'e.participant_email' => DB::raw('p.email'),
+                    'e.participant_phone' => DB::raw('p.phone'),
+                    'e.participant_website' => DB::raw('p.website'),
+                ]);
         }
     }
 

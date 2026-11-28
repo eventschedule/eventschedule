@@ -72,7 +72,7 @@ class ParticipantDirectoryController extends Controller
             'participant_phone' => 'present|nullable|string|max:80',
             'participant_website' => 'present|nullable|url:http,https|max:2048',
         ]);
-        DB::table('backstage_entries')->where('id', $id)->update($data);
+        DB::table('backstage_entries')->where('id', $id)->update([...$data, 'participant_info_updated_at' => now()]);
 
         return $this->page($schedule, $id);
     }
