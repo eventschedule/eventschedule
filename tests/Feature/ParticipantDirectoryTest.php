@@ -54,6 +54,25 @@ class ParticipantDirectoryTest extends TestCase
         $this->get(route('role.view_admin', [$schedule->subdomain, 'participants']))->assertOk()->assertSee('Evening Trio'); // eligible to add again
     }
 
+    public function test_detail_page_reads_the_current_participant_profile_without_copying_it(): void
+    {
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner);
+        $this->actingAs($owner);
+        [, $entry] = $this->add($venue, ['name' => 'Evening Trio']);
+        $band = Role::where('name', 'Evening Trio')->firstOrFail();
+        $video = 'https://youtu.be/dQw4w9WgXcQ';
+        $band->email = 'booking@trio.test';
+        $band->phone = '+1 555 0123';
+        $band->youtube_links = json_encode([['url' => $video]]);
+        $band->save();
+
+        $this->get(route('role.view_admin', [$venue->subdomain, 'participants', 'entry' => $entry]))
+            ->assertOk()->assertSee($band->email)->assertSee($band->phone)->assertSee('href="'.$video.'"', false);
+        $this->assertDatabaseCount('backstage_contacts', 0);
+        $this->assertDatabaseCount('backstage_links', 0);
+    }
+
     public function test_historical_lineups_get_one_private_record_for_the_owner_not_the_listing_curator(): void
     {
         $owner = $this->createOwner();

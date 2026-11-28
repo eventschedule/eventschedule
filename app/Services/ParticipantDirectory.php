@@ -46,9 +46,11 @@ class ParticipantDirectory
         $entry = null;
         $details = [];
         if ($selected !== null) {
-            $entry = DB::table('backstage_entries as e')->join('roles as p', 'p.id', '=', 'e.participant_id')->where('e.schedule_id', $schedule->id)->where('e.id', UrlUtils::decodeIdOrFail($selected))->select('e.id', 'e.promotion', 'p.name')->firstOrFail();
+            $entry = Role::query()->join('backstage_entries as e', 'roles.id', '=', 'e.participant_id')
+                ->where('e.schedule_id', $schedule->id)->where('e.id', UrlUtils::decodeIdOrFail($selected))
+                ->firstOrFail(['e.id as entry_id', 'e.promotion', 'roles.id', 'roles.name', 'roles.email', 'roles.phone', 'roles.youtube_links']);
             foreach (['contacts', 'links', 'files'] as $kind) {
-                $details[$kind] = DB::table('backstage_'.$kind)->where('entry_id', $entry->id)->orderBy('id')->get();
+                $details[$kind] = DB::table('backstage_'.$kind)->where('entry_id', $entry->entry_id)->orderBy('id')->get();
             }
         } else {
             $rows = DB::table('roles as p')->leftJoin('backstage_entries as e', fn ($join) => $join
