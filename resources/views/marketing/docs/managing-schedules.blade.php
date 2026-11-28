@@ -10,6 +10,7 @@
             <x-doc-nav-link href="#schedule-filters">Filter Events</x-doc-nav-link>
             <x-doc-nav-link href="#actions">Actions menu</x-doc-nav-link>
         </x-doc-nav-group>
+        <x-doc-nav-link href="#participants">Participants</x-doc-nav-link>
         <x-doc-nav-link href="#templates">Templates</x-doc-nav-link>
         <x-doc-nav-link href="#videos">Videos</x-doc-nav-link>
         <x-doc-nav-link href="#availability">Availability</x-doc-nav-link>
@@ -74,6 +75,11 @@
                         <td><a href="#schedule" class="doc-link">Schedule</a></td>
                         <td>Your events, a month at a time, plus anything without a date</td>
                         <td>Always, viewers included</td>
+                    </tr>
+                    <tr>
+                        <td><x-link href="#participants">Participants</x-link></td>
+                        <td>Private booking records, contacts and files</td>
+                        <td>Owners and admins on every plan</td>
                     </tr>
                     <tr>
                         <td><a href="#templates" class="doc-link">Templates</a></td>
@@ -289,6 +295,13 @@
     </section>
 
     <!-- Templates -->
+    <section id="participants" class="doc-section">
+        <h2 class="doc-heading">Participants</h2>
+        <p>Use the Participants tab to keep a private record before, between and after bookings. Search the list by name. Adding a participant to an event lineup also adds them to the schedule's directory. Choose View for a read-only look or Edit to open their profile directly. To add someone before their first booking, choose Add beside a known performer or enter a new name. The directory's promotion notes, contacts, files and social links belong to this schedule: another venue that books the same band cannot see them.</p>
+        <p>The participant's email, phone and website come from their profile. Editing these fields updates that shared profile, so the change applies across schedules. The guest page still follows the profile's existing visibility settings. Add a named contact for each booking agent, tour manager or other contact. Their label, email, phone and website are optional. These contacts are private to this schedule and do not send anyone an invitation.</p>
+        <p>Upload a file and give it a label such as “Tech rider” or “Press photo”. PDF, JPEG, PNG and Word, Excel and PowerPoint documents are supported. Keep promotion text and social links here too. None of this material appears on the guest page. Removing the directory entry deletes its private files and details, not the participant or any event lineup.</p>
+    </section>
+
     <section id="templates" class="doc-section">
         <h2 class="doc-heading">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0">

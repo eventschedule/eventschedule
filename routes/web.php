@@ -53,6 +53,7 @@ use App\Http\Controllers\MicrosoftCalendarWebhookController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterTrackingController;
 use App\Http\Controllers\NotificationEmailController;
+use App\Http\Controllers\ParticipantDirectoryController;
 use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Controllers\ProfileController;
@@ -1020,6 +1021,15 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     Route::post('/{subdomain}/team/transfer', [RoleController::class, 'storeTransfer'])->name('role.transfer.store')->middleware('throttle:5,1');
     Route::post('/{subdomain}/team/transfer/cancel', [RoleController::class, 'cancelTransfer'])->name('role.transfer.cancel');
     Route::post('/{subdomain}/team/transfer/resend', [RoleController::class, 'resendTransfer'])->name('role.transfer.resend')->middleware('throttle:5,1');
+    Route::prefix('/{subdomain}/participants')->name('role.participants.')->controller(ParticipantDirectoryController::class)->group(function () {
+        Route::post('/', 'store')->name('store');
+        Route::delete('/{entry}', 'destroy')->name('destroy');
+        Route::put('/{entry}/basic-info', 'basicInfo')->name('basic_info');
+        Route::match(['post', 'delete'], '/{entry}/profile-video', 'profileVideo')->name('profile_video');
+        Route::put('/{entry}/promotion', 'promotion')->name('promotion');
+        Route::match(['post', 'delete'], '/{entry}/{kind}/{item?}', 'item')->whereIn('kind', ['contacts', 'links', 'files'])->name('item');
+        Route::get('/{entry}/files/{item}/download', 'download')->name('download');
+    });
     // Promoter links: their list is a tab of the schedule (role.view_admin, tab "promoters");
     // these answer its forms. For the owner and the admins, checked in the controller.
     Route::post('/{subdomain}/promoters', [PromoterLinkController::class, 'store'])->name('role.promoters.store')->where('subdomain', '(?!admin(?=/|$))[^/]+');
@@ -1126,7 +1136,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain', 'active_day'])->group(fu
     $adminTabSubdomain = config('app.is_nexus')
         ? '(?!docs(?=/|$)|features(?=/|$)|admin(?=/|$))[^/]+'
         : '(?!docs(?=/|$)|admin(?=/|$))[^/]+';
-    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|vendor-map|requests|feeds|followers|team|promoters|plan|videos')->where('subdomain', $adminTabSubdomain);
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|seating|vendor-map|requests|feeds|followers|team|participants|promoters|plan|videos')->where('subdomain', $adminTabSubdomain);
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image')->middleware('throttle:60,1');
 

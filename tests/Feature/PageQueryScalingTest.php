@@ -70,6 +70,7 @@ class PageQueryScalingTest extends TestCase
         'guest booking page' => 14, // 11
         'dashboard' => 88, // 80
         'following' => 20, // 17
+        'participants tab' => 35,
         'schedule tab' => 47, // 42
         'requests tab' => 29, // 26
         'followers tab' => 38, // 34
@@ -131,6 +132,8 @@ class PageQueryScalingTest extends TestCase
     private string $apiKey;
 
     private int $size = 0;
+
+    private bool $backstageScaling = false;
 
     /** @var list<Event> */
     private array $events = [];
@@ -201,6 +204,10 @@ class PageQueryScalingTest extends TestCase
             $event->roles()->attach($this->talent->id, ['is_accepted' => true]);
             $event->roles()->attach($this->curator->id, ['is_accepted' => true]);
             $ticket = $this->createTicket($event, ['price' => 10 + $i, 'quantity' => 100]);
+            if ($this->backstageScaling) {
+                $person = $this->createRole($this->createOwner(), 'talent');
+                DB::table('backstage_entries')->insert(['schedule_id' => $this->venue->id, 'participant_id' => $person->id]);
+            }
             // A promoter link per round, credited with the round's sale (the Promoters tab).
             $promoter = PromoterLink::create(['role_id' => $this->venue->id, 'name' => 'Promoter '.$i, 'code' => 'promoter-'.$i, 'commission_percent' => 10]);
             $this->createSale($event, $this->venue, ['name' => 'Buyer '.$i, 'email' => "buyer{$i}@gmail.com", 'payment_amount' => 10 + $i, 'promoter_link_id' => $promoter->id], $ticket);
@@ -309,7 +316,7 @@ class PageQueryScalingTest extends TestCase
             'guest rss feed', 'guest ical feed', 'guest schedule sitemap', 'guest request form', 'guest booking page',
             'guest vendor map', 'guest vendor map band', 'guest vendor map event',
             // The admin portal
-            'dashboard', 'following', 'schedule tab', 'requests tab', 'followers tab', 'team tab', 'promoters tab', 'plan tab',
+            'dashboard', 'following', 'participants tab', 'schedule tab', 'requests tab', 'followers tab', 'team tab', 'promoters tab', 'plan tab',
             'availability tab', 'appointments tab', 'schedule settings', 'event form', 'sales', 'analytics',
             'realtime data', 'realtime summary', 'realtime activity', 'newsletters', 'boost', 'account settings',
             'check-in stats',
@@ -332,6 +339,7 @@ class PageQueryScalingTest extends TestCase
     #[DataProvider('pages')]
     public function test_a_page_asks_no_more_as_its_lists_grow(string $page): void
     {
+        $this->backstageScaling = $page === 'participants tab';
         $grows = self::GROWS[$page] ?? null;
 
         [$small, $large] = $this->assertQueriesDoNotGrow(
@@ -385,7 +393,7 @@ class PageQueryScalingTest extends TestCase
 
             'dashboard' => $this->actingAs($owner)->get(route('home')),
             'following' => $this->actingAs($owner)->get(route('following')),
-            'schedule tab', 'requests tab', 'followers tab', 'team tab', 'promoters tab', 'plan tab', 'availability tab', 'appointments tab' => $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $sub, 'tab' => explode(' ', $page)[0]])),
+            'participants tab', 'schedule tab', 'requests tab', 'followers tab', 'team tab', 'promoters tab', 'plan tab', 'availability tab', 'appointments tab' => $this->actingAs($owner)->get(route('role.view_admin', ['subdomain' => $sub, 'tab' => explode(' ', $page)[0]])),
             'schedule settings' => $this->actingAs($owner)->get(route('role.edit', ['subdomain' => $sub])),
             'event form' => $this->actingAs($owner)->get(route('event.edit', ['subdomain' => $sub, 'hash' => UrlUtils::encodeId($event->id)])),
             'sales' => $this->actingAs($owner)->get(route('sales')),

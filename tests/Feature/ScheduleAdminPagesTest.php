@@ -78,9 +78,9 @@ class ScheduleAdminPagesTest extends TestCase
         // The strip and the dropdown are drawn from one list,
         // so a tab cannot be in one and missing from the other.
         $expected = [
-            'talent' => ['schedule', 'templates', 'availability', 'appointments', 'followers', 'team', 'promoters', 'plan'],
-            'venue' => ['schedule', 'templates', 'appointments', 'seating', 'vendor', 'followers', 'team', 'promoters', 'plan'],
-            'curator' => ['schedule', 'templates', 'videos', 'appointments', 'followers', 'team', 'promoters', 'plan'],
+            'talent' => ['schedule', 'participants', 'templates', 'availability', 'appointments', 'followers', 'team', 'promoters', 'plan'],
+            'venue' => ['schedule', 'participants', 'templates', 'appointments', 'seating', 'vendor', 'followers', 'team', 'promoters', 'plan'],
+            'curator' => ['schedule', 'participants', 'templates', 'videos', 'appointments', 'followers', 'team', 'promoters', 'plan'],
         ];
 
         foreach ($expected as $type => $tabs) {

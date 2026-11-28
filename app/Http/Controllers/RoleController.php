@@ -73,6 +73,7 @@ use App\Services\MetaAdsService;
 use App\Services\MicrosoftCalendarService;
 use App\Services\NotificationEmailService;
 use App\Services\OneSignalService;
+use App\Services\ParticipantDirectory;
 use App\Services\PromoterLinks;
 use App\Services\ScheduleDeletionService;
 use App\Services\ScheduleTransferService;
@@ -4273,7 +4274,14 @@ class RoleController extends Controller
             ];
         }
 
+        $directory = null;
+        if ($tab === 'participants') {
+            $query = $request->query('q');
+            $directory = ParticipantDirectory::page($role, $request->user(), $request->query('entry'), is_string($query) ? mb_substr(trim($query), 0, 255) : '');
+        }
+
         return view('role/show-admin', compact(
+            'directory',
             'promoters',
             'subdomain',
             'role',

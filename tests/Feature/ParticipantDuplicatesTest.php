@@ -70,6 +70,10 @@ class ParticipantDuplicatesTest extends TestCase
         $this->assertCount(1, $teams);
         $this->assertTrue($first->roles->contains('id', $teams[0]->id));
         $this->assertTrue($second->roles->contains('id', $teams[0]->id));
+        $entries = DB::table('backstage_entries')->where('schedule_id', $curator->id)->where('participant_id', $teams[0]->id);
+        $this->assertSame(1, $entries->count());
+        $this->get(route('role.view_admin', [$curator->subdomain, 'participants']))->assertOk()
+            ->assertSee('entry='.\App\Utils\UrlUtils::encodeId($entries->value('id')), false);
     }
 
     public function test_the_same_name_twice_in_one_save_is_one_participant(): void
