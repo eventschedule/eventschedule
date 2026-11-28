@@ -5727,7 +5727,7 @@
                                         <button type="button" class="event-link" @click="memberType = 'create_new'">{{ __('messages.someone_new') }}</button>
                                     </div>
                                     <label for="member_picker_search" class="sr-only">{{ __('messages.search') }}</label>
-                                    <input id="member_picker_search" v-model="memberPickerSearch" @keydown.enter.prevent="void 0" type="search" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" autocomplete="off" :placeholder="__('messages.search')">
+                                    <input id="member_picker_search" v-model="memberPickerSearch" @keydown.enter.prevent="void 0" type="search" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" autocomplete="off" placeholder="{{ __('messages.search') }}">
                                     <select v-if="memberPickerSearch.trim()" v-model="selectedMember" @change="addExistingMember" id="selected_member" class="mt-2 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                         <option v-for="member in matchingMembers" :key="member.id" :value="member">
