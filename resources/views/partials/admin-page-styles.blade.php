@@ -1077,11 +1077,23 @@
       height: 1.125rem;
     }
     .participant-directory .participant-social-row select {
+      color: rgb(var(--ap-ink));
+      background-color: rgb(var(--ap-surface));
+      border-color: rgb(var(--ap-border-strong));
       flex: 0 0 8.5rem;
       width: 8.5rem;
       height: 2.75rem;
       padding: 0.5rem 2rem 0.5rem 0.75rem !important;
       font-size: 0.8125rem !important;
+    }
+    .participant-directory .participant-social-row select option {
+      color: rgb(var(--ap-ink));
+      background-color: rgb(var(--ap-surface));
+    }
+    html[data-theme="espresso"] .participant-directory .participant-social-row select,
+    html[data-theme="midnight"] .participant-directory .participant-social-row select,
+    html[data-theme="carbon"] .participant-directory .participant-social-row select {
+      color-scheme: dark;
     }
     @media (max-width: 639.98px) {
       .participant-directory .participant-social-item,
